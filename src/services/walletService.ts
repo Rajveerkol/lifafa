@@ -9,6 +9,22 @@ export interface RequestWithdrawalParams {
   upiId?: string;
 }
 
+export interface PlatformPaymentSettings {
+  upiId: string;
+  payeeName: string;
+  qrImageUrl: string;
+  qrMode: 'DYNAMIC' | 'CUSTOM_IMAGE';
+}
+
+export const DEFAULT_PAYMENT_SETTINGS: PlatformPaymentSettings = {
+  upiId: 'createlifafa@upi',
+  payeeName: 'CreatLifafa',
+  qrImageUrl: '',
+  qrMode: 'DYNAMIC',
+};
+
+export const PAYMENT_SETTINGS_STORAGE_KEY = 'lifafa_platform_payment_settings';
+
 export const walletService = {
   // Fetch user's double-entry ledger transactions
   async getTransactions(userId: string): Promise<WalletTransaction[]> {
@@ -91,32 +107,55 @@ export const walletService = {
       console.error('Error fetching platform fees:', error);
       return [];
     }
-
     return (data || []) as PlatformFee[];
   },
 
-  // Fetch current platform deposit UPI ID from settings
-  async getDepositUpiId(): Promise<string> {
-    const defaultUpiId = 'createlifafa@upi';
+  // Fetch all payment settings with localStorage instant cache fallback
+  async getPaymentSettings(): Promise<PlatformPaymentSettings> {
+    let cached: PlatformPaymentSettings = { ...DEFAULT_PAYMENT_SETTINGS };
+    try {
+      const stored = localStorage.getItem(PAYMENT_SETTINGS_STORAGE_KEY);
+      if (stored) {
+        cached = { ...cached, ...JSON.parse(stored) };
+      }
+    } catch (e) {
+      // ignore JSON parse error
+    }
+
     if (!isSupabaseConfigured || !supabase) {
-      return defaultUpiId;
+      return cached;
     }
 
     try {
       const { data, error } = await supabase
         .from('platform_settings')
-        .select('value')
-        .eq('key', 'DEPOSIT_UPI_ID')
-        .maybeSingle();
+        .select('key, value')
+        .in('key', ['DEPOSIT_UPI_ID', 'DEPOSIT_PAYEE_NAME', 'DEPOSIT_QR_IMAGE_URL', 'DEPOSIT_QR_MODE']);
 
-      if (error || !data?.value) {
-        return defaultUpiId;
+      if (!error && data && data.length > 0) {
+        const fetched: Partial<PlatformPaymentSettings> = {};
+        for (const row of data) {
+          if (row.key === 'DEPOSIT_UPI_ID' && row.value) fetched.upiId = row.value;
+          if (row.key === 'DEPOSIT_PAYEE_NAME' && row.value) fetched.payeeName = row.value;
+          if (row.key === 'DEPOSIT_QR_IMAGE_URL') fetched.qrImageUrl = row.value || '';
+          if (row.key === 'DEPOSIT_QR_MODE') fetched.qrMode = row.value as any;
+        }
+        const updated = { ...cached, ...fetched };
+        try {
+          localStorage.setItem(PAYMENT_SETTINGS_STORAGE_KEY, JSON.stringify(updated));
+        } catch {}
+        return updated;
       }
-
-      return data.value;
+      return cached;
     } catch {
-      return defaultUpiId;
+      return cached;
     }
+  },
+
+  // Fetch current platform deposit UPI ID from settings
+  async getDepositUpiId(): Promise<string> {
+    const settings = await this.getPaymentSettings();
+    return settings.upiId || DEFAULT_PAYMENT_SETTINGS.upiId;
   },
 
   // Submit manual UPI deposit request with authoritative server validation

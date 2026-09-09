@@ -25,9 +25,22 @@ import {
   Lock,
   UserCheck,
   UserX,
+  QrCode,
+  Upload,
+  Image as ImageIcon,
+  Trash2,
+  Eye,
+  Sparkles,
+  Copy,
+  Check,
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../context/AuthContext';
 import { adminService, type AdminMetrics } from '../services/adminService';
+import {
+  type PlatformPaymentSettings,
+  DEFAULT_PAYMENT_SETTINGS,
+} from '../services/walletService';
 import type {
   Profile,
   Lifafa,
@@ -56,7 +69,7 @@ type AdminSection =
   | 'settings';
 
 export const AdminPage: React.FC = () => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isLoading, loginWithGoogle, logout, activateDevDemo } = useAuth();
   const [section, setSection] = useState<AdminSection>('dashboard');
   const [metrics, setMetrics] = useState<AdminMetrics | null>(null);
   const [usersList, setUsersList] = useState<(Profile & { wallet?: any })[]>([]);
@@ -95,18 +108,23 @@ export const AdminPage: React.FC = () => {
   // Deposit Requests state
   const [depositsList, setDepositsList] = useState<DepositRequest[]>([]);
   const [depositStatusFilter, setDepositStatusFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('ALL');
-  const [depositUpiIdSetting, setDepositUpiIdSetting] = useState('createlifafa@upi');
-  const [newDepositUpiInput, setNewDepositUpiInput] = useState('createlifafa@upi');
-  const [savingUpiSetting, setSavingUpiSetting] = useState(false);
   const [reviewingDepositId, setReviewingDepositId] = useState<string | null>(null);
   const [rejectModalDeposit, setRejectModalDeposit] = useState<DepositRequest | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [rejectingLoading, setRejectingLoading] = useState(false);
 
+  // Platform Payment & QR Code Configuration state
+  const [paymentSettings, setPaymentSettings] = useState<PlatformPaymentSettings>(DEFAULT_PAYMENT_SETTINGS);
+  const [savingPaymentSettings, setSavingPaymentSettings] = useState(false);
+  const [paymentSettingsSuccess, setPaymentSettingsSuccess] = useState(false);
+  const [previewAmount, setPreviewAmount] = useState<number>(100);
+  const [copiedPreviewUpi, setCopiedPreviewUpi] = useState(false);
+  const [qrImageError, setQrImageError] = useState(false);
+
   const loadData = async () => {
     setLoading(true);
     try {
-      const [m, u, l, w, f, a, tx, deps, upiSetting] = await Promise.all([
+      const [m, u, l, w, f, a, tx, deps, pSettings] = await Promise.all([
         adminService.getDashboardMetrics(),
         adminService.getUsers(),
         adminService.getAllLifafas(),
@@ -115,7 +133,7 @@ export const AdminPage: React.FC = () => {
         adminService.getAuditLogs(),
         adminService.getAllTransactions(),
         adminService.getDepositRequests(),
-        adminService.getPlatformSetting('DEPOSIT_UPI_ID'),
+        adminService.getPaymentSettings(),
       ]);
       setMetrics(m);
       setUsersList(u);
@@ -125,9 +143,8 @@ export const AdminPage: React.FC = () => {
       setAuditLogs(a);
       setTransactionsList(tx);
       setDepositsList(deps);
-      if (upiSetting) {
-        setDepositUpiIdSetting(upiSetting);
-        setNewDepositUpiInput(upiSetting);
+      if (pSettings) {
+        setPaymentSettings(pSettings);
       }
     } catch (e) {
       console.error('Error loading admin data', e);
@@ -167,18 +184,59 @@ export const AdminPage: React.FC = () => {
     }
   };
 
-  const handleUpdateDepositUpi = async () => {
-    if (!newDepositUpiInput.trim()) return;
-    try {
-      setSavingUpiSetting(true);
-      await adminService.updatePlatformSetting('DEPOSIT_UPI_ID', newDepositUpiInput.trim(), 'Platform Deposit UPI ID');
-      setDepositUpiIdSetting(newDepositUpiInput.trim());
-      alert('Platform Deposit UPI ID updated successfully.');
-    } catch (err: any) {
-      alert(err.message || 'Failed to update setting');
-    } finally {
-      setSavingUpiSetting(false);
+  const handleSavePaymentSettings = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!paymentSettings.upiId.trim()) {
+      alert('Platform UPI ID cannot be empty.');
+      return;
     }
+    try {
+      setSavingPaymentSettings(true);
+      const updated = await adminService.updatePaymentSettings(paymentSettings);
+      setPaymentSettings(updated);
+      setPaymentSettingsSuccess(true);
+      setTimeout(() => setPaymentSettingsSuccess(false), 3500);
+    } catch (err: any) {
+      alert(err.message || 'Failed to save payment settings');
+    } finally {
+      setSavingPaymentSettings(false);
+    }
+  };
+
+  const handleQrFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file (PNG, JPG, SVG, WebP).');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Image size should be under 2MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64Url = reader.result as string;
+      setPaymentSettings((prev) => ({
+        ...prev,
+        qrImageUrl: base64Url,
+        qrMode: 'CUSTOM_IMAGE',
+      }));
+      setQrImageError(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleClearCustomQr = () => {
+    setPaymentSettings((prev) => ({
+      ...prev,
+      qrImageUrl: '',
+      qrMode: 'DYNAMIC',
+    }));
+    setQrImageError(false);
   };
 
   useEffect(() => {
@@ -187,16 +245,91 @@ export const AdminPage: React.FC = () => {
     }
   }, [isAdmin]);
 
+  // Loading State
+  if (isLoading) {
+    return (
+      <div className="max-w-md mx-auto py-28 text-center flex flex-col items-center justify-center gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <h3 className="text-sm font-bold text-slate-800">Verifying Admin Privileges...</h3>
+        <p className="text-xs text-slate-400">Checking authorization credentials</p>
+      </div>
+    );
+  }
+
+  // Not Signed In
+  if (!user) {
+    return (
+      <div className="max-w-md mx-auto py-16 px-4 text-center">
+        <div className="w-16 h-16 rounded-3xl bg-blue-50 text-blue-600 mx-auto flex items-center justify-center mb-4 shadow-xs">
+          <Lock className="w-8 h-8" />
+        </div>
+        <h3 className="text-xl font-black text-slate-900 mb-2">Admin Sign In Required</h3>
+        <p className="text-xs text-slate-500 mb-6 leading-relaxed">
+          Please sign in with your authorized administrator Google account (<code className="text-blue-600 font-bold">kolrajveer33@gmail.com</code>) to access the control center.
+        </p>
+        <div className="space-y-2">
+          <button
+            onClick={loginWithGoogle}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-2xl text-xs shadow-md shadow-blue-500/25 transition-all active:scale-98 cursor-pointer"
+          >
+            Sign In with Google
+          </button>
+          <a
+            href="/"
+            className="block text-xs font-semibold text-slate-500 hover:text-slate-800 py-2"
+          >
+            Return to Home
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // Unauthorized Account
   if (!isAdmin) {
     return (
-      <div className="max-w-md mx-auto py-20 text-center">
-        <div className="w-16 h-16 rounded-3xl bg-red-50 text-red-600 mx-auto flex items-center justify-center mb-3">
+      <div className="max-w-md mx-auto py-16 px-4 text-center">
+        <div className="w-16 h-16 rounded-3xl bg-red-50 text-red-600 mx-auto flex items-center justify-center mb-4 shadow-xs">
           <ShieldAlert className="w-8 h-8" />
         </div>
-        <h3 className="text-xl font-bold text-slate-900 mb-1">Access Restricted</h3>
-        <p className="text-xs text-slate-500">
-          This area requires administrator authorization in the <code className="text-blue-600 font-mono">admin_users</code> table.
+        <h3 className="text-xl font-black text-slate-900 mb-2">Unauthorized Account</h3>
+        <p className="text-xs text-slate-600 mb-2">
+          You are currently signed in as:
         </p>
+        <div className="bg-slate-100 p-2.5 rounded-xl text-xs font-mono font-bold text-slate-800 mb-4 break-all border border-slate-200">
+          {user.email}
+        </div>
+        <p className="text-xs text-slate-500 mb-6 leading-relaxed">
+          This account is not authorized as an administrator. Please sign in with the registered admin account (<code className="text-blue-600 font-bold">kolrajveer33@gmail.com</code>).
+        </p>
+        <div className="space-y-2">
+          <button
+            onClick={async () => {
+              await logout();
+              await loginWithGoogle();
+            }}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-2xl text-xs shadow-md shadow-blue-500/25 transition-all active:scale-98 cursor-pointer"
+          >
+            Switch to Admin Google Account
+          </button>
+          {import.meta.env.DEV && (
+            <button
+              onClick={() => {
+                activateDevDemo();
+                loadData();
+              }}
+              className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-4 rounded-2xl text-xs transition-all shadow-xs cursor-pointer"
+            >
+              [Dev Simulator] Grant Local Admin Access
+            </button>
+          )}
+          <a
+            href="/"
+            className="block text-xs font-semibold text-slate-500 hover:text-slate-800 py-2"
+          >
+            Return to Home
+          </a>
+        </div>
       </div>
     );
   }
@@ -434,42 +567,313 @@ export const AdminPage: React.FC = () => {
         </div>
       ) : section === 'deposits' ? (
         /* Deposits Review & Platform UPI Settings */
-        <div className="space-y-4">
-          {/* Header & UPI Setting Card */}
-          <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-2xs space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="space-y-6">
+          {/* Header & Payment Settings Card with Live Interactive Preview */}
+          <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-100 shadow-2xs space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Wallet className="w-4 h-4 text-blue-600" />
-                  <span>Platform Deposit UPI Configuration</span>
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <QrCode className="w-4 h-4" />
+                  </div>
+                  <span>Platform Deposit UPI & QR Code Settings</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Users send payments to this UPI ID and submit their 12-digit UTR for manual review.
+                  Change the UPI ID, Merchant Name, and QR Code (Dynamic or Custom Image) displayed to users during manual deposits.
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={newDepositUpiInput}
-                  onChange={(e) => setNewDepositUpiInput(e.target.value)}
-                  placeholder="e.g. createlifafa@upi"
-                  className="px-3.5 py-2 text-xs font-mono font-bold bg-slate-50 border border-slate-200 rounded-xl w-48 sm:w-64 focus:outline-hidden focus:border-blue-500"
-                />
-                <button
-                  type="button"
-                  onClick={handleUpdateDepositUpi}
-                  disabled={savingUpiSetting || !newDepositUpiInput.trim() || newDepositUpiInput.trim() === depositUpiIdSetting}
-                  className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all shadow-xs shrink-0 cursor-pointer"
-                >
-                  {savingUpiSetting ? 'Saving...' : 'Update UPI ID'}
-                </button>
-              </div>
+              {paymentSettingsSuccess && (
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 animate-in fade-in shrink-0">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>Payment Settings Saved!</span>
+                </div>
+              )}
             </div>
 
-            <div className="text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex items-center gap-2">
-              <span className="font-semibold text-slate-700">Active Live UPI ID:</span>
-              <span className="font-mono font-bold text-blue-700">{depositUpiIdSetting}</span>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Left Column: Settings Configuration Form (7 cols) */}
+              <div className="lg:col-span-7 space-y-4">
+                {/* 1. Deposit UPI ID */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+                    <span>Platform Deposit UPI ID *</span>
+                    <span className="text-[10px] text-slate-400 font-mono">e.g. createlifafa@upi, yourname@okaxis</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={paymentSettings.upiId}
+                    onChange={(e) =>
+                      setPaymentSettings((prev) => ({ ...prev, upiId: e.target.value }))
+                    }
+                    placeholder="e.g. createlifafa@upi"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900 focus:outline-hidden focus:border-blue-500 focus:bg-white"
+                    required
+                  />
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Users transfer money to this UPI ID. Server verifies against this value.
+                  </p>
+                </div>
+
+                {/* 2. Merchant / Payee Name */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+                    <span>Merchant / Payee Name *</span>
+                    <span className="text-[10px] text-slate-400 font-sans">Displayed in UPI Apps & Receipt</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={paymentSettings.payeeName}
+                    onChange={(e) =>
+                      setPaymentSettings((prev) => ({ ...prev, payeeName: e.target.value }))
+                    }
+                    placeholder="e.g. CreatLifafa Platform"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-hidden focus:border-blue-500 focus:bg-white"
+                    required
+                  />
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Recipient name displayed when users scan the QR code using PhonePe, GPay, Paytm, or BHIM.
+                  </p>
+                </div>
+
+                {/* 3. QR Code Mode Selector */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    QR Code Display Mode
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPaymentSettings((prev) => ({ ...prev, qrMode: 'DYNAMIC' }))
+                      }
+                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                        paymentSettings.qrMode === 'DYNAMIC'
+                          ? 'bg-blue-50 border-blue-500 text-blue-900 shadow-xs'
+                          : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 font-bold text-xs">
+                        <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                        <span>Dynamic UPI QR</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-1 leading-snug">
+                        Auto-generates QR with user-entered amount (₹50, ₹100, etc.).
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPaymentSettings((prev) => ({ ...prev, qrMode: 'CUSTOM_IMAGE' }))
+                      }
+                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                        paymentSettings.qrMode === 'CUSTOM_IMAGE'
+                          ? 'bg-blue-50 border-blue-500 text-blue-900 shadow-xs'
+                          : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 font-bold text-xs">
+                        <ImageIcon className="w-3.5 h-3.5 text-blue-600" />
+                        <span>Custom QR Image</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-1 leading-snug">
+                        Displays your own merchant standee image or shop QR code.
+                      </p>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 4. Custom QR Code Image Upload / URL */}
+                <div className={`p-4 rounded-2xl border space-y-3 transition-all ${paymentSettings.qrMode === 'CUSTOM_IMAGE' ? 'bg-blue-50/40 border-blue-200' : 'bg-slate-50/60 border-slate-200/80'}`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <ImageIcon className="w-4 h-4 text-blue-600" />
+                      <span>Custom QR Image / Standee Photo</span>
+                    </span>
+                    {paymentSettings.qrImageUrl && (
+                      <button
+                        type="button"
+                        onClick={handleClearCustomQr}
+                        className="text-[11px] text-red-600 hover:text-red-700 font-bold flex items-center gap-1 cursor-pointer"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        <span>Remove Image</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                        Upload Image File (PNG, JPG, WebP)
+                      </label>
+                      <label className="flex items-center justify-center gap-2 px-3 py-2 bg-white border border-dashed border-slate-300 hover:border-blue-500 rounded-xl text-xs font-bold text-slate-700 hover:text-blue-600 cursor-pointer transition-colors shadow-2xs">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Choose QR Image File</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleQrFileUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                        Or Paste Direct Image URL
+                      </label>
+                      <input
+                        type="url"
+                        value={paymentSettings.qrImageUrl.startsWith('data:') ? '' : paymentSettings.qrImageUrl}
+                        onChange={(e) => {
+                          setPaymentSettings((prev) => ({
+                            ...prev,
+                            qrImageUrl: e.target.value.trim(),
+                            qrMode: 'CUSTOM_IMAGE',
+                          }));
+                          setQrImageError(false);
+                        }}
+                        placeholder="https://.../my-qr.png"
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-hidden focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  {paymentSettings.qrImageUrl.startsWith('data:') && (
+                    <div className="text-[11px] text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100 flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                      <span>Custom image uploaded (stored and ready to save).</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Save Button */}
+                <div className="pt-2 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleSavePaymentSettings}
+                    disabled={savingPaymentSettings || !paymentSettings.upiId.trim()}
+                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-blue-500/20 active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    {savingPaymentSettings ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Saving Settings...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Save Payment Settings</span>
+                      </>
+                    )}
+                  </button>
+
+                  <span className="text-[11px] text-slate-400">
+                    Live updates take effect immediately for all users.
+                  </span>
+                </div>
+              </div>
+
+              {/* Right Column: Live Interactive User Simulation Card (5 cols) */}
+              <div className="lg:col-span-5 bg-slate-50 p-4 rounded-2xl border border-slate-200/80 flex flex-col justify-between space-y-4">
+                <div>
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                    <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                      <Eye className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Live User Modal Preview</span>
+                    </span>
+                    <span className="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full uppercase font-mono">
+                      {paymentSettings.qrMode === 'CUSTOM_IMAGE' && paymentSettings.qrImageUrl ? 'Custom QR' : 'Dynamic UPI'}
+                    </span>
+                  </div>
+
+                  {/* QR Preview Card */}
+                  <div className="mt-3 bg-white p-4 rounded-2xl border border-slate-200 text-center space-y-3 shadow-2xs">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Payee / Merchant</span>
+                      <h4 className="text-sm font-bold text-slate-900">{paymentSettings.payeeName || 'CreatLifafa'}</h4>
+                    </div>
+
+                    {/* QR Code Container */}
+                    <div className="py-2 flex items-center justify-center">
+                      {paymentSettings.qrMode === 'CUSTOM_IMAGE' && paymentSettings.qrImageUrl && !qrImageError ? (
+                        <div className="relative p-2 bg-white rounded-2xl border border-slate-200 shadow-2xs">
+                          <img
+                            src={paymentSettings.qrImageUrl}
+                            alt="Merchant Custom QR"
+                            onError={() => setQrImageError(true)}
+                            className="w-36 h-36 object-contain mx-auto rounded-lg"
+                          />
+                        </div>
+                      ) : (
+                        <div className="p-3 bg-white rounded-2xl border border-slate-200 shadow-2xs inline-block">
+                          <QRCodeSVG
+                            value={`upi://pay?pa=${encodeURIComponent(paymentSettings.upiId || 'createlifafa@upi')}&pn=${encodeURIComponent(paymentSettings.payeeName || 'CreatLifafa')}&am=${previewAmount}&cu=INR`}
+                            size={140}
+                            level="M"
+                            includeMargin={false}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {paymentSettings.qrMode === 'CUSTOM_IMAGE' && qrImageError && (
+                      <p className="text-[11px] text-red-600 font-medium">Failed to load custom QR image URL.</p>
+                    )}
+
+                    <p className="text-[11px] text-slate-500 font-medium">
+                      Scan QR with <span className="font-bold text-slate-700">PhonePe, GPay, Paytm, BHIM</span> to pay <span className="font-bold text-blue-600">₹{previewAmount}</span>
+                    </p>
+
+                    {/* Test Amount Selector for dynamic QR */}
+                    <div className="pt-1 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                      <span>Test Amount:</span>
+                      <div className="flex items-center gap-1 font-mono font-bold">
+                        {[50, 100, 500].map((amt) => (
+                          <button
+                            key={amt}
+                            type="button"
+                            onClick={() => setPreviewAmount(amt)}
+                            className={`px-1.5 py-0.5 rounded text-[10px] transition-colors cursor-pointer ${
+                              previewAmount === amt ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                            }`}
+                          >
+                            ₹{amt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* UPI ID Pill */}
+                    <div className="flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-100 text-left">
+                      <div className="overflow-hidden">
+                        <span className="text-[9px] uppercase font-bold text-slate-400 block">UPI ID</span>
+                        <span className="font-mono text-xs font-bold text-slate-800 truncate block select-all">
+                          {paymentSettings.upiId || 'createlifafa@upi'}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(paymentSettings.upiId);
+                          setCopiedPreviewUpi(true);
+                          setTimeout(() => setCopiedPreviewUpi(false), 2000);
+                        }}
+                        className="p-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-slate-600 shrink-0 transition-colors cursor-pointer"
+                        title="Copy UPI ID"
+                      >
+                        {copiedPreviewUpi ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white/80 p-2.5 rounded-xl border border-slate-200 text-[10px] text-slate-500 leading-snug">
+                  🛡️ <strong>Note:</strong> Deposit verification uses strict 12-digit UTR reconciliation against platform bank account logs.
+                </div>
+              </div>
             </div>
           </div>
 

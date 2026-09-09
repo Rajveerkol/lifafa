@@ -22,7 +22,16 @@ import type { Lifafa } from './types/database';
 
 export function App() {
   const { user } = useAuth();
-  const [currentTab, setCurrentTab] = useState<string>('home');
+
+  const getInitialTab = () => {
+    const raw = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+    if (['home', 'lifafa', 'bots', 'wallet', 'profile', 'admin'].includes(raw)) {
+      return raw;
+    }
+    return 'home';
+  };
+
+  const [currentTab, setCurrentTab] = useState<string>(getInitialTab);
   const [isCreatingLifafa, setIsCreatingLifafa] = useState(false);
 
   // Modals
@@ -34,6 +43,20 @@ export function App() {
   // Lifafa Modals
   const [selectedClaimLifafa, setSelectedClaimLifafa] = useState<Lifafa | null>(null);
   const [selectedShareLifafa, setSelectedShareLifafa] = useState<Lifafa | null>(null);
+
+  // Sync URL history on browser popstate (back/forward)
+  useEffect(() => {
+    const handlePopState = () => {
+      const raw = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+      if (['home', 'lifafa', 'bots', 'wallet', 'profile', 'admin'].includes(raw)) {
+        setCurrentTab(raw);
+      } else {
+        setCurrentTab('home');
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Check URL query parameters for claim code (e.g. ?claim=LF-8X92K)
   useEffect(() => {
@@ -52,10 +75,12 @@ export function App() {
     if (tab === 'lifafa' && extra?.action === 'create') {
       setIsCreatingLifafa(true);
       setCurrentTab('lifafa');
+      window.history.pushState({}, '', '/lifafa');
       return;
     }
     setIsCreatingLifafa(false);
     setCurrentTab(tab);
+    window.history.pushState({}, '', tab === 'home' ? '/' : `/${tab}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

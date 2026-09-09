@@ -1,4 +1,4 @@
-﻿-- ==============================================================================
+-- ==============================================================================
 -- Migration: 014_manual_deposits.sql
 -- Description: Manual UPI deposit workflow with UTR verification and admin approval.
 -- Target: Run in Supabase SQL Editor
@@ -12,9 +12,13 @@ CREATE TABLE IF NOT EXISTS public.platform_settings (
     updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- Seed default deposit UPI ID if not already present
+-- Seed default deposit settings if not already present
 INSERT INTO public.platform_settings (key, value, description)
-VALUES ('DEPOSIT_UPI_ID', 'createlifafa@upi', 'Authoritative platform UPI ID for user manual deposits')
+VALUES 
+    ('DEPOSIT_UPI_ID', 'createlifafa@upi', 'Authoritative platform UPI ID for user manual deposits'),
+    ('DEPOSIT_PAYEE_NAME', 'CreatLifafa', 'Merchant/Payee name displayed in UPI apps and deposit modal'),
+    ('DEPOSIT_QR_IMAGE_URL', '', 'Custom QR Code image URL or base64 data for manual deposit modal'),
+    ('DEPOSIT_QR_MODE', 'DYNAMIC', 'QR mode: DYNAMIC (auto QR with amount) or CUSTOM_IMAGE')
 ON CONFLICT (key) DO NOTHING;
 
 -- 2. Deposit Requests Table

@@ -27,7 +27,7 @@ interface ProfilePageProps {
 }
 
 export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate, onOpenAuth }) => {
-  const { user, wallet, logout } = useAuth();
+  const { user, wallet, logout, isAdmin } = useAuth();
   const [editingPhone, setEditingPhone] = useState(false);
   const [phone, setPhone] = useState(user?.phone_number || '+91 9876543210');
   const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -100,6 +100,35 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate, onOpenAuth
           </button>
         </div>
       </div>
+
+      {/* Admin Panel Quick Access Banner (Visible to authorized administrators) */}
+      {isAdmin && (
+        <div
+          onClick={() => onNavigate('admin')}
+          className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white p-4 rounded-3xl border border-blue-900/50 shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-between group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-sm font-black tracking-tight">Admin Control Center</h4>
+                <span className="bg-blue-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase tracking-wider">
+                  PRO
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-300 mt-0.5">
+                Manage deposits, UPI & QR codes, users, and withdrawals
+              </p>
+            </div>
+          </div>
+
+          <div className="w-8 h-8 rounded-xl bg-white/10 group-hover:bg-blue-600 flex items-center justify-center transition-colors">
+            <ChevronRight className="w-4 h-4 text-white" />
+          </div>
+        </div>
+      )}
 
       {/* 2. User Info Card matching media_1788926051778.png */}
       <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-2xs divide-y divide-slate-100">
@@ -259,6 +288,22 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate, onOpenAuth
               <div>
                 <h5 className="text-xs font-bold text-slate-900">Privacy Policy</h5>
                 <p className="text-[10px] text-slate-400">Read our privacy commitments</p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-slate-400" />
+          </div>
+
+          <div
+            onClick={() => onNavigate('admin')}
+            className="p-4 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                <ShieldCheck className="w-4 h-4 text-purple-600" />
+              </div>
+              <div>
+                <h5 className="text-xs font-bold text-slate-900">Admin Portal</h5>
+                <p className="text-[10px] text-slate-400">Platform management & deposit verification</p>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400" />

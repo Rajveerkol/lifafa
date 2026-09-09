@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Copy,
@@ -17,7 +17,11 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../../context/AuthContext';
-import { walletService } from '../../services/walletService';
+import {
+  walletService,
+  type PlatformPaymentSettings,
+  DEFAULT_PAYMENT_SETTINGS,
+} from '../../services/walletService';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import type { DepositRequest } from '../../types/database';
 
@@ -43,6 +47,7 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
   const [amount, setAmount] = useState<number>(100);
   const [customAmountInput, setCustomAmountInput] = useState<string>('100');
   const [utrNumber, setUtrNumber] = useState<string>('');
+  const [paymentSettings, setPaymentSettings] = useState<PlatformPaymentSettings>(DEFAULT_PAYMENT_SETTINGS);
   const [depositUpiId, setDepositUpiId] = useState<string>('createlifafa@upi');
 
   const [copiedUpi, setCopiedUpi] = useState(false);
@@ -54,14 +59,31 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
   const [history, setHistory] = useState<DepositRequest[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
-  // Load platform UPI ID
+  // Load platform payment settings (UPI ID, payee name, QR image/mode)
   useEffect(() => {
     if (isOpen) {
-      walletService.getDepositUpiId().then((upi) => {
-        if (upi) setDepositUpiId(upi);
+      walletService.getPaymentSettings().then((settings) => {
+        if (settings) {
+          setPaymentSettings(settings);
+          if (settings.upiId) setDepositUpiId(settings.upiId);
+        }
       });
     }
   }, [isOpen]);
+
+  // Listen for real-time updates dispatched when admin saves payment settings
+  useEffect(() => {
+    const handleSettingsUpdated = (e: any) => {
+      if (e?.detail) {
+        setPaymentSettings(e.detail);
+        if (e.detail.upiId) setDepositUpiId(e.detail.upiId);
+      }
+    };
+    window.addEventListener('lifafa_payment_settings_updated', handleSettingsUpdated as EventListener);
+    return () => {
+      window.removeEventListener('lifafa_payment_settings_updated', handleSettingsUpdated as EventListener);
+    };
+  }, []);
 
   // Load user deposit history
   const fetchHistory = async () => {
@@ -153,8 +175,10 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
     setSubmittedDeposit(null);
   };
 
-  // UPI payment intent link
-  const upiPayUrl = `upi://pay?pa=${encodeURIComponent(depositUpiId)}&pn=CreatLifafa&am=${amount}&cu=INR`;
+  // UPI payment intent link with configured payee name and UPI ID
+  const activeUpiId = paymentSettings.upiId || depositUpiId || 'createlifafa@upi';
+  const activePayeeName = paymentSettings.payeeName || 'CreatLifafa';
+  const upiPayUrl = `upi://pay?pa=${encodeURIComponent(activeUpiId)}&pn=${encodeURIComponent(activePayeeName)}&am=${amount}&cu=INR`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
@@ -275,7 +299,7 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">
-                        Platform Deposit UPI ID
+                        Payee: <strong className="text-slate-800">{activePayeeName}</strong>
                       </span>
                       <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                         <ShieldCheck className="w-3 h-3 text-emerald-600" />
@@ -284,13 +308,16 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
                     </div>
 
                     <div className="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-200">
-                      <span className="font-mono text-xs sm:text-sm font-bold text-slate-800 break-all select-all">
-                        {depositUpiId}
-                      </span>
+                      <div className="overflow-hidden">
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block">UPI ID</span>
+                        <span className="font-mono text-xs sm:text-sm font-bold text-slate-800 break-all select-all">
+                          {activeUpiId}
+                        </span>
+                      </div>
                       <button
                         type="button"
                         onClick={handleCopyUpi}
-                        className="ml-2 px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-lg text-xs flex items-center gap-1 shrink-0 transition-colors"
+                        className="ml-2 px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-lg text-xs flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
                       >
                         {copiedUpi ? (
                           <>
@@ -306,20 +333,39 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
                       </button>
                     </div>
 
-                    {/* QR Code */}
+                    {/* QR Code (Custom Image or Dynamic UPI QR) */}
                     <div className="text-center py-2 flex flex-col items-center">
-                      <div className="p-3 bg-white rounded-2xl border border-slate-200 shadow-2xs inline-block">
-                        <QRCodeSVG
-                          value={upiPayUrl}
-                          size={140}
-                          level="M"
-                          includeMargin={false}
-                        />
-                      </div>
+                      {paymentSettings.qrMode === 'CUSTOM_IMAGE' && paymentSettings.qrImageUrl ? (
+                        <div className="p-2 bg-white rounded-2xl border border-slate-200 shadow-2xs inline-block">
+                          <img
+                            src={paymentSettings.qrImageUrl}
+                            alt="Deposit UPI QR Code"
+                            className="w-40 h-40 object-contain mx-auto rounded-xl"
+                          />
+                        </div>
+                      ) : (
+                        <div className="p-3 bg-white rounded-2xl border border-slate-200 shadow-2xs inline-block">
+                          <QRCodeSVG
+                            value={upiPayUrl}
+                            size={144}
+                            level="M"
+                            includeMargin={false}
+                          />
+                        </div>
+                      )}
                       <p className="text-[11px] text-slate-500 mt-2 font-medium">
                         Scan QR with <span className="font-bold text-slate-700">PhonePe, GPay, Paytm, BHIM</span> to pay <span className="font-bold text-blue-600">₹{amount}</span>
                       </p>
                     </div>
+
+                    {/* Mobile UPI Direct App Intent Button */}
+                    <a
+                      href={upiPayUrl}
+                      className="sm:hidden w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Open UPI App to Pay ₹{amount}</span>
+                    </a>
 
                     {/* Instructions */}
                     <div className="bg-white/80 p-3 rounded-xl border border-slate-100 text-[11px] text-slate-600 space-y-1">

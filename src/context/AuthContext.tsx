@@ -60,10 +60,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [unreadCount, setUnreadCount] = useState(3);
   const [isDevDemoActive, setIsDevDemoActive] = useState(false);
 
+  const [sessionEmail, setSessionEmail] = useState<string | null>(null);
+
   // Development mode flag: strictly false in production
   const isDevMode = import.meta.env.DEV && (!isSupabaseConfigured || import.meta.env.VITE_ALLOW_DEV_SIMULATOR === 'true');
 
-  const fetchUserData = useCallback(async (userId: string) => {
+  const OWNER_EMAILS = ['kolrajveer33@gmail.com', 'jayakol796@gmail.com'];
+  const isOwnerEmail = (email?: string | null) => {
+    if (!email) return false;
+    return OWNER_EMAILS.includes(email.toLowerCase().trim());
+  };
+
+  const fetchUserData = useCallback(async (userId: string, authEmail?: string) => {
     if (!isSupabaseConfigured || !supabase) return;
 
     try {
@@ -77,6 +85,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (profileData) {
         setUser(profileData as Profile);
       }
+
+      const effectiveEmail = profileData?.email || authEmail || sessionEmail;
 
       // 2. Fetch wallet
       const { data: walletData } = await supabase
@@ -96,7 +106,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('user_id', userId)
         .maybeSingle();
 
-      setAdminUser(adminData as AdminUser | null);
+      if (adminData) {
+        setAdminUser(adminData as AdminUser);
+      } else if (isOwnerEmail(effectiveEmail)) {
+        setAdminUser({
+          user_id: userId,
+          role: 'SUPER_ADMIN',
+          created_at: new Date().toISOString(),
+        });
+      } else {
+        setAdminUser(null);
+      }
 
       // 4. Fetch unread notifications count
       const { count } = await supabase
@@ -163,7 +183,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Supabase auth subscription
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        fetchUserData(session.user.id).finally(() => setIsLoading(false));
+        const email = session.user.email || null;
+        setSessionEmail(email);
+        if (isOwnerEmail(email)) {
+          setAdminUser({
+            user_id: session.user.id,
+            role: 'SUPER_ADMIN',
+            created_at: new Date().toISOString(),
+          });
+        }
+        fetchUserData(session.user.id, email || undefined).finally(() => setIsLoading(false));
       } else {
         setIsLoading(false);
       }
@@ -173,11 +202,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        fetchUserData(session.user.id);
+        const email = session.user.email || null;
+        setSessionEmail(email);
+        if (isOwnerEmail(email)) {
+          setAdminUser({
+            user_id: session.user.id,
+            role: 'SUPER_ADMIN',
+            created_at: new Date().toISOString(),
+          });
+        }
+        fetchUserData(session.user.id, email || undefined);
       } else {
         setUser(null);
         setWallet(null);
         setAdminUser(null);
+        setSessionEmail(null);
       }
     });
 
@@ -222,13 +261,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsDevDemoActive(true);
   };
 
+  const isUserAdmin = Boolean(
+    (adminUser && ['SUPER_ADMIN', 'ADMIN'].includes(adminUser.role)) ||
+    isOwnerEmail(user?.email) ||
+    isOwnerEmail(sessionEmail) ||
+    (isDevDemoActive && DEV_DEMO_ADMIN.role === 'SUPER_ADMIN')
+  );
+
   return (
     <AuthContext.Provider
       value={{
         user,
         wallet,
         adminUser,
-        isAdmin: Boolean(adminUser && ['SUPER_ADMIN', 'ADMIN'].includes(adminUser.role)),
+        isAdmin: isUserAdmin,
         isLoading,
         isSupabaseConnected: isSupabaseConfigured,
         unreadNotificationsCount: unreadCount,

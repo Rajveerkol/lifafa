@@ -11,6 +11,12 @@ import type {
   WithdrawalStatus,
   DepositRequest,
 } from '../types/database';
+import {
+  type PlatformPaymentSettings,
+  DEFAULT_PAYMENT_SETTINGS,
+  PAYMENT_SETTINGS_STORAGE_KEY,
+  walletService,
+} from './walletService';
 
 export interface AdminMetrics {
   totalUsers: number;
@@ -441,5 +447,69 @@ export const adminService = {
     }
 
     return data;
+  },
+
+  // Get complete payment settings (UPI ID, Payee Name, QR image, QR Mode)
+  async getPaymentSettings(): Promise<PlatformPaymentSettings> {
+    return walletService.getPaymentSettings();
+  },
+
+  // Update complete payment settings with multi-key persistence, local cache, and live broadcast
+  async updatePaymentSettings(settings: PlatformPaymentSettings): Promise<PlatformPaymentSettings> {
+    const cleanSettings: PlatformPaymentSettings = {
+      upiId: settings.upiId.trim() || DEFAULT_PAYMENT_SETTINGS.upiId,
+      payeeName: settings.payeeName.trim() || DEFAULT_PAYMENT_SETTINGS.payeeName,
+      qrImageUrl: settings.qrImageUrl?.trim() || '',
+      qrMode: settings.qrMode || 'DYNAMIC',
+    };
+
+    // 1. Update localStorage cache immediately
+    try {
+      localStorage.setItem(PAYMENT_SETTINGS_STORAGE_KEY, JSON.stringify(cleanSettings));
+    } catch (e) {
+      console.warn('Failed to cache payment settings in localStorage:', e);
+    }
+
+    // 2. Broadcast event to open windows and components
+    try {
+      window.dispatchEvent(
+        new CustomEvent('lifafa_payment_settings_updated', { detail: cleanSettings })
+      );
+    } catch {}
+
+    // 3. Persist to Supabase platform_settings if configured
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const updates = [
+          { key: 'DEPOSIT_UPI_ID', value: cleanSettings.upiId, desc: 'Authoritative platform UPI ID' },
+          { key: 'DEPOSIT_PAYEE_NAME', value: cleanSettings.payeeName, desc: 'Merchant Payee Name' },
+          { key: 'DEPOSIT_QR_IMAGE_URL', value: cleanSettings.qrImageUrl, desc: 'Custom QR Code image URL or base64' },
+          { key: 'DEPOSIT_QR_MODE', value: cleanSettings.qrMode, desc: 'QR code display mode' },
+        ];
+
+        for (const item of updates) {
+          // Attempt via RPC first
+          const { error: rpcError } = await supabase.rpc('admin_update_platform_setting_rpc', {
+            p_key: item.key,
+            p_value: item.value,
+            p_description: item.desc,
+          });
+
+          if (rpcError) {
+            // Fallback to direct table upsert if RPC is not present
+            await supabase
+              .from('platform_settings')
+              .upsert(
+                { key: item.key, value: item.value, description: item.desc, updated_at: new Date().toISOString() },
+                { onConflict: 'key' }
+              );
+          }
+        }
+      } catch (err) {
+        console.warn('Notice: Remote platform_settings sync error (local cache updated):', err);
+      }
+    }
+
+    return cleanSettings;
   },
 };
