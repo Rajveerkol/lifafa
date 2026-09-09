@@ -24,8 +24,8 @@ export const TelegramTaskBuilder: React.FC<TelegramTaskBuilderProps> = ({
   const [needsAdminHelp, setNeedsAdminHelp] = useState(false);
   const [verifiedChannel, setVerifiedChannel] = useState<VerifiedTelegramChannel | null>(null);
 
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleVerify = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!username.trim()) return;
 
     try {
@@ -111,7 +111,7 @@ export const TelegramTaskBuilder: React.FC<TelegramTaskBuilderProps> = ({
         </div>
       ) : (
         /* Input & Verification Flow */
-        <form onSubmit={handleVerify} className="space-y-3">
+        <div className="space-y-3">
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
               Telegram Channel / Group Username *
@@ -124,9 +124,14 @@ export const TelegramTaskBuilder: React.FC<TelegramTaskBuilderProps> = ({
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value.replace(/^@/, ''))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleVerify();
+                  }
+                }}
                 placeholder="e.g. MyTechCommunity"
                 className="w-full pl-8 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:outline-hidden focus:border-sky-500"
-                required
               />
             </div>
           </div>
@@ -151,17 +156,29 @@ export const TelegramTaskBuilder: React.FC<TelegramTaskBuilderProps> = ({
             <div className="p-3 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-2 text-xs text-red-700">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold">Verification Incomplete:</p>
+                <p className="font-bold">Verification Status:</p>
                 <p className="text-[11px] mt-0.5">{errorMsg}</p>
+                {needsAdminHelp && (
+                  <a
+                    href={`https://t.me/${telegramService.BOT_USERNAME}?startgroup=botstart`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 mt-2 text-[11px] font-bold text-sky-700 hover:text-sky-800 bg-sky-100/70 hover:bg-sky-100 px-2.5 py-1 rounded-lg transition-colors"
+                  >
+                    <span>Add @{telegramService.BOT_USERNAME} to Channel</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
               </div>
             </div>
           )}
 
           <div className="flex gap-2">
             <button
-              type="submit"
+              type="button"
+              onClick={() => handleVerify()}
               disabled={loading || !username.trim()}
-              className="flex-1 bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl text-xs shadow-md shadow-sky-500/20 active:scale-98 transition-all flex items-center justify-center gap-2"
+              className="flex-1 bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl text-xs shadow-md shadow-sky-500/20 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading ? (
                 <>
@@ -176,7 +193,7 @@ export const TelegramTaskBuilder: React.FC<TelegramTaskBuilderProps> = ({
               )}
             </button>
           </div>
-        </form>
+        </div>
       )}
     </div>
   );
