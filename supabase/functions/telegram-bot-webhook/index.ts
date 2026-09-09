@@ -1,4 +1,4 @@
-﻿// Supabase Edge Function: telegram-bot-webhook
+// Supabase Edge Function: telegram-bot-webhook
 // Handles incoming Telegram Bot webhook updates, specifically:
 // /start bind_<nonce> deep links to cryptographically bind Telegram account to user profile.
 
@@ -49,15 +49,15 @@ serve(async (req: Request) => {
 
       let replyText = '';
       if (error || !data?.success) {
-        replyText = ⚠️ Verification Failed: ;
+        replyText = `⚠️ <b>Verification Failed</b>: ${error?.message || data?.error || 'Unknown error'}`;
       } else {
-        const usernameDisplay = fromUser.username ? @ : fromUser.first_name;
-        replyText = 🎉 Success! Your Telegram account () has been cryptographically linked to your Lifafa profile.\n\nYou can now return to the Lifafa app and claim your rewards instantly! 🎁;
+        const usernameDisplay = fromUser.username ? `@${fromUser.username}` : fromUser.first_name;
+        replyText = `🎉 <b>Success!</b> Your Telegram account (<b>${usernameDisplay}</b>) has been cryptographically linked to your Lifafa profile.\n\nYou can now return to the Lifafa app and claim your rewards instantly! 🎁`;
       }
 
       // Send confirmation message back to the user via Telegram Bot API
       if (botToken) {
-        await fetch(https://api.telegram.org/bot/sendMessage, {
+        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -75,12 +75,12 @@ serve(async (req: Request) => {
 
     // Default response for standard /start or help
     if (text === '/start' && botToken) {
-      await fetch(https://api.telegram.org/bot/sendMessage, {
+      await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chat_id: chatId,
-          text: 👋 Welcome to <b>Lifafa Bot</b>!\n\nThis bot verifies channel administration and membership for digital cash Lifafa rewards.\n\nTo link your account, click the <b>Verify with Telegram</b> button inside the Lifafa app.,
+          text: `👋 Welcome to <b>Lifafa Bot</b>!\n\nThis bot verifies channel administration and membership for digital cash Lifafa rewards.\n\nTo link your account, click the <b>Verify with Telegram</b> button inside the Lifafa app.`,
           parse_mode: 'HTML',
         }),
       });
