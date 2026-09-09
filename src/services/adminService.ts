@@ -497,16 +497,21 @@ export const adminService = {
 
           if (rpcError) {
             // Fallback to direct table upsert if RPC is not present
-            await supabase
+            const { error: upsertError } = await supabase
               .from('platform_settings')
               .upsert(
                 { key: item.key, value: item.value, description: item.desc, updated_at: new Date().toISOString() },
                 { onConflict: 'key' }
               );
+
+            if (upsertError) {
+              throw new Error(rpcError.message || upsertError.message || 'Failed to persist platform setting to database.');
+            }
           }
         }
-      } catch (err) {
-        console.warn('Notice: Remote platform_settings sync error (local cache updated):', err);
+      } catch (err: any) {
+        console.error('Remote platform_settings sync error:', err);
+        throw err;
       }
     }
 

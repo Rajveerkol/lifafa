@@ -42,10 +42,6 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
   const [winnerCount, setWinnerCount] = useState('');
   const [distributionType, setDistributionType] = useState<DistributionType>('EQUAL');
 
-  // Expiry presets
-  const [expiryPreset, setExpiryPreset] = useState<'1h' | '6h' | '12h' | '24h' | '3d' | '7d' | 'custom'>('24h');
-  const [customExpiry, setCustomExpiry] = useState('');
-
   // Tasks Builder & Telegram Modal
   const [showTelegramBuilder, setShowTelegramBuilder] = useState(false);
   const [tasks, setTasks] = useState<
@@ -69,8 +65,6 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
   const [allowCancel, setAllowCancel] = useState(true);
   const [showRemaining, setShowRemaining] = useState(true);
   const [creatorNote, setCreatorNote] = useState('');
-  const [scheduleMode, setScheduleMode] = useState<'now' | 'later'>('now');
-  const [scheduledStartTime, setScheduledStartTime] = useState('');
   const [deviceLimit, setDeviceLimit] = useState<'1' | '2' | 'unlimited'>('1');
   const [minClaimAmount, setMinClaimAmount] = useState('');
   const [maxClaimAmount, setMaxClaimAmount] = useState('');
@@ -83,28 +77,8 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
   const numTotalAmount = parseFloat(totalAmount) || 0;
   const numWinners = parseInt(winnerCount) || 1;
 
-  // Calculate Expiry Date from Preset
-  const computeExpiryDate = (): string => {
-    const now = new Date();
-    switch (expiryPreset) {
-      case '1h':
-        return new Date(now.getTime() + 60 * 60 * 1000).toISOString();
-      case '6h':
-        return new Date(now.getTime() + 6 * 60 * 60 * 1000).toISOString();
-      case '12h':
-        return new Date(now.getTime() + 12 * 60 * 60 * 1000).toISOString();
-      case '24h':
-        return new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
-      case '3d':
-        return new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString();
-      case '7d':
-        return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
-      case 'custom':
-        return customExpiry ? new Date(customExpiry).toISOString() : new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
-      default:
-        return new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
-    }
-  };
+  // Perpetual non-expiring date (Year 9999) satisfies database NOT NULL constraint without enforcing visible expiration
+  const computeExpiryDate = (): string => '9999-12-31T23:59:59.999Z';
 
   const handleTelegramChannelVerified = (channel: VerifiedTelegramChannel) => {
     setTasks([
@@ -204,19 +178,9 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
       return;
     }
 
-    if (expiryPreset === 'custom' && (!customExpiry || new Date(customExpiry) <= new Date())) {
-      setErrorMsg('Please select a valid future expiry date.');
-      return;
-    }
-
     try {
       setLoading(true);
       const idempotencyKey = `create_${user.id}_${Date.now()}`;
-
-      const startsAtIso =
-        scheduleMode === 'later' && scheduledStartTime
-          ? new Date(scheduledStartTime).toISOString()
-          : undefined;
 
       const numDeviceLimit = deviceLimit === 'unlimited' ? 0 : parseInt(deviceLimit, 10);
       const numMinClaim = parseFloat(minClaimAmount) || undefined;
@@ -235,7 +199,7 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
           allowCancel,
           showRemaining,
           creatorNote: creatorNote.trim() || undefined,
-          startsAt: startsAtIso,
+          startsAt: undefined,
           deviceClaimLimit: numDeviceLimit,
           minClaimAmount: numMinClaim,
           maxClaimAmount: numMaxClaim,
@@ -566,46 +530,7 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
           )}
         </div>
 
-        {/* Section 4: Expiry Preset */}
-        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-100 shadow-2xs space-y-3">
-          <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wide">
-            4. Lifafa Duration & Expiry
-          </h3>
-
-          <div className="grid grid-cols-3 sm:grid-cols-7 gap-2">
-            {(['1h', '6h', '12h', '24h', '3d', '7d', 'custom'] as const).map((preset) => (
-              <button
-                key={preset}
-                type="button"
-                onClick={() => setExpiryPreset(preset)}
-                className={`py-2 px-2 text-xs font-bold rounded-xl border transition-all ${
-                  expiryPreset === preset
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                }`}
-              >
-                {preset.toUpperCase()}
-              </button>
-            ))}
-          </div>
-
-          {expiryPreset === 'custom' && (
-            <div className="pt-2">
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Custom Expiry Date & Time
-              </label>
-              <input
-                type="datetime-local"
-                value={customExpiry}
-                onChange={(e) => setCustomExpiry(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium"
-                required={expiryPreset === 'custom'}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Section 5: Advanced Settings Accordion */}
+        {/* Section 4: Advanced Settings Accordion */}
         <div className="bg-white rounded-3xl border border-slate-100 shadow-2xs overflow-hidden">
           <button
             type="button"
@@ -613,7 +538,7 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
             className="w-full p-5 sm:p-6 flex items-center justify-between text-left hover:bg-slate-50/60 transition-colors"
           >
             <div>
-              <h3 className="text-sm font-extrabold text-slate-900">Advanced Settings</h3>
+              <h3 className="text-sm font-extrabold text-slate-900">4. Advanced Settings</h3>
               <p className="text-[11px] text-slate-500">Security PIN, Privacy & Creator Controls</p>
             </div>
             {showAdvanced ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
@@ -621,46 +546,6 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
 
           {showAdvanced && (
             <div className="p-5 sm:p-6 pt-0 space-y-4 border-t border-slate-100">
-              {/* Scheduled Launch Timing */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                  Launch Timing
-                </label>
-                <div className="grid grid-cols-2 gap-2 mb-2">
-                  <button
-                    type="button"
-                    onClick={() => setScheduleMode('now')}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all ${
-                      scheduleMode === 'now'
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                        : 'bg-slate-50 text-slate-700 border-slate-200'
-                    }`}
-                  >
-                    Launch Immediately
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setScheduleMode('later')}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all ${
-                      scheduleMode === 'later'
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                        : 'bg-slate-50 text-slate-700 border-slate-200'
-                    }`}
-                  >
-                    Schedule for Later
-                  </button>
-                </div>
-                {scheduleMode === 'later' && (
-                  <input
-                    type="datetime-local"
-                    value={scheduledStartTime}
-                    onChange={(e) => setScheduledStartTime(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium"
-                    required={scheduleMode === 'later'}
-                  />
-                )}
-              </div>
-
               {/* Anti-Farming Device Limit */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1.5">

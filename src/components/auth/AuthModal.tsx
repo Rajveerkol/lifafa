@@ -35,7 +35,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
       <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Subtle Brand Accent Stripe */}
         <div className="h-1.5 w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500" />
@@ -100,8 +100,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               <span>{loading ? 'Connecting...' : 'Continue with Google'}</span>
             </button>
 
-            {/* Development Mode Quick Demo Trigger (ONLY visible in local dev when Supabase is not connected) */}
-            {isDevMode && !isSupabaseConnected && (
+            {/* Development Mode Quick Demo Trigger (ONLY visible in local dev mode) */}
+            {isDevMode && (
               <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-center">
                 <p className="text-[11px] text-amber-800 font-medium mb-2">
                   Development Mode: Supabase credentials not yet configured in .env.

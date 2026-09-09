@@ -57,6 +57,11 @@ export function formatTimeRemaining(expiresAt: string | null | undefined): {
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
+  // Perpetual non-expiring Lifafas (far-future date > 365 days)
+  if (hours > 24 * 365) {
+    return { isExpired: false, formatted: 'Active' };
+  }
+
   if (hours > 24) {
     const days = Math.floor(hours / 24);
     return { isExpired: false, formatted: `${days}d ${hours % 24}h left` };

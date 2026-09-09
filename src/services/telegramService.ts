@@ -206,6 +206,10 @@ export const telegramService = {
 
     const { data, error } = await supabase.rpc('generate_telegram_binding_nonce_rpc');
     if (error) {
+      // In development with demo sessions (without real Supabase JWT):
+      if (import.meta.env.DEV && error.message?.includes('Authentication required')) {
+        return `bind_dev_${Date.now()}`;
+      }
       throw new Error(error.message || 'Failed to generate Telegram binding token');
     }
     return data;
@@ -222,11 +226,12 @@ export const telegramService = {
     telegramUsername: string | null;
     telegramUserId: number | null;
   }> {
-    if (!isSupabaseConfigured || !supabase) {
+    if (!isSupabaseConfigured || !supabase || userId.startsWith('dev-demo')) {
+      const demoBound = typeof window !== 'undefined' && localStorage.getItem('lifafa_demo_tg_bound') === 'true';
       return {
-        isBound: true,
-        telegramUsername: 'lifafa_demo_user',
-        telegramUserId: 987654321,
+        isBound: demoBound,
+        telegramUsername: demoBound ? 'lifafa_demo_user' : null,
+        telegramUserId: demoBound ? 987654321 : null,
       };
     }
 
@@ -249,7 +254,10 @@ export const telegramService = {
 
   // 4. Development/testing simulator for binding when running without live Telegram webhook
   async simulateBinding(userId: string, tgUsername: string, tgUserId: number = 888999111) {
-    if (!isSupabaseConfigured || !supabase) {
+    if (!isSupabaseConfigured || !supabase || userId.startsWith('dev-demo')) {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('lifafa_demo_tg_bound', 'true');
+      }
       return { success: true };
     }
 

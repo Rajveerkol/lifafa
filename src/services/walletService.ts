@@ -195,5 +195,36 @@ export const walletService = {
 
     return data || [];
   },
+
+  // Update user profile display name (Issue 4)
+  async updateUserProfileName(userId: string, fullName: string) {
+    const cleanName = fullName.trim();
+    if (!cleanName || cleanName.length < 2) {
+      throw new Error('Full Name must be at least 2 characters long.');
+    }
+    if (cleanName.length > 50) {
+      throw new Error('Full Name cannot exceed 50 characters.');
+    }
+
+    if (!isSupabaseConfigured || !supabase) {
+      return { success: true, full_name: cleanName };
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({
+        full_name: cleanName,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message || 'Failed to update profile name.');
+    }
+
+    return data;
+  },
 };
 

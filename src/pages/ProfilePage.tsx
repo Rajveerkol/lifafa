@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   User,
   Mail,
-  Phone,
   Wallet,
   Gift,
   Users,
@@ -20,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { formatCurrency, formatDate } from '../lib/utils';
+import { EditProfileModal } from '../components/profile/EditProfileModal';
 
 interface ProfilePageProps {
   onNavigate: (tab: string, extra?: any) => void;
@@ -28,9 +28,8 @@ interface ProfilePageProps {
 
 export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate, onOpenAuth }) => {
   const { user, wallet, logout, isAdmin } = useAuth();
-  const [editingPhone, setEditingPhone] = useState(false);
-  const [phone, setPhone] = useState(user?.phone_number || '+91 9876543210');
-  const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [showReferralModal, setShowReferralModal] = useState(false);
 
   if (!user) {
     return (
@@ -92,8 +91,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate, onOpenAuth
 
           {/* Edit Profile Pill Button */}
           <button
-            onClick={() => setActiveModal('edit-profile')}
-            className="flex items-center gap-1.5 bg-white text-blue-700 font-bold px-3.5 py-2 rounded-2xl text-xs shadow-sm hover:bg-slate-50 active:scale-95 transition-all shrink-0"
+            onClick={() => setIsEditProfileOpen(true)}
+            className="flex items-center gap-1.5 bg-white text-blue-700 font-bold px-3.5 py-2 rounded-2xl text-xs shadow-sm hover:bg-slate-50 active:scale-95 transition-all shrink-0 cursor-pointer"
           >
             <Edit3 className="w-3.5 h-3.5 text-blue-600" />
             <span>Edit Profile</span>
@@ -130,7 +129,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate, onOpenAuth
         </div>
       )}
 
-      {/* 2. User Info Card matching media_1788926051778.png */}
+      {/* 2. User Info Card */}
       <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-2xs divide-y divide-slate-100">
         <div className="flex items-center justify-between py-2.5 first:pt-0">
           <div className="flex items-center gap-3">
@@ -142,7 +141,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate, onOpenAuth
           <span className="text-xs font-bold text-slate-900">{displayName}</span>
         </div>
 
-        <div className="flex items-center justify-between py-2.5">
+        <div className="flex items-center justify-between py-2.5 last:pb-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
               <Mail className="w-4 h-4" />
@@ -150,16 +149,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate, onOpenAuth
             <span className="text-xs font-bold text-slate-700">Email Address</span>
           </div>
           <span className="text-xs font-medium text-slate-800">{user.email}</span>
-        </div>
-
-        <div className="flex items-center justify-between py-2.5 last:pb-0">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <Phone className="w-4 h-4" />
-            </div>
-            <span className="text-xs font-bold text-slate-700">Mobile Number</span>
-          </div>
-          <span className="text-xs font-medium text-slate-800 font-mono">{phone}</span>
         </div>
       </div>
 
@@ -196,7 +185,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate, onOpenAuth
           </div>
 
           <div
-            onClick={() => setActiveModal('referral')}
+            onClick={() => setShowReferralModal(true)}
             className="bg-white rounded-3xl p-3.5 border border-slate-100 shadow-2xs hover:shadow-md transition-all cursor-pointer text-center flex flex-col items-center"
           >
             <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-1.5">
@@ -219,7 +208,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate, onOpenAuth
         </div>
       </div>
 
-      {/* 4. Account & Support List matching media_1788926051778.png */}
+      {/* 4. Account & Support List */}
       <div>
         <div className="flex items-center gap-2 mb-2 px-1">
           <ShieldCheck className="w-4 h-4 text-blue-600" />
@@ -230,7 +219,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate, onOpenAuth
 
         <div className="bg-white rounded-3xl border border-slate-100 shadow-2xs divide-y divide-slate-100 overflow-hidden">
           <div
-            onClick={() => setActiveModal('security')}
+            onClick={() => onNavigate('account-security')}
             className="p-4 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-3">
@@ -246,7 +235,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate, onOpenAuth
           </div>
 
           <div
-            onClick={() => setActiveModal('support')}
+            onClick={() => onNavigate('help-support')}
             className="p-4 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-3">
@@ -255,14 +244,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate, onOpenAuth
               </div>
               <div>
                 <h5 className="text-xs font-bold text-slate-900">Help & Support</h5>
-                <p className="text-[10px] text-slate-400">Get help and contact support</p>
+                <p className="text-[10px] text-slate-400">Guides, FAQs & in-platform support</p>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400" />
           </div>
 
           <div
-            onClick={() => setActiveModal('terms')}
+            onClick={() => onNavigate('terms')}
             className="p-4 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-3">
@@ -278,7 +267,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate, onOpenAuth
           </div>
 
           <div
-            onClick={() => setActiveModal('privacy')}
+            onClick={() => onNavigate('privacy')}
             className="p-4 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-3">
@@ -311,34 +300,46 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate, onOpenAuth
         </div>
       </div>
 
-      {/* 5. Logout Button matching media_1788926051778.png */}
+      {/* 5. Logout Button */}
       <div className="pt-2">
         <button
           onClick={logout}
-          className="w-full flex items-center justify-center gap-2 bg-white hover:bg-red-50 border border-red-500 text-red-600 font-bold py-3.5 rounded-2xl text-xs transition-colors shadow-2xs"
+          className="w-full flex items-center justify-center gap-2 bg-white hover:bg-red-50 border border-red-500 text-red-600 font-bold py-3.5 rounded-2xl text-xs transition-colors shadow-2xs cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
           <span>Logout</span>
         </button>
       </div>
 
-      {/* Support & Legal Modals */}
-      {activeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-left">
-            <h4 className="text-base font-bold text-slate-900 mb-2 capitalize">
-              {activeModal.replace('-', ' ')}
-            </h4>
-            <p className="text-xs text-slate-600 leading-relaxed mb-4">
-              {activeModal === 'support'
-                ? 'For support, bug reports, or partnership inquiries, reach out to our official support Telegram @CreatLifafaSupport.'
-                : activeModal === 'referral'
-                ? `Share your referral link with friends: ${window.location.origin}/?ref=${user.id.substring(0, 8)}`
-                : 'All transactions on Lifafa are protected by 256-bit encryption, strict Row Level Security, and PostgreSQL transactional guarantees.'}
+      {/* Real Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
+      />
+
+      {/* Referral Share Modal */}
+      {showReferralModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-left space-y-4">
+            <h4 className="text-sm font-black text-slate-900">Invite Friends & Earn</h4>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Share your referral link to invite your community to claim Lifafas:
             </p>
+            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-mono font-medium text-blue-700 break-all select-all">
+              {`${window.location.origin}/?ref=${user.id.substring(0, 8)}`}
+            </div>
             <button
-              onClick={() => setActiveModal(null)}
-              className="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs"
+              onClick={() => {
+                navigator.clipboard.writeText(`${window.location.origin}/?ref=${user.id.substring(0, 8)}`);
+                alert('Referral link copied to clipboard!');
+              }}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md shadow-blue-500/25 cursor-pointer"
+            >
+              Copy Link
+            </button>
+            <button
+              onClick={() => setShowReferralModal(false)}
+              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs cursor-pointer"
             >
               Close
             </button>

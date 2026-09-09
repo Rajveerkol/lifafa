@@ -8,6 +8,10 @@ import { WalletPage } from './pages/WalletPage';
 import { BotsPage } from './pages/BotsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AdminPage } from './pages/AdminPage';
+import { AccountSecurityPage } from './pages/AccountSecurityPage';
+import { HelpSupportPage } from './pages/HelpSupportPage';
+import { TermsPage } from './pages/TermsPage';
+import { PrivacyPage } from './pages/PrivacyPage';
 
 import { AuthModal } from './components/auth/AuthModal';
 import { WithdrawModal } from './components/wallet/WithdrawModal';
@@ -25,7 +29,20 @@ export function App() {
 
   const getInitialTab = () => {
     const raw = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
-    if (['home', 'lifafa', 'bots', 'wallet', 'profile', 'admin'].includes(raw)) {
+    if (
+      [
+        'home',
+        'lifafa',
+        'bots',
+        'wallet',
+        'profile',
+        'admin',
+        'account-security',
+        'help-support',
+        'terms',
+        'privacy',
+      ].includes(raw)
+    ) {
       return raw;
     }
     return 'home';
@@ -44,11 +61,38 @@ export function App() {
   const [selectedClaimLifafa, setSelectedClaimLifafa] = useState<Lifafa | null>(null);
   const [selectedShareLifafa, setSelectedShareLifafa] = useState<Lifafa | null>(null);
 
+  const clearClaimQueryParam = () => {
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has('claim')) {
+        url.searchParams.delete('claim');
+        const cleanUrl = url.pathname + (url.search ? url.search : '') + url.hash;
+        window.history.replaceState({}, '', cleanUrl);
+      }
+    } catch {}
+  };
+
   // Sync URL history on browser popstate (back/forward)
   useEffect(() => {
     const handlePopState = () => {
+      setSelectedClaimLifafa(null);
+      setSelectedShareLifafa(null);
+      clearClaimQueryParam();
       const raw = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
-      if (['home', 'lifafa', 'bots', 'wallet', 'profile', 'admin'].includes(raw)) {
+      if (
+        [
+          'home',
+          'lifafa',
+          'bots',
+          'wallet',
+          'profile',
+          'admin',
+          'account-security',
+          'help-support',
+          'terms',
+          'privacy',
+        ].includes(raw)
+      ) {
         setCurrentTab(raw);
       } else {
         setCurrentTab('home');
@@ -72,6 +116,11 @@ export function App() {
   }, []);
 
   const handleTabChange = (tab: string, extra?: any) => {
+    // Dismiss claim/share modal and clear claim query param so navigation is never trapped
+    setSelectedClaimLifafa(null);
+    setSelectedShareLifafa(null);
+    clearClaimQueryParam();
+
     if (tab === 'lifafa' && extra?.action === 'create') {
       setIsCreatingLifafa(true);
       setCurrentTab('lifafa');
@@ -82,6 +131,11 @@ export function App() {
     setCurrentTab(tab);
     window.history.pushState({}, '', tab === 'home' ? '/' : `/${tab}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCloseClaimModal = () => {
+    setSelectedClaimLifafa(null);
+    clearClaimQueryParam();
   };
 
   const handleClaimLifafa = (lifafa: Lifafa) => {
@@ -161,6 +215,25 @@ export function App() {
         )}
 
         {currentTab === 'admin' && <AdminPage />}
+
+        {currentTab === 'account-security' && (
+          <AccountSecurityPage onBack={() => handleTabChange('profile')} />
+        )}
+
+        {currentTab === 'help-support' && (
+          <HelpSupportPage
+            onBack={() => handleTabChange('profile')}
+            onNavigate={handleTabChange}
+          />
+        )}
+
+        {currentTab === 'terms' && (
+          <TermsPage onBack={() => handleTabChange('profile')} />
+        )}
+
+        {currentTab === 'privacy' && (
+          <PrivacyPage onBack={() => handleTabChange('profile')} />
+        )}
       </main>
 
       {/* Mobile Bottom Navigation (Home, Lifafa, Bots, Wallet, Profile) */}
@@ -187,7 +260,7 @@ export function App() {
       <ClaimModal
         lifafa={selectedClaimLifafa}
         isOpen={Boolean(selectedClaimLifafa)}
-        onClose={() => setSelectedClaimLifafa(null)}
+        onClose={handleCloseClaimModal}
         onOpenShare={handleShareLifafa}
         onOpenAuth={() => setAuthModalOpen(true)}
       />

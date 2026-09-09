@@ -28,7 +28,7 @@ const DEV_DEMO_PROFILE: Profile = {
   full_name: 'Demo Account',
   email: 'demoaccount@gmail.com',
   avatar_url: null,
-  phone_number: '+91 9876543210',
+  phone_number: null,
   is_suspended: false,
   created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
   updated_at: new Date().toISOString(),
@@ -62,8 +62,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [sessionEmail, setSessionEmail] = useState<string | null>(null);
 
-  // Development mode flag: strictly false in production
-  const isDevMode = import.meta.env.DEV && (!isSupabaseConfigured || import.meta.env.VITE_ALLOW_DEV_SIMULATOR === 'true');
+  // Development mode flag: strictly false in production build
+  const isDevMode = Boolean(import.meta.env.DEV);
 
   const OWNER_EMAILS = ['kolrajveer33@gmail.com', 'jayakol796@gmail.com'];
   const isOwnerEmail = (email?: string | null) => {
@@ -168,14 +168,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   useEffect(() => {
+    // In dev mode, check if demo is preferred
+    if (isDevMode && localStorage.getItem('lifafa_dev_demo') === 'active') {
+      setUser(DEV_DEMO_PROFILE);
+      setWallet(DEV_DEMO_WALLET);
+      setAdminUser(DEV_DEMO_ADMIN);
+      setIsDevDemoActive(true);
+      setIsLoading(false);
+      return;
+    }
+
     if (!isSupabaseConfigured || !supabase) {
-      // In dev mode without keys, check if demo is preferred
-      if (isDevMode && localStorage.getItem('lifafa_dev_demo') === 'active') {
-        setUser(DEV_DEMO_PROFILE);
-        setWallet(DEV_DEMO_WALLET);
-        setAdminUser(DEV_DEMO_ADMIN);
-        setIsDevDemoActive(true);
-      }
       setIsLoading(false);
       return;
     }

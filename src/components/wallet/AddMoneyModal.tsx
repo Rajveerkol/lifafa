@@ -21,6 +21,7 @@ import {
   walletService,
   type PlatformPaymentSettings,
   DEFAULT_PAYMENT_SETTINGS,
+  PAYMENT_SETTINGS_STORAGE_KEY,
 } from '../../services/walletService';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import type { DepositRequest } from '../../types/database';
@@ -47,8 +48,23 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
   const [amount, setAmount] = useState<number>(100);
   const [customAmountInput, setCustomAmountInput] = useState<string>('100');
   const [utrNumber, setUtrNumber] = useState<string>('');
-  const [paymentSettings, setPaymentSettings] = useState<PlatformPaymentSettings>(DEFAULT_PAYMENT_SETTINGS);
-  const [depositUpiId, setDepositUpiId] = useState<string>('createlifafa@upi');
+  const [paymentSettings, setPaymentSettings] = useState<PlatformPaymentSettings>(() => {
+    try {
+      const stored = localStorage.getItem(PAYMENT_SETTINGS_STORAGE_KEY);
+      if (stored) return { ...DEFAULT_PAYMENT_SETTINGS, ...JSON.parse(stored) };
+    } catch {}
+    return DEFAULT_PAYMENT_SETTINGS;
+  });
+  const [depositUpiId, setDepositUpiId] = useState<string>(() => {
+    try {
+      const stored = localStorage.getItem(PAYMENT_SETTINGS_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.upiId) return parsed.upiId;
+      }
+    } catch {}
+    return DEFAULT_PAYMENT_SETTINGS.upiId;
+  });
 
   const [copiedUpi, setCopiedUpi] = useState(false);
   const [loading, setLoading] = useState(false);

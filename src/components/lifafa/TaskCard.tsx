@@ -51,6 +51,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   } | null>(null);
   const [isConnectingTg, setIsConnectingTg] = useState(false);
   const [awaitingBotStart, setAwaitingBotStart] = useState(false);
+  const [botDeepLink, setBotDeepLink] = useState<string | null>(null);
   const [isVerifyingMembership, setIsVerifyingMembership] = useState(false);
   const [verificationError, setVerificationError] = useState<string | null>(null);
 
@@ -132,6 +133,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   // Step 2: Connect Telegram via Bot deep link
   const handleConnectTelegram = async () => {
     if (!user) {
+      setVerificationError('Please sign in with Google to connect your Telegram account.');
       if (onOpenAuth) onOpenAuth();
       return;
     }
@@ -141,8 +143,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       setVerificationError(null);
       const nonce = await telegramService.generateBindingNonce();
       const deepLink = telegramService.getBindingDeepLink(nonce);
-      window.open(deepLink, '_blank', 'noopener,noreferrer');
+      setBotDeepLink(deepLink);
       setAwaitingBotStart(true);
+
+      // Attempt to open deep link in new tab (fallback direct button rendered in UI if popup is blocked)
+      try {
+        window.open(deepLink, '_blank', 'noopener,noreferrer');
+      } catch (openErr) {
+        console.warn('Popup blocked, fallback direct link available in UI:', openErr);
+      }
     } catch (err: any) {
       setVerificationError(err.message || 'Failed to initiate Telegram connection');
     } finally {
@@ -416,6 +425,25 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             Connect Telegram so we can securely verify that you joined this channel.
           </p>
 
+          {/* Error display in Step 2 */}
+          {verificationError && !tgBinding?.isBound && (
+            <div className="ml-7 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2 text-xs text-red-700 animate-in fade-in">
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+              <div className="flex-1 space-y-1.5">
+                <p>{verificationError}</p>
+                {!user && onOpenAuth && (
+                  <button
+                    type="button"
+                    onClick={onOpenAuth}
+                    className="bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] px-2.5 py-1 rounded-lg cursor-pointer transition-colors"
+                  >
+                    Sign In Now
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {tgBinding?.isBound ? (
             <div className="ml-7 p-2.5 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-2 text-xs text-emerald-800 font-semibold">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -427,18 +455,30 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           ) : (
             <div className="ml-7 space-y-2">
               {awaitingBotStart ? (
-                <div className="p-3 bg-sky-50 border border-sky-200 rounded-xl space-y-2.5">
+                <div className="p-3 bg-sky-50 border border-sky-200 rounded-xl space-y-2.5 animate-in fade-in">
                   <div className="flex items-center gap-2 text-xs font-semibold text-sky-900">
                     <Loader2 className="w-4 h-4 animate-spin text-sky-600 shrink-0" />
                     <span>Waiting for bot connection... Tap START in Telegram</span>
                   </div>
                   <p className="text-[10px] text-sky-700">
-                    We will automatically detect your connection, or tap below to check right away:
+                    Tap below if the bot didn't open automatically, then tap START:
                   </p>
+                  {botDeepLink && (
+                    <a
+                      href={botDeepLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full bg-sky-500 hover:bg-sky-600 active:scale-98 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer"
+                    >
+                      <Send className="w-3.5 h-3.5 -rotate-12" />
+                      <span>Open @{telegramService.BOT_USERNAME}</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  )}
                   <button
                     type="button"
                     onClick={() => checkBindingStatus(false)}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-colors"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-all"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
                     <span>Check Connection Status</span>

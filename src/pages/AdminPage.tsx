@@ -84,6 +84,7 @@ export const AdminPage: React.FC = () => {
   // Search & Filters
   const [searchUser, setSearchUser] = useState('');
   const [searchLifafa, setSearchLifafa] = useState('');
+  const [adminNavFilter, setAdminNavFilter] = useState<'ALL' | 'FINANCE' | 'COMMUNITY' | 'SYSTEM'>('ALL');
 
   // Notification Dispatch Form State
   const [notifTitle, setNotifTitle] = useState('');
@@ -427,49 +428,101 @@ export const AdminPage: React.FC = () => {
       </div>
 
       {/* Navigation Sub-Tabs (All 13 Admin Sections) */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 bg-white p-2 rounded-2xl border border-slate-100 shadow-2xs scrollbar-none">
-        {[
-          { id: 'dashboard', label: 'Dashboard', icon: Shield },
-          { id: 'deposits', label: 'Deposits', icon: ArrowDownToLine, badge: depositsList.filter((d) => d.status === 'PENDING').length },
-          { id: 'users', label: 'Users', icon: Users },
-          { id: 'wallets', label: 'Wallets', icon: Wallet },
-          { id: 'transactions', label: 'Ledger Transactions', icon: Clock },
-          { id: 'lifafas', label: 'Lifafas', icon: Gift },
-          { id: 'withdrawals', label: 'Withdrawals', icon: ArrowDownToLine },
-          { id: 'telegram', label: 'Telegram Tasks', icon: Send },
-          { id: 'fraud', label: 'Fraud & Risk', icon: AlertTriangle },
-          { id: 'notifications', label: 'Notifications', icon: Bell },
-          { id: 'fees', label: 'Platform Fees', icon: DollarSign },
-          { id: 'audit', label: 'Audit Logs', icon: FileText },
-          { id: 'settings', label: 'Settings', icon: Settings },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = section === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setSection(tab.id as AdminSection)}
-              className={`flex items-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                isActive
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{tab.label}</span>
-              {tab.badge && tab.badge > 0 ? (
-                <span
-                  className={`px-1.5 py-0.5 text-[10px] rounded-full font-black ${
-                    isActive ? 'bg-white text-blue-700' : 'bg-amber-500 text-white'
+      {(() => {
+        const pendingDepositsCount = depositsList.filter((d) => d.status === 'PENDING').length;
+        const pendingWithdrawalsCount = withdrawalsList.filter((w) => w.status === 'PENDING').length;
+        const openFraudCount = fraudFlags.filter((f) => !f.is_resolved).length;
+
+        const adminTabs: Array<{
+          id: AdminSection;
+          label: string;
+          icon: any;
+          category: 'FINANCE' | 'COMMUNITY' | 'SYSTEM';
+          badge?: number;
+          badgeHighlight?: boolean;
+        }> = [
+          // Finance & Approvals
+          { id: 'deposits', label: 'Deposits', icon: ArrowDownToLine, category: 'FINANCE', badge: pendingDepositsCount, badgeHighlight: true },
+          { id: 'withdrawals', label: 'Withdrawals', icon: ArrowDownToLine, category: 'FINANCE', badge: pendingWithdrawalsCount },
+          { id: 'wallets', label: 'Wallets', icon: Wallet, category: 'FINANCE' },
+          { id: 'transactions', label: 'Ledger Transactions', icon: Clock, category: 'FINANCE' },
+          // Users & Operations
+          { id: 'dashboard', label: 'Dashboard', icon: Shield, category: 'COMMUNITY' },
+          { id: 'users', label: 'Users', icon: Users, category: 'COMMUNITY' },
+          { id: 'lifafas', label: 'Lifafas', icon: Gift, category: 'COMMUNITY' },
+          { id: 'settings', label: 'Payment Settings', icon: Settings, category: 'COMMUNITY' },
+          // Security & System
+          { id: 'telegram', label: 'Telegram Tasks', icon: Send, category: 'SYSTEM' },
+          { id: 'fraud', label: 'Fraud & Risk', icon: AlertTriangle, category: 'SYSTEM', badge: openFraudCount },
+          { id: 'fees', label: 'Platform Fees', icon: DollarSign, category: 'SYSTEM' },
+          { id: 'notifications', label: 'Notifications', icon: Bell, category: 'SYSTEM' },
+          { id: 'audit', label: 'Audit Logs', icon: FileText, category: 'SYSTEM' },
+        ];
+
+        return (
+          <div className="bg-white p-3 sm:p-4 rounded-3xl border border-slate-100 shadow-2xs space-y-3">
+            {/* Category Switcher */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none border-b border-slate-100 pb-2.5">
+              {[
+                { id: 'ALL', label: 'All Sections (13)' },
+                { id: 'FINANCE', label: `Financial & Approvals (4)${pendingDepositsCount > 0 ? ` • ${pendingDepositsCount} pending` : ''}` },
+                { id: 'COMMUNITY', label: 'Users & Operations (4)' },
+                { id: 'SYSTEM', label: 'Security & System (5)' },
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setAdminNavFilter(cat.id as any)}
+                  className={`py-1.5 px-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                    adminNavFilter === cat.id
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/60'
                   }`}
                 >
-                  {tab.badge}
-                </span>
-              ) : null}
-            </button>
-          );
-        })}
-      </div>
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Responsive Section Buttons */}
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              {adminTabs
+                .filter((tab) => adminNavFilter === 'ALL' || tab.category === adminNavFilter)
+                .map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = section === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setSection(tab.id as AdminSection)}
+                      className={`flex items-center gap-2 py-2 px-3 sm:px-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        isActive
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                          : 'bg-slate-50 text-slate-700 border border-slate-200/80 hover:bg-slate-100'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5 shrink-0" />
+                      <span>{tab.label}</span>
+                      {tab.badge && tab.badge > 0 ? (
+                        <span
+                          className={`px-1.5 py-0.2 text-[10px] rounded-full font-black ${
+                            isActive
+                              ? 'bg-white text-blue-700'
+                              : tab.badgeHighlight
+                              ? 'bg-amber-500 text-white animate-pulse'
+                              : 'bg-slate-300 text-slate-800'
+                          }`}
+                        >
+                          {tab.badge}
+                        </span>
+                      ) : null}
+                    </button>
+                  );
+                })}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Section Content */}
       {loading ? (

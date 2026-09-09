@@ -22,7 +22,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onSelectTab })
       <div className="flex items-center justify-around">
         {items.map((item) => {
           const Icon = item.icon;
-          const isActive = currentTab === item.id;
+          const isActive =
+            currentTab === item.id ||
+            (item.id === 'profile' &&
+              ['account-security', 'help-support', 'terms', 'privacy'].includes(currentTab));
           return (
             <button
               key={item.id}
