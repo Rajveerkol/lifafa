@@ -189,6 +189,7 @@ export function App() {
         isOpen={Boolean(selectedClaimLifafa)}
         onClose={() => setSelectedClaimLifafa(null)}
         onOpenShare={handleShareLifafa}
+        onOpenAuth={() => setAuthModalOpen(true)}
       />
 
       <ShareModal

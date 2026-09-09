@@ -27,6 +27,7 @@ interface ClaimModalProps {
   onClose: () => void;
   onSuccessClaim?: () => void;
   onOpenShare?: (lifafa: Lifafa) => void;
+  onOpenAuth?: () => void;
 }
 
 export const ClaimModal: React.FC<ClaimModalProps> = ({
@@ -35,6 +36,7 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
   onClose,
   onSuccessClaim,
   onOpenShare,
+  onOpenAuth,
 }) => {
   const { user, refreshWallet } = useAuth();
   const [pinCode, setPinCode] = useState('');
@@ -240,38 +242,39 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
                     )}
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {tasks.map((task) => (
                       <TaskCard
                         key={task.id}
                         task={task}
                         isCompleted={completedTaskIds.has(task.id)}
                         onCompleted={handleTaskDone}
+                        onOpenAuth={onOpenAuth}
                       />
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Break Seal & Claim Cash Action Button */}
+              {/* Main Action: Claim Lifafa Button */}
               <button
                 onClick={handleClaim}
                 disabled={claiming || isExpired || !allRequiredDone}
-                className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/25 active:scale-98 transition-all text-sm flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/25 active:scale-98 transition-all text-sm flex items-center justify-center gap-2 cursor-pointer"
               >
                 {claiming ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Validating &amp; Crediting Wallet...</span>
+                    <span>Claiming Lifafa...</span>
                   </>
                 ) : isExpired ? (
                   <span>Lifafa Has Expired</span>
                 ) : !allRequiredDone ? (
-                  <span>Complete Verified Tasks to Claim</span>
+                  <span>Complete Required Tasks to Claim</span>
                 ) : (
                   <>
                     <Sparkles className="w-5 h-5 text-amber-300" />
-                    <span>Break Seal &amp; Claim Cash</span>
+                    <span>Claim Lifafa</span>
                   </>
                 )}
               </button>
