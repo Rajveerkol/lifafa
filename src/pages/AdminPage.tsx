@@ -35,12 +35,14 @@ import type {
   AdminAuditLog,
   FraudFlag,
   PlatformFee,
+  DepositRequest,
 } from '../types/database';
 import { formatCurrency, formatDate } from '../lib/utils';
 import { supabase } from '../lib/supabase';
 
 type AdminSection =
   | 'dashboard'
+  | 'deposits'
   | 'users'
   | 'wallets'
   | 'transactions'
@@ -90,10 +92,21 @@ export const AdminPage: React.FC = () => {
   const [withdrawalFeeVal, setWithdrawalFeeVal] = useState('0');
   const [savingFees, setSavingFees] = useState(false);
 
+  // Deposit Requests state
+  const [depositsList, setDepositsList] = useState<DepositRequest[]>([]);
+  const [depositStatusFilter, setDepositStatusFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('ALL');
+  const [depositUpiIdSetting, setDepositUpiIdSetting] = useState('createlifafa@upi');
+  const [newDepositUpiInput, setNewDepositUpiInput] = useState('createlifafa@upi');
+  const [savingUpiSetting, setSavingUpiSetting] = useState(false);
+  const [reviewingDepositId, setReviewingDepositId] = useState<string | null>(null);
+  const [rejectModalDeposit, setRejectModalDeposit] = useState<DepositRequest | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejectingLoading, setRejectingLoading] = useState(false);
+
   const loadData = async () => {
     setLoading(true);
     try {
-      const [m, u, l, w, f, a, tx] = await Promise.all([
+      const [m, u, l, w, f, a, tx, deps, upiSetting] = await Promise.all([
         adminService.getDashboardMetrics(),
         adminService.getUsers(),
         adminService.getAllLifafas(),
@@ -101,6 +114,8 @@ export const AdminPage: React.FC = () => {
         adminService.getFraudFlags(),
         adminService.getAuditLogs(),
         adminService.getAllTransactions(),
+        adminService.getDepositRequests(),
+        adminService.getPlatformSetting('DEPOSIT_UPI_ID'),
       ]);
       setMetrics(m);
       setUsersList(u);
@@ -109,10 +124,60 @@ export const AdminPage: React.FC = () => {
       setFraudFlags(f);
       setAuditLogs(a);
       setTransactionsList(tx);
+      setDepositsList(deps);
+      if (upiSetting) {
+        setDepositUpiIdSetting(upiSetting);
+        setNewDepositUpiInput(upiSetting);
+      }
     } catch (e) {
       console.error('Error loading admin data', e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleApproveDeposit = async (dep: DepositRequest) => {
+    if (!window.confirm(`Confirm APPROVE deposit of ₹${dep.amount} (UTR: ${dep.utr_number})? This will credit ₹${dep.amount} to user's wallet immediately.`)) {
+      return;
+    }
+    try {
+      setReviewingDepositId(dep.id);
+      await adminService.reviewDepositRequest(dep.id, 'APPROVE');
+      await loadData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to approve deposit');
+    } finally {
+      setReviewingDepositId(null);
+    }
+  };
+
+  const handleRejectDepositSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!rejectModalDeposit) return;
+    try {
+      setRejectingLoading(true);
+      await adminService.reviewDepositRequest(rejectModalDeposit.id, 'REJECT', rejectReason);
+      setRejectModalDeposit(null);
+      setRejectReason('');
+      await loadData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to reject deposit');
+    } finally {
+      setRejectingLoading(false);
+    }
+  };
+
+  const handleUpdateDepositUpi = async () => {
+    if (!newDepositUpiInput.trim()) return;
+    try {
+      setSavingUpiSetting(true);
+      await adminService.updatePlatformSetting('DEPOSIT_UPI_ID', newDepositUpiInput.trim(), 'Platform Deposit UPI ID');
+      setDepositUpiIdSetting(newDepositUpiInput.trim());
+      alert('Platform Deposit UPI ID updated successfully.');
+    } catch (err: any) {
+      alert(err.message || 'Failed to update setting');
+    } finally {
+      setSavingUpiSetting(false);
     }
   };
 
@@ -228,10 +293,11 @@ export const AdminPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Navigation Sub-Tabs (All 12 Admin Sections) */}
+      {/* Navigation Sub-Tabs (All 13 Admin Sections) */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 bg-white p-2 rounded-2xl border border-slate-100 shadow-2xs scrollbar-none">
         {[
           { id: 'dashboard', label: 'Dashboard', icon: Shield },
+          { id: 'deposits', label: 'Deposits', icon: ArrowDownToLine, badge: depositsList.filter((d) => d.status === 'PENDING').length },
           { id: 'users', label: 'Users', icon: Users },
           { id: 'wallets', label: 'Wallets', icon: Wallet },
           { id: 'transactions', label: 'Ledger Transactions', icon: Clock },
@@ -258,6 +324,15 @@ export const AdminPage: React.FC = () => {
             >
               <Icon className="w-3.5 h-3.5" />
               <span>{tab.label}</span>
+              {tab.badge && tab.badge > 0 ? (
+                <span
+                  className={`px-1.5 py-0.5 text-[10px] rounded-full font-black ${
+                    isActive ? 'bg-white text-blue-700' : 'bg-amber-500 text-white'
+                  }`}
+                >
+                  {tab.badge}
+                </span>
+              ) : null}
             </button>
           );
         })}
@@ -340,12 +415,192 @@ export const AdminPage: React.FC = () => {
 
             <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-2xs">
               <span className="text-[10px] text-slate-400 font-bold uppercase block">
+                Pending Deposits
+              </span>
+              <span className="text-xl font-black text-amber-600 mt-1 block">
+                {depositsList.filter((d) => d.status === 'PENDING').length}
+              </span>
+            </div>
+
+            <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-2xs">
+              <span className="text-[10px] text-slate-400 font-bold uppercase block">
                 Active Fraud Flags
               </span>
               <span className="text-xl font-black text-purple-600 mt-1 block">
                 {fraudFlags.filter((f) => !f.is_resolved).length}
               </span>
             </div>
+          </div>
+        </div>
+      ) : section === 'deposits' ? (
+        /* Deposits Review & Platform UPI Settings */
+        <div className="space-y-4">
+          {/* Header & UPI Setting Card */}
+          <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-2xs space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <Wallet className="w-4 h-4 text-blue-600" />
+                  <span>Platform Deposit UPI Configuration</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Users send payments to this UPI ID and submit their 12-digit UTR for manual review.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newDepositUpiInput}
+                  onChange={(e) => setNewDepositUpiInput(e.target.value)}
+                  placeholder="e.g. createlifafa@upi"
+                  className="px-3.5 py-2 text-xs font-mono font-bold bg-slate-50 border border-slate-200 rounded-xl w-48 sm:w-64 focus:outline-hidden focus:border-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={handleUpdateDepositUpi}
+                  disabled={savingUpiSetting || !newDepositUpiInput.trim() || newDepositUpiInput.trim() === depositUpiIdSetting}
+                  className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all shadow-xs shrink-0 cursor-pointer"
+                >
+                  {savingUpiSetting ? 'Saving...' : 'Update UPI ID'}
+                </button>
+              </div>
+            </div>
+
+            <div className="text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex items-center gap-2">
+              <span className="font-semibold text-slate-700">Active Live UPI ID:</span>
+              <span className="font-mono font-bold text-blue-700">{depositUpiIdSetting}</span>
+            </div>
+          </div>
+
+          {/* Status Filters & Counter */}
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 bg-white p-1 rounded-2xl border border-slate-100 shadow-2xs">
+              {(['ALL', 'PENDING', 'APPROVED', 'REJECTED'] as const).map((st) => {
+                const count = st === 'ALL' ? depositsList.length : depositsList.filter((d) => d.status === st).length;
+                return (
+                  <button
+                    key={st}
+                    type="button"
+                    onClick={() => setDepositStatusFilter(st)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      depositStatusFilter === st
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span>{st === 'ALL' ? 'All' : st}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                        depositStatusFilter === st
+                          ? 'bg-white/20 text-white'
+                          : st === 'PENDING' && count > 0
+                          ? 'bg-amber-100 text-amber-800 font-bold'
+                          : 'bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <span className="text-xs text-slate-500 font-medium">
+              Showing {depositsList.filter((d) => depositStatusFilter === 'ALL' || d.status === depositStatusFilter).length} requests
+            </span>
+          </div>
+
+          {/* Deposit Requests Table */}
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-2xs overflow-hidden divide-y divide-slate-100">
+            {depositsList.filter((d) => depositStatusFilter === 'ALL' || d.status === depositStatusFilter).length === 0 ? (
+              <div className="py-16 text-center text-xs text-slate-400">
+                No deposit requests matching the filter.
+              </div>
+            ) : (
+              depositsList
+                .filter((d) => depositStatusFilter === 'ALL' || d.status === depositStatusFilter)
+                .map((dep) => (
+                  <div key={dep.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-900 text-sm font-mono">
+                          {formatCurrency(dep.amount)}
+                        </span>
+                        <span
+                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                            dep.status === 'APPROVED'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : dep.status === 'REJECTED'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-amber-100 text-amber-800'
+                          }`}
+                        >
+                          {dep.status}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
+                        <span>
+                          User: <strong className="text-slate-900">{dep.profile?.full_name || dep.profile?.email || dep.user_id.substring(0, 8)}</strong>
+                        </span>
+                        <span>•</span>
+                        <span className="font-mono">
+                          UTR: <strong className="text-blue-700 select-all">{dep.utr_number}</strong>
+                        </span>
+                        <span>•</span>
+                        <span>
+                          Destination UPI: <code className="bg-slate-100 px-1.5 py-0.5 rounded text-[11px] font-mono">{dep.upi_id}</code>
+                        </span>
+                      </div>
+
+                      <div className="text-[10px] text-slate-400">
+                        Submitted: {formatDate(dep.created_at)}
+                        {dep.admin_notes && (
+                          <span className="ml-2 text-slate-600 font-medium">
+                            (Notes: {dep.admin_notes})
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    {dep.status === 'PENDING' ? (
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleApproveDeposit(dep)}
+                          disabled={reviewingDepositId === dep.id}
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                        >
+                          {reviewingDepositId === dep.id ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                          )}
+                          <span>Approve & Credit</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRejectModalDeposit(dep);
+                            setRejectReason('');
+                          }}
+                          disabled={reviewingDepositId === dep.id}
+                          className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition-all cursor-pointer"
+                        >
+                          <span>Reject</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="text-right text-xs text-slate-400 font-mono shrink-0">
+                        Processed: {dep.processed_at ? formatDate(dep.processed_at) : 'Done'}
+                      </div>
+                    )}
+                  </div>
+                ))
+            )}
           </div>
         </div>
       ) : section === 'users' || section === 'wallets' ? (
@@ -940,6 +1195,50 @@ export const AdminPage: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Reject Deposit Modal */}
+      {rejectModalDeposit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-100 space-y-4">
+            <h4 className="text-base font-bold text-slate-900">
+              Reject Deposit Request
+            </h4>
+            <p className="text-xs text-slate-600">
+              Are you sure you want to reject this deposit request of <strong>₹{rejectModalDeposit.amount}</strong> with UTR <strong className="font-mono">{rejectModalDeposit.utr_number}</strong>? No wallet funds will be added.
+            </p>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Rejection Reason (Shown to user)
+              </label>
+              <input
+                type="text"
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="e.g. UTR not found in bank statement, amount mismatch"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+              />
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setRejectModalDeposit(null)}
+                disabled={rejectingLoading}
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleRejectDepositSubmit}
+                disabled={rejectingLoading}
+                className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs cursor-pointer"
+              >
+                {rejectingLoading ? 'Rejecting...' : 'Confirm Reject'}
+              </button>
+            </div>
           </div>
         </div>
       )}

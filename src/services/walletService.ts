@@ -94,4 +94,67 @@ export const walletService = {
 
     return (data || []) as PlatformFee[];
   },
+
+  // Fetch current platform deposit UPI ID from settings
+  async getDepositUpiId(): Promise<string> {
+    const defaultUpiId = 'createlifafa@upi';
+    if (!isSupabaseConfigured || !supabase) {
+      return defaultUpiId;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('platform_settings')
+        .select('value')
+        .eq('key', 'DEPOSIT_UPI_ID')
+        .maybeSingle();
+
+      if (error || !data?.value) {
+        return defaultUpiId;
+      }
+
+      return data.value;
+    } catch {
+      return defaultUpiId;
+    }
+  },
+
+  // Submit manual UPI deposit request with authoritative server validation
+  async submitDepositRequest(amount: number, utrNumber: string) {
+    if (!isSupabaseConfigured || !supabase) {
+      throw new Error('Supabase database is not configured.');
+    }
+
+    const { data, error } = await supabase.rpc('submit_deposit_request_rpc', {
+      p_amount: amount,
+      p_utr_number: utrNumber.trim(),
+    });
+
+    if (error) {
+      throw new Error(error.message || 'Failed to submit deposit request.');
+    }
+
+    return data;
+  },
+
+  // Fetch current user's deposit request history
+  async getUserDeposits(userId: string) {
+    if (!isSupabaseConfigured || !supabase) {
+      return [];
+    }
+
+    const { data, error } = await supabase
+      .from('deposit_requests')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching deposit requests:', error);
+      return [];
+    }
+
+    return data || [];
+  },
 };
+

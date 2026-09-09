@@ -240,3 +240,27 @@ export interface FraudFlag {
   created_at: string;
   user_profile?: Profile;
 }
+
+export type DepositRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+export interface DepositRequest {
+  id: string;
+  user_id: string;
+  amount: number;
+  upi_id: string;
+  utr_number: string;
+  status: DepositRequestStatus;
+  admin_notes: string | null;
+  processed_by: string | null;
+  processed_at: string | null;
+  created_at: string;
+  updated_at: string;
+  profile?: Profile;
+}
+
+export interface PlatformSetting {
+  key: string;
+  value: string;
+  description: string | null;
+  updated_at: string;
+}

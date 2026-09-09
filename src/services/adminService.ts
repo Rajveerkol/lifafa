@@ -9,6 +9,7 @@ import type {
   PlatformFee,
   TransactionType,
   WithdrawalStatus,
+  DepositRequest,
 } from '../types/database';
 
 export interface AdminMetrics {
@@ -356,5 +357,89 @@ export const adminService = {
         if (error) throw new Error(error.message || 'Failed to broadcast notification');
       }
     }
+  },
+
+  // Fetch deposit requests for admin review
+  async getDepositRequests(statusFilter?: string): Promise<DepositRequest[]> {
+    if (!isSupabaseConfigured || !supabase) return [];
+
+    let query = supabase
+      .from('deposit_requests')
+      .select('*, profile:profiles!deposit_requests_user_id_fkey(id, full_name, email, avatar_url)')
+      .order('created_at', { ascending: false });
+
+    if (statusFilter && statusFilter !== 'ALL') {
+      query = query.eq('status', statusFilter);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      // Fallback without foreign key join if relation cache is cold
+      const { data: fallbackData, error: fbError } = await supabase
+        .from('deposit_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (fbError) {
+        console.error('Error fetching deposit requests:', fbError);
+        return [];
+      }
+      return (fallbackData || []) as DepositRequest[];
+    }
+
+    return (data || []) as DepositRequest[];
+  },
+
+  // Review deposit request with idempotent server RPC
+  async reviewDepositRequest(depositId: string, action: 'APPROVE' | 'REJECT', notes?: string) {
+    if (!isSupabaseConfigured || !supabase) {
+      throw new Error('Supabase database is not configured.');
+    }
+
+    const { data, error } = await supabase.rpc('admin_review_deposit_rpc', {
+      p_deposit_id: depositId,
+      p_action: action,
+      p_notes: notes?.trim() || null,
+    });
+
+    if (error) {
+      throw new Error(error.message || `Failed to ${action.toLowerCase()} deposit request.`);
+    }
+
+    return data;
+  },
+
+  // Fetch setting value from platform_settings
+  async getPlatformSetting(key: string): Promise<string | null> {
+    if (!isSupabaseConfigured || !supabase) return null;
+
+    const { data, error } = await supabase
+      .from('platform_settings')
+      .select('value')
+      .eq('key', key)
+      .maybeSingle();
+
+    if (error || !data) return null;
+    return data.value;
+  },
+
+  // Update setting in platform_settings via admin RPC
+  async updatePlatformSetting(key: string, value: string, description?: string) {
+    if (!isSupabaseConfigured || !supabase) {
+      throw new Error('Supabase database is not configured.');
+    }
+
+    const { data, error } = await supabase.rpc('admin_update_platform_setting_rpc', {
+      p_key: key,
+      p_value: value.trim(),
+      p_description: description || null,
+    });
+
+    if (error) {
+      throw new Error(error.message || 'Failed to update platform setting.');
+    }
+
+    return data;
   },
 };

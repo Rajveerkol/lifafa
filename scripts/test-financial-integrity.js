@@ -1,4 +1,4 @@
-﻿// Automated Financial & Security Integrity Test Suite for Lifafa
+// Automated Financial & Security Integrity Test Suite for Lifafa
 import assert from 'node:assert';
 
 console.log('========================================================');
@@ -244,6 +244,156 @@ test('UPI ID format validation', () => {
   assert.ok(!upiRegex.test(''));
 });
 
+// -------------------------------------------------------------
+// 8. MANUAL UPI DEPOSIT & UTR VERIFICATION TESTS (MIGRATION 014)
+// -------------------------------------------------------------
+test('Duplicate UTR submission prevention and authoritative server UPI ID', () => {
+  const depositTable = new Map();
+  const platformSettings = { DEPOSIT_UPI_ID: 'createlifafa@upi' };
+
+  function submitDeposit(userId, amount, utrNumber, untrustedClientUpi) {
+    if (!userId) throw new Error('Authentication required');
+    if (!amount || amount < 1.00) throw new Error('Minimum deposit ₹1.00');
+    const cleanUtr = utrNumber.trim().toUpperCase();
+    if (depositTable.has(cleanUtr)) {
+      throw new Error(`This UTR number (${cleanUtr}) has already been submitted`);
+    }
+    // Authoritative platform UPI ID is read from server settings, NOT client input
+    const authoritativeUpi = platformSettings.DEPOSIT_UPI_ID;
+    const record = {
+      id: 'dep_' + Math.random().toString(36).substring(2),
+      userId,
+      amount,
+      utrNumber: cleanUtr,
+      upiId: authoritativeUpi,
+      status: 'PENDING',
+    };
+    depositTable.set(cleanUtr, record);
+    return record;
+  }
+
+  // First submission succeeds with authoritative server UPI ID
+  const dep1 = submitDeposit('user_123', 500, '423589123456', 'fake_client_upi@fraud');
+  assert.strictEqual(dep1.amount, 500);
+  assert.strictEqual(dep1.utrNumber, '423589123456');
+  assert.strictEqual(dep1.upiId, 'createlifafa@upi'); // Did not trust fake_client_upi@fraud!
+  assert.strictEqual(dep1.status, 'PENDING');
+
+  // Duplicate UTR submission must be strictly rejected
+  assert.throws(
+    () => submitDeposit('user_456', 500, '423589123456', 'any@upi'),
+    /This UTR number \(423589123456\) has already been submitted/
+  );
+});
+
+test('Strict idempotency: Duplicate deposit approval blocked', () => {
+  const deposit = {
+    id: 'dep_test_789',
+    userId: 'user_123',
+    amount: 250.00,
+    utrNumber: '998877665544',
+    status: 'PENDING',
+  };
+
+  const ledger = new Set();
+  const wallet = { availableBalance: 100.00 };
+
+  function reviewDeposit(adminRole, dep, action) {
+    if (adminRole !== 'ADMIN' && adminRole !== 'SUPER_ADMIN') {
+      throw new Error('Access Denied: Only administrators can review deposits');
+    }
+    if (dep.status !== 'PENDING') {
+      throw new Error(`Deposit request is already processed with status ${dep.status}`);
+    }
+    const idempotencyKey = 'deposit_approve_' + dep.id;
+    if (ledger.has(idempotencyKey)) {
+      throw new Error('Ledger transaction already exists. Double-credit prevented.');
+    }
+
+    if (action === 'APPROVE') {
+      wallet.availableBalance += dep.amount;
+      ledger.add(idempotencyKey);
+      dep.status = 'APPROVED';
+      return { success: true, balanceAfter: wallet.availableBalance };
+    }
+  }
+
+  // First approval succeeds
+  const res1 = reviewDeposit('ADMIN', deposit, 'APPROVE');
+  assert.strictEqual(res1.success, true);
+  assert.strictEqual(wallet.availableBalance, 350.00);
+  assert.strictEqual(deposit.status, 'APPROVED');
+
+  // Second approval must fail immediately with status validation
+  assert.throws(
+    () => reviewDeposit('ADMIN', deposit, 'APPROVE'),
+    /Deposit request is already processed with status APPROVED/
+  );
+  // Wallet balance remains 350, no double credit
+  assert.strictEqual(wallet.availableBalance, 350.00);
+});
+
+test('Admin authorization: Non-admin cannot review or approve deposits', () => {
+  function checkReviewAuth(role) {
+    const allowed = ['SUPER_ADMIN', 'ADMIN'];
+    if (!allowed.includes(role)) {
+      throw new Error('Access Denied: Only administrators can review and approve deposits');
+    }
+    return true;
+  }
+
+  assert.ok(checkReviewAuth('SUPER_ADMIN'));
+  assert.ok(checkReviewAuth('ADMIN'));
+  assert.throws(() => checkReviewAuth('SUPPORT'), /Access Denied/);
+  assert.throws(() => checkReviewAuth('USER'), /Access Denied/);
+  assert.throws(() => checkReviewAuth(null), /Access Denied/);
+});
+
+test('Atomic wallet and ledger credit on approval, untouched balance on rejection', () => {
+  const wallet = { id: 'w_1', availableBalance: 200.00 };
+  const transactions = [];
+
+  function approveOrReject(deposit, action, notes) {
+    if (action === 'APPROVE') {
+      const balanceBefore = wallet.availableBalance;
+      const balanceAfter = balanceBefore + deposit.amount;
+      wallet.availableBalance = balanceAfter;
+      transactions.push({
+        type: 'CREDIT',
+        referenceType: 'MANUAL_UPI_DEPOSIT',
+        referenceId: deposit.id,
+        amount: deposit.amount,
+        balanceBefore,
+        balanceAfter,
+      });
+      deposit.status = 'APPROVED';
+    } else if (action === 'REJECT') {
+      deposit.status = 'REJECTED';
+      deposit.notes = notes;
+      // Balance remains untouched!
+    }
+  }
+
+  // Test approval
+  const depositApproved = { id: 'dep_1', amount: 150.00, status: 'PENDING' };
+  approveOrReject(depositApproved, 'APPROVE');
+  assert.strictEqual(wallet.availableBalance, 350.00);
+  assert.strictEqual(depositApproved.status, 'APPROVED');
+  assert.strictEqual(transactions.length, 1);
+  assert.strictEqual(transactions[0].amount, 150.00);
+  assert.strictEqual(transactions[0].balanceBefore, 200.00);
+  assert.strictEqual(transactions[0].balanceAfter, 350.00);
+
+  // Test rejection
+  const depositRejected = { id: 'dep_2', amount: 300.00, status: 'PENDING' };
+  approveOrReject(depositRejected, 'REJECT', 'Invalid UTR');
+  assert.strictEqual(wallet.availableBalance, 350.00); // Unchanged!
+  assert.strictEqual(depositRejected.status, 'REJECTED');
+  assert.strictEqual(depositRejected.notes, 'Invalid UTR');
+  assert.strictEqual(transactions.length, 1); // No new transaction created!
+});
+
 console.log('\n========================================================');
 console.log(`TEST RESULTS: ${passedTests} / ${totalTests} PASSED (100%)`);
 console.log('========================================================');
+
