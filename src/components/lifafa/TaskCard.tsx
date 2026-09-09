@@ -133,7 +133,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, isCompleted, onComplet
       if (status.isBound) {
         setAwaitingLink(false);
       } else {
-        setError('Telegram account not linked yet. Please tap START in @CreatLifafaBot and retry.');
+        setError('Telegram account not linked yet. Please tap START in @createlifafa_bot and retry.');
       }
     } catch (err: any) {
       setError(err.message || 'Could not verify link status');

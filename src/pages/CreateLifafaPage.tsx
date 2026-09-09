@@ -178,7 +178,7 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
       (t) => (t.task_type === 'TELEGRAM_JOIN' || t.task_type === 'TELEGRAM_BOT') && t.is_enabled && !t.is_channel_verified
     );
     if (unverifiedTg) {
-      setErrorMsg('All enabled Telegram channels must be verified by adding @CreatLifafaBot as administrator.');
+      setErrorMsg('All enabled Telegram channels must be verified by adding @createlifafa_bot as administrator.');
       return;
     }
 

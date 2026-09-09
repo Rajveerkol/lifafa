@@ -19,7 +19,7 @@ export interface TelegramMembershipResult {
 
 export const telegramService = {
   // Official Lifafa Bot handle for the user to add as admin
-  BOT_USERNAME: 'CreatLifafaBot',
+  BOT_USERNAME: 'createlifafa_bot',
 
   // Verify that a Telegram channel exists and the Lifafa bot is an administrator
   async verifyChannelAdmin(channelUsername: string): Promise<TelegramChannelVerificationResult> {

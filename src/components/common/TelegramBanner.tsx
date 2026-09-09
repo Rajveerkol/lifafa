@@ -60,12 +60,12 @@ export const TelegramBanner: React.FC = () => {
               Connect our Telegram notification bot to receive real-time alerts whenever you claim rewards, your Lifafas are redeemed, or payouts complete.
             </p>
             <div className="bg-slate-50 rounded-2xl p-3 text-xs text-slate-500 mb-5 text-left border border-slate-100">
-              <p className="font-semibold text-slate-700 mb-1">Bot Username: <span className="text-blue-600 font-mono">@CreatLifafaBot</span></p>
+              <p className="font-semibold text-slate-700 mb-1">Bot Username: <span className="text-blue-600 font-mono">@createlifafa_bot</span></p>
               <p>Type <code className="bg-white px-1.5 py-0.5 rounded text-blue-700 font-mono">/start</code> to bind your account.</p>
             </div>
             <div className="flex flex-col gap-2">
               <a
-                href="https://t.me/"
+                href="https://t.me/createlifafa_bot"
                 target="_blank"
                 rel="noreferrer"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-sm"

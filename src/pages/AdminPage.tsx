@@ -612,7 +612,7 @@ export const AdminPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-sm font-bold text-slate-900">Telegram Bot Integration Status</h4>
-              <p className="text-xs text-slate-500">Live Telegram verification bot: @CreatLifafaBot</p>
+              <p className="text-xs text-slate-500">Live Telegram verification bot: @createlifafa_bot</p>
             </div>
             <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5" /> Bot Service Online
@@ -622,7 +622,7 @@ export const AdminPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
               <span className="text-[10px] text-slate-400 font-bold uppercase block">Bot Username</span>
-              <span className="text-xs font-mono font-bold text-sky-700 mt-1 block">@CreatLifafaBot</span>
+              <span className="text-xs font-mono font-bold text-sky-700 mt-1 block">@createlifafa_bot</span>
             </div>
             <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
               <span className="text-[10px] text-slate-400 font-bold uppercase block">Edge Verification</span>
