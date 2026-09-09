@@ -36,23 +36,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
-        {/* Top curved gradient decorative header */}
-        <div className="h-16 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 relative flex items-center justify-end px-4">
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        {/* Subtle Brand Accent Stripe */}
+        <div className="h-1.5 w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500" />
 
-        <div className="px-6 pt-4 pb-6">
-          {/* Centered Logo */}
-          <div className="flex justify-center -mt-10 mb-4">
-            <div className="bg-white p-2 rounded-2xl shadow-md border border-slate-100">
-              <Logo size="md" showTagline />
-            </div>
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer z-10"
+          aria-label="Close"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        <div className="px-6 pt-6 pb-6">
+          {/* Centered Brand Logo (Clean, no overlap) */}
+          <div className="flex justify-center mb-4">
+            <Logo size="md" showTagline />
           </div>
 
           <div className="text-center mb-6">
