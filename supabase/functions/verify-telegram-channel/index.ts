@@ -59,9 +59,11 @@ serve(async (req: Request) => {
       return new Response(
         JSON.stringify({
           success: false,
+          verified: false,
+          channelExists: false,
           error: `Channel ${chatIdentifier} could not be found. Ensure it is public and username is spelled correctly.`,
         }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -74,25 +76,33 @@ serve(async (req: Request) => {
     );
     const memberData = await memberRes.json();
 
-    if (!memberData.ok || !['administrator', 'creator'].includes(memberData.result.status)) {
+    const isBotAdmin = memberData.ok && ['administrator', 'creator'].includes(memberData.result?.status);
+
+    if (!isBotAdmin) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: `Bot @${botUsername} is not an administrator of ${chatIdentifier}. Please add the bot to your channel and grant administrator privileges.`,
-          botUsername,
+          verified: false,
+          channelExists: true,
+          needsAdmin: true,
           channelTitle,
           channelId,
-          needsAdmin: true,
+          channelUsername: cleanUsername,
+          botUsername,
+          botStatus: memberData?.result?.status || 'none',
+          error: `Please add the bot as an administrator to this channel.`,
         }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Verification Success!
+    // Verification Success: Channel exists and Bot is confirmed Administrator / Creator
     return new Response(
       JSON.stringify({
         success: true,
         verified: true,
+        channelExists: true,
+        needsAdmin: false,
         channelUsername: cleanUsername,
         channelId,
         channelTitle,

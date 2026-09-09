@@ -8,6 +8,8 @@ export interface TelegramChannelVerificationResult {
   botUsername?: string;
   error?: string;
   needsAdmin?: boolean;
+  channelExists?: boolean;
+  botStatus?: string;
 }
 
 export interface TelegramMembershipResult {
@@ -40,7 +42,8 @@ export const telegramService = {
           verified: false,
           channelUsername: cleanUsername,
           botUsername: this.BOT_USERNAME,
-          error: `Bot @${this.BOT_USERNAME} is not an administrator of @${cleanUsername}. Please add the bot to your channel and grant administrator privileges.`,
+          channelExists: true,
+          error: `Please add the bot as an administrator to this channel.`,
           needsAdmin: true,
         };
       }
@@ -51,6 +54,8 @@ export const telegramService = {
         channelId: -100192837465,
         channelTitle: `${cleanUsername} (Verified Channel)`,
         botUsername: this.BOT_USERNAME,
+        channelExists: true,
+        needsAdmin: false,
       };
     }
 
@@ -60,30 +65,62 @@ export const telegramService = {
         body: { channelUsername: cleanUsername },
       });
 
+      let payload: any = data;
+
+      // Extract error response body from error.context if Edge Function returned non-2xx
+      if (error && typeof error === 'object' && 'context' in error && (error as any).context) {
+        try {
+          const errorBody = await ((error as any).context as Response).json();
+          if (errorBody && typeof errorBody === 'object') {
+            payload = errorBody;
+          }
+        } catch {}
+      }
+
+      if (payload) {
+        if (payload.verified && payload.success) {
+          return {
+            verified: true,
+            channelUsername: payload.channelUsername || cleanUsername,
+            channelId: payload.channelId,
+            channelTitle: payload.channelTitle || cleanUsername,
+            botUsername: payload.botUsername || this.BOT_USERNAME,
+            channelExists: true,
+            needsAdmin: false,
+            botStatus: payload.botStatus || 'administrator',
+          };
+        }
+
+        // Business failure: channel found but bot not admin, or channel not found
+        return {
+          verified: false,
+          channelUsername: payload.channelUsername || cleanUsername,
+          channelId: payload.channelId,
+          channelTitle: payload.channelTitle,
+          botUsername: payload.botUsername || this.BOT_USERNAME,
+          needsAdmin: Boolean(payload.needsAdmin),
+          channelExists: Boolean(payload.channelExists),
+          botStatus: payload.botStatus,
+          error:
+            payload.error ||
+            (payload.needsAdmin
+              ? `Please add the bot as an administrator to this channel.`
+              : 'Channel verification failed.'),
+        };
+      }
+
       if (error) {
         return {
           verified: false,
           channelUsername: cleanUsername,
-          error: error.message || 'Channel verification failed. Please ensure the bot is an admin.',
-        };
-      }
-
-      if (!data.success || !data.verified) {
-        return {
-          verified: false,
-          channelUsername: cleanUsername,
-          botUsername: data.botUsername || this.BOT_USERNAME,
-          error: data.error || 'Bot is not an administrator of this channel.',
-          needsAdmin: data.needsAdmin,
+          error: error.message || 'Channel verification failed. Please check network connection.',
         };
       }
 
       return {
-        verified: true,
-        channelUsername: data.channelUsername,
-        channelId: data.channelId,
-        channelTitle: data.channelTitle,
-        botUsername: data.botUsername,
+        verified: false,
+        channelUsername: cleanUsername,
+        error: 'Unable to verify channel. Please try again.',
       };
     } catch (err: any) {
       return {
@@ -125,6 +162,23 @@ export const telegramService = {
         },
       });
 
+      let payload: any = data;
+      if (error && typeof error === 'object' && 'context' in error && (error as any).context) {
+        try {
+          const errBody = await ((error as any).context as Response).json();
+          if (errBody) payload = errBody;
+        } catch {}
+      }
+
+      if (payload) {
+        return {
+          verified: Boolean(payload.verified),
+          memberStatus: payload.memberStatus,
+          message: payload.message,
+          error: payload.error,
+        };
+      }
+
       if (error) {
         return {
           verified: false,
@@ -133,10 +187,8 @@ export const telegramService = {
       }
 
       return {
-        verified: Boolean(data?.verified),
-        memberStatus: data?.memberStatus,
-        message: data?.message,
-        error: data?.error,
+        verified: false,
+        error: 'Failed to verify membership with Telegram Bot API.',
       };
     } catch (err: any) {
       return {
