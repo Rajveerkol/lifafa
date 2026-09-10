@@ -198,7 +198,7 @@ serve(async (req: Request) => {
     let payrupeeData: any = {};
 
     try {
-      payrupeeResponse = await fetch('https://payrupee.tech/v1/payouts', {
+      payrupeeResponse = await fetch('https://payrupee.tech/v1/payouts/', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${payrupeeSecret}`,
@@ -206,6 +206,7 @@ serve(async (req: Request) => {
         },
         body: JSON.stringify(payoutPayload),
         signal: controller.signal,
+        redirect: 'error',
       });
 
       clearTimeout(timeoutId);
