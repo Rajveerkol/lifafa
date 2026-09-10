@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   Gift,
@@ -48,21 +48,40 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
   const [claimResult, setClaimResult] = useState<{ amount: number; code: string } | null>(null);
   const [isEnvelopeOpened, setIsEnvelopeOpened] = useState(false);
 
-  useEffect(() => {
-    if (isOpen && lifafa) {
-      setPinCode('');
-      setErrorMsg(null);
-      setClaimResult(null);
-      setIsEnvelopeOpened(false);
+  const lifafaId = lifafa?.id;
+  const userId = user?.id;
 
-      // Load tasks
+  // Track the lifafa being viewed so returning from external apps/Telegram
+  // or window focus/auth token refreshes never reset an unsealed envelope.
+  const prevLifafaIdRef = useRef<string | null>(null);
+  const prevIsOpenRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (isOpen && lifafaId) {
+      if (!prevIsOpenRef.current || prevLifafaIdRef.current !== lifafaId) {
+        setPinCode('');
+        setErrorMsg(null);
+        setClaimResult(null);
+        setIsEnvelopeOpened(false);
+      }
+      prevIsOpenRef.current = true;
+      prevLifafaIdRef.current = lifafaId;
+    } else if (!isOpen) {
+      prevIsOpenRef.current = false;
+      prevLifafaIdRef.current = null;
+    }
+  }, [isOpen, lifafaId]);
+
+  // Load tasks and user task completions without resetting envelope unsealed state
+  useEffect(() => {
+    if (isOpen && lifafaId) {
       setLoadingTasks(true);
       lifafaService
-        .getLifafaTasks(lifafa.id)
+        .getLifafaTasks(lifafaId)
         .then((fetchedTasks) => {
           setTasks(fetchedTasks);
-          if (user) {
-            taskService.getUserTaskCompletions(lifafa.id, user.id).then((completions) => {
+          if (userId) {
+            taskService.getUserTaskCompletions(lifafaId, userId).then((completions) => {
               const verified = new Set(
                 completions.filter((c) => c.status === 'VERIFIED').map((c) => c.task_id)
               );
@@ -72,7 +91,7 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
         })
         .finally(() => setLoadingTasks(false));
     }
-  }, [isOpen, lifafa, user]);
+  }, [isOpen, lifafaId, userId]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

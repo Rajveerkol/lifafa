@@ -132,6 +132,88 @@ test('Claim Lifafa Button: strictly disabled until all required tasks are verifi
   assert.strictEqual(isClaimActive(), true, 'Should become active when t1 and t2 are verified');
 });
 
+// 6. Nonce format compliance with Telegram bot webhook regex
+test('Step 2 Nonce Format: Matches Migration 016 and bot webhook regex ^\\/start\\s+(bind_[a-f0-9]+)$', () => {
+  // Simulates 'bind_' || replace(gen_random_uuid()::text, '-', '')
+  const simulatedUuid = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+  const simulatedDbNonce = 'bind_' + simulatedUuid.replace(/-/g, '');
+  assert.strictEqual(simulatedDbNonce.length, 37); // 'bind_' (5) + 32 hex chars
+
+  const webhookStartCommand = `/start ${simulatedDbNonce}`;
+  const match = webhookStartCommand.match(/^\/start\s+(bind_[a-f0-9]+)$/i);
+  assert.ok(match, 'Webhook regex must match the nonce from Migration 016');
+  assert.strictEqual(match[1], simulatedDbNonce);
+});
+
+// 7. Channel URL and Username Normalization (with trailing slashes)
+test('Step 1 Channel Normalization: Handles @mishra4488, trailing slashes, and full URLs', () => {
+  const normalizeChannel = (input) => {
+    let clean = (input || '').trim();
+    clean = clean.replace(/\/+$/, '');
+    clean = clean.replace(/^https?:\/\/t\.me\//i, '');
+    clean = clean.replace(/^t\.me\//i, '');
+    clean = clean.replace(/^@/, '');
+    clean = clean.trim();
+    const url = clean ? `https://t.me/${clean}` : 'https://t.me';
+    return { clean, url };
+  };
+
+  const testCases = [
+    { input: '@mishra4488', expectedUser: 'mishra4488', expectedUrl: 'https://t.me/mishra4488' },
+    { input: 'mishra4488/', expectedUser: 'mishra4488', expectedUrl: 'https://t.me/mishra4488' },
+    { input: 'https://t.me/mishra4488/', expectedUser: 'mishra4488', expectedUrl: 'https://t.me/mishra4488' },
+    { input: 't.me/mishra4488', expectedUser: 'mishra4488', expectedUrl: 'https://t.me/mishra4488' },
+    { input: '  @mishra4488   ', expectedUser: 'mishra4488', expectedUrl: 'https://t.me/mishra4488' },
+  ];
+
+  for (const tc of testCases) {
+    const res = normalizeChannel(tc.input);
+    assert.strictEqual(res.clean, tc.expectedUser);
+    assert.strictEqual(res.url, tc.expectedUrl);
+  }
+});
+
+// 8. URL Claim Query Parameter Sanitization
+test('Navigation Trap Protection: Cleans claim query parameter without page reload', () => {
+  const currentHref = 'https://paleturquoise-crocodile-131192.hostingersite.com/?claim=LF-WPQEDM';
+  const url = new URL(currentHref);
+  assert.strictEqual(url.searchParams.get('claim'), 'LF-WPQEDM');
+
+  url.searchParams.delete('claim');
+  const cleanUrl = url.pathname + (url.search ? url.search : '') + url.hash;
+  assert.strictEqual(cleanUrl, '/');
+  assert.ok(!cleanUrl.includes('claim'));
+});
+
+// 9. Envelope State Isolation on Refocus / Auth Changes
+test('Envelope Persistence: Unsealed state persists across user/auth state re-renders', () => {
+  let isEnvelopeOpened = false;
+  let prevLifafaId = null;
+  let prevIsOpen = false;
+
+  const onLifafaModalMount = (isOpen, lifafaId) => {
+    if (isOpen && lifafaId) {
+      if (!prevIsOpen || prevLifafaId !== lifafaId) {
+        isEnvelopeOpened = false;
+      }
+      prevIsOpen = true;
+      prevLifafaId = lifafaId;
+    }
+  };
+
+  // Open modal for LF-WPQEDM
+  onLifafaModalMount(true, 'lifafa-123');
+  assert.strictEqual(isEnvelopeOpened, false, 'Starts sealed');
+
+  // User unseals envelope
+  isEnvelopeOpened = true;
+  assert.strictEqual(isEnvelopeOpened, true, 'Unsealed by user');
+
+  // Auth refresh or window focus fires with same lifafa
+  onLifafaModalMount(true, 'lifafa-123');
+  assert.strictEqual(isEnvelopeOpened, true, 'Must remain unsealed when user/focus refreshes');
+});
+
 console.log(`\nTEST RESULTS: ${passedTests} / ${totalTests} PASSED (${Math.round((passedTests/totalTests)*100)}%)`);
 if (passedTests !== totalTests) {
   process.exit(1);

@@ -107,6 +107,9 @@ export function App() {
     const params = new URLSearchParams(window.location.search);
     const claimCode = params.get('claim');
     if (claimCode) {
+      // Immediately sanitize URL bar so returning from Telegram, window focus,
+      // or tab navigation never traps or re-triggers the claim modal.
+      clearClaimQueryParam();
       lifafaService.getLifafaByCode(claimCode).then((found) => {
         if (found) {
           setSelectedClaimLifafa(found);

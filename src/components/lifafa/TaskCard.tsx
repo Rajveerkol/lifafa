@@ -58,16 +58,22 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   const pollIntervalRef = useRef<any>(null);
 
   // Channel username & URL normalization
-  const channelUsername = (
+  const rawTarget = (task.target_url || '').trim();
+  const cleanTarget = rawTarget.replace(/\/+$/, '');
+  const extractedUsername = (
     task.telegram_channel_username ||
-    task.target_url?.split('/').pop() ||
-    ''
+    cleanTarget.split('/').pop() ||
+    cleanTarget
   )
     .replace(/^@/, '')
     .trim();
 
-  const channelUrl = task.target_url?.startsWith('http')
-    ? task.target_url
+  const channelUsername = extractedUsername.startsWith('http') ? '' : extractedUsername;
+
+  const channelUrl = cleanTarget.startsWith('http')
+    ? cleanTarget
+    : cleanTarget.startsWith('t.me/')
+    ? `https://${cleanTarget}`
     : channelUsername
     ? `https://t.me/${channelUsername}`
     : 'https://t.me';
@@ -125,13 +131,19 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   }, [awaitingBotStart, user]);
 
   // Step 1: Open Telegram Channel
-  const handleJoinTelegram = () => {
+  const handleJoinTelegram = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     setHasJoined(true);
-    window.open(channelUrl, '_blank', 'noopener,noreferrer');
+    try {
+      window.open(channelUrl, '_blank', 'noopener,noreferrer');
+    } catch {
+      // Fallback handled by direct anchor href
+    }
   };
 
   // Step 2: Connect Telegram via Bot deep link
-  const handleConnectTelegram = async () => {
+  const handleConnectTelegram = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     if (!user) {
       setVerificationError('Please sign in with Google to connect your Telegram account.');
       if (onOpenAuth) onOpenAuth();
@@ -146,11 +158,21 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       setBotDeepLink(deepLink);
       setAwaitingBotStart(true);
 
-      // Attempt to open deep link in new tab (fallback direct button rendered in UI if popup is blocked)
+      // Attempt to trigger opening deep link in new tab or external app
       try {
-        window.open(deepLink, '_blank', 'noopener,noreferrer');
-      } catch (openErr) {
-        console.warn('Popup blocked, fallback direct link available in UI:', openErr);
+        const a = document.createElement('a');
+        a.href = deepLink;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } catch {
+        try {
+          window.open(deepLink, '_blank', 'noopener,noreferrer');
+        } catch (openErr) {
+          console.warn('Direct link open suppressed, fallback available in UI:', openErr);
+        }
       }
     } catch (err: any) {
       setVerificationError(err.message || 'Failed to initiate Telegram connection');
@@ -160,7 +182,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   };
 
   // Step 3: Verify Membership
-  const handleVerifyMembership = async () => {
+  const handleVerifyMembership = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     if (isCompleted || !user) {
       if (!user && onOpenAuth) onOpenAuth();
       return;
@@ -372,28 +395,35 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           </div>
 
           {!hasJoined && !tgBinding?.isBound ? (
-            <button
-              type="button"
-              onClick={handleJoinTelegram}
-              className="w-full bg-sky-500 hover:bg-sky-600 active:scale-98 text-white font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+            <a
+              href={channelUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                e.stopPropagation();
+                setHasJoined(true);
+              }}
+              className="w-full bg-sky-500 hover:bg-sky-600 active:scale-98 text-white font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer text-center no-underline"
             >
               <span>Join Telegram</span>
               <ExternalLink className="w-3.5 h-3.5" />
-            </button>
+            </a>
           ) : (
             <div className="flex items-center justify-between px-3 py-2 bg-emerald-50/60 border border-emerald-100 rounded-xl text-xs">
               <span className="text-emerald-800 font-semibold flex items-center gap-1.5">
                 <Check className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Channel opened</span>
               </span>
-              <button
-                type="button"
-                onClick={handleJoinTelegram}
+              <a
+                href={channelUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
                 className="text-[11px] text-sky-600 hover:text-sky-800 font-bold flex items-center gap-1 underline cursor-pointer"
               >
                 <span>Re-open</span>
                 <ExternalLink className="w-3 h-3" />
-              </button>
+              </a>
             </div>
           )}
         </div>
@@ -468,7 +498,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                       href={botDeepLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full bg-sky-500 hover:bg-sky-600 active:scale-98 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-full bg-sky-500 hover:bg-sky-600 active:scale-98 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer no-underline text-center"
                     >
                       <Send className="w-3.5 h-3.5 -rotate-12" />
                       <span>Open @{telegramService.BOT_USERNAME}</span>
@@ -477,7 +508,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                   )}
                   <button
                     type="button"
-                    onClick={() => checkBindingStatus(false)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      checkBindingStatus(false);
+                    }}
                     className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-all"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
@@ -542,7 +576,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                   <div className="flex flex-col sm:flex-row gap-2 pt-1">
                     <button
                       type="button"
-                      onClick={handleVerifyMembership}
+                      onClick={(e) => handleVerifyMembership(e)}
                       disabled={isVerifyingMembership}
                       className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs active:scale-98 transition-all cursor-pointer"
                     >
@@ -553,14 +587,16 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                       )}
                       <span>Try Again</span>
                     </button>
-                    <button
-                      type="button"
-                      onClick={handleJoinTelegram}
-                      className="bg-white hover:bg-slate-50 text-slate-700 font-bold py-2.5 px-3 rounded-xl border border-slate-200 text-xs flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                    <a
+                      href={channelUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="bg-white hover:bg-slate-50 text-slate-700 font-bold py-2.5 px-3 rounded-xl border border-slate-200 text-xs flex items-center justify-center gap-1 transition-colors cursor-pointer no-underline"
                     >
                       <span>Open Channel</span>
                       <ExternalLink className="w-3 h-3" />
-                    </button>
+                    </a>
                   </div>
                 </div>
               )}
@@ -568,7 +604,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               {!verificationError && (
                 <button
                   type="button"
-                  onClick={handleVerifyMembership}
+                  onClick={(e) => handleVerifyMembership(e)}
                   disabled={isVerifyingMembership}
                   className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 active:scale-98 text-white font-black py-3.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 transition-all cursor-pointer"
                 >
