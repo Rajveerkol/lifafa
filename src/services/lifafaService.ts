@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import type { Lifafa, LifafaTask, LifafaClaim, DistributionType } from '../types/database';
+import type { Lifafa, LifafaTask, LifafaClaim, DistributionType, PayoutMode } from '../types/database';
 
 export interface CreateLifafaParams {
   title: string;
@@ -8,6 +8,7 @@ export interface CreateLifafaParams {
   winnerCount: number;
   distributionType: DistributionType;
   expiresAt: string;
+  payoutMode?: PayoutMode;
   isPublic?: boolean;
   pinCode?: string;
   allowCancel?: boolean;
@@ -56,6 +57,7 @@ export const lifafaService = {
       p_max_claim_amount: params.maxClaimAmount || null,
       p_starts_at: params.startsAt || null,
       p_device_claim_limit: params.deviceClaimLimit ?? 1,
+      p_payout_mode: params.payoutMode || 'WALLET',
     });
 
     if (error) {
@@ -71,7 +73,13 @@ export const lifafaService = {
     pinCode?: string,
     deviceFingerprint?: string,
     ipAddress?: string,
-    idempotencyKey?: string
+    idempotencyKey?: string,
+    payoutDetails?: {
+      accountHolderName?: string;
+      bankAccountNumber?: string;
+      ifscCode?: string;
+      upiId?: string;
+    }
   ) {
     if (!isSupabaseConfigured || !supabase) {
       throw new Error('Supabase database is not configured.');
@@ -83,6 +91,10 @@ export const lifafaService = {
       p_device_fingerprint: deviceFingerprint || null,
       p_ip_address: ipAddress || null,
       p_idempotency_key: idempotencyKey || null,
+      p_account_holder_name: payoutDetails?.accountHolderName || null,
+      p_bank_account_number: payoutDetails?.bankAccountNumber || null,
+      p_ifsc_code: payoutDetails?.ifscCode || null,
+      p_upi_id: payoutDetails?.upiId || null,
     });
 
     if (error) {

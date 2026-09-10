@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { lifafaService } from '../services/lifafaService';
-import type { DistributionType, TaskType, Lifafa } from '../types/database';
+import type { DistributionType, TaskType, Lifafa, PayoutMode } from '../types/database';
 import { formatCurrency } from '../lib/utils';
 import { TelegramTaskBuilder, type VerifiedTelegramChannel } from '../components/lifafa/TelegramTaskBuilder';
 
@@ -41,6 +41,7 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
   const [totalAmount, setTotalAmount] = useState('');
   const [winnerCount, setWinnerCount] = useState('');
   const [distributionType, setDistributionType] = useState<DistributionType>('EQUAL');
+  const [payoutMode, setPayoutMode] = useState<PayoutMode>('WALLET');
 
   // Tasks Builder & Telegram Modal
   const [showTelegramBuilder, setShowTelegramBuilder] = useState(false);
@@ -193,6 +194,7 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
           totalAmount: numTotalAmount,
           winnerCount: numWinners,
           distributionType,
+          payoutMode,
           expiresAt: computeExpiryDate(),
           isPublic,
           pinCode: pinCode.trim() || undefined,
@@ -325,6 +327,56 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:outline-hidden focus:border-blue-500 focus:bg-white"
                 required
               />
+            </div>
+          </div>
+
+          {/* Reward Destination (Payout Mode) */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-2">
+              Reward Destination
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setPayoutMode('UPI_BANK')}
+                className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
+                  payoutMode === 'UPI_BANK'
+                    ? 'border-emerald-600 bg-emerald-50/70 shadow-xs ring-1 ring-emerald-600'
+                    : 'border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span className="text-xs font-bold text-slate-900">UPI / Bank</span>
+                  </div>
+                  {payoutMode === 'UPI_BANK' && <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
+                </div>
+                <p className="text-[11px] text-slate-500 leading-snug">
+                  Winners receive the reward through their bank/UPI payout details.
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPayoutMode('WALLET')}
+                className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
+                  payoutMode === 'WALLET'
+                    ? 'border-blue-600 bg-blue-50/70 shadow-xs ring-1 ring-blue-600'
+                    : 'border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                    <span className="text-xs font-bold text-slate-900">CreatLifafa Wallet</span>
+                  </div>
+                  {payoutMode === 'WALLET' && <CheckCircle2 className="w-4 h-4 text-blue-600" />}
+                </div>
+                <p className="text-[11px] text-slate-500 leading-snug">
+                  Winners receive the reward directly in their CreatLifafa wallet.
+                </p>
+              </button>
             </div>
           </div>
 

@@ -47,11 +47,21 @@ export const LifafaCard: React.FC<LifafaCardProps> = ({
                 PIN
               </span>
             )}
+
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+              lifafa.payout_mode === 'UPI_BANK'
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                : 'bg-slate-50 text-slate-600 border border-slate-200'
+            }`}>
+              {lifafa.payout_mode === 'UPI_BANK' ? '🏦 UPI/Bank' : '💼 Wallet'}
+            </span>
           </div>
 
           <span
             className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
-              canClaim
+              isCompleted
+                ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                : canClaim
                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                 : 'bg-slate-100 text-slate-500'
             }`}
@@ -136,7 +146,7 @@ export const LifafaCard: React.FC<LifafaCardProps> = ({
               : 'bg-slate-100 text-slate-400 cursor-not-allowed'
           }`}
         >
-          <span>{canClaim ? 'Claim Now' : isCompleted ? 'Fully Claimed' : 'Closed'}</span>
+          <span>{canClaim ? 'Claim Now' : isCompleted ? 'Completed' : 'Closed'}</span>
           {canClaim && <ArrowRight className="w-3.5 h-3.5" />}
         </button>
       </div>

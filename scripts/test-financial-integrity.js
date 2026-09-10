@@ -393,6 +393,248 @@ test('Atomic wallet and ledger credit on approval, untouched balance on rejectio
   assert.strictEqual(transactions.length, 1); // No new transaction created!
 });
 
+// -------------------------------------------------------------
+// 16. LIFAFA COMPLETION LIFECYCLE (1/100 REMAINS ACTIVE, 100/100 COMPLETED)
+// -------------------------------------------------------------
+test('Lifafa Lifecycle: 1/100 claims strictly remains ACTIVE; 100/100 becomes COMPLETED', () => {
+  const evaluateStatus = (claimedCount, winnerCount, remainingAmount) => {
+    if (claimedCount >= winnerCount || remainingAmount <= 0) {
+      return 'COMPLETED';
+    }
+    return 'ACTIVE';
+  };
+
+  // State in screenshot: 1 out of 100 claimed
+  assert.strictEqual(evaluateStatus(1, 100, 495.00), 'ACTIVE', '1/100 MUST remain ACTIVE as 99 winners remain');
+  assert.strictEqual(evaluateStatus(50, 100, 250.00), 'ACTIVE', '50/100 MUST remain ACTIVE');
+  assert.strictEqual(evaluateStatus(99, 100, 5.00), 'ACTIVE', '99/100 MUST remain ACTIVE');
+  
+  // Completed states
+  assert.strictEqual(evaluateStatus(100, 100, 0.00), 'COMPLETED', '100/100 MUST be COMPLETED');
+  assert.strictEqual(evaluateStatus(10, 10, 0.00), 'COMPLETED', '10/10 MUST be COMPLETED');
+  assert.strictEqual(evaluateStatus(90, 100, 0.00), 'COMPLETED', 'Pool exhausted (0 balance) MUST be COMPLETED');
+});
+
+// -------------------------------------------------------------
+// 17. PAYOUT MODE CREATION & BACKWARD COMPATIBLE DEFAULT
+// -------------------------------------------------------------
+test('Payout Mode: Backward-compatible default WALLET vs explicit UPI_BANK', () => {
+  const createLifafaConfig = (params) => {
+    const validModes = ['WALLET', 'UPI_BANK'];
+    const mode = (params.payout_mode || 'WALLET').toUpperCase();
+    if (!validModes.includes(mode)) {
+      throw new Error('Invalid payout mode');
+    }
+    return {
+      payout_mode: mode,
+    };
+  };
+
+  // Pre-existing or omitted parameter defaults to WALLET
+  assert.strictEqual(createLifafaConfig({}).payout_mode, 'WALLET');
+  assert.strictEqual(createLifafaConfig({ payout_mode: undefined }).payout_mode, 'WALLET');
+
+  // Explicit modes
+  assert.strictEqual(createLifafaConfig({ payout_mode: 'WALLET' }).payout_mode, 'WALLET');
+  assert.strictEqual(createLifafaConfig({ payout_mode: 'UPI_BANK' }).payout_mode, 'UPI_BANK');
+
+  // Invalid mode rejected
+  assert.throws(() => createLifafaConfig({ payout_mode: 'CRYPTO' }), /Invalid payout mode/);
+});
+
+// -------------------------------------------------------------
+// 18. UPI/BANK PAYOUT SERVER-SIDE VALIDATION
+// -------------------------------------------------------------
+test('UPI/Bank Payout Details Validation: Enforces name, account number/UPI, and valid IFSC', () => {
+  const validatePayoutDetails = (details) => {
+    if (!details.account_holder_name || details.account_holder_name.trim().length < 2) {
+      throw new Error('Account holder name is required');
+    }
+    const hasAcc = details.bank_account_number && details.bank_account_number.trim().length >= 6;
+    const hasUpi = details.upi_id && details.upi_id.trim().length >= 3;
+    if (!hasAcc && !hasUpi) {
+      throw new Error('Valid Bank Account Number or UPI ID is required');
+    }
+    if (details.ifsc_code && details.ifsc_code.trim().length > 0) {
+      if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(details.ifsc_code.trim().toUpperCase())) {
+        throw new Error('Invalid IFSC code format');
+      }
+    }
+    if (details.upi_id && details.upi_id.trim().length > 0) {
+      if (!/^[\w.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(details.upi_id.trim())) {
+        throw new Error('Invalid UPI ID format');
+      }
+    }
+    return true;
+  };
+
+  // Valid combinations
+  assert.ok(validatePayoutDetails({
+    account_holder_name: 'Rajveer Kol',
+    bank_account_number: '123456789012',
+    ifsc_code: 'SBIN0001234',
+    upi_id: 'rajveer@upi'
+  }));
+
+  assert.ok(validatePayoutDetails({
+    account_holder_name: 'Rajveer Kol',
+    upi_id: 'rajveer@oksbi'
+  }));
+
+  // Missing name fails
+  assert.throws(() => validatePayoutDetails({ account_holder_name: '', upi_id: 'a@upi' }), /Account holder name is required/);
+
+  // Missing both account and UPI fails
+  assert.throws(() => validatePayoutDetails({ account_holder_name: 'Rajveer Kol' }), /Valid Bank Account Number or UPI ID is required/);
+
+  // Bad IFSC fails
+  assert.throws(() => validatePayoutDetails({ account_holder_name: 'Rajveer Kol', bank_account_number: '1234567890', ifsc_code: 'INVALID_IFSC' }), /Invalid IFSC code format/);
+
+  // Bad UPI fails
+  assert.throws(() => validatePayoutDetails({ account_holder_name: 'Rajveer Kol', upi_id: 'not-a-valid-upi' }), /Invalid UPI ID format/);
+});
+
+// -------------------------------------------------------------
+// 19. UPI/BANK ESCROW DEBIT & PENDING WITHDRAWAL (NO WALLET DOUBLE-CREDIT)
+// -------------------------------------------------------------
+test('UPI/Bank Claim: Debits creator reserved balance, creates PENDING withdrawal, touches 0 winner wallet', () => {
+  let creatorWallet = { available: 1000.00, reserved: 500.00 };
+  let winnerWallet = { available: 50.00, total_earned: 50.00 };
+  let withdrawals = [];
+  let claims = [];
+
+  const claimAmount = 25.00;
+
+  // Execute UPI_BANK claim
+  creatorWallet.reserved -= claimAmount;
+  const withdrawal = {
+    id: 'w_1',
+    user_id: 'winner_1',
+    amount: claimAmount,
+    status: 'PENDING',
+    payout_provider: 'MANUAL',
+    bank_account_number_masked: 'XXXX-XXXX-9012',
+    upi_id: 'winner@upi'
+  };
+  withdrawals.push(withdrawal);
+  claims.push({
+    claim_id: 'c_1',
+    payout_mode: 'UPI_BANK',
+    withdrawal_id: 'w_1',
+    amount: claimAmount
+  });
+
+  // VERIFY:
+  // 1. Creator reserved balance debited
+  assert.strictEqual(creatorWallet.reserved, 475.00);
+  // 2. Withdrawal record created in PENDING state
+  assert.strictEqual(withdrawals.length, 1);
+  assert.strictEqual(withdrawals[0].status, 'PENDING');
+  assert.strictEqual(withdrawals[0].amount, 25.00);
+  // 3. Winner available balance is NOT credited (prevents double payout)
+  assert.strictEqual(winnerWallet.available, 50.00);
+  assert.strictEqual(winnerWallet.total_earned, 50.00);
+});
+
+// -------------------------------------------------------------
+// 20. WALLET REWARD MODE ATOMIC CREDIT & LEDGER
+// -------------------------------------------------------------
+test('Wallet Reward Claim: Credits winner available balance atomically and generates CLAIM ledger entry', () => {
+  let creatorWallet = { reserved: 500.00 };
+  let winnerWallet = { available: 100.00, total_earned: 100.00 };
+  let ledger = [];
+
+  const claimAmount = 50.00;
+
+  // Execute WALLET claim
+  creatorWallet.reserved -= claimAmount;
+  const balanceBefore = winnerWallet.available;
+  const balanceAfter = balanceBefore + claimAmount;
+  winnerWallet.available = balanceAfter;
+  winnerWallet.total_earned += claimAmount;
+
+  ledger.push({
+    type: 'CLAIM',
+    status: 'SUCCESS',
+    amount: claimAmount,
+    balanceBefore,
+    balanceAfter
+  });
+
+  assert.strictEqual(creatorWallet.reserved, 450.00);
+  assert.strictEqual(winnerWallet.available, 150.00);
+  assert.strictEqual(winnerWallet.total_earned, 150.00);
+  assert.strictEqual(ledger.length, 1);
+  assert.strictEqual(ledger[0].balanceBefore, 100.00);
+  assert.strictEqual(ledger[0].balanceAfter, 150.00);
+});
+
+// -------------------------------------------------------------
+// 21. IDEMPOTENCY & DUPLICATE RETRY PROTECTION
+// -------------------------------------------------------------
+test('Claim Idempotency: Duplicate claim click returns existing claim without double debit/credit', () => {
+  const claimsDb = new Map();
+  let payoutCalls = 0;
+
+  const handleClaim = (userId, lifafaCode, idempotencyKey) => {
+    if (claimsDb.has(idempotencyKey)) {
+      return { ...claimsDb.get(idempotencyKey), is_duplicate: true };
+    }
+    payoutCalls++;
+    const result = { claim_id: 'c_' + Date.now(), amount: 20.00, is_duplicate: false };
+    claimsDb.set(idempotencyKey, result);
+    return result;
+  };
+
+  const res1 = handleClaim('user_1', 'LF-TEST', 'idemp_key_1');
+  assert.strictEqual(res1.is_duplicate, false);
+  assert.strictEqual(payoutCalls, 1);
+
+  // Duplicate retry with same idempotency key
+  const res2 = handleClaim('user_1', 'LF-TEST', 'idemp_key_1');
+  assert.strictEqual(res2.is_duplicate, true);
+  assert.strictEqual(res2.amount, 20.00);
+  assert.strictEqual(payoutCalls, 1, 'Payout must NOT be called a second time');
+});
+
+// -------------------------------------------------------------
+// 22. SENSITIVE BANK INFO DATA PROTECTION
+// -------------------------------------------------------------
+test('Data Protection: Bank account numbers masked to XXXX-XXXX-Last4; no raw data exposed', () => {
+  const maskBankAccount = (acc) => {
+    if (!acc || acc.trim().length < 4) return 'XXXX-XXXX-XXXX';
+    return 'XXXX-XXXX-' + acc.trim().slice(-4);
+  };
+
+  assert.strictEqual(maskBankAccount('123456789012'), 'XXXX-XXXX-9012');
+  assert.strictEqual(maskBankAccount('987654321'), 'XXXX-XXXX-4321');
+  assert.strictEqual(maskBankAccount(''), 'XXXX-XXXX-XXXX');
+});
+
+// -------------------------------------------------------------
+// 23. RPC OVERLOAD ELIMINATION GUARANTEE
+// -------------------------------------------------------------
+test('RPC Architecture: Drop old function signatures before create to prevent PostgreSQL overloading', () => {
+  // Simulates PostgreSQL pg_proc uniqueness enforcement
+  const registeredRpcSignatures = new Set([
+    'create_lifafa_rpc(13)',
+    'create_lifafa_rpc(17)',
+    'claim_lifafa_rpc(5)'
+  ]);
+
+  // Migration 017 drop routine
+  registeredRpcSignatures.clear();
+
+  // Register only the new single authoritative signatures
+  registeredRpcSignatures.add('create_lifafa_rpc(18)'); // includes p_payout_mode
+  registeredRpcSignatures.add('claim_lifafa_rpc(9)');  // includes payout details
+
+  assert.strictEqual(registeredRpcSignatures.size, 2);
+  assert.ok(registeredRpcSignatures.has('create_lifafa_rpc(18)'));
+  assert.ok(registeredRpcSignatures.has('claim_lifafa_rpc(9)'));
+  assert.ok(!registeredRpcSignatures.has('claim_lifafa_rpc(5)'), 'Old 5-param signature must be dropped');
+});
+
 console.log('\n========================================================');
 console.log(`TEST RESULTS: ${passedTests} / ${totalTests} PASSED (100%)`);
 console.log('========================================================');

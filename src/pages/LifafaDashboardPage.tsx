@@ -23,7 +23,7 @@ interface LifafaDashboardPageProps {
   onShareClick: (lifafa: Lifafa) => void;
 }
 
-type TabType = 'all' | 'active' | 'created' | 'claimed' | 'expired';
+type TabType = 'all' | 'active' | 'completed' | 'created' | 'claimed' | 'expired';
 
 export const LifafaDashboardPage: React.FC<LifafaDashboardPageProps> = ({
   onCreateClick,
@@ -89,7 +89,13 @@ export const LifafaDashboardPage: React.FC<LifafaDashboardPageProps> = ({
     } else if (currentTab === 'claimed') {
       return []; // Rendered specially below
     } else if (currentTab === 'active') {
-      list = lifafas.filter((l) => l.status === 'ACTIVE' && new Date(l.expires_at) > new Date());
+      list = lifafas.filter(
+        (l) => l.status === 'ACTIVE' && new Date(l.expires_at) > new Date() && l.claimed_count < l.winner_count && l.remaining_amount > 0
+      );
+    } else if (currentTab === 'completed') {
+      list = lifafas.filter(
+        (l) => l.status === 'COMPLETED' || l.claimed_count >= l.winner_count || l.remaining_amount <= 0
+      );
     } else if (currentTab === 'expired') {
       list = lifafas.filter((l) => l.status === 'EXPIRED' || new Date(l.expires_at) <= new Date());
     } else {
@@ -139,7 +145,7 @@ export const LifafaDashboardPage: React.FC<LifafaDashboardPageProps> = ({
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           {/* Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 scrollbar-none">
-            {(['all', 'active', 'created', 'claimed', 'expired'] as const).map((tab) => (
+            {(['all', 'active', 'completed', 'created', 'claimed', 'expired'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setCurrentTab(tab)}

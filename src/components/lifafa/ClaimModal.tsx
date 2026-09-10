@@ -10,9 +10,10 @@ import {
   Share2,
   Loader2,
   ShieldCheck,
+  Landmark,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import type { Lifafa, LifafaTask } from '../../types/database';
+import type { Lifafa, LifafaTask, PayoutMode } from '../../types/database';
 import { lifafaService } from '../../services/lifafaService';
 import { taskService } from '../../services/taskService';
 import { useAuth } from '../../context/AuthContext';
@@ -45,8 +46,14 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
   const [loadingTasks, setLoadingTasks] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [claimResult, setClaimResult] = useState<{ amount: number; code: string } | null>(null);
+  const [claimResult, setClaimResult] = useState<{ amount: number; code: string; payoutMode?: PayoutMode } | null>(null);
   const [isEnvelopeOpened, setIsEnvelopeOpened] = useState(false);
+
+  // UPI / Bank Payout Details State
+  const [accountHolderName, setAccountHolderName] = useState('');
+  const [bankAccountNumber, setBankAccountNumber] = useState('');
+  const [ifscCode, setIfscCode] = useState('');
+  const [upiId, setUpiId] = useState('');
 
   const lifafaId = lifafa?.id;
   const userId = user?.id;
@@ -63,6 +70,10 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
         setErrorMsg(null);
         setClaimResult(null);
         setIsEnvelopeOpened(false);
+        setAccountHolderName('');
+        setBankAccountNumber('');
+        setIfscCode('');
+        setUpiId('');
       }
       prevIsOpenRef.current = true;
       prevLifafaIdRef.current = lifafaId;
@@ -129,6 +140,29 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
       return;
     }
 
+    // Validate UPI / Bank details if Lifafa is in UPI_BANK mode
+    if (lifafa.payout_mode === 'UPI_BANK') {
+      if (!accountHolderName.trim() || accountHolderName.trim().length < 2) {
+        setErrorMsg('Please enter account holder name as per bank records.');
+        return;
+      }
+      if (
+        (!bankAccountNumber.trim() || bankAccountNumber.trim().length < 6) &&
+        (!upiId.trim() || upiId.trim().length < 3)
+      ) {
+        setErrorMsg('Please provide a valid Bank Account Number or UPI ID.');
+        return;
+      }
+      if (ifscCode.trim() && !/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/.test(ifscCode.trim())) {
+        setErrorMsg('Invalid IFSC code format (expected 11 alphanumeric characters e.g. SBIN0001234).');
+        return;
+      }
+      if (upiId.trim() && !/^[\w.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(upiId.trim())) {
+        setErrorMsg('Invalid UPI ID format (e.g. yourname@okhdfcbank).');
+        return;
+      }
+    }
+
     try {
       setClaiming(true);
       setErrorMsg(null);
@@ -142,7 +176,15 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
         pinCode.trim() || undefined,
         deviceFp,
         undefined,
-        idempotencyKey
+        idempotencyKey,
+        lifafa.payout_mode === 'UPI_BANK'
+          ? {
+              accountHolderName: accountHolderName.trim(),
+              bankAccountNumber: bankAccountNumber.trim() || undefined,
+              ifscCode: ifscCode.trim().toUpperCase() || undefined,
+              upiId: upiId.trim() || undefined,
+            }
+          : undefined
       );
 
       // Confetti celebration
@@ -156,6 +198,7 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
       setClaimResult({
         amount: res.amount,
         code: lifafa.code,
+        payoutMode: res.payout_mode || lifafa.payout_mode || 'WALLET',
       });
 
       await refreshWallet();
@@ -207,10 +250,28 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
           {claimResult ? (
             /* Celebration Action State */
             <div className="text-center space-y-3 pt-2">
-              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-800 font-bold flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Credited {formatCurrency(claimResult.amount)} directly to your Lifafa Wallet!</span>
-              </div>
+              {claimResult.payoutMode === 'UPI_BANK' ? (
+                <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-800 space-y-1.5 text-center">
+                  <div className="flex items-center justify-center gap-2 text-emerald-700">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                    <span className="text-sm font-black">Payout Initiated!</span>
+                  </div>
+                  <p className="text-[11px] text-emerald-800 font-semibold">
+                    {formatCurrency(claimResult.amount)} payout request submitted. Status:{' '}
+                    <span className="font-bold text-amber-700 bg-amber-100/70 px-1.5 py-0.5 rounded border border-amber-200">
+                      Pending Processing
+                    </span>
+                  </p>
+                  <p className="text-[10px] text-slate-500 font-normal">
+                    Your reward will be transferred directly to your bank/UPI account. You can track progress in your Wallet under Withdrawals.
+                  </p>
+                </div>
+              ) : (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-800 font-bold flex items-center justify-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Credited {formatCurrency(claimResult.amount)} directly to your CreatLifafa Wallet!</span>
+                </div>
+              )}
 
               <div className="space-y-2">
                 {onOpenShare && (
@@ -241,6 +302,29 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
                 <div className="p-3 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-2 text-xs text-red-700">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{errorMsg}</span>
+                </div>
+              )}
+
+              {/* Login required prompt if not authenticated */}
+              {!user && (
+                <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl space-y-2 text-xs text-amber-900">
+                  <div className="flex items-center gap-2 font-bold">
+                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>
+                      {lifafa.payout_mode === 'UPI_BANK'
+                        ? 'Login required to claim reward and receive payout'
+                        : 'Login required to receive reward in your CreatLifafa Wallet'}
+                    </span>
+                  </div>
+                  {onOpenAuth && (
+                    <button
+                      type="button"
+                      onClick={onOpenAuth}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors cursor-pointer"
+                    >
+                      Sign In with Google
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -287,6 +371,79 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
                       />
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* UPI / Bank Details Input for UPI_BANK Payout Mode */}
+              {lifafa.payout_mode === 'UPI_BANK' && (
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <Landmark className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Payout Details (Bank / UPI)</span>
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                      Direct Payout
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Account Holder Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={accountHolderName}
+                      onChange={(e) => setAccountHolderName(e.target.value)}
+                      placeholder="Name as per bank account"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-hidden focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        Bank Account Number
+                      </label>
+                      <input
+                        type="text"
+                        value={bankAccountNumber}
+                        onChange={(e) => setBankAccountNumber(e.target.value)}
+                        placeholder="e.g. 123456789012"
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono focus:outline-hidden focus:border-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        IFSC Code
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={11}
+                        value={ifscCode}
+                        onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
+                        placeholder="e.g. SBIN0001234"
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono uppercase focus:outline-hidden focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      UPI ID
+                    </label>
+                    <input
+                      type="text"
+                      value={upiId}
+                      onChange={(e) => setUpiId(e.target.value)}
+                      placeholder="e.g. yourname@okhdfcbank"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono focus:outline-hidden focus:border-blue-500"
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-500 leading-tight">
+                    * Provide either Bank Account Number + IFSC, or your active UPI ID.
+                  </p>
                 </div>
               )}
 

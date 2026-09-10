@@ -19,6 +19,8 @@ export type LifafaStatus =
   | 'EXPIRED'
   | 'CANCELLED';
 
+export type PayoutMode = 'WALLET' | 'UPI_BANK';
+
 export type DistributionType = 'EQUAL' | 'RANDOM';
 
 export type TaskType =
@@ -106,6 +108,7 @@ export interface Lifafa {
   allow_cancel: boolean;
   show_remaining: boolean;
   creator_note: string | null;
+  payout_mode?: PayoutMode;
   created_at: string;
   updated_at: string;
   creator_profile?: Profile;
@@ -130,6 +133,8 @@ export interface LifafaClaim {
   idempotency_key: string | null;
   device_fingerprint: string | null;
   ip_address: string | null;
+  payout_mode?: PayoutMode;
+  withdrawal_id?: string | null;
   claimed_at: string;
   claimer_profile?: Profile;
 }
