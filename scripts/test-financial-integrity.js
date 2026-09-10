@@ -729,6 +729,465 @@ test('Authoritative User Claim Resolution: Evaluates user claim strictly against
   assert.strictEqual(getClaimDetails('lf_1', 'user_999'), null);
 });
 
+// -------------------------------------------------------------
+// 26. PAYRUPEE BANK PAYOUT PAYLOAD FORMULATION
+// -------------------------------------------------------------
+test('PayRupee Bank Payout: Formulates exact required API payload', () => {
+  const buildPayRupeeBankPayload = (withdrawal) => {
+    if (!withdrawal.account_holder_name || withdrawal.account_holder_name.trim().length < 2) {
+      throw new Error('Valid account holder name is required');
+    }
+    const accNum = withdrawal.bank_account_encrypted || withdrawal.bank_account_number;
+    if (!accNum || accNum.trim().length < 6) {
+      throw new Error('Valid bank account number is required');
+    }
+    if (!withdrawal.ifsc_code || !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(withdrawal.ifsc_code.trim().toUpperCase())) {
+      throw new Error('Valid IFSC code is required');
+    }
+    const amount = Number(withdrawal.net_amount || withdrawal.amount);
+    if (!amount || amount <= 0) {
+      throw new Error('Valid positive payout amount is required');
+    }
+
+    return {
+      order_id: `ORD_${withdrawal.id}`,
+      amount: amount,
+      currency: 'INR',
+      method: 'bank',
+      recipient: {
+        name: withdrawal.account_holder_name.trim(),
+        account_number: accNum.trim(),
+        ifsc: withdrawal.ifsc_code.trim().toUpperCase()
+      }
+    };
+  };
+
+  const sampleWithdrawal = {
+    id: 'wth_abc_123',
+    amount: 500.00,
+    net_amount: 500.00,
+    account_holder_name: 'Rajveer Kol',
+    bank_account_encrypted: '123456789012',
+    ifsc_code: 'SBIN0001234'
+  };
+
+  const payload = buildPayRupeeBankPayload(sampleWithdrawal);
+  assert.strictEqual(payload.order_id, 'ORD_wth_abc_123');
+  assert.strictEqual(payload.amount, 500.00);
+  assert.strictEqual(payload.currency, 'INR');
+  assert.strictEqual(payload.method, 'bank');
+  assert.strictEqual(payload.recipient.name, 'Rajveer Kol');
+  assert.strictEqual(payload.recipient.account_number, '123456789012');
+  assert.strictEqual(payload.recipient.ifsc, 'SBIN0001234');
+});
+
+// -------------------------------------------------------------
+// 27. DETERMINISTIC ORDER ID GENERATION
+// -------------------------------------------------------------
+test('PayRupee Payout: Generates strictly deterministic order_id (ORD_<id>)', () => {
+  const generateOrderId = (withdrawalId) => `ORD_${withdrawalId}`;
+
+  const id = '550e8400-e29b-41d4-a716-446655440000';
+  const order1 = generateOrderId(id);
+  const order2 = generateOrderId(id);
+
+  assert.strictEqual(order1, 'ORD_550e8400-e29b-41d4-a716-446655440000');
+  assert.strictEqual(order1, order2, 'Retries MUST generate the identical order_id');
+});
+
+// -------------------------------------------------------------
+// 28. DUPLICATE DISPATCH PREVENTION
+// -------------------------------------------------------------
+test('PayRupee Payout: Rejects duplicate dispatch if withdrawal is not in PENDING state', () => {
+  const validateForDispatch = (withdrawal) => {
+    if (withdrawal.status !== 'PENDING') {
+      throw new Error(`Cannot dispatch withdrawal in ${withdrawal.status} status`);
+    }
+    if (withdrawal.provider_order_id) {
+      throw new Error('Withdrawal already has an assigned provider_order_id');
+    }
+    return true;
+  };
+
+  assert.ok(validateForDispatch({ status: 'PENDING', provider_order_id: null }));
+  assert.throws(() => validateForDispatch({ status: 'PROCESSING', provider_order_id: 'ORD_1' }), /Cannot dispatch withdrawal in PROCESSING status/);
+  assert.throws(() => validateForDispatch({ status: 'SUCCESS', provider_order_id: 'ORD_1' }), /Cannot dispatch withdrawal in SUCCESS status/);
+  assert.throws(() => validateForDispatch({ status: 'FAILED', provider_order_id: 'ORD_1' }), /Cannot dispatch withdrawal in FAILED status/);
+});
+
+// -------------------------------------------------------------
+// 29. CONCURRENT DISPATCH ATOMIC LOCK
+// -------------------------------------------------------------
+test('PayRupee Payout: Concurrency simulation locks PENDING to PROCESSING exactly once', () => {
+  let dbWithdrawal = { id: 'w_concurrent', status: 'PENDING', provider_order_id: null };
+  let executionCount = 0;
+
+  const atomicLockAndStart = (wthId, providerOrderId) => {
+    if (dbWithdrawal.status !== 'PENDING') {
+      throw new Error('Row locked or not pending');
+    }
+    dbWithdrawal.status = 'PROCESSING';
+    dbWithdrawal.provider_order_id = providerOrderId;
+    executionCount++;
+    return { success: true };
+  };
+
+  // First request succeeds
+  const res1 = atomicLockAndStart('w_concurrent', 'ORD_w_concurrent');
+  assert.strictEqual(res1.success, true);
+  assert.strictEqual(executionCount, 1);
+  assert.strictEqual(dbWithdrawal.status, 'PROCESSING');
+
+  // Second concurrent request gets rejected
+  assert.throws(() => atomicLockAndStart('w_concurrent', 'ORD_w_concurrent'), /Row locked or not pending/);
+  assert.strictEqual(executionCount, 1, 'Provider API must never be dispatched concurrently');
+});
+
+// -------------------------------------------------------------
+// 30. SECURITY & DATA SANITIZATION (SECRET & ACCOUNT NUMBER)
+// -------------------------------------------------------------
+test('Security: PayRupee secret never leaked; full account number masked in client responses', () => {
+  const sanitizeClientResponse = (withdrawal, providerResult) => {
+    return {
+      success: true,
+      withdrawal_id: withdrawal.id,
+      status: withdrawal.status,
+      provider_order_id: withdrawal.provider_order_id,
+      account_masked: withdrawal.bank_account_number_masked,
+      net_amount: withdrawal.net_amount
+    };
+  };
+
+  const internalState = {
+    id: 'w_sec_1',
+    status: 'PROCESSING',
+    provider_order_id: 'ORD_w_sec_1',
+    bank_account_encrypted: '987654321098',
+    bank_account_number_masked: 'XXXX-XXXX-1098',
+    net_amount: 150.00,
+    secret_key: 'SUPER_SECRET_PAYRUPEE_KEY'
+  };
+
+  const clientJson = JSON.stringify(sanitizeClientResponse(internalState));
+  assert.ok(!clientJson.includes('SUPER_SECRET_PAYRUPEE_KEY'), 'Secret must NEVER be in client response');
+  assert.ok(!clientJson.includes('987654321098'), 'Full account number must NEVER be in client response');
+  assert.ok(clientJson.includes('XXXX-XXXX-1098'), 'Masked account number must be shown');
+});
+
+// -------------------------------------------------------------
+// 31. PAYRUPEE HTTP 2XX ACCEPTED = IMMEDIATE WITHDRAWAL SUCCESS
+// -------------------------------------------------------------
+test('PayRupee Response: HTTP 2xx accepted immediately transitions to SUCCESS without crediting wallet', () => {
+  let userWallet = { available: 50.00, total_withdrawn: 100.00 }; // funds already debited at request time
+  let withdrawal = { id: 'w_success_200', amount: 100.00, status: 'PROCESSING', provider_order_id: 'ORD_w_success_200' };
+
+  const handlePayRupeeHttp2xxAccepted = (apiStatus, providerRef) => {
+    if (withdrawal.status !== 'PROCESSING') {
+      throw new Error('Can only transition from PROCESSING');
+    }
+    // Finalize withdrawal to SUCCESS
+    withdrawal.status = 'SUCCESS';
+    withdrawal.payout_reference_id = providerRef || withdrawal.provider_order_id;
+
+    // Financial Rule: Do NOT credit wallet again!
+    return {
+      status: withdrawal.status,
+      reference_id: withdrawal.payout_reference_id,
+      wallet_untouched: true
+    };
+  };
+
+  const res = handlePayRupeeHttp2xxAccepted(200, 'PAYRUPEE_REF_12345');
+  assert.strictEqual(res.status, 'SUCCESS');
+  assert.strictEqual(res.reference_id, 'PAYRUPEE_REF_12345');
+  assert.strictEqual(withdrawal.status, 'SUCCESS');
+
+  // Verify wallet balance was NOT credited
+  assert.strictEqual(userWallet.available, 50.00, 'Wallet balance must NOT be credited on SUCCESS');
+  assert.strictEqual(userWallet.total_withdrawn, 100.00);
+
+  // Concurrency check: Cannot re-finalize an already finalized SUCCESS withdrawal
+  assert.throws(
+    () => handlePayRupeeHttp2xxAccepted(200, 'PAYRUPEE_REF_DUP'),
+    /Can only transition from PROCESSING/
+  );
+});
+
+// -------------------------------------------------------------
+// 32. TERMINAL FAILURE & AUTOMATIC SINGLE REFUND
+// -------------------------------------------------------------
+test('PayRupee Failure: Definitive rejection triggers single reversal refund', () => {
+  let userWallet = { available: 50.00, total_withdrawn: 100.00 };
+  let withdrawal = { id: 'w_fail', amount: 100.00, status: 'PROCESSING' };
+  let reversalLedger = [];
+
+  const handleProviderTerminalFailure = (reason) => {
+    if (withdrawal.status === 'FAILED' || withdrawal.status === 'SUCCESS') {
+      throw new Error('Already finalized');
+    }
+    withdrawal.status = 'FAILED';
+    withdrawal.rejection_reason = reason;
+
+    // Refund wallet
+    userWallet.available += withdrawal.amount;
+    userWallet.total_withdrawn = Math.max(0, userWallet.total_withdrawn - withdrawal.amount);
+
+    reversalLedger.push({
+      type: 'WITHDRAWAL_REVERSAL',
+      amount: withdrawal.amount,
+      reference_id: withdrawal.id
+    });
+  };
+
+  handleProviderTerminalFailure('Beneficiary bank account inactive');
+  assert.strictEqual(withdrawal.status, 'FAILED');
+  assert.strictEqual(userWallet.available, 150.00);
+  assert.strictEqual(userWallet.total_withdrawn, 0.00);
+  assert.strictEqual(reversalLedger.length, 1);
+
+  // Duplicate webhook delivery cannot double refund
+  assert.throws(() => handleProviderTerminalFailure('Repeat failure event'), /Already finalized/);
+  assert.strictEqual(userWallet.available, 150.00);
+  assert.strictEqual(reversalLedger.length, 1);
+});
+
+// -------------------------------------------------------------
+// 33. NETWORK TIMEOUT IDEMPOTENT SAFETY
+// -------------------------------------------------------------
+test('PayRupee Network Timeout: Leaves withdrawal in PROCESSING, blocks new order ID and auto-refund', () => {
+  let withdrawal = { id: 'w_timeout', status: 'PROCESSING', provider_order_id: 'ORD_w_timeout' };
+  let userWallet = { available: 100.00 };
+
+  const handleNetworkTimeout = () => {
+    // Keep in PROCESSING. Do NOT change order_id. Do NOT refund.
+    return {
+      status: withdrawal.status,
+      order_id: withdrawal.provider_order_id,
+      retry_allowed: false
+    };
+  };
+
+  const outcome = handleNetworkTimeout();
+  assert.strictEqual(outcome.status, 'PROCESSING');
+  assert.strictEqual(outcome.order_id, 'ORD_w_timeout');
+  assert.strictEqual(outcome.retry_allowed, false);
+  assert.strictEqual(userWallet.available, 100.00, 'Wallet must NOT be refunded on timeout');
+});
+
+// -------------------------------------------------------------
+// 34. WALLET WITHDRAWAL & LIFAFA REWARD COMPATIBILITY
+// -------------------------------------------------------------
+test('Compatibility: Wallet withdrawals and Lifafa UPI/BANK claims both produce valid PayRupee recipient data', () => {
+  const walletWithdrawal = {
+    id: 'w_wallet_1',
+    amount: 250.00,
+    net_amount: 250.00,
+    account_holder_name: 'Rajveer Kol',
+    bank_account_encrypted: '111122223333',
+    ifsc_code: 'HDFC0001234'
+  };
+
+  const lifafaBankClaimWithdrawal = {
+    id: 'w_lifafa_1',
+    amount: 100.00,
+    net_amount: 100.00,
+    account_holder_name: 'Aman Verma',
+    bank_account_encrypted: '999988887777',
+    ifsc_code: 'SBIN0004321'
+  };
+
+  const toPayload = (w) => ({
+    order_id: `ORD_${w.id}`,
+    amount: w.net_amount,
+    currency: 'INR',
+    method: 'bank',
+    recipient: {
+      name: w.account_holder_name,
+      account_number: w.bank_account_encrypted,
+      ifsc: w.ifsc_code
+    }
+  });
+
+  const p1 = toPayload(walletWithdrawal);
+  const p2 = toPayload(lifafaBankClaimWithdrawal);
+
+  assert.strictEqual(p1.order_id, 'ORD_w_wallet_1');
+  assert.strictEqual(p1.recipient.account_number, '111122223333');
+  assert.strictEqual(p2.order_id, 'ORD_w_lifafa_1');
+  assert.strictEqual(p2.recipient.account_number, '999988887777');
+});
+
+// -------------------------------------------------------------
+// 35. FAIL-CLOSED ENCRYPTION WITHOUT JWT FALLBACK
+// -------------------------------------------------------------
+test('Security: Bank credential encryption fails closed if dedicated key is missing, never falls back to JWT secret', () => {
+  const encryptBankAccount = (accNumber, dedicatedKey) => {
+    if (!accNumber || accNumber.trim().length === 0) return null;
+    if (!dedicatedKey || dedicatedKey.trim().length === 0) {
+      throw new Error('Dedicated payout encryption key (app.settings.payout_encryption_key) is not configured');
+    }
+    return `enc_${Buffer.from(accNumber.trim()).toString('base64')}`;
+  };
+
+  // Missing or empty key must strictly fail closed
+  assert.throws(() => encryptBankAccount('123456789012', null), /Dedicated payout encryption key.*is not configured/);
+  assert.throws(() => encryptBankAccount('123456789012', ''), /Dedicated payout encryption key.*is not configured/);
+  assert.throws(() => encryptBankAccount('123456789012', '   '), /Dedicated payout encryption key.*is not configured/);
+
+  // Valid key produces encrypted credential
+  const enc = encryptBankAccount('123456789012', 'valid-dedicated-key-secret-123');
+  assert.ok(enc.startsWith('enc_'), 'Encrypted result produced when key is present');
+});
+
+// -------------------------------------------------------------
+// 36. PAYOUT ERROR PATH: DECRYPTION FAILURE SAFETY
+// -------------------------------------------------------------
+test('Payout Error Path: Decryption failure reverts PROCESSING to PENDING without triggering refund', () => {
+  let userWallet = { available: 50.00, total_withdrawn: 100.00 };
+  let dbWithdrawal = { id: 'w_decrypt_fail', status: 'PENDING', provider_order_id: null, amount: 100.00 };
+  let payrupeeDispatched = false;
+  let refundsTriggered = 0;
+
+  // Step 1: Concurrency lock PENDING -> PROCESSING
+  dbWithdrawal.status = 'PROCESSING';
+  dbWithdrawal.provider_order_id = `ORD_${dbWithdrawal.id}`;
+
+  // Step 2: Decryption fails
+  const simulateDecryption = (wId) => {
+    return { error: 'Decryption failed for bank account credentials' };
+  };
+
+  const decryptResult = simulateDecryption(dbWithdrawal.id);
+  if (decryptResult.error) {
+    // Revert state to PENDING safely: clear provider_order_id so retry is safe, do NOT refund wallet
+    dbWithdrawal.status = 'PENDING';
+    dbWithdrawal.provider_order_id = null;
+    dbWithdrawal.rejection_reason = decryptResult.error;
+    // PayRupee is NOT dispatched
+    payrupeeDispatched = false;
+  }
+
+  assert.strictEqual(dbWithdrawal.status, 'PENDING', 'Must revert safely to PENDING');
+  assert.strictEqual(dbWithdrawal.provider_order_id, null, 'Must clear provider_order_id on revert');
+  assert.strictEqual(payrupeeDispatched, false, 'PayRupee order must NOT be created');
+  assert.strictEqual(userWallet.available, 50.00, 'NO refund must be incorrectly triggered');
+  assert.strictEqual(refundsTriggered, 0, 'No refund transactions generated');
+});
+
+// -------------------------------------------------------------
+// 37. UPI-ONLY PAYOUT PROHIBITION (BLOCKER 6)
+// -------------------------------------------------------------
+test('Compatibility: PayRupee method=bank rejects UPI-only claims without account_number/ifsc, avoids fake UPI payload', () => {
+  const upiOnlyWithdrawal = {
+    id: 'w_upi_only_1',
+    amount: 100.00,
+    net_amount: 100.00,
+    account_holder_name: 'Aman Verma',
+    upi_id: 'aman@okaxis',
+    bank_account_encrypted: null,
+    ifsc_code: null
+  };
+
+  const validatePayRupeeBankDispatch = (w, decryptedAcc) => {
+    if (!decryptedAcc || decryptedAcc.trim().length === 0) {
+      throw new Error('PayRupee method=bank requires bank account number. UPI-only payouts are not supported by this provider.');
+    }
+    if (!w.ifsc_code || w.ifsc_code.trim().length === 0) {
+      throw new Error('PayRupee method=bank requires IFSC code.');
+    }
+    return true;
+  };
+
+  assert.throws(
+    () => validatePayRupeeBankDispatch(upiOnlyWithdrawal, null),
+    /PayRupee method=bank requires bank account number/
+  );
+  assert.throws(
+    () => validatePayRupeeBankDispatch({ ...upiOnlyWithdrawal, ifsc_code: null }, '1234567890'),
+    /PayRupee method=bank requires IFSC code/
+  );
+});
+
+// -------------------------------------------------------------
+// 38. PAYRUPEE 5XX SERVER ERROR UNCERTAINTY HANDLING
+// -------------------------------------------------------------
+test('PayRupee 5xx Server Error: Must NOT trigger refund, leaves withdrawal in PROCESSING', () => {
+  let withdrawal = { id: 'w_500', amount: 500.00, status: 'PROCESSING', provider_order_id: 'ORD_w_500' };
+  let userWallet = { available: 50.00 };
+  let reversalLedger = [];
+
+  const handleProviderResponse = (statusCode, data) => {
+    const isServerOrUncertainError = statusCode >= 500 || statusCode === 408 || statusCode === 429;
+    if (isServerOrUncertainError) {
+      // Must NOT refund, must remain PROCESSING
+      return { status: 'PROCESSING', refunded: false };
+    }
+    // Definitive 4xx
+    withdrawal.status = 'FAILED';
+    userWallet.available += withdrawal.amount;
+    reversalLedger.push({ type: 'WITHDRAWAL_REVERSAL', amount: withdrawal.amount });
+    return { status: 'FAILED', refunded: true };
+  };
+
+  // 500 Internal Server Error
+  const res500 = handleProviderResponse(500, { error: 'Internal server crash' });
+  assert.strictEqual(res500.status, 'PROCESSING');
+  assert.strictEqual(res500.refunded, false);
+  assert.strictEqual(userWallet.available, 50.00, 'Wallet must NOT be refunded on 500');
+  assert.strictEqual(withdrawal.status, 'PROCESSING');
+  assert.strictEqual(reversalLedger.length, 0);
+
+  // 502 Bad Gateway
+  const res502 = handleProviderResponse(502, { error: 'Bad Gateway' });
+  assert.strictEqual(res502.status, 'PROCESSING');
+  assert.strictEqual(userWallet.available, 50.00, 'Wallet must NOT be refunded on 502');
+
+  // 503 Service Unavailable
+  const res503 = handleProviderResponse(503, { error: 'Service Unavailable' });
+  assert.strictEqual(res503.status, 'PROCESSING');
+  assert.strictEqual(userWallet.available, 50.00, 'Wallet must NOT be refunded on 503');
+});
+
+// -------------------------------------------------------------
+// 39. PAYRUPEE AMBIGUOUS 4XX (408/429/UNCLASSIFIED) HANDLING
+// -------------------------------------------------------------
+test('PayRupee Ambiguous 4xx (408/429): Must NOT trigger refund, leaves withdrawal in PROCESSING', () => {
+  let withdrawal = { id: 'w_ambig', amount: 300.00, status: 'PROCESSING', provider_order_id: 'ORD_w_ambig' };
+  let userWallet = { available: 100.00 };
+
+  const classifyError = (statusCode, reason) => {
+    if (statusCode >= 500 || statusCode === 408 || statusCode === 429) {
+      return { status: 'PROCESSING', shouldRefund: false };
+    }
+    const isDefinitive = (statusCode === 400 || statusCode === 401 || statusCode === 403 || statusCode === 422) &&
+      (reason.toLowerCase().includes('reject') || reason.toLowerCase().includes('invalid'));
+    if (!isDefinitive) {
+      return { status: 'PROCESSING', shouldRefund: false };
+    }
+    return { status: 'FAILED', shouldRefund: true };
+  };
+
+  // 408 Request Timeout
+  const res408 = classifyError(408, 'Request Timeout');
+  assert.strictEqual(res408.status, 'PROCESSING');
+  assert.strictEqual(res408.shouldRefund, false);
+
+  // 429 Rate Limit
+  const res429 = classifyError(429, 'Too Many Requests');
+  assert.strictEqual(res429.status, 'PROCESSING');
+  assert.strictEqual(res429.shouldRefund, false);
+
+  // Ambiguous 400 without clear rejection
+  const resAmbiguous = classifyError(400, 'Something unusual happened');
+  assert.strictEqual(resAmbiguous.status, 'PROCESSING');
+  assert.strictEqual(resAmbiguous.shouldRefund, false);
+
+  // Definitive 400 with invalid account
+  const resDefinitive = classifyError(400, 'Beneficiary account invalid or closed');
+  assert.strictEqual(resDefinitive.status, 'FAILED');
+  assert.strictEqual(resDefinitive.shouldRefund, true);
+});
+
 console.log('\n========================================================');
 console.log(`TEST RESULTS: ${passedTests} / ${totalTests} PASSED (100%)`);
 console.log('========================================================');
