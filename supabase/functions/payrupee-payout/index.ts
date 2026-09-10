@@ -56,6 +56,12 @@ serve(async (req: Request) => {
     // Initialize Supabase service-role client for authoritative caller verification & operations
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
+    // Initialize userClient with caller token for PostgREST RPC operations requiring auth.uid()
+    const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY') || '', {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+      auth: { persistSession: false },
+    });
+
     // Authoritative caller verification using service-role client
     const { data: { user }, error: userErr } = await adminClient.auth.getUser(token);
 
