@@ -36,19 +36,28 @@ serve(async (req: Request) => {
       });
     }
 
+    // 1. Extract the Bearer token safely
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'Authorization header required' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // 1. Authenticate caller using caller's JWT token
-    const userClient = createClient(supabaseUrl, authHeader.replace('Bearer ', ''), {
-      auth: { persistSession: false },
-    });
-    const { data: { user }, error: userErr } = await userClient.auth.getUser();
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Authorization header required' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Initialize Supabase service-role client for authoritative caller verification & operations
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
+    // Authoritative caller verification using service-role client
+    const { data: { user }, error: userErr } = await adminClient.auth.getUser(token);
 
     if (userErr || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized caller' }), {
@@ -58,7 +67,6 @@ serve(async (req: Request) => {
     }
 
     // 2. Authorize admin caller (matches Migration 015 parameter check_user_id)
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
     const { data: isAdmin, error: adminErr } = await adminClient.rpc('is_admin', {
       check_user_id: user.id,
     });
@@ -71,7 +79,17 @@ serve(async (req: Request) => {
     }
 
     // 3. Parse input
-    const { withdrawal_id } = await req.json();
+    let withdrawal_id: string | undefined;
+    try {
+      const body = await req.json();
+      withdrawal_id = body?.withdrawal_id;
+    } catch {
+      return new Response(JSON.stringify({ error: 'Missing withdrawal_id parameter' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     if (!withdrawal_id) {
       return new Response(JSON.stringify({ error: 'Missing withdrawal_id parameter' }), {
         status: 400,
