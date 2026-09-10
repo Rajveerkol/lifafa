@@ -42,6 +42,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 }) => {
   const { user } = useAuth();
   const [featuredLifafas, setFeaturedLifafas] = useState<Lifafa[]>([]);
+  const [myClaimedMap, setMyClaimedMap] = useState<Map<string, number>>(new Map());
   const [quickCode, setQuickCode] = useState('');
   const [searchingCode, setSearchingCode] = useState(false);
   const [codeError, setCodeError] = useState<string | null>(null);
@@ -51,6 +52,22 @@ export const HomePage: React.FC<HomePageProps> = ({
       setFeaturedLifafas(list.slice(0, 4));
     });
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      lifafaService.getMyClaimedLifafas(user.id).then((claims) => {
+        const map = new Map<string, number>();
+        for (const c of claims) {
+          if (c.lifafa_id) {
+            map.set(c.lifafa_id, c.amount);
+          }
+        }
+        setMyClaimedMap(map);
+      });
+    } else {
+      setMyClaimedMap(new Map());
+    }
+  }, [user]);
 
   const handleQuickCodeClaim = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -289,6 +306,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                 lifafa={lifafa}
                 onClaimClick={onClaimLifafa}
                 onShareClick={onShareLifafa}
+                isClaimed={myClaimedMap.has(lifafa.id)}
+                claimedAmount={myClaimedMap.get(lifafa.id)}
               />
             ))}
           </div>

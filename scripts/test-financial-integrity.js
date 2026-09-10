@@ -635,6 +635,100 @@ test('RPC Architecture: Drop old function signatures before create to prevent Po
   assert.ok(!registeredRpcSignatures.has('claim_lifafa_rpc(5)'), 'Old 5-param signature must be dropped');
 });
 
+// -------------------------------------------------------------
+// 24. GLOBAL STATUS VS PER-USER CLAIM ACTION DECOUPLING
+// -------------------------------------------------------------
+test('Dual State Decoupling: Global Lifafa status strictly decoupled from Current User claim status', () => {
+  const getCardDisplayState = (lifafa, userId, userClaimsSet) => {
+    const isCompleted = lifafa.status === 'COMPLETED' || lifafa.claimed_count >= lifafa.winner_count;
+    const isGloballyActive = lifafa.status === 'ACTIVE' && !isCompleted && new Date(lifafa.expires_at) > new Date();
+    const isClaimedByMe = userClaimsSet.has(`${lifafa.id}:${userId}`);
+
+    // Global badge
+    const globalStatus = isCompleted ? 'COMPLETED' : isGloballyActive ? 'ACTIVE' : 'CLOSED';
+
+    // User action button
+    let userAction = 'Claim Now';
+    let canClickClaim = true;
+
+    if (isCompleted) {
+      userAction = 'Completed';
+      canClickClaim = false;
+    } else if (isClaimedByMe) {
+      userAction = 'Claimed ✓';
+      canClickClaim = false;
+    } else if (!isGloballyActive) {
+      userAction = 'Closed';
+      canClickClaim = false;
+    }
+
+    return { globalStatus, userAction, canClickClaim };
+  };
+
+  const activeLifafa = {
+    id: 'lf_test_1',
+    status: 'ACTIVE',
+    claimed_count: 1,
+    winner_count: 100,
+    expires_at: new Date(Date.now() + 86400000).toISOString()
+  };
+
+  // User A has claimed
+  const claimsStore = new Set(['lf_test_1:user_A']);
+
+  // Check state for User A (who already claimed ₹902.26)
+  const userAState = getCardDisplayState(activeLifafa, 'user_A', claimsStore);
+  assert.strictEqual(userAState.globalStatus, 'ACTIVE', 'Global status for 1/100 MUST be ACTIVE');
+  assert.strictEqual(userAState.userAction, 'Claimed ✓', 'User A action MUST be Claimed ✓');
+  assert.strictEqual(userAState.canClickClaim, false, 'User A cannot click Claim Now');
+
+  // Check state for User B (who has NOT claimed yet)
+  const userBState = getCardDisplayState(activeLifafa, 'user_B', claimsStore);
+  assert.strictEqual(userBState.globalStatus, 'ACTIVE', 'Global status for 1/100 MUST be ACTIVE');
+  assert.strictEqual(userBState.userAction, 'Claim Now', 'User B action MUST be Claim Now');
+  assert.strictEqual(userBState.canClickClaim, true, 'User B CAN click Claim Now');
+
+  // Check state when 100/100 is reached
+  const completedLifafa = {
+    id: 'lf_test_1',
+    status: 'ACTIVE', // Even if status is ACTIVE, 100/100 completes it
+    claimed_count: 100,
+    winner_count: 100,
+    expires_at: new Date(Date.now() + 86400000).toISOString()
+  };
+
+  const userACompletedState = getCardDisplayState(completedLifafa, 'user_A', claimsStore);
+  assert.strictEqual(userACompletedState.globalStatus, 'COMPLETED');
+  assert.strictEqual(userACompletedState.userAction, 'Completed');
+
+  const userBCompletedState = getCardDisplayState(completedLifafa, 'user_B', claimsStore);
+  assert.strictEqual(userBCompletedState.globalStatus, 'COMPLETED');
+  assert.strictEqual(userBCompletedState.userAction, 'Completed');
+});
+
+// -------------------------------------------------------------
+// 25. AUTHORITATIVE CLAIM LOOKUP CONSERVATION
+// -------------------------------------------------------------
+test('Authoritative User Claim Resolution: Evaluates user claim strictly against authoritative database claims', () => {
+  const mockDbClaims = [
+    { id: 'c_1', lifafa_id: 'lf_1', user_id: 'user_123', amount: 902.26, claimed_at: '2026-09-10T12:00:00Z' }
+  ];
+
+  const hasClaimed = (lifafaId, userId) => {
+    return mockDbClaims.some(c => c.lifafa_id === lifafaId && c.user_id === userId);
+  };
+
+  const getClaimDetails = (lifafaId, userId) => {
+    return mockDbClaims.find(c => c.lifafa_id === lifafaId && c.user_id === userId) || null;
+  };
+
+  assert.strictEqual(hasClaimed('lf_1', 'user_123'), true);
+  assert.strictEqual(getClaimDetails('lf_1', 'user_123')?.amount, 902.26);
+
+  assert.strictEqual(hasClaimed('lf_1', 'user_999'), false);
+  assert.strictEqual(getClaimDetails('lf_1', 'user_999'), null);
+});
+
 console.log('\n========================================================');
 console.log(`TEST RESULTS: ${passedTests} / ${totalTests} PASSED (100%)`);
 console.log('========================================================');

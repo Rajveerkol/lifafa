@@ -231,4 +231,25 @@ export const lifafaService = {
 
     return data;
   },
+
+  // Authoritatively check if a user has already claimed a specific Lifafa
+  async getUserClaimForLifafa(lifafaId: string, userId: string): Promise<LifafaClaim | null> {
+    if (!isSupabaseConfigured || !supabase) {
+      return null;
+    }
+
+    const { data, error } = await supabase
+      .from('lifafa_claims')
+      .select('*')
+      .eq('lifafa_id', lifafaId)
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error checking user claim:', error);
+      return null;
+    }
+
+    return (data || null) as LifafaClaim | null;
+  },
 };

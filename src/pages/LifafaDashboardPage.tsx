@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Gift,
   PlusCircle,
@@ -38,6 +38,17 @@ export const LifafaDashboardPage: React.FC<LifafaDashboardPageProps> = ({
   const [myClaimed, setMyClaimed] = useState<(LifafaClaim & { lifafa: Lifafa })[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  // Authoritative user claims lookup map
+  const myClaimedMap = useMemo(() => {
+    const map = new Map<string, LifafaClaim>();
+    for (const c of myClaimed) {
+      if (c.lifafa_id) {
+        map.set(c.lifafa_id, c);
+      }
+    }
+    return map;
+  }, [myClaimed]);
 
   const loadData = async () => {
     setLoading(true);
@@ -243,6 +254,8 @@ export const LifafaDashboardPage: React.FC<LifafaDashboardPageProps> = ({
                 onClaimClick={onClaimClick}
                 onShareClick={onShareClick}
                 isCreator={user?.id === lifafa.creator_id}
+                isClaimed={myClaimedMap.has(lifafa.id)}
+                claimedAmount={myClaimedMap.get(lifafa.id)?.amount}
               />
               {user?.id === lifafa.creator_id && lifafa.remaining_amount > 0 && lifafa.status === 'ACTIVE' && (
                 <button

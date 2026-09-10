@@ -92,6 +92,17 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
         .then((fetchedTasks) => {
           setTasks(fetchedTasks);
           if (userId) {
+            lifafaService.getUserClaimForLifafa(lifafaId, userId).then((existingClaim) => {
+              if (existingClaim) {
+                setClaimResult({
+                  amount: existingClaim.amount,
+                  code: lifafa.code,
+                  payoutMode: existingClaim.payout_mode || lifafa.payout_mode || 'WALLET',
+                });
+                setIsEnvelopeOpened(true);
+              }
+            });
+
             taskService.getUserTaskCompletions(lifafaId, userId).then((completions) => {
               const verified = new Set(
                 completions.filter((c) => c.status === 'VERIFIED').map((c) => c.task_id)
