@@ -12,6 +12,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { HeroWalletCard } from '../components/wallet/HeroWalletCard';
+import { WithdrawalHistory } from '../components/wallet/WithdrawalHistory';
 import { useAuth } from '../context/AuthContext';
 import { walletService } from '../services/walletService';
 import type { WalletTransaction, Withdrawal, TransactionType } from '../types/database';
@@ -29,20 +30,29 @@ export const WalletPage: React.FC<WalletPageProps> = ({ onOpenWithdraw, onOpenAd
   const [activeTab, setActiveTab] = useState<'transactions' | 'withdrawals'>('transactions');
   const [txFilter, setTxFilter] = useState<string>('ALL');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      setLoading(true);
-      Promise.all([
+  const fetchData = async () => {
+    if (!user) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const [txList, wList] = await Promise.all([
         walletService.getTransactions(user.id),
         walletService.getWithdrawals(user.id),
-      ])
-        .then(([txList, wList]) => {
-          setTransactions(txList);
-          setWithdrawals(wList);
-        })
-        .finally(() => setLoading(false));
+      ]);
+      setTransactions(txList);
+      setWithdrawals(wList);
+    } catch (err: any) {
+      console.error('Error fetching wallet records:', err);
+      setError('Unable to load wallet records. Please check your connection.');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [user]);
 
   const availableBalance = wallet?.available_balance ?? 0;
@@ -111,10 +121,16 @@ export const WalletPage: React.FC<WalletPageProps> = ({ onOpenWithdraw, onOpenAd
           </span>
         </div>
 
-        <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-2xs">
-          <span className="text-[10px] text-slate-400 font-bold uppercase block">
-            Total Withdrawn
-          </span>
+        <div
+          onClick={() => setActiveTab('withdrawals')}
+          className="bg-white p-4 rounded-3xl border border-slate-100 shadow-2xs cursor-pointer hover:border-blue-200 hover:shadow-xs transition-all group"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-slate-400 font-bold uppercase block">
+              Total Withdrawn
+            </span>
+            <ArrowUpRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-600 transition-colors" />
+          </div>
           <span className="text-lg font-black text-slate-800 mt-1 block">
             {formatCurrency(totalWithdrawn)}
           </span>
@@ -139,13 +155,22 @@ export const WalletPage: React.FC<WalletPageProps> = ({ onOpenWithdraw, onOpenAd
 
             <button
               onClick={() => setActiveTab('withdrawals')}
-              className={`py-2 px-4 rounded-xl text-xs font-bold transition-all ${
+              className={`py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                 activeTab === 'withdrawals'
                   ? 'bg-blue-600 text-white shadow-xs'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              Withdrawals ({withdrawals.length})
+              <span>Withdrawal History</span>
+              <span
+                className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                  activeTab === 'withdrawals'
+                    ? 'bg-blue-700 text-white'
+                    : 'bg-slate-200 text-slate-700'
+                }`}
+              >
+                {withdrawals.length}
+              </span>
             </button>
           </div>
 
@@ -231,54 +256,17 @@ export const WalletPage: React.FC<WalletPageProps> = ({ onOpenWithdraw, onOpenAd
             </div>
           )
         ) : (
-          /* Withdrawals History List */
-          withdrawals.length === 0 ? (
-            <div className="py-16 text-center text-xs text-slate-400">
-              No withdrawal requests recorded yet.
-            </div>
-          ) : (
-            <div className="divide-y divide-slate-100">
-              {withdrawals.map((w) => (
-                <div key={w.id} className="p-4 sm:p-5 flex items-center justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h5 className="text-xs sm:text-sm font-bold text-slate-900">
-                        {w.account_holder_name}
-                      </h5>
-                      <span
-                        className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase ${
-                          w.status === 'SUCCESS'
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : w.status === 'PENDING'
-                            ? 'bg-amber-50 text-amber-700'
-                            : 'bg-rose-50 text-rose-700'
-                        }`}
-                      >
-                        {w.status}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 font-mono mt-0.5">
-                      {w.bank_account_number_masked}
-                    </p>
-                    <span className="text-[10px] text-slate-400 block mt-0.5">
-                      Requested on {formatDate(w.created_at)}
-                    </span>
-                  </div>
-
-                  <div className="text-right">
-                    <span className="text-sm sm:text-base font-black text-slate-900">
-                      {formatCurrency(w.net_amount)}
-                    </span>
-                    {w.fee_amount > 0 && (
-                      <span className="block text-[10px] text-slate-400">
-                        Fee: {formatCurrency(w.fee_amount)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )
+          /* Rich Withdrawal History Section */
+          <div className="p-4 sm:p-5">
+            <WithdrawalHistory
+              withdrawals={withdrawals}
+              transactions={transactions}
+              loading={loading}
+              error={error}
+              onRefresh={fetchData}
+              onOpenWithdraw={onOpenWithdraw}
+            />
+          </div>
         )}
       </div>
     </div>

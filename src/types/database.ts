@@ -177,6 +177,7 @@ export interface Withdrawal {
   status: WithdrawalStatus;
   payout_provider: string;
   payout_reference_id: string | null;
+  provider_order_id?: string | null;
   idempotency_key: string;
   rejection_reason: string | null;
   created_at: string;
