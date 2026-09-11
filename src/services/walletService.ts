@@ -4,9 +4,9 @@ import type { WalletTransaction, Withdrawal, PlatformFee } from '../types/databa
 export interface RequestWithdrawalParams {
   amount: number;
   accountHolderName: string;
-  bankAccountNumber?: string;
-  ifscCode?: string;
-  upiId?: string;
+  bankAccountNumber: string;
+  ifscCode: string;
+  upiId?: string; // If provided, server-side RPC strictly rejects with error
 }
 
 export interface PlatformPaymentSettings {
@@ -47,7 +47,7 @@ export const walletService = {
     return (data || []) as WalletTransaction[];
   },
 
-  // Request withdrawal via atomic server RPC
+  // Request withdrawal via atomic server RPC (Bank Account Only)
   async requestWithdrawal(params: RequestWithdrawalParams, idempotencyKey?: string) {
     if (!isSupabaseConfigured || !supabase) {
       throw new Error('Supabase database is not configured.');
@@ -56,8 +56,8 @@ export const walletService = {
     const { data, error } = await supabase.rpc('request_withdrawal_rpc', {
       p_amount: params.amount,
       p_account_holder_name: params.accountHolderName.trim(),
-      p_bank_account_number: params.bankAccountNumber?.trim() || null,
-      p_ifsc_code: params.ifscCode?.trim() || null,
+      p_bank_account_number: params.bankAccountNumber.trim(),
+      p_ifsc_code: params.ifscCode.trim().toUpperCase(),
       p_upi_id: params.upiId?.trim() || null,
       p_idempotency_key: idempotencyKey || null,
     });

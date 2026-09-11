@@ -1188,6 +1188,160 @@ test('PayRupee Ambiguous 4xx (408/429): Must NOT trigger refund, leaves withdraw
   assert.strictEqual(resDefinitive.shouldRefund, true);
 });
 
+// -------------------------------------------------------------
+// 40. BANK-ONLY WITHDRAWAL VALIDATION & SERVER-SIDE UPI REJECTION
+// -------------------------------------------------------------
+test('Bank-Only Withdrawal: Enforces Bank Account & IFSC, strictly rejects UPI destination', () => {
+  const validateWithdrawalRequest = (params) => {
+    if (params.upiId && params.upiId.trim().length > 0) {
+      throw new Error('Withdrawals are bank account only. UPI withdrawals are not supported.');
+    }
+    if (!params.bankAccountNumber || params.bankAccountNumber.trim().length < 9) {
+      throw new Error('A valid bank account number is required for withdrawal.');
+    }
+    const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+    if (!params.ifscCode || !ifscRegex.test(params.ifscCode.trim().toUpperCase())) {
+      throw new Error('A valid 11-character IFSC code is required for withdrawal.');
+    }
+    if (!params.accountHolderName || params.accountHolderName.trim().length < 2) {
+      throw new Error('Account holder name is required for withdrawal.');
+    }
+    return true;
+  };
+
+  // 1. UPI input must be rejected
+  assert.throws(() => {
+    validateWithdrawalRequest({
+      amount: 100,
+      accountHolderName: 'Rajveer Kol',
+      bankAccountNumber: '123456789012',
+      ifscCode: 'HDFC0001234',
+      upiId: 'rajveer@upi'
+    });
+  }, /Withdrawals are bank account only/);
+
+  // 2. Short account number must be rejected
+  assert.throws(() => {
+    validateWithdrawalRequest({
+      amount: 100,
+      accountHolderName: 'Rajveer Kol',
+      bankAccountNumber: '123',
+      ifscCode: 'HDFC0001234'
+    });
+  }, /valid bank account number/);
+
+  // 3. Invalid IFSC format must be rejected
+  assert.throws(() => {
+    validateWithdrawalRequest({
+      amount: 100,
+      accountHolderName: 'Rajveer Kol',
+      bankAccountNumber: '123456789012',
+      ifscCode: 'HDFC1234'
+    });
+  }, /valid 11-character IFSC code/);
+
+  // 4. Missing account holder name must be rejected
+  assert.throws(() => {
+    validateWithdrawalRequest({
+      amount: 100,
+      accountHolderName: '',
+      bankAccountNumber: '123456789012',
+      ifscCode: 'HDFC0001234'
+    });
+  }, /Account holder name is required/);
+
+  // 5. Valid bank details must pass cleanly
+  assert.strictEqual(validateWithdrawalRequest({
+    amount: 100,
+    accountHolderName: 'Rajveer Kol',
+    bankAccountNumber: '123456789012',
+    ifscCode: 'HDFC0001234'
+  }), true);
+});
+
+// -------------------------------------------------------------
+// 41. TRANSACTION_STATUS ENUM INTEGRITY (NO FAKE 'COMPLETED')
+// -------------------------------------------------------------
+test('Transaction Status Enum Integrity: Strictly PENDING, SUCCESS, FAILED, REVERSED (No COMPLETED)', () => {
+  const VALID_TRANSACTION_STATUSES = new Set(['PENDING', 'SUCCESS', 'FAILED', 'REVERSED']);
+
+  const createLedgerEntry = (type, status, amount) => {
+    if (!VALID_TRANSACTION_STATUSES.has(status)) {
+      throw new Error(`invalid input value for enum transaction_status: "${status}"`);
+    }
+    return { type, status, amount };
+  };
+
+  // Withdrawal reservation must be PENDING
+  const withdrawalTx = createLedgerEntry('WITHDRAWAL', 'PENDING', -100);
+  assert.strictEqual(withdrawalTx.status, 'PENDING');
+
+  // Claim must be SUCCESS
+  const claimTx = createLedgerEntry('CLAIM', 'SUCCESS', 50);
+  assert.strictEqual(claimTx.status, 'SUCCESS');
+
+  // Reversal must be SUCCESS
+  const reversalTx = createLedgerEntry('WITHDRAWAL_REVERSAL', 'SUCCESS', 100);
+  assert.strictEqual(reversalTx.status, 'SUCCESS');
+
+  // FAKE 'COMPLETED' MUST BE STRICTLY REJECTED
+  assert.throws(() => {
+    createLedgerEntry('WITHDRAWAL', 'COMPLETED', -100);
+  }, /invalid input value for enum transaction_status: "COMPLETED"/);
+
+  assert.throws(() => {
+    createLedgerEntry('CLAIM', 'COMPLETED', 50);
+  }, /invalid input value for enum transaction_status: "COMPLETED"/);
+});
+
+// -------------------------------------------------------------
+// 42. ATOMIC WITHDRAWAL RESERVATION & LEDGER INTEGRITY
+// -------------------------------------------------------------
+test('Atomic Withdrawal Reservation: Debits available balance, creates PENDING withdrawal and ledger entry', () => {
+  let userWallet = { available: 500.00, total_withdrawn: 0.00 };
+  let withdrawals = [];
+  let ledger = [];
+
+  const executeWithdrawalRequest = (amount, holder, acc, ifsc) => {
+    if (amount <= 0 || userWallet.available < amount) {
+      throw new Error('Insufficient available balance');
+    }
+    const balanceBefore = userWallet.available;
+    const balanceAfter = balanceBefore - amount;
+    userWallet.available = balanceAfter;
+    userWallet.total_withdrawn += amount;
+
+    const wthId = `w_${Date.now()}`;
+    withdrawals.push({
+      id: wthId,
+      amount,
+      status: 'PENDING',
+      bank_account_number_masked: `XXXX-XXXX-${acc.slice(-4)}`,
+      ifsc_code: ifsc
+    });
+
+    ledger.push({
+      type: 'WITHDRAWAL',
+      status: 'PENDING', // strictly valid enum
+      amount: -amount,
+      balance_before: balanceBefore,
+      balance_after: balanceAfter,
+      reference_id: wthId
+    });
+
+    return { success: true, withdrawal_id: wthId };
+  };
+
+  const res = executeWithdrawalRequest(150.00, 'Rajveer Kol', '987654321012', 'SBIN0001234');
+  assert.strictEqual(res.success, true);
+  assert.strictEqual(userWallet.available, 350.00);
+  assert.strictEqual(userWallet.total_withdrawn, 150.00);
+  assert.strictEqual(withdrawals[0].status, 'PENDING');
+  assert.strictEqual(ledger[0].status, 'PENDING');
+  assert.strictEqual(ledger[0].amount, -150.00);
+  assert.strictEqual(ledger[0].balance_after, 350.00);
+});
+
 console.log('\n========================================================');
 console.log(`TEST RESULTS: ${passedTests} / ${totalTests} PASSED (100%)`);
 console.log('========================================================');

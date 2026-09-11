@@ -11,13 +11,11 @@ interface WithdrawModalProps {
 
 export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose }) => {
   const { user, wallet, refreshWallet } = useAuth();
-  const [method, setMethod] = useState<'BANK' | 'UPI'>('UPI');
   const [amount, setAmount] = useState('');
   const [accountHolder, setAccountHolder] = useState(user?.full_name || '');
   const [accountNumber, setAccountNumber] = useState('');
   const [confirmAccountNumber, setConfirmAccountNumber] = useState('');
   const [ifsc, setIfsc] = useState('');
-  const [upiId, setUpiId] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -47,24 +45,17 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
       return;
     }
 
-    if (method === 'BANK') {
-      if (!accountNumber.trim() || accountNumber.length < 9) {
-        setErrorMsg('Please enter a valid bank account number.');
-        return;
-      }
-      if (accountNumber !== confirmAccountNumber) {
-        setErrorMsg('Bank account numbers do not match.');
-        return;
-      }
-      if (!ifsc.trim() || ifsc.length < 11) {
-        setErrorMsg('Please enter a valid 11-character IFSC code.');
-        return;
-      }
-    } else {
-      if (!upiId.trim() || !upiId.includes('@')) {
-        setErrorMsg('Please enter a valid UPI ID (e.g. yourname@upi).');
-        return;
-      }
+    if (!accountNumber.trim() || accountNumber.length < 9) {
+      setErrorMsg('Please enter a valid bank account number (min 9 digits).');
+      return;
+    }
+    if (accountNumber !== confirmAccountNumber) {
+      setErrorMsg('Bank account numbers do not match.');
+      return;
+    }
+    if (!ifsc.trim() || !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc.trim().toUpperCase())) {
+      setErrorMsg('Please enter a valid 11-character IFSC code (e.g. HDFC0001234).');
+      return;
     }
 
     try {
@@ -74,10 +65,9 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
       const result = await walletService.requestWithdrawal(
         {
           amount: numAmount,
-          accountHolderName: accountHolder,
-          bankAccountNumber: method === 'BANK' ? accountNumber : undefined,
-          ifscCode: method === 'BANK' ? ifsc.toUpperCase() : undefined,
-          upiId: method === 'UPI' ? upiId : undefined,
+          accountHolderName: accountHolder.trim(),
+          bankAccountNumber: accountNumber.trim(),
+          ifscCode: ifsc.trim().toUpperCase(),
         },
         idempotencyKey
       );
@@ -133,10 +123,9 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
               <div className="flex items-start gap-2">
                 <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-bold">Automated Payout System Notice:</p>
+                  <p className="font-bold">Bank Payout Notice:</p>
                   <p className="text-[11px] text-amber-800 mt-0.5">
-                    Live payout provider (RazorpayX / Cashfree) is in standard queue mode. Your
-                    withdrawal will be audited and processed by the system administrator.
+                    Your bank account withdrawal request is queued in PENDING status and will be processed via our secure payout gateway.
                   </p>
                 </div>
               </div>
@@ -157,32 +146,6 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
                 <span>{errorMsg}</span>
               </div>
             )}
-
-            {/* Method Toggle: UPI vs Bank Account */}
-            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-2xl">
-              <button
-                type="button"
-                onClick={() => setMethod('UPI')}
-                className={`py-2 text-xs font-bold rounded-xl transition-all ${
-                  method === 'UPI'
-                    ? 'bg-white text-blue-600 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Instant UPI ID
-              </button>
-              <button
-                type="button"
-                onClick={() => setMethod('BANK')}
-                className={`py-2 text-xs font-bold rounded-xl transition-all ${
-                  method === 'BANK'
-                    ? 'bg-white text-blue-600 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Bank Account
-              </button>
-            </div>
 
             {/* Withdrawal Amount */}
             <div>
@@ -222,62 +185,49 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
               />
             </div>
 
-            {method === 'UPI' ? (
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">UPI ID</label>
-                <input
-                  type="text"
-                  value={upiId}
-                  onChange={(e) => setUpiId(e.target.value)}
-                  placeholder="e.g. mobile@paytm or name@okaxis"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-hidden focus:border-blue-500 focus:bg-white"
-                  required
-                />
-              </div>
-            ) : (
-              <>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Bank Account Number
-                  </label>
-                  <input
-                    type="password"
-                    value={accountNumber}
-                    onChange={(e) => setAccountNumber(e.target.value)}
-                    placeholder="Enter account number"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-hidden focus:border-blue-500 focus:bg-white"
-                    required
-                  />
-                </div>
+            {/* Bank Account Number */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Bank Account Number
+              </label>
+              <input
+                type="password"
+                value={accountNumber}
+                onChange={(e) => setAccountNumber(e.target.value)}
+                placeholder="Enter bank account number"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-hidden focus:border-blue-500 focus:bg-white"
+                required
+              />
+            </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Confirm Account Number
-                  </label>
-                  <input
-                    type="text"
-                    value={confirmAccountNumber}
-                    onChange={(e) => setConfirmAccountNumber(e.target.value)}
-                    placeholder="Re-enter account number"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-hidden focus:border-blue-500 focus:bg-white"
-                    required
-                  />
-                </div>
+            {/* Confirm Account Number */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Confirm Account Number
+              </label>
+              <input
+                type="text"
+                value={confirmAccountNumber}
+                onChange={(e) => setConfirmAccountNumber(e.target.value)}
+                placeholder="Re-enter bank account number"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-hidden focus:border-blue-500 focus:bg-white"
+                required
+              />
+            </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">IFSC Code</label>
-                  <input
-                    type="text"
-                    value={ifsc}
-                    onChange={(e) => setIfsc(e.target.value.toUpperCase())}
-                    placeholder="e.g. HDFC0001234"
-                    maxLength={11}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono uppercase focus:outline-hidden focus:border-blue-500 focus:bg-white"
-                    required
-                  />
-                </div>
-              </>
-            )}
+            {/* IFSC Code */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">IFSC Code</label>
+              <input
+                type="text"
+                value={ifsc}
+                onChange={(e) => setIfsc(e.target.value.toUpperCase())}
+                placeholder="e.g. HDFC0001234"
+                maxLength={11}
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono uppercase focus:outline-hidden focus:border-blue-500 focus:bg-white"
+                required
+              />
+            </div>
 
             {/* Fee note */}
             <div className="p-3 bg-blue-50/70 border border-blue-100 rounded-2xl text-[11px] text-blue-800 flex justify-between items-center">
