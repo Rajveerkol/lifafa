@@ -72,35 +72,76 @@ serve(async (req: Request) => {
       });
     }
 
-    // 2. Authorize admin caller (matches Migration 015 parameter check_user_id)
-    const { data: isAdmin, error: adminErr } = await adminClient.rpc('is_admin', {
+    // 2. Parse input and handle orchestration or direct dispatch
+    let body: any = {};
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { data: isAdmin } = await adminClient.rpc('is_admin', {
       check_user_id: user.id,
     });
 
-    if (adminErr || !isAdmin) {
-      return new Response(JSON.stringify({ error: 'Forbidden: Admin access required for payout dispatch' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    let withdrawal_id: string | undefined = body?.withdrawal_id;
 
-    // 3. Parse input
-    let withdrawal_id: string | undefined;
-    try {
-      const body = await req.json();
-      withdrawal_id = body?.withdrawal_id;
-    } catch {
-      return new Response(JSON.stringify({ error: 'Missing withdrawal_id parameter' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // A. ORCHESTRATOR MODE: User requests withdrawal and automatic dispatch in one server-side flow
+    if (body?.action === 'request_and_dispatch') {
+      const { amount, accountHolderName, bankAccountNumber, ifscCode, idempotencyKey } = body;
+
+      if (!amount || !accountHolderName || !bankAccountNumber || !ifscCode) {
+        return new Response(
+          JSON.stringify({ error: 'Missing required withdrawal fields (amount, accountHolderName, bankAccountNumber, ifscCode)' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Execute request_withdrawal_rpc server-side with caller's user session
+      const { data: rpcRes, error: rpcErr } = await userClient.rpc('request_withdrawal_rpc', {
+        p_amount: Number(amount),
+        p_account_holder_name: String(accountHolderName).trim(),
+        p_bank_account_number: String(bankAccountNumber).trim(),
+        p_ifsc_code: String(ifscCode).trim().toUpperCase(),
+        p_upi_id: null,
+        p_idempotency_key: idempotencyKey || null,
       });
+
+      if (rpcErr || !rpcRes?.success) {
+        return new Response(
+          JSON.stringify({ error: rpcErr?.message || 'Failed to initiate withdrawal' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      withdrawal_id = rpcRes.withdrawal_id;
     }
 
     if (!withdrawal_id) {
-      return new Response(JSON.stringify({ error: 'Missing withdrawal_id parameter' }), {
+      return new Response(JSON.stringify({ error: 'Missing withdrawal_id parameter or action' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Authorization check for dispatching existing withdrawal
+    if (!isAdmin && body?.action !== 'request_and_dispatch') {
+      // Caller must own the withdrawal if not admin
+      const { data: existingWth } = await adminClient
+        .from('withdrawals')
+        .select('user_id')
+        .eq('id', withdrawal_id)
+        .maybeSingle();
+
+      if (!existingWth || existingWth.user_id !== user.id) {
+        return new Response(JSON.stringify({ error: 'Forbidden: Access denied to this withdrawal' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     // 4. Concurrently lock withdrawal from PENDING -> PROCESSING with deterministic ORD_<withdrawal_id>
@@ -116,7 +157,7 @@ serve(async (req: Request) => {
       })
       .eq('id', withdrawal_id)
       .eq('status', 'PENDING')
-      .select('id, amount, net_amount, account_holder_name, ifsc_code, bank_account_number_masked, upi_id, status');
+      .select('id, user_id, amount, fee_amount, net_amount, account_holder_name, ifsc_code, bank_account_number_masked, upi_id, status');
 
     if (lockErr || !lockedRows || lockedRows.length === 0) {
       return new Response(
@@ -180,7 +221,7 @@ serve(async (req: Request) => {
     // 6. Formulate exact documented PayRupee API payload
     const payoutPayload = {
       order_id: deterministicOrderId,
-      amount: Number(withdrawal.net_amount || withdrawal.amount),
+      amount: Number(withdrawal.net_amount != null ? withdrawal.net_amount : withdrawal.amount),
       currency: 'INR',
       method: 'bank',
       recipient: {
@@ -242,22 +283,22 @@ serve(async (req: Request) => {
       const providerReferenceId = payrupeeData.reference_id || payrupeeData.payout_id || deterministicOrderId;
 
       // Update withdrawal to SUCCESS via admin_update_withdrawal_rpc
-      // Important: admin_update_withdrawal_rpc finalizes withdrawal state to SUCCESS without crediting wallet (funds were debited at request time)
-      const { error: successErr } = await userClient.rpc('admin_update_withdrawal_rpc', {
+      // adminClient provides service_role authorization permitted by Migration 020
+      const { error: adminErr } = await adminClient.rpc('admin_update_withdrawal_rpc', {
         p_withdrawal_id: withdrawal.id,
         p_new_status: 'SUCCESS',
         p_payout_reference_id: providerReferenceId,
       });
 
-      if (successErr) {
-        // Fallback to adminClient
-        const { error: adminErr } = await adminClient.rpc('admin_update_withdrawal_rpc', {
+      if (adminErr) {
+        // Fallback to userClient if caller was an admin user
+        const { error: userRpcErr } = await userClient.rpc('admin_update_withdrawal_rpc', {
           p_withdrawal_id: withdrawal.id,
           p_new_status: 'SUCCESS',
           p_payout_reference_id: providerReferenceId,
         });
 
-        if (adminErr) {
+        if (userRpcErr) {
           // Direct atomic update if RPC fails
           await adminClient
             .from('withdrawals')
@@ -391,8 +432,8 @@ serve(async (req: Request) => {
     });
 
     // Execute single reversal refund via admin_update_withdrawal_rpc
-    // userClient provides auth.uid() for has_admin_role check and admin_audit_logs
-    const { error: refundErr } = await userClient.rpc('admin_update_withdrawal_rpc', {
+    // adminClient provides service_role authorization permitted by Migration 020
+    const { error: refundErr } = await adminClient.rpc('admin_update_withdrawal_rpc', {
       p_withdrawal_id: withdrawal.id,
       p_new_status: 'FAILED',
       p_payout_reference_id: deterministicOrderId,
@@ -400,7 +441,8 @@ serve(async (req: Request) => {
     });
 
     if (refundErr) {
-      await adminClient.rpc('admin_update_withdrawal_rpc', {
+      // Fallback to userClient if caller was an admin user
+      await userClient.rpc('admin_update_withdrawal_rpc', {
         p_withdrawal_id: withdrawal.id,
         p_new_status: 'FAILED',
         p_payout_reference_id: deterministicOrderId,

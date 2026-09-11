@@ -47,23 +47,34 @@ export const walletService = {
     return (data || []) as WalletTransaction[];
   },
 
-  // Request withdrawal via atomic server RPC (Bank Account Only)
+  // Request withdrawal via server-side orchestrator Edge Function (Bank Account Only)
   async requestWithdrawal(params: RequestWithdrawalParams, idempotencyKey?: string) {
     if (!isSupabaseConfigured || !supabase) {
       throw new Error('Supabase database is not configured.');
     }
 
-    const { data, error } = await supabase.rpc('request_withdrawal_rpc', {
-      p_amount: params.amount,
-      p_account_holder_name: params.accountHolderName.trim(),
-      p_bank_account_number: params.bankAccountNumber.trim(),
-      p_ifsc_code: params.ifscCode.trim().toUpperCase(),
-      p_upi_id: params.upiId?.trim() || null,
-      p_idempotency_key: idempotencyKey || null,
+    const { data, error } = await supabase.functions.invoke('payrupee-payout', {
+      body: {
+        action: 'request_and_dispatch',
+        amount: params.amount,
+        accountHolderName: params.accountHolderName.trim(),
+        bankAccountNumber: params.bankAccountNumber.trim(),
+        ifscCode: params.ifscCode.trim().toUpperCase(),
+        idempotencyKey: idempotencyKey || null,
+      },
     });
 
     if (error) {
-      throw new Error(error.message || 'Withdrawal request failed');
+      // If error returned with response data, extract the specific error message
+      const errMsg = data?.error || data?.message || error.message || 'Withdrawal request failed';
+      if (data?.status === 'PROCESSING') {
+        return data;
+      }
+      throw new Error(errMsg);
+    }
+
+    if (data?.error) {
+      throw new Error(data.error);
     }
 
     return data;

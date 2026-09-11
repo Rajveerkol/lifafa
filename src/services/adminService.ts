@@ -239,6 +239,23 @@ export const adminService = {
     return data;
   },
 
+  // Dispatch pending withdrawal to PayRupee Edge Function
+  async dispatchPendingPayout(withdrawalId: string) {
+    if (!isSupabaseConfigured || !supabase) {
+      throw new Error('Supabase is not configured.');
+    }
+
+    const { data, error } = await supabase.functions.invoke('payrupee-payout', {
+      body: { withdrawal_id: withdrawalId },
+    });
+
+    if (error) {
+      throw new Error(data?.error || error.message || 'Payout dispatch failed');
+    }
+
+    return data;
+  },
+
   // Fraud Flags List
   async getFraudFlags(): Promise<FraudFlag[]> {
     if (!isSupabaseConfigured || !supabase) return [];

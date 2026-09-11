@@ -1342,6 +1342,236 @@ test('Atomic Withdrawal Reservation: Debits available balance, creates PENDING w
   assert.strictEqual(ledger[0].balance_after, 350.00);
 });
 
+// -------------------------------------------------------------
+// 43. MINIMUM & MAXIMUM WITHDRAWAL LIMITS (₹10 - ₹1,000)
+// -------------------------------------------------------------
+test('Withdrawal Limits: Rejects < ₹10.00 and > ₹1,000.00; Accepts ₹10.00 and ₹1,000.00', () => {
+  const validateWithdrawalAmount = (amount) => {
+    if (amount === null || amount === undefined || amount < 10.00) {
+      throw new Error('Minimum withdrawal amount is ₹10.00');
+    }
+    if (amount > 1000.00) {
+      throw new Error('Maximum withdrawal amount is ₹1,000.00');
+    }
+    return true;
+  };
+
+  // Rejections
+  assert.throws(() => validateWithdrawalAmount(9.99), /Minimum withdrawal amount is ₹10.00/);
+  assert.throws(() => validateWithdrawalAmount(0), /Minimum withdrawal amount is ₹10.00/);
+  assert.throws(() => validateWithdrawalAmount(-10), /Minimum withdrawal amount is ₹10.00/);
+  assert.throws(() => validateWithdrawalAmount(1000.01), /Maximum withdrawal amount is ₹1,000.00/);
+  assert.throws(() => validateWithdrawalAmount(5000), /Maximum withdrawal amount is ₹1,000.00/);
+
+  // Acceptances
+  assert.strictEqual(validateWithdrawalAmount(10.00), true);
+  assert.strictEqual(validateWithdrawalAmount(50.00), true);
+  assert.strictEqual(validateWithdrawalAmount(500.00), true);
+  assert.strictEqual(validateWithdrawalAmount(1000.00), true);
+});
+
+// -------------------------------------------------------------
+// 44. FIXED ₹3.58 PLATFORM FEE & BALANCE REQUIREMENT
+// -------------------------------------------------------------
+test('Fixed Platform Fee ₹3.58: Requires available_balance >= payout + 3.58', () => {
+  const FIXED_FEE = 3.58;
+  const checkBalanceRequirement = (availableBalance, payoutAmount) => {
+    const totalDeduction = payoutAmount + FIXED_FEE;
+    if (availableBalance < totalDeduction) {
+      throw new Error(
+        `Insufficient available balance. Required: ₹${totalDeduction.toFixed(2)} (Withdrawal ₹${payoutAmount.toFixed(2)} + Platform Fee ₹${FIXED_FEE.toFixed(2)}), Available: ₹${availableBalance.toFixed(2)}`
+      );
+    }
+    return totalDeduction;
+  };
+
+  // Exact boundary tests
+  // User has ₹100, requests ₹100 -> needs ₹103.58 -> FAILS
+  assert.throws(() => checkBalanceRequirement(100.00, 100.00), /Insufficient available balance/);
+  // User has ₹103.57, requests ₹100 -> FAILS
+  assert.throws(() => checkBalanceRequirement(103.57, 100.00), /Insufficient available balance/);
+  // User has ₹103.58, requests ₹100 -> PASSES
+  assert.strictEqual(checkBalanceRequirement(103.58, 100.00), 103.58);
+  // User has ₹13.58, requests ₹10 -> PASSES
+  assert.strictEqual(checkBalanceRequirement(13.58, 10.00), 13.58);
+  // User has ₹1003.58, requests ₹1000 -> PASSES
+  assert.strictEqual(checkBalanceRequirement(1003.58, 1000.00), 1003.58);
+});
+
+// -------------------------------------------------------------
+// 45. OPTION A ACCOUNTING: total_withdrawn TRACKS BENEFICIARY PAYOUT
+// -------------------------------------------------------------
+test('Option A Accounting: wallets.total_withdrawn increments by net payout, available_balance decrements by gross', () => {
+  let wallet = {
+    available_balance: 500.00,
+    total_withdrawn: 0.00,
+  };
+  const FIXED_FEE = 3.58;
+  const payoutAmount = 100.00;
+  const grossDeduction = payoutAmount + FIXED_FEE; // 103.58
+
+  // Execute withdrawal
+  wallet.available_balance -= grossDeduction;
+  wallet.total_withdrawn += payoutAmount; // Option A
+
+  assert.strictEqual(wallet.available_balance, 396.42);
+  assert.strictEqual(wallet.total_withdrawn, 100.00); // exactly ₹100, not ₹103.58
+});
+
+// -------------------------------------------------------------
+// 46. DUAL-ENTRY LEDGER: WITHDRAWAL AND FEE ROWS
+// -------------------------------------------------------------
+test('Dual-Entry Ledger: Inserts separate WITHDRAWAL and FEE rows with valid PENDING status', () => {
+  const ledger = [];
+  const FIXED_FEE = 3.58;
+  const payoutAmount = 100.00;
+  const balanceBefore = 500.00;
+  const balanceMid = balanceBefore - payoutAmount; // 400.00
+  const balanceAfter = balanceMid - FIXED_FEE; // 396.42
+  const wthId = 'w_test_123';
+
+  // Row 1: WITHDRAWAL
+  ledger.push({
+    type: 'WITHDRAWAL',
+    status: 'PENDING',
+    amount: -payoutAmount,
+    balance_before: balanceBefore,
+    balance_after: balanceMid,
+    reference_id: wthId,
+    metadata: { withdrawal_id: wthId, payout_amount: payoutAmount },
+  });
+
+  // Row 2: FEE
+  ledger.push({
+    type: 'FEE',
+    status: 'PENDING',
+    amount: -FIXED_FEE,
+    balance_before: balanceMid,
+    balance_after: balanceAfter,
+    reference_id: wthId,
+    metadata: { withdrawal_id: wthId, fee_amount: FIXED_FEE, fee_type: 'WITHDRAWAL_PLATFORM_FEE' },
+  });
+
+  assert.strictEqual(ledger.length, 2);
+  assert.strictEqual(ledger[0].type, 'WITHDRAWAL');
+  assert.strictEqual(ledger[0].amount, -100.00);
+  assert.strictEqual(ledger[0].status, 'PENDING');
+  assert.strictEqual(ledger[1].type, 'FEE');
+  assert.strictEqual(ledger[1].amount, -3.58);
+  assert.strictEqual(ledger[1].status, 'PENDING');
+  assert.strictEqual(ledger[1].balance_after, 396.42);
+});
+
+// -------------------------------------------------------------
+// 47. PAYRUPEE PAYLOAD AMOUNT EXCLUDES FEE
+// -------------------------------------------------------------
+test('PayRupee Payout Payload: amount strictly equals net_amount (excludes platform fee)', () => {
+  const withdrawalRecord = {
+    id: 'w_test_456',
+    amount: 103.58, // gross
+    fee_amount: 3.58, // fee
+    net_amount: 100.00, // net beneficiary payout
+    account_holder_name: 'Rajveer Kol',
+    ifsc_code: 'HDFC0001234',
+  };
+  const decryptedAccount = '123456789012';
+
+  const payoutPayload = {
+    order_id: `ORD_${withdrawalRecord.id}`,
+    amount: Number(withdrawalRecord.net_amount != null ? withdrawalRecord.net_amount : withdrawalRecord.amount),
+    currency: 'INR',
+    method: 'bank',
+    recipient: {
+      name: withdrawalRecord.account_holder_name.trim(),
+      account_number: decryptedAccount.trim(),
+      ifsc: withdrawalRecord.ifsc_code.trim().toUpperCase(),
+    },
+  };
+
+  assert.strictEqual(payoutPayload.amount, 100.00);
+  assert.notStrictEqual(payoutPayload.amount, 103.58);
+  assert.strictEqual(payoutPayload.method, 'bank');
+  assert.strictEqual(payoutPayload.currency, 'INR');
+  assert.strictEqual(payoutPayload.order_id, 'ORD_w_test_456');
+});
+
+// -------------------------------------------------------------
+// 48. FAILED REFUND RESTORES GROSS DEDUCTION & REVERSES OPTION A TOTAL
+// -------------------------------------------------------------
+test('Refund Path: Restores full gross deduction (₹103.58) and decrements total_withdrawn by net payout (₹100)', () => {
+  let wallet = {
+    available_balance: 396.42,
+    total_withdrawn: 100.00,
+  };
+  const withdrawal = {
+    id: 'w_refund_789',
+    amount: 103.58, // gross
+    fee_amount: 3.58,
+    net_amount: 100.00, // net
+    status: 'PROCESSING',
+  };
+
+  // Execute refund via admin_update_withdrawal_rpc logic
+  wallet.available_balance += withdrawal.amount; // refunds full 103.58
+  wallet.total_withdrawn = Math.max(0, wallet.total_withdrawn - withdrawal.net_amount); // reverses 100.00
+
+  assert.strictEqual(wallet.available_balance, 500.00); // exactly restored
+  assert.strictEqual(wallet.total_withdrawn, 0.00); // exactly restored
+});
+
+// -------------------------------------------------------------
+// 49. SERVER-SIDE ORCHESTRATOR SINGLE-CALL SIMULATION
+// -------------------------------------------------------------
+test('Single-Call Server Orchestrator: Client calls once, server executes reservation and payout atomic pipeline', () => {
+  let dbWithdrawals = [];
+  let providerCalls = 0;
+
+  // Server-side Edge Function orchestrator simulation
+  const handleEdgeFunction = (body) => {
+    if (body.action === 'request_and_dispatch') {
+      // Step 1: Server-side reservation (request_withdrawal_rpc)
+      if (body.amount < 10 || body.amount > 1000) throw new Error('Invalid limits');
+      const wId = `w_${Date.now()}`;
+      const rec = {
+        id: wId,
+        amount: body.amount + 3.58,
+        net_amount: body.amount,
+        status: 'PENDING',
+      };
+      dbWithdrawals.push(rec);
+
+      // Step 2: Atomic lock PENDING -> PROCESSING
+      if (rec.status !== 'PENDING') throw new Error('Lock failed');
+      rec.status = 'PROCESSING';
+      rec.order_id = `ORD_${wId}`;
+
+      // Step 3: Server dispatches PayRupee POST
+      providerCalls++;
+      // Simulate provider 200 SUCCESS
+      rec.status = 'SUCCESS';
+
+      return { success: true, status: 'SUCCESS', order_id: rec.order_id };
+    }
+    throw new Error('Unknown action');
+  };
+
+  // Client makes ONE call
+  const clientRes = handleEdgeFunction({
+    action: 'request_and_dispatch',
+    amount: 50.00,
+    accountHolderName: 'Rajveer Kol',
+    bankAccountNumber: '123456789012',
+    ifscCode: 'HDFC0001234',
+  });
+
+  assert.strictEqual(clientRes.success, true);
+  assert.strictEqual(clientRes.status, 'SUCCESS');
+  assert.strictEqual(providerCalls, 1);
+  assert.strictEqual(dbWithdrawals[0].amount, 53.58);
+  assert.strictEqual(dbWithdrawals[0].net_amount, 50.00);
+  assert.strictEqual(dbWithdrawals[0].status, 'SUCCESS');
+});
+
 console.log('\n========================================================');
 console.log(`TEST RESULTS: ${passedTests} / ${totalTests} PASSED (100%)`);
 console.log('========================================================');

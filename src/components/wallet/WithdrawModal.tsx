@@ -25,18 +25,27 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
 
   const availableBalance = wallet?.available_balance ?? 0;
   const numAmount = parseFloat(amount) || 0;
+  const FIXED_FEE = 3.58;
+  const totalDeduction = numAmount > 0 ? Math.round((numAmount + FIXED_FEE) * 100) / 100 : 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
 
-    if (numAmount <= 0) {
-      setErrorMsg('Please enter a valid withdrawal amount.');
+    if (numAmount < 10) {
+      setErrorMsg('Minimum withdrawal amount is ₹10.00.');
       return;
     }
 
-    if (numAmount > availableBalance) {
-      setErrorMsg(`Insufficient available balance (${formatCurrency(availableBalance)}).`);
+    if (numAmount > 1000) {
+      setErrorMsg('Maximum withdrawal amount is ₹1,000.00.');
+      return;
+    }
+
+    if (totalDeduction > availableBalance) {
+      setErrorMsg(
+        `Insufficient available balance. You need ${formatCurrency(totalDeduction)} (${formatCurrency(numAmount)} payout + ₹${FIXED_FEE} platform fee), but only have ${formatCurrency(availableBalance)}.`
+      );
       return;
     }
 
@@ -111,23 +120,25 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
               <CheckCircle2 className="w-8 h-8" />
             </div>
             <h4 className="text-lg font-bold text-slate-900 mb-1">
-              Withdrawal Request Placed!
+              {successData.status === 'SUCCESS' ? 'Withdrawal Successful!' : 'Withdrawal Processing'}
             </h4>
             <p className="text-xs text-slate-600 mb-4 max-w-sm mx-auto">
-              Your request for <strong>{formatCurrency(numAmount)}</strong> has been recorded in
-              PENDING status.
+              Your bank payout of <strong>{formatCurrency(numAmount)}</strong> has been {successData.status === 'SUCCESS' ? 'dispatched successfully' : 'initiated and is being processed'}.
             </p>
 
-            {/* Payout abstraction note */}
-            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 mb-5 text-left text-xs text-amber-900">
-              <div className="flex items-start gap-2">
-                <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-bold">Bank Payout Notice:</p>
-                  <p className="text-[11px] text-amber-800 mt-0.5">
-                    Your bank account withdrawal request is queued in PENDING status and will be processed via our secure payout gateway.
-                  </p>
-                </div>
+            {/* Breakdown summary */}
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 mb-5 text-left text-xs space-y-1.5">
+              <div className="flex justify-between text-slate-600">
+                <span>Beneficiary Payout:</span>
+                <span className="font-bold text-slate-900">{formatCurrency(numAmount)}</span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Platform Fee:</span>
+                <span className="font-bold text-slate-900">₹{FIXED_FEE.toFixed(2)}</span>
+              </div>
+              <div className="pt-1.5 border-t border-slate-200 flex justify-between font-bold text-slate-900">
+                <span>Total Debited:</span>
+                <span className="text-blue-600">{formatCurrency(totalDeduction)}</span>
               </div>
             </div>
 
@@ -149,21 +160,26 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
 
             {/* Withdrawal Amount */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Withdrawal Amount (₹)
-              </label>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-xs font-bold text-slate-700">
+                  Withdrawal Amount (₹)
+                </label>
+                <span className="text-[10px] text-slate-400 font-medium">
+                  Min ₹10 • Max ₹1,000
+                </span>
+              </div>
               <div className="relative">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">
                   ₹
                 </span>
                 <input
                   type="number"
-                  min="1"
-                  max={availableBalance}
+                  min="10"
+                  max="1000"
                   step="any"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0.00"
+                  placeholder="10.00"
                   className="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:outline-hidden focus:border-blue-500 focus:bg-white transition-colors"
                   required
                 />
@@ -229,18 +245,32 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
               />
             </div>
 
-            {/* Fee note */}
-            <div className="p-3 bg-blue-50/70 border border-blue-100 rounded-2xl text-[11px] text-blue-800 flex justify-between items-center">
-              <span>Platform Fee:</span>
-              <span className="font-bold">₹0.00 (0% Promo)</span>
+            {/* Dynamic Fee & Payout Breakdown */}
+            <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-1.5">
+              <div className="flex justify-between items-center text-slate-600">
+                <span>Beneficiary Payout:</span>
+                <span className="font-bold text-slate-900">{formatCurrency(numAmount || 0)}</span>
+              </div>
+              <div className="flex justify-between items-center text-slate-600">
+                <span>Fixed Platform Fee:</span>
+                <span className="font-bold text-slate-900">₹{FIXED_FEE.toFixed(2)}</span>
+              </div>
+              <div className="pt-1.5 border-t border-slate-200 flex justify-between items-center font-bold text-slate-900">
+                <span>Total Wallet Deduction:</span>
+                <span className="text-blue-600">{formatCurrency(totalDeduction)}</span>
+              </div>
             </div>
 
             <button
               type="submit"
-              disabled={loading || availableBalance <= 0}
+              disabled={loading || availableBalance < totalDeduction || numAmount < 10}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-2xl shadow-lg shadow-blue-500/25 active:scale-98 transition-all text-sm flex items-center justify-center gap-2"
             >
-              {loading ? 'Submitting Request...' : `Withdraw ${formatCurrency(numAmount || 0)}`}
+              {loading
+                ? 'Processing Payout...'
+                : numAmount >= 10
+                ? `Withdraw ${formatCurrency(numAmount)} (Total: ${formatCurrency(totalDeduction)})`
+                : 'Enter Amount (Min ₹10)'}
             </button>
           </form>
         )}

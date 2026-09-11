@@ -380,6 +380,17 @@ export const AdminPage: React.FC = () => {
     }
   };
 
+  const handleDispatchPendingPayout = async (wId: string) => {
+    if (!confirm('Dispatch this pending withdrawal to PayRupee now?')) return;
+    try {
+      const res = await adminService.dispatchPendingPayout(wId);
+      alert(`Payout result: ${res?.status || 'Dispatched'}`);
+      await loadData();
+    } catch (err: any) {
+      alert(err.message || 'Dispatch failed');
+    }
+  };
+
   const handleDispatchNotification = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!notifTitle.trim() || !notifMessage.trim()) return;
@@ -1296,14 +1307,15 @@ export const AdminPage: React.FC = () => {
                     {w.status === 'PENDING' && (
                       <div className="flex items-center gap-1.5">
                         <button
-                          onClick={() => handleWithdrawalStatusUpdate(w.id, 'SUCCESS')}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1.5 rounded-xl text-[11px]"
+                          onClick={() => handleDispatchPendingPayout(w.id)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-2.5 py-1.5 rounded-xl text-[11px]"
+                          title="Trigger automatic PayRupee payout dispatch"
                         >
-                          Approve Payout
+                          Dispatch Now
                         </button>
                         <button
                           onClick={() => {
-                            const reason = prompt('Enter rejection reason:') || 'Invalid details';
+                            const reason = prompt('Enter rejection reason:') || 'Administrative cancellation';
                             handleWithdrawalStatusUpdate(w.id, 'FAILED', reason);
                           }}
                           className="bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold px-2.5 py-1.5 rounded-xl text-[11px]"
