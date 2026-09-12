@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Wallet, AlertCircle, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { walletService } from '../../services/walletService';
@@ -21,9 +21,36 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successData, setSuccessData] = useState<any | null>(null);
 
+  const [withdrawableData, setWithdrawableData] = useState<{
+    available_balance: number;
+    blocked_balance: number;
+    withdrawable_balance: number;
+  }>({
+    available_balance: wallet?.available_balance ?? 0,
+    blocked_balance: 0,
+    withdrawable_balance: wallet?.available_balance ?? 0,
+  });
+
+  useEffect(() => {
+    if (isOpen) {
+      let isMounted = true;
+      walletService.getWithdrawableBalance().then((res) => {
+        if (isMounted) {
+          setWithdrawableData(res);
+        }
+      }).catch((e) => {
+        console.error('Failed to fetch withdrawable balance', e);
+      });
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [isOpen, wallet?.available_balance]);
+
   if (!isOpen) return null;
 
   const availableBalance = wallet?.available_balance ?? 0;
+  const effectiveWithdrawable = withdrawableData.withdrawable_balance;
   const numAmount = parseFloat(amount) || 0;
   const FIXED_FEE = 3.58;
   const totalDeduction = numAmount > 0 ? Math.round((numAmount + FIXED_FEE) * 100) / 100 : 0;
@@ -42,10 +69,16 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
       return;
     }
 
-    if (totalDeduction > availableBalance) {
-      setErrorMsg(
-        `Insufficient available balance. You need ${formatCurrency(totalDeduction)} (${formatCurrency(numAmount)} payout + ₹${FIXED_FEE} platform fee), but only have ${formatCurrency(availableBalance)}.`
-      );
+    if (totalDeduction > effectiveWithdrawable) {
+      if (withdrawableData.blocked_balance > 0) {
+        setErrorMsg(
+          `Withdrawal exceeds your eligible balance. You need ${formatCurrency(totalDeduction)} (${formatCurrency(numAmount)} payout + ₹${FIXED_FEE} platform fee), but only have ${formatCurrency(effectiveWithdrawable)} eligible for withdrawal (${formatCurrency(withdrawableData.blocked_balance)} is currently restricted under Lifafa withdrawal policy).`
+        );
+      } else {
+        setErrorMsg(
+          `Insufficient available balance. You need ${formatCurrency(totalDeduction)} (${formatCurrency(numAmount)} payout + ₹${FIXED_FEE} platform fee), but only have ${formatCurrency(availableBalance)}.`
+        );
+      }
       return;
     }
 
@@ -102,7 +135,9 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
             <div>
               <h3 className="text-base font-bold">Withdraw Funds</h3>
               <p className="text-[11px] text-blue-100">
-                Available: {formatCurrency(availableBalance)}
+                {withdrawableData.blocked_balance > 0
+                  ? `Withdrawable: ${formatCurrency(withdrawableData.withdrawable_balance)} • Total: ${formatCurrency(availableBalance)}`
+                  : `Available: ${formatCurrency(availableBalance)}`}
               </p>
             </div>
           </div>
@@ -113,6 +148,19 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
             <X className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Restricted Funds Notice Banner */}
+        {withdrawableData.blocked_balance > 0 && !successData && (
+          <div className="mx-6 mt-4 p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-2.5 text-xs text-amber-900">
+            <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold block">Lifafa Withdrawal Restriction</span>
+              <p className="text-[11px] text-amber-800 leading-snug mt-0.5">
+                {formatCurrency(withdrawableData.blocked_balance)} of your balance is currently restricted from withdrawal under Lifafa policy. You can withdraw up to <strong>{formatCurrency(withdrawableData.withdrawable_balance)}</strong>.
+              </p>
+            </div>
+          </div>
+        )}
 
         {successData ? (
           <div className="p-6 text-center">

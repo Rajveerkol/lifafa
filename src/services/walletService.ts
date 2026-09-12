@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import type { WalletTransaction, Withdrawal, PlatformFee } from '../types/database';
+import type { WalletTransaction, Withdrawal, PlatformFee, WithdrawableBalanceResponse } from '../types/database';
 
 export interface RequestWithdrawalParams {
   amount: number;
@@ -78,6 +78,29 @@ export const walletService = {
     }
 
     return data;
+  },
+
+  // Fetch server-authoritative withdrawable balance breakdown
+  async getWithdrawableBalance(): Promise<WithdrawableBalanceResponse> {
+    if (!isSupabaseConfigured || !supabase) {
+      return { available_balance: 0, blocked_balance: 0, withdrawable_balance: 0 };
+    }
+
+    try {
+      const { data, error } = await supabase.rpc('get_user_withdrawable_balance_rpc');
+      if (error) {
+        console.error('Error fetching withdrawable balance:', error);
+        return { available_balance: 0, blocked_balance: 0, withdrawable_balance: 0 };
+      }
+      return {
+        available_balance: Number(data?.available_balance ?? 0),
+        blocked_balance: Number(data?.blocked_balance ?? 0),
+        withdrawable_balance: Number(data?.withdrawable_balance ?? 0),
+      };
+    } catch (e) {
+      console.error('Exception fetching withdrawable balance:', e);
+      return { available_balance: 0, blocked_balance: 0, withdrawable_balance: 0 };
+    }
   },
 
   // Fetch user's withdrawal requests

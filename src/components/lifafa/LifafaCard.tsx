@@ -63,6 +63,15 @@ export const LifafaCard: React.FC<LifafaCardProps> = ({
             }`}>
               {lifafa.payout_mode === 'UPI_BANK' ? '🏦 UPI/Bank' : '💼 Wallet'}
             </span>
+
+            {lifafa.withdrawal_status === 'BLOCKED' && (
+              <span
+                className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200"
+                title="Withdrawals for rewards originating from this Lifafa are restricted"
+              >
+                🔒 Payout Restricted
+              </span>
+            )}
           </div>
 
           <span

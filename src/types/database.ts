@@ -109,6 +109,7 @@ export interface Lifafa {
   show_remaining: boolean;
   creator_note: string | null;
   payout_mode?: PayoutMode;
+  withdrawal_status?: 'ALLOWED' | 'BLOCKED';
   created_at: string;
   updated_at: string;
   creator_profile?: Profile;
@@ -130,6 +131,7 @@ export interface LifafaClaim {
   user_id: string;
   allocation_id: string;
   amount: number;
+  withdrawn_amount?: number;
   idempotency_key: string | null;
   device_fingerprint: string | null;
   ip_address: string | null;
@@ -137,6 +139,21 @@ export interface LifafaClaim {
   withdrawal_id?: string | null;
   claimed_at: string;
   claimer_profile?: Profile;
+}
+
+export interface WithdrawalSourceAllocation {
+  id: string;
+  withdrawal_id: string;
+  claim_id: string | null;
+  lifafa_id: string | null;
+  allocated_amount: number;
+  created_at: string;
+}
+
+export interface WithdrawableBalanceResponse {
+  available_balance: number;
+  blocked_balance: number;
+  withdrawable_balance: number;
 }
 
 export interface LifafaTask {

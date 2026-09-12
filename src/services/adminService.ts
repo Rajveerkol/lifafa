@@ -194,6 +194,29 @@ export const adminService = {
     return (data || []) as Lifafa[];
   },
 
+  // Set Lifafa withdrawal status (ALLOWED / BLOCKED) with server-side audit logging
+  async setLifafaWithdrawalStatus(
+    lifafaId: string,
+    status: 'ALLOWED' | 'BLOCKED',
+    reason: string
+  ) {
+    if (!isSupabaseConfigured || !supabase) {
+      throw new Error('Supabase database is not configured.');
+    }
+
+    const { data, error } = await supabase.rpc('admin_set_lifafa_withdrawal_status_rpc', {
+      p_lifafa_id: lifafaId,
+      p_status: status,
+      p_reason: reason.trim(),
+    });
+
+    if (error) {
+      throw new Error(error.message || 'Failed to update Lifafa withdrawal status');
+    }
+
+    return data;
+  },
+
   // All Withdrawals with user profile details
   async getAllWithdrawals(): Promise<Withdrawal[]> {
     if (!isSupabaseConfigured || !supabase) return [];
