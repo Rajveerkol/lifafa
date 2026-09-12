@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, Bell, Shield, X, LogIn, LogOut, User, Gift, Wallet, Bot, Home } from 'lucide-react';
+import { Menu, Bell, Shield, X, LogIn, LogOut, User, Gift, Wallet, Bot, Home, Gamepad2 } from 'lucide-react';
 import { Logo } from './Logo';
 import { useAuth } from '../../context/AuthContext';
 import { formatCurrency } from '../../lib/utils';
@@ -23,6 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   const navItems = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'lifafa', label: 'Lifafa', icon: Gift },
+    { id: 'games', label: 'Games', icon: Gamepad2 },
     { id: 'bots', label: 'Bots', icon: Bot, badge: 'Soon' },
     { id: 'wallet', label: 'Wallet', icon: Wallet },
     { id: 'profile', label: 'Profile', icon: User },

@@ -270,3 +270,101 @@ export interface PlatformSetting {
   description: string | null;
   updated_at: string;
 }
+
+// ====================================================================
+// DUEL EARN ARCHITECTURE TYPES (PHASE 1)
+// ====================================================================
+
+export type DuelMatchStatus =
+  | 'WAITING'
+  | 'MATCHED'
+  | 'COUNTDOWN'
+  | 'IN_PROGRESS'
+  | 'ROUND_TRANSITION'
+  | 'COMPLETED'
+  | 'CANCELLED'
+  | 'DISCONNECTED';
+
+export type DuelPlayerSlot = 'PLAYER_1' | 'PLAYER_2';
+
+export type DuelPlayerStatus =
+  | 'WAITING'
+  | 'READY'
+  | 'PLAYING'
+  | 'FINISHED'
+  | 'DISCONNECTED';
+
+export type DuelPlayerResult = 'PLAYING' | 'WON' | 'LOST' | 'DRAW';
+
+export type DuelRoundType =
+  | 'QUICK_QUIZ'
+  | 'PATTERN'
+  | 'MEMORY'
+  | 'ACCURACY'
+  | 'SPEED';
+
+export interface DuelQuestion {
+  id: string;
+  round_type: DuelRoundType;
+  prompt: string;
+  options: string[];
+  correct_answer?: string; // Private, omitted from standard client queries
+  difficulty: 'EASY' | 'MEDIUM' | 'HARD';
+  time_limit_sec: number;
+}
+
+export interface DuelMatch {
+  id: string;
+  status: DuelMatchStatus;
+  current_round: number;
+  winner_id: string | null;
+  is_test_opponent: boolean;
+  match_config?: Record<string, any>;
+  started_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+  players?: DuelPlayer[];
+}
+
+export interface DuelPlayer {
+  id: string;
+  match_id: string;
+  player_id: string | null;
+  player_slot: DuelPlayerSlot;
+  status: DuelPlayerStatus;
+  display_name: string;
+  avatar_url: string | null;
+  score: number;
+  result: DuelPlayerResult;
+  is_test_opponent: boolean;
+  last_heartbeat_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DuelRound {
+  id: string;
+  match_id: string;
+  round_number: number;
+  round_type: DuelRoundType;
+  player_id: string;
+  question_id: string;
+  player_response: string;
+  response_time_ms: number;
+  is_correct: boolean;
+  score_awarded: number;
+  created_at: string;
+}
+
+export interface DuelStats {
+  user_id: string;
+  total_matches: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  win_streak: number;
+  highest_score: number;
+  created_at: string;
+  updated_at: string;
+}

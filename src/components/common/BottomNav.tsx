@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Gift, Bot, Wallet, User } from 'lucide-react';
+import { Home, Gift, Gamepad2, Bot, Wallet, User } from 'lucide-react';
 
 interface BottomNavProps {
   currentTab: string;
@@ -7,11 +7,11 @@ interface BottomNavProps {
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onSelectTab }) => {
-  // Fixed navigation structure strictly following rules:
-  // "There must NOT be a Games section. 'Lifafa' replaces Games completely."
+  // Primary navigation strictly: Home | Lifafa | Games | Bots | Wallet | Profile
   const items = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'lifafa', label: 'Lifafa', icon: Gift },
+    { id: 'games', label: 'Games', icon: Gamepad2 },
     { id: 'bots', label: 'Bots', icon: Bot, isSoon: true },
     { id: 'wallet', label: 'Wallet', icon: Wallet },
     { id: 'profile', label: 'Profile', icon: User },

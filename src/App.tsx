@@ -7,6 +7,7 @@ import { CreateLifafaPage } from './pages/CreateLifafaPage';
 import { WalletPage } from './pages/WalletPage';
 import { BotsPage } from './pages/BotsPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { GamesPage } from './pages/GamesPage';
 import { AdminPage } from './pages/AdminPage';
 import { AccountSecurityPage } from './pages/AccountSecurityPage';
 import { HelpSupportPage } from './pages/HelpSupportPage';
@@ -33,6 +34,7 @@ export function App() {
       [
         'home',
         'lifafa',
+        'games',
         'bots',
         'wallet',
         'profile',
@@ -83,6 +85,7 @@ export function App() {
         [
           'home',
           'lifafa',
+          'games',
           'bots',
           'wallet',
           'profile',
@@ -200,6 +203,8 @@ export function App() {
               onShareClick={handleShareLifafa}
             />
           ))}
+
+        {currentTab === 'games' && <GamesPage />}
 
         {currentTab === 'bots' && <BotsPage onOpenAuth={() => setAuthModalOpen(true)} />}
 
