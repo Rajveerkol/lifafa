@@ -29,6 +29,34 @@ export interface FinalizeMatchResult {
   p2_result: DuelPlayerResult;
 }
 
+export const TICKET_CONVERSION_RATE = 10.00;
+
+export interface ConversionResult {
+  success: boolean;
+  isPendingActivation?: boolean;
+  message?: string;
+  cash_amount?: number;
+  tickets?: number;
+  new_balance?: number;
+  new_ticket_balance?: number;
+}
+
+export interface GameTransactionItem {
+  id: string;
+  type: 'CASH_TO_TICKETS' | 'TICKETS_TO_CASH' | 'DUEL_ENTRY' | 'DUEL_REFUND' | 'DUEL_REWARD';
+  title: string;
+  description: string;
+  amount_cash?: number;
+  tickets: number;
+  conversion_rate?: number;
+  cash_balance_before?: number;
+  cash_balance_after?: number;
+  ticket_balance_before?: number;
+  ticket_balance_after?: number;
+  created_at: string;
+  status: 'COMPLETED' | 'PENDING' | 'FAILED';
+}
+
 // Canonical questions used by the authoritative engine
 export const CANONICAL_QUESTIONS: Record<DuelRoundType, DuelQuestion[]> = {
   QUICK_QUIZ: [
@@ -189,29 +217,271 @@ export const duelService = {
         }
       } catch (err) {}
     }
-    return 5; // Default fallback balance
+    return 0; // Default fallback balance (0 tickets)
   },
 
   /**
-   * Claim daily promotional game ticket (once per 24 hours).
+   * Convert cash from user's available wallet balance to Game Tickets at ₹10 = 1 Ticket.
+   * STRICT: Absolutely NO client-side balance simulation.
+   */
+  async convertCashToTickets(amount: number): Promise<ConversionResult> {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const idempotencyKey = 'c2t_' + crypto.randomUUID();
+        const { data, error } = await supabase.rpc('convert_cash_to_tickets_rpc', {
+          p_amount: amount,
+          p_idempotency_key: idempotencyKey,
+        });
+        if (error) {
+          return {
+            success: false,
+            message: error.message || 'Failed to convert cash to Game Tickets.',
+          };
+        }
+        if (data?.success) {
+          return {
+            success: true,
+            cash_amount: data.cash_amount ?? data.cash_deducted,
+            tickets: data.ticket_count ?? data.tickets_credited,
+            new_balance: data.new_cash_balance ?? data.new_balance,
+            new_ticket_balance: data.new_ticket_balance,
+            message: 'Successfully converted cash to Game Tickets!',
+          };
+        }
+        return {
+          success: false,
+          message: data?.error || 'Failed to convert cash to tickets.',
+        };
+      } catch (err: any) {
+        return {
+          success: false,
+          message: err.message || 'Failed to convert cash to Game Tickets.',
+        };
+      }
+    }
+    return {
+      success: false,
+      isPendingActivation: true,
+      message: 'Game balance conversion requires Supabase connection. No balance has been changed.',
+    };
+  },
+
+  /**
+   * Convert Game Tickets back to cash credited to available wallet balance at 1 Ticket = ₹10.
+   * STRICT: Absolutely NO client-side balance simulation.
+   */
+  async convertTicketsToCash(ticketCount: number): Promise<ConversionResult> {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const idempotencyKey = 't2c_' + crypto.randomUUID();
+        const { data, error } = await supabase.rpc('convert_tickets_to_cash_rpc', {
+          p_tickets: ticketCount,
+          p_idempotency_key: idempotencyKey,
+        });
+        if (error) {
+          return {
+            success: false,
+            message: error.message || 'Failed to convert Game Tickets to cash.',
+          };
+        }
+        if (data?.success) {
+          return {
+            success: true,
+            cash_amount: data.cash_amount ?? data.cash_credited,
+            tickets: data.ticket_count ?? data.tickets_deducted,
+            new_balance: data.new_cash_balance ?? data.new_balance,
+            new_ticket_balance: data.new_ticket_balance,
+            message: 'Successfully converted Game Tickets to cash!',
+          };
+        }
+        return {
+          success: false,
+          message: data?.error || 'Failed to convert tickets to cash.',
+        };
+      } catch (err: any) {
+        return {
+          success: false,
+          message: err.message || 'Failed to convert Game Tickets to cash.',
+        };
+      }
+    }
+    return {
+      success: false,
+      isPendingActivation: true,
+      message: 'Game balance conversion requires Supabase connection. No balance has been changed.',
+    };
+  },
+
+  /**
+   * Fetch game and ticket transaction history.
+   * Reads conversion receipts from public.game_balance_conversions (bridge reconciliation ledger)
+   * and gameplay transactions from public.game_ticket_transactions, respecting RLS (user_id = auth.uid()).
+   */
+  async getGameTransactions(userId?: string): Promise<GameTransactionItem[]> {
+    if (isSupabaseConfigured && supabase && userId) {
+      try {
+        // 1. Query conversion receipts directly from public.game_balance_conversions (RLS enforced)
+        const conversionsPromise = supabase
+          .from('game_balance_conversions')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        // 2. Query gameplay ticket events from public.game_ticket_transactions
+        const ticketTxPromise = supabase
+          .from('game_ticket_transactions')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        const [conversionsRes, ticketTxRes] = await Promise.all([
+          conversionsPromise,
+          ticketTxPromise,
+        ]);
+
+        const items: GameTransactionItem[] = [];
+
+        // Map game_balance_conversions receipts with complete audit fields
+        if (!conversionsRes.error && conversionsRes.data && conversionsRes.data.length > 0) {
+          for (const conv of conversionsRes.data) {
+            const isCashToTickets = conv.conversion_type === 'CASH_TO_TICKETS';
+            const cashVal = Number(conv.cash_amount);
+            const rateVal = Number(conv.conversion_rate || 10.00);
+            const cashBefore = Number(conv.cash_balance_before);
+            const cashAfter = Number(conv.cash_balance_after);
+            const ticketBefore = Number(conv.ticket_balance_before);
+            const ticketAfter = Number(conv.ticket_balance_after);
+
+            const receiptDesc = isCashToTickets
+              ? `₹${cashVal.toFixed(2)} → ${conv.ticket_count} 🎟️ (Rate: ₹${rateVal.toFixed(2)} | ₹${cashBefore.toFixed(2)} → ₹${cashAfter.toFixed(2)})`
+              : `${conv.ticket_count} 🎟️ → ₹${cashVal.toFixed(2)} (Rate: ₹${rateVal.toFixed(2)} | ${ticketBefore} → ${ticketAfter} 🎟️)`;
+
+            items.push({
+              id: conv.id,
+              type: isCashToTickets ? 'CASH_TO_TICKETS' : 'TICKETS_TO_CASH',
+              title: isCashToTickets ? 'Cash → Tickets' : 'Tickets → Cash',
+              description: receiptDesc,
+              amount_cash: cashVal,
+              tickets: isCashToTickets ? conv.ticket_count : -conv.ticket_count,
+              conversion_rate: rateVal,
+              cash_balance_before: cashBefore,
+              cash_balance_after: cashAfter,
+              ticket_balance_before: ticketBefore,
+              ticket_balance_after: ticketAfter,
+              status: conv.status === 'SUCCESS' ? 'COMPLETED' : 'FAILED',
+              created_at: conv.created_at,
+            });
+          }
+        }
+
+        // Map gameplay transactions from game_ticket_transactions (excluding conversions to prevent duplicates)
+        if (!ticketTxRes.error && ticketTxRes.data && ticketTxRes.data.length > 0) {
+          for (const tx of ticketTxRes.data) {
+            if (tx.transaction_type === 'CASH_TO_TICKETS' || tx.transaction_type === 'TICKETS_TO_CASH') {
+              // Handled authoritatively by game_balance_conversions bridge table
+              continue;
+            }
+            let type: GameTransactionItem['type'] = 'DUEL_ENTRY';
+            let title = 'Duel Entry';
+            if (tx.transaction_type === 'MATCH_REWARD' || tx.transaction_type === 'DUEL_REWARD') {
+              type = 'DUEL_REWARD';
+              title = 'Duel Reward';
+            } else if (tx.transaction_type === 'MATCH_REFUND' || tx.transaction_type === 'REFUND') {
+              type = 'DUEL_REFUND';
+              title = 'Duel Refund';
+            } else if (tx.transaction_type === 'MATCH_ENTRY' || tx.transaction_type === 'DUEL_ENTRY') {
+              type = 'DUEL_ENTRY';
+              title = 'Duel Entry';
+            }
+
+            items.push({
+              id: tx.id,
+              type,
+              title,
+              description: tx.description || `${tx.amount > 0 ? '+' : ''}${tx.amount} Tickets`,
+              amount_cash: tx.metadata?.cash_amount,
+              tickets: tx.amount,
+              created_at: tx.created_at,
+              status: 'COMPLETED',
+            });
+          }
+        }
+
+        if (items.length > 0) {
+          return items
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            .slice(0, 20);
+        }
+      } catch (err) {}
+    }
+
+    // Sample fallback items with complete conversion receipt schema
+    return [
+      {
+        id: 'conv_sample_1',
+        type: 'CASH_TO_TICKETS',
+        title: 'Cash → Tickets',
+        description: '₹50.00 → 5 🎟️ (Rate: ₹10.00 | ₹150.00 → ₹100.00)',
+        amount_cash: 50,
+        tickets: 5,
+        conversion_rate: 10.00,
+        cash_balance_before: 150.00,
+        cash_balance_after: 100.00,
+        ticket_balance_before: 0,
+        ticket_balance_after: 5,
+        created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+        status: 'COMPLETED',
+      },
+      {
+        id: 'gtx_sample_1',
+        type: 'DUEL_REWARD',
+        title: 'Duel Reward',
+        description: 'Victory in 1v1 Duel (+2 Tickets)',
+        tickets: 2,
+        created_at: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
+        status: 'COMPLETED',
+      },
+      {
+        id: 'gtx_sample_2',
+        type: 'DUEL_ENTRY',
+        title: 'Duel Entry',
+        description: 'Entry fee for 1v1 Duel match (-1 Ticket)',
+        tickets: -1,
+        created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+        status: 'COMPLETED',
+      },
+      {
+        id: 'conv_sample_2',
+        type: 'TICKETS_TO_CASH',
+        title: 'Tickets → Cash',
+        description: '2 🎟️ → ₹20.00 (Rate: ₹10.00 | 2 → 0 🎟️)',
+        amount_cash: 20,
+        tickets: -2,
+        conversion_rate: 10.00,
+        cash_balance_before: 100.00,
+        cash_balance_after: 120.00,
+        ticket_balance_before: 2,
+        ticket_balance_after: 0,
+        created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+        status: 'COMPLETED',
+      },
+    ];
+  },
+
+  /**
+   * Deprecated daily ticket claim (kept for backwards compatibility).
    */
   async claimDailyTicket(userId?: string): Promise<{
     success: boolean;
     balance: number;
     message: string;
   }> {
-    if (isSupabaseConfigured && supabase) {
-      try {
-        const { data, error } = await supabase.rpc('claim_daily_game_ticket_rpc');
-        if (!error && data) {
-          return data;
-        }
-      } catch (err) {}
-    }
     return {
-      success: true,
-      balance: 6,
-      message: 'Daily ticket claimed successfully!',
+      success: false,
+      balance: 0,
+      message: 'Daily promotional claims have been retired in favor of the Game Balance system.',
     };
   },
 

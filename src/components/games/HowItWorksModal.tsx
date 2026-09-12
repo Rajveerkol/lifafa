@@ -12,8 +12,8 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ isOpen, onClos
   const steps = [
     {
       number: '01',
-      title: 'Join Using Game Tickets',
-      desc: 'Use 1 game ticket to enter a 1v1 duel. Tickets are promotional game credits provided to participate in battles.',
+      title: 'Convert Cash to Game Tickets',
+      desc: 'Exchange available wallet balance for Game Tickets at ₹10 = 1 Ticket. Use 1 Game Ticket to enter a 1v1 duel.',
       icon: Ticket,
       color: 'from-amber-500 to-orange-500',
       bg: 'bg-amber-50',
@@ -42,8 +42,8 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ isOpen, onClos
     },
     {
       number: '04',
-      title: 'Highest Score Wins the Duel',
-      desc: 'Points are awarded based on accuracy and speed. Server validates all answers securely to crown the champion.',
+      title: 'Winner Receives 2 Game Tickets',
+      desc: 'Points are awarded based on accuracy and speed. The champion wins 2 Game Tickets, which can be converted back to cash at ₹10 per ticket.',
       icon: Trophy,
       color: 'from-emerald-500 to-teal-500',
       bg: 'bg-emerald-50',
@@ -108,14 +108,14 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ isOpen, onClos
           })}
         </div>
 
-        {/* Prominent Non-Withdrawable Disclaimer */}
-        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 text-xs leading-relaxed mb-6 flex items-start gap-3">
-          <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+        {/* Real Balance & Conversion Policy Card */}
+        <div className="p-4 rounded-2xl bg-slate-900 text-white text-xs leading-relaxed mb-6 flex items-start gap-3 shadow-lg">
+          <Sparkles className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
           <div>
-            <span className="font-bold text-amber-950 block mb-0.5">
-              Important Game Credits Notice
+            <span className="font-bold text-amber-300 block mb-0.5">
+              Real Balance & Ticket System
             </span>
-            Game Tickets are promotional game credits and have no cash value. They cannot be withdrawn or converted to money.
+            Game Tickets are purchased from your available wallet cash at ₹10 per ticket. Winner rewards (2 tickets) can be converted back to available cash anytime at 1 Ticket = ₹10 and withdrawn to your verified bank account.
           </div>
         </div>
 

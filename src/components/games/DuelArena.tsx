@@ -23,6 +23,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { ConversionModal } from './ConversionModal';
 import {
   duelService,
   CANONICAL_QUESTIONS,
@@ -63,19 +64,20 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
   onBackToGames,
   onOpenHowItWorks,
 }) => {
-  const { user } = useAuth();
+  const { user, wallet, refreshWallet } = useAuth();
 
   // Arena navigation & tab states
   const [arenaState, setArenaState] = useState<ArenaState>('LOBBY');
   const [lobbyTab, setLobbyTab] = useState<LobbyTab>('ARENA');
   const [historyFilter, setHistoryFilter] = useState<'ALL' | 'WINS' | 'LOSSES'>('ALL');
 
-  // Stats & Ticket Balance (Game Credits only)
-  const [userTickets, setUserTickets] = useState<number>(5);
+  // Stats & Ticket Balance (Real Balance & Ticket System)
+  const [userTickets, setUserTickets] = useState<number>(0);
   const [stats, setStats] = useState<DuelStats | null>(null);
   const [history, setHistory] = useState<any[]>([]);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
-  const [dailyClaimed, setDailyClaimed] = useState<boolean>(false);
+  const [convertModalOpen, setConvertModalOpen] = useState<boolean>(false);
+  const [convertMode, setConvertMode] = useState<'CASH_TO_TICKETS' | 'TICKETS_TO_CASH'>('CASH_TO_TICKETS');
 
   // Active Match State
   const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
@@ -171,16 +173,6 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
     }
   }, [activeMatchId, arenaState]);
 
-  // Daily free ticket claim
-  const handleClaimDailyTicket = async () => {
-    if (dailyClaimed) return;
-    const res = await duelService.claimDailyTicket(user?.id);
-    if (res.success) {
-      setUserTickets(res.balance);
-      setDailyClaimed(true);
-    }
-  };
-
   // ----------------------------------------------------
   // 1. MATCHMAKING FLOW
   // ----------------------------------------------------
@@ -211,7 +203,8 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
 
   const handleStartMatchmaking = async () => {
     if (userTickets <= 0) {
-      alert('You need at least 1 Game Ticket to enter the duel arena. Game Tickets are promotional game credits and have no cash value. They cannot be withdrawn or converted to money.');
+      setConvertMode('CASH_TO_TICKETS');
+      setConvertModalOpen(true);
       return;
     }
 
@@ -813,12 +806,12 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
             </div>
           </div>
 
-          {/* Reward Notification (Game Credits Only) */}
+          {/* Reward Notification */}
           <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-900 font-medium inline-flex items-center gap-2">
             <Ticket className="w-4 h-4 text-amber-600 shrink-0" />
             <span>
               {isWinner
-                ? 'Earned +2 Game Tickets & 100 Duel XP (Game credits only)'
+                ? 'Earned +2 Game Tickets & 100 Duel XP (Convertible to ₹20 cash)'
                 : 'Earned +25 Duel XP for completing the match'}
             </span>
           </div>
@@ -893,11 +886,21 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
         </button>
 
         <div className="flex items-center gap-2">
-          {/* Ticket Balance (Game Credits Only) */}
+          {/* Ticket Balance */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-900 text-xs font-bold">
             <Ticket className="w-4 h-4 text-amber-600" />
             <span>{userTickets} Tickets</span>
           </div>
+
+          <button
+            onClick={() => {
+              setConvertMode('CASH_TO_TICKETS');
+              setConvertModalOpen(true);
+            }}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors border border-amber-200"
+          >
+            + Get Tickets
+          </button>
 
           <button
             onClick={onOpenHowItWorks}
@@ -927,23 +930,37 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
           </p>
 
           <div className="flex flex-wrap items-center gap-3 mt-6">
-            <button
-              onClick={handleStartMatchmaking}
-              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-sm shadow-xl shadow-orange-500/30 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
-            >
-              <Swords className="w-4 h-4" />
-              FIND OPPONENT (1 🎟️)
-            </button>
-
-            {!dailyClaimed && (
+            {userTickets > 0 ? (
               <button
-                onClick={handleClaimDailyTicket}
-                className="px-4 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all border border-white/15 flex items-center gap-1.5"
+                onClick={handleStartMatchmaking}
+                className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-sm shadow-xl shadow-orange-500/30 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                Claim Daily Free Ticket
+                <Swords className="w-4 h-4" />
+                FIND OPPONENT (1 🎟️)
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setConvertMode('CASH_TO_TICKETS');
+                  setConvertModalOpen(true);
+                }}
+                className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-sm shadow-xl shadow-orange-500/30 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
+              >
+                <Ticket className="w-4 h-4" />
+                GET GAME TICKETS (₹10 = 1 🎟️)
               </button>
             )}
+
+            <button
+              onClick={() => {
+                setConvertMode('CASH_TO_TICKETS');
+                setConvertModalOpen(true);
+              }}
+              className="px-4 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all border border-white/15 flex items-center gap-1.5"
+            >
+              <Ticket className="w-3.5 h-3.5 text-amber-400" />
+              + Convert Tickets
+            </button>
           </div>
         </div>
 
@@ -985,12 +1002,24 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
         </div>
       </div>
 
-      {/* Prominent Non-Withdrawable Disclaimer */}
-      <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-900 text-xs flex items-start gap-2.5">
-        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-        <p className="leading-relaxed">
-          <strong>Notice:</strong> Game Tickets are promotional game credits and have no cash value. They cannot be withdrawn or converted to money.
-        </p>
+      {/* Real Balance Gaming Policy Banner */}
+      <div className="p-3.5 rounded-2xl bg-slate-100 border border-slate-200 text-slate-700 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2">
+          <Ticket className="w-4 h-4 text-amber-600 shrink-0" />
+          <span><strong>Entry:</strong> 1 Ticket (₹10.00) &bull; <strong>Winner Reward:</strong> 2 Tickets (₹20.00)</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-slate-500 text-[11px]">Convert tickets to cash anytime at ₹10/ticket</span>
+          <button
+            onClick={() => {
+              setConvertMode('TICKETS_TO_CASH');
+              setConvertModalOpen(true);
+            }}
+            className="text-xs font-bold text-amber-600 hover:text-amber-700 underline shrink-0"
+          >
+            Cashout Tickets
+          </button>
+        </div>
       </div>
 
       {/* Tab Selectors: ARENA / HISTORY / LEADERBOARD */}
@@ -1084,7 +1113,7 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
                 </div>
                 <div className="flex items-center gap-2 text-slate-700">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span>Zero-cash non-withdrawable tickets</span>
+                  <span>Convertible game tickets (₹10 = 1 Ticket)</span>
                 </div>
               </div>
             </div>
@@ -1237,6 +1266,20 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
           </div>
         </div>
       )}
+
+      {/* Conversion Modal */}
+      <ConversionModal
+        isOpen={convertModalOpen}
+        onClose={() => setConvertModalOpen(false)}
+        mode={convertMode}
+        cashBalance={wallet?.available_balance ?? 0}
+        ticketBalance={userTickets}
+        onSuccess={() => {
+          const userId = user?.id || 'user_current';
+          duelService.getGameTickets(userId).then(setUserTickets);
+          if (refreshWallet) refreshWallet();
+        }}
+      />
     </div>
   );
 };
