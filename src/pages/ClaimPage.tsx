@@ -131,7 +131,9 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
           taskService.getUserTaskCompletions(lifafaId, userId).then((completions) => {
             if (!isMounted) return;
             const verified = new Set(
-              (completions || []).filter((c) => c.status === 'VERIFIED').map((c) => c.task_id)
+              (completions || [])
+                .filter((c) => ['VERIFIED', 'CLICK_CONFIRMED', 'USER_CONFIRMED'].includes(c.status))
+                .map((c) => c.task_id)
             );
             setCompletedTaskIds(verified);
           });
@@ -535,7 +537,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                     </span>
                     {allRequiredDone && (
                       <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> All Verified
+                        <CheckCircle2 className="w-3.5 h-3.5" /> All Required Tasks Complete
                       </span>
                     )}
                   </div>

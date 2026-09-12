@@ -105,7 +105,9 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
 
             taskService.getUserTaskCompletions(lifafaId, userId).then((completions) => {
               const verified = new Set(
-                completions.filter((c) => c.status === 'VERIFIED').map((c) => c.task_id)
+                (completions || [])
+                  .filter((c) => ['VERIFIED', 'CLICK_CONFIRMED', 'USER_CONFIRMED'].includes(c.status))
+                  .map((c) => c.task_id)
               );
               setCompletedTaskIds(verified);
             });
@@ -366,7 +368,7 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
                     </span>
                     {allRequiredDone && (
                       <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> All Verified
+                        <CheckCircle2 className="w-3.5 h-3.5" /> All Required Tasks Complete
                       </span>
                     )}
                   </div>

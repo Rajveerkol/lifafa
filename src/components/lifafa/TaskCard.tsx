@@ -203,21 +203,16 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       const result = await telegramService.verifyMembership(
         targetIdentifier,
         task.telegram_channel_id,
-        tgBinding.telegramUserId
+        tgBinding.telegramUserId,
+        task.id,
+        tgBinding.telegramUsername
       );
 
       if (result.verified) {
-        if (supabase) {
-          await supabase.rpc('record_telegram_member_completion_rpc', {
-            p_task_id: task.id,
-            p_telegram_user_id: tgBinding.telegramUserId,
-            p_telegram_username: tgBinding.telegramUsername || 'telegram_user',
-            p_member_status: result.memberStatus || 'member',
-          });
-        }
         onCompleted(task.id);
       } else {
         setVerificationError(
+          result.error ||
           "We couldn't verify your membership yet. Please make sure you joined the channel, then try again."
         );
       }
@@ -311,7 +306,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               </p>
             </div>
             <span className="text-[10px] font-bold text-emerald-800 bg-emerald-200/80 px-2.5 py-1 rounded-full shrink-0">
-              Verified
+              Membership Verified ✓
             </span>
           </div>
         </div>
@@ -667,7 +662,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           {isCompleted ? (
             <div className="flex items-center gap-1 text-emerald-600 font-bold text-xs px-3 py-1.5 bg-emerald-100/60 rounded-xl shrink-0">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Verified</span>
+              <span>
+                {task.task_type === 'VISIT_WEBSITE'
+                  ? 'Visit Confirmed ✓'
+                  : task.task_type === 'INSTAGRAM_FOLLOW' || task.task_type === 'INSTAGRAM_LIKE'
+                  ? 'Follow Confirmed ✓'
+                  : task.task_type === 'YOUTUBE_SUB'
+                  ? 'Subscription Confirmed ✓'
+                  : 'Action Confirmed ✓'}
+              </span>
             </div>
           ) : (
             <button
@@ -679,7 +682,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                 <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
                 <>
-                  <span>Complete</span>
+                  <span>
+                    {task.task_type === 'VISIT_WEBSITE'
+                      ? 'Visit Website'
+                      : task.task_type === 'INSTAGRAM_FOLLOW'
+                      ? 'Follow on Instagram'
+                      : task.task_type === 'YOUTUBE_SUB'
+                      ? 'Subscribe on YouTube'
+                      : 'Complete'}
+                  </span>
                   <ExternalLink className="w-3 h-3" />
                 </>
               )}

@@ -135,7 +135,9 @@ export const telegramService = {
   async verifyMembership(
     channelUsername: string,
     channelId?: number | string,
-    telegramUserId?: number | string
+    telegramUserId?: number | string,
+    taskId?: string,
+    telegramUsername?: string | null
   ): Promise<TelegramMembershipResult> {
     if (!telegramUserId) {
       return {
@@ -159,6 +161,8 @@ export const telegramService = {
           channelUsername,
           channelId,
           telegramUserId,
+          taskId,
+          telegramUsername,
         },
       });
 

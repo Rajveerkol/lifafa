@@ -3,7 +3,7 @@ import type { TaskCompletion, TaskType } from '../types/database';
 
 export interface TaskVerificationResult {
   verified: boolean;
-  status: 'VERIFIED' | 'PENDING' | 'FAILED';
+  status: 'VERIFIED' | 'PENDING' | 'FAILED' | 'CLICK_CONFIRMED' | 'USER_CONFIRMED';
   verificationMethod: string;
   message: string;
   isApiConfigured: boolean;
@@ -47,80 +47,54 @@ export const taskService = {
         isApiConfigured: true,
       };
     }
-
-    let verificationMethod = 'MANUAL_VERIFY';
-    let isApiConfigured = false;
-    let status: 'VERIFIED' | 'PENDING' | 'FAILED' = 'VERIFIED';
-    let message = 'Task verified successfully.';
-
-    // Check third-party API availability
-    switch (taskType) {
-      case 'TELEGRAM_JOIN':
-      case 'TELEGRAM_BOT':
-        // If telegram bot token is not configured in backend env
-        isApiConfigured = false;
-        verificationMethod = 'URL_VISIT_CONFIRM';
-        status = 'VERIFIED';
-        message = 'Telegram channel link opened and confirmed.';
-        break;
-
-      case 'YOUTUBE_SUB':
-        isApiConfigured = false;
-        verificationMethod = 'URL_VISIT_CONFIRM';
-        status = 'VERIFIED';
-        message = 'YouTube channel visited and confirmed.';
-        break;
-
-      case 'INSTAGRAM_FOLLOW':
-      case 'INSTAGRAM_LIKE':
-        isApiConfigured = false;
-        verificationMethod = 'URL_VISIT_CONFIRM';
-        status = 'VERIFIED';
-        message = 'Instagram profile visited and confirmed.';
-        break;
-
-      case 'VISIT_WEBSITE':
-      case 'CUSTOM':
-      default:
-        isApiConfigured = true;
-        verificationMethod = 'URL_VISIT';
-        status = 'VERIFIED';
-        message = 'Link visited successfully.';
-        break;
+    // Telegram tasks must NEVER be handled by client engagement RPC
+    if (taskType === 'TELEGRAM_JOIN' || taskType === 'TELEGRAM_BOT') {
+      throw new Error('Telegram tasks must be verified through the Telegram Bot verification flow.');
     }
 
-    // Record server-side into task_completions table
-    const { data, error } = await supabase
-      .from('task_completions')
-      .upsert(
-        {
-          task_id: taskId,
-          lifafa_id: lifafaId,
-          user_id: userId,
-          status,
-          verification_method: verificationMethod,
-          metadata: {
-            task_type: taskType,
-            target_url: targetUrl,
-            verified_at: new Date().toISOString(),
-          },
-        },
-        { onConflict: 'task_id,user_id' }
-      )
-      .select()
-      .single();
+    let verificationMethod = 'CLICK_CONFIRMED';
+    let friendlyMessage = 'Action confirmed.';
 
-    if (error) {
-      console.error('Error saving task completion:', error);
-      throw new Error('Failed to record task completion');
+    if (taskType === 'VISIT_WEBSITE' || taskType === 'CUSTOM') {
+      verificationMethod = 'CLICK_CONFIRMED';
+      friendlyMessage = 'Website visit confirmed.';
+    } else if (taskType === 'INSTAGRAM_FOLLOW' || taskType === 'INSTAGRAM_LIKE') {
+      verificationMethod = 'USER_CONFIRMED';
+      friendlyMessage = 'Instagram follow confirmed.';
+    } else if (taskType === 'YOUTUBE_SUB') {
+      verificationMethod = 'USER_CONFIRMED';
+      friendlyMessage = 'YouTube subscription confirmed.';
+    } else if (taskType === 'REFERRAL') {
+      verificationMethod = 'USER_CONFIRMED';
+      friendlyMessage = 'Referral task confirmed.';
     }
 
-    return {
-      verified: status === 'VERIFIED',
-      status,
-      verificationMethod,
-      message,
-      isApiConfigured,
-    };
+    try {
+      const { data, error } = await supabase.rpc('record_engagement_task_completion_rpc', {
+        p_task_id: taskId,
+      });
+
+      if (error) {
+        console.error('Error saving engagement task completion:', error);
+        throw new Error(error.message || 'Failed to record task completion');
+      }
+
+      const method = (data && data.method) || (taskType === 'VISIT_WEBSITE' ? 'CLICK_CONFIRMED' : 'USER_CONFIRMED');
+      let friendlyMessage = 'Action confirmed.';
+      if (taskType === 'VISIT_WEBSITE') friendlyMessage = 'Website visit confirmed.';
+      else if (taskType === 'INSTAGRAM_FOLLOW') friendlyMessage = 'Follow confirmed.';
+      else if (taskType === 'YOUTUBE_SUB') friendlyMessage = 'Subscription confirmed.';
+
+      return {
+        verified: true,
+        status: (method === 'CLICK_CONFIRMED' ? 'CLICK_CONFIRMED' : 'USER_CONFIRMED'),
+        verificationMethod: method,
+        message: friendlyMessage,
+        isApiConfigured: false,
+      };
+    } catch (e: any) {
+      console.error('Error in verifyAndRecordTask:', e);
+      throw new Error(e.message || 'Failed to record task completion');
+    }
   },
 };

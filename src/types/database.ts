@@ -174,7 +174,7 @@ export interface TaskCompletion {
   task_id: string;
   lifafa_id: string;
   user_id: string;
-  status: 'PENDING' | 'VERIFIED' | 'FAILED';
+  status: 'PENDING' | 'VERIFIED' | 'FAILED' | 'CLICK_CONFIRMED' | 'USER_CONFIRMED';
   verification_method: string;
   metadata: Record<string, any>;
   created_at: string;
