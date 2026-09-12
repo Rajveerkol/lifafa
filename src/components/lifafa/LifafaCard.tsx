@@ -33,6 +33,15 @@ export const LifafaCard: React.FC<LifafaCardProps> = ({
   // 2. CURRENT USER ACTION
   const canClaim = isGloballyActive && !isClaimed;
 
+  const handleClaim = () => {
+    if (onClaimClick) {
+      onClaimClick(lifafa);
+    } else {
+      window.history.pushState({}, '', `/claim/${lifafa.code}`);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
+  };
+
   return (
     <div className="group bg-white rounded-3xl p-5 border border-slate-100 shadow-sm hover:shadow-lg hover:border-blue-100 transition-all flex flex-col justify-between">
       <div>
@@ -163,7 +172,7 @@ export const LifafaCard: React.FC<LifafaCardProps> = ({
           </button>
         ) : isClaimed ? (
           <button
-            onClick={() => onClaimClick(lifafa)}
+            onClick={handleClaim}
             className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors cursor-pointer shadow-2xs"
             title={claimedAmount ? `Claimed ${formatCurrency(claimedAmount)}` : 'Claimed'}
           >
@@ -172,7 +181,7 @@ export const LifafaCard: React.FC<LifafaCardProps> = ({
           </button>
         ) : canClaim ? (
           <button
-            onClick={() => onClaimClick(lifafa)}
+            onClick={handleClaim}
             className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/25 active:scale-98 cursor-pointer"
           >
             <span>Claim Now</span>

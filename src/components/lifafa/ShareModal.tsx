@@ -15,7 +15,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ lifafa, isOpen, onClose 
 
   if (!isOpen || !lifafa) return null;
 
-  const shareUrl = `${window.location.origin}/?claim=${lifafa.code}`;
+  const shareUrl = `${window.location.origin}/claim/${lifafa.code}`;
   const shareText = `🎁 Grab your digital cash reward from "${lifafa.title}" on Lifafa! Claim up to ${formatCurrency(lifafa.total_amount)}: ${shareUrl}`;
 
   const handleCopy = () => {

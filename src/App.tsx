@@ -13,6 +13,7 @@ import { AccountSecurityPage } from './pages/AccountSecurityPage';
 import { HelpSupportPage } from './pages/HelpSupportPage';
 import { TermsPage } from './pages/TermsPage';
 import { PrivacyPage } from './pages/PrivacyPage';
+import { ClaimPage } from './pages/ClaimPage';
 
 import { AuthModal } from './components/auth/AuthModal';
 import { WithdrawModal } from './components/wallet/WithdrawModal';
@@ -27,6 +28,15 @@ import type { Lifafa } from './types/database';
 
 export function App() {
   const { user } = useAuth();
+
+  const parseClaimCodeFromPath = () => {
+    const path = window.location.pathname;
+    if (path.toLowerCase().startsWith('/claim/')) {
+      const code = path.replace(/^\/claim\/?/i, '').trim();
+      return code || null;
+    }
+    return null;
+  };
 
   const getInitialTab = () => {
     const raw = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
@@ -51,6 +61,7 @@ export function App() {
   };
 
   const [currentTab, setCurrentTab] = useState<string>(getInitialTab);
+  const [claimRouteCode, setClaimRouteCode] = useState<string | null>(parseClaimCodeFromPath);
   const [isCreatingLifafa, setIsCreatingLifafa] = useState(false);
 
   // Modals
@@ -80,6 +91,14 @@ export function App() {
       setSelectedClaimLifafa(null);
       setSelectedShareLifafa(null);
       clearClaimQueryParam();
+
+      const routeCode = parseClaimCodeFromPath();
+      if (routeCode) {
+        setClaimRouteCode(routeCode);
+        return;
+      }
+      setClaimRouteCode(null);
+
       const raw = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
       if (
         [
@@ -105,24 +124,21 @@ export function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Check URL query parameters for claim code (e.g. ?claim=LF-8X92K)
+  // Check URL query parameters for legacy claim code (e.g. ?claim=LF-8X92K)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const claimCode = params.get('claim');
-    if (claimCode) {
-      // Immediately sanitize URL bar so returning from Telegram, window focus,
-      // or tab navigation never traps or re-triggers the claim modal.
+    const queryCode = params.get('claim');
+    if (queryCode) {
+      const clean = queryCode.trim();
       clearClaimQueryParam();
-      lifafaService.getLifafaByCode(claimCode).then((found) => {
-        if (found) {
-          setSelectedClaimLifafa(found);
-        }
-      });
+      window.history.replaceState({}, '', `/claim/${clean}`);
+      setClaimRouteCode(clean);
     }
   }, []);
 
   const handleTabChange = (tab: string, extra?: any) => {
-    // Dismiss claim/share modal and clear claim query param so navigation is never trapped
+    // Dismiss claim/share modal and clear claim state so navigation is never trapped
+    setClaimRouteCode(null);
     setSelectedClaimLifafa(null);
     setSelectedShareLifafa(null);
     clearClaimQueryParam();
@@ -145,11 +161,9 @@ export function App() {
   };
 
   const handleClaimLifafa = (lifafa: Lifafa) => {
-    if (!user) {
-      setAuthModalOpen(true);
-      return;
-    }
-    setSelectedClaimLifafa(lifafa);
+    window.history.pushState({}, '', `/claim/${lifafa.code}`);
+    setClaimRouteCode(lifafa.code);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleShareLifafa = (lifafa: Lifafa) => {
@@ -166,6 +180,32 @@ export function App() {
       }
     });
   };
+
+  // Dedicated Standalone Claim Page View (suppresses Header, BottomNav, and surrounding Home UI)
+  if (claimRouteCode) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white">
+        <ClaimPage
+          code={claimRouteCode}
+          onNavigateHome={() => handleTabChange('home')}
+          onOpenAuth={() => setAuthModalOpen(true)}
+          onOpenShare={handleShareLifafa}
+        />
+
+        {/* Global Modals active on ClaimPage */}
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+        />
+
+        <ShareModal
+          lifafa={selectedShareLifafa}
+          isOpen={Boolean(selectedShareLifafa)}
+          onClose={() => setSelectedShareLifafa(null)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f8faff] text-slate-900 flex flex-col selection:bg-blue-600 selection:text-white">
