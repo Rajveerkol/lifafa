@@ -1,0 +1,162 @@
+[
+  {
+    "prompt": "Which elementary subatomic particle carries a negative fundamental electric charge?",
+    "options": [
+      "Proton",
+      "Neutron",
+      "Electron",
+      "Positron"
+    ],
+    "correct_answer": "Electron",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Physics",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Electrons carry a negative elementary charge (-1e), orbiting the atomic nucleus."
+  },
+  {
+    "prompt": "What physical phenomenon causes white light to separate into a rainbow of colors when passing through a glass prism?",
+    "options": [
+      "Dispersion",
+      "Total Internal Reflection",
+      "Diffraction",
+      "Polarization"
+    ],
+    "correct_answer": "Dispersion",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Optics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Dispersion occurs because different wavelengths of light refract by different angles through a dispersive medium."
+  },
+  {
+    "prompt": "Which law of thermodynamics states that the entropy of an isolated system always increases over time?",
+    "options": [
+      "Zeroth Law",
+      "First Law",
+      "Second Law",
+      "Third Law"
+    ],
+    "correct_answer": "Second Law",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Thermodynamics",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Second Law of Thermodynamics states that total entropy in an isolated system can never decrease over time."
+  },
+  {
+    "prompt": "What unit of measurement is defined as one kilogram meter squared per second squared (kg·m²/s²)?",
+    "options": [
+      "Watt",
+      "Joule",
+      "Newton",
+      "Pascal"
+    ],
+    "correct_answer": "Joule",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Physics",
+    "pattern_type": "Unit Definition",
+    "time_limit_sec": 25,
+    "explanation": "One Joule is the SI unit of work or energy, dimensionally equal to 1 N·m or 1 kg·m²/s²."
+  },
+  {
+    "prompt": "What is the escape velocity required for an object to leave Earth’s gravitational field from the surface?",
+    "options": [
+      "Approximately 7.9 km/s",
+      "Approximately 11.2 km/s",
+      "Approximately 16.7 km/s",
+      "Approximately 29.8 km/s"
+    ],
+    "correct_answer": "Approximately 11.2 km/s",
+    "difficulty": "HARD",
+    "category": "Science",
+    "subcategory": "Astrophysics",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 25,
+    "explanation": "Earth surface escape velocity is roughly 11.186 km/s (approx 11.2 km/s or 40,270 km/h)."
+  },
+  {
+    "prompt": "Which fundamental force is responsible for holding atomic nuclei together despite electromagnetic repulsion between protons?",
+    "options": [
+      "Gravitational force",
+      "Weak nuclear force",
+      "Strong nuclear force",
+      "Electrostatic force"
+    ],
+    "correct_answer": "Strong nuclear force",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Nuclear Physics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "The strong nuclear force binds quarks into protons and neutrons and binds nucleons together against electrostatic repulsion."
+  },
+  {
+    "prompt": "At what Celsius temperature does water reach its maximum density at standard atmospheric pressure?",
+    "options": [
+      "0°C",
+      "4°C",
+      "10°C",
+      "100°C"
+    ],
+    "correct_answer": "4°C",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Physical Chemistry",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Pure water exhibits an anomalous density curve, reaching maximum density at approximately 3.98°C (approx 4°C)."
+  },
+  {
+    "prompt": "What type of lens is used to correct myopia (nearsightedness)?",
+    "options": [
+      "Convex lens",
+      "Concave lens",
+      "Cylindrical lens",
+      "Bifocal prism"
+    ],
+    "correct_answer": "Concave lens",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Optics",
+    "pattern_type": "Application",
+    "time_limit_sec": 25,
+    "explanation": "Concave (diverging) lenses spread light rays slightly before entering the eye, pushing the focal point onto the retina."
+  },
+  {
+    "prompt": "Which constant relates the energy of a photon directly to its frequency (E = hf)?",
+    "options": [
+      "Boltzmann constant",
+      "Planck constant",
+      "Avogadro constant",
+      "Rydberg constant"
+    ],
+    "correct_answer": "Planck constant",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Quantum Physics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Planck constant (h ≈ 6.626 × 10⁻³⁴ J·s) is the proportionality constant between energy and frequency of electromagnetic radiation."
+  },
+  {
+    "prompt": "Which metallic element is liquid at standard room temperature (25°C)?",
+    "options": [
+      "Gallium",
+      "Mercury",
+      "Bromine",
+      "Cesium"
+    ],
+    "correct_answer": "Mercury",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Chemistry",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Mercury (Hg) is the only metallic element that is liquid at standard room temperature and pressure."
+  }
+]

@@ -42,15 +42,34 @@ export const GamesPage: React.FC = () => {
   const [convertModalOpen, setConvertModalOpen] = useState<boolean>(false);
   const [convertMode, setConvertMode] = useState<'CASH_TO_TICKETS' | 'TICKETS_TO_CASH'>('CASH_TO_TICKETS');
 
+  // Live genuine platform activity metrics
+  const [liveActivity, setLiveActivity] = useState<{
+    currently_playing: number;
+    matches_today: number;
+    players_online: number;
+  }>({
+    currently_playing: 0,
+    matches_today: 0,
+    players_online: 0,
+  });
+
   const loadData = () => {
     const userId = user?.id || 'user_current';
     duelService.getPlayerStats(userId).then(setStats);
     duelService.getGameTickets(userId).then(setUserTickets);
     duelService.getGameTransactions(userId).then(setGameTransactions);
+    duelService.getGamesLiveActivity().then(setLiveActivity);
   };
 
   useEffect(() => {
     loadData();
+
+    // 30-second live activity refresh
+    const activityInterval = setInterval(() => {
+      duelService.getGamesLiveActivity().then(setLiveActivity);
+    }, 30000);
+
+    return () => clearInterval(activityInterval);
   }, [user]);
 
   const handleOpenConversion = (mode: 'CASH_TO_TICKETS' | 'TICKETS_TO_CASH') => {
@@ -179,6 +198,50 @@ export const GamesPage: React.FC = () => {
             </span>
           </div>
           <span>Convert game tickets back to wallet cash anytime with zero fee</span>
+        </div>
+      </div>
+
+      {/* LIVE PLATFORM ACTIVITY COUNTER */}
+      <div className="bg-white border border-slate-200/80 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-2.5 w-2.5 relative">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+          </span>
+          <div>
+            <span className="text-xs font-bold text-slate-900 tracking-tight block">
+              Live Arena Activity
+            </span>
+            <span className="text-[11px] text-slate-400 font-medium">
+              Real-time platform activity (updates every 30s)
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs">
+          <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/60">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="text-slate-500 font-medium">Online:</span>
+            <span className="font-mono font-bold text-slate-900">
+              {liveActivity.players_online}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/60">
+            <Swords className="w-3.5 h-3.5 text-amber-500" />
+            <span className="text-slate-500 font-medium">In Battle:</span>
+            <span className="font-mono font-bold text-slate-900">
+              {liveActivity.currently_playing}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/60">
+            <Trophy className="w-3.5 h-3.5 text-orange-500" />
+            <span className="text-slate-500 font-medium">Matches Today:</span>
+            <span className="font-mono font-bold text-slate-900">
+              {liveActivity.matches_today}
+            </span>
+          </div>
         </div>
       </div>
 

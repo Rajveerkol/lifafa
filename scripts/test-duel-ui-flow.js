@@ -23,17 +23,25 @@ function test(name, fn) {
   }
 }
 
-// 1. Exact Disclaimer Verification across all relevant files
-test('1. Exact disclaimer is present in DuelArena, GamesPage, and HowItWorksModal', () => {
-  const exactDisclaimer = 'Game Tickets are promotional game credits and have no cash value. They cannot be withdrawn or converted to money.';
+// 1. Real Balance & Ticket Conversion System UI Verification (Promotional disclaimers removed)
+test('1. Promotional disclaimer is removed and Real Balance / Ticket conversion system is present', () => {
+  const oldDisclaimer = 'Game Tickets are promotional game credits and have no cash value. They cannot be withdrawn or converted to money.';
 
   const duelArenaCode = fs.readFileSync(path.resolve('src/components/games/DuelArena.tsx'), 'utf-8');
   const gamesPageCode = fs.readFileSync(path.resolve('src/pages/GamesPage.tsx'), 'utf-8');
   const howItWorksCode = fs.readFileSync(path.resolve('src/components/games/HowItWorksModal.tsx'), 'utf-8');
 
-  assert.ok(duelArenaCode.includes(exactDisclaimer), 'DuelArena.tsx must contain the exact disclaimer string');
-  assert.ok(gamesPageCode.includes(exactDisclaimer), 'GamesPage.tsx must contain the exact disclaimer string');
-  assert.ok(howItWorksCode.includes(exactDisclaimer), 'HowItWorksModal.tsx must contain the exact disclaimer string');
+  // Verify old promotional disclaimer is completely removed
+  assert.ok(!duelArenaCode.includes(oldDisclaimer), 'DuelArena.tsx must NOT contain the old promotional disclaimer string');
+  assert.ok(!gamesPageCode.includes(oldDisclaimer), 'GamesPage.tsx must NOT contain the old promotional disclaimer string');
+  assert.ok(!howItWorksCode.includes(oldDisclaimer), 'HowItWorksModal.tsx must NOT contain the old promotional disclaimer string');
+
+  // Verify real balance conversion components and rates are present
+  assert.ok(gamesPageCode.includes('ConversionModal'), 'GamesPage.tsx must include ConversionModal');
+  assert.ok(gamesPageCode.includes('Cash → Tickets'), 'GamesPage.tsx must include Cash → Tickets conversion');
+  assert.ok(gamesPageCode.includes('Tickets → Cash'), 'GamesPage.tsx must include Tickets → Cash conversion');
+  assert.ok(duelArenaCode.includes('ConversionModal'), 'DuelArena.tsx must include ConversionModal');
+  assert.ok(!duelArenaCode.includes('Claim Daily Free Ticket'), 'DuelArena.tsx must NOT contain Claim Daily Free Ticket');
 });
 
 // 2. Strict Dev/Test-Opponent Removal in Production UI

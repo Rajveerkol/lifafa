@@ -176,9 +176,14 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
   // ----------------------------------------------------
   // 1. MATCHMAKING FLOW
   // ----------------------------------------------------
+  const MATCHMAKING_TIMEOUT_SEC = 6;
+
   const startMatchmakingPoll = (matchId: string, mySlot: 'PLAYER_1' | 'PLAYER_2') => {
     if (matchmakingPollRef.current) clearInterval(matchmakingPollRef.current);
+    let pollCount = 0;
+
     matchmakingPollRef.current = setInterval(async () => {
+      pollCount += 1;
       try {
         const { match, players } = await duelService.getMatch(matchId);
         if (match && (match.status === 'MATCHED' || match.status === 'COUNTDOWN' || match.status === 'IN_PROGRESS')) {
@@ -186,19 +191,39 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
           if (matchmakingTimerRef.current) clearInterval(matchmakingTimerRef.current);
           const opp = players.find((p) => p.player_slot !== mySlot);
           if (opp) {
-            setOpponentName(opp.display_name || 'Opponent');
+            setOpponentName(opp.display_name || 'Ramesh Dalle');
           }
           startVsCountdown(matchId);
+          return;
         } else if (match && match.status === 'CANCELLED') {
           if (matchmakingPollRef.current) clearInterval(matchmakingPollRef.current);
           if (matchmakingTimerRef.current) clearInterval(matchmakingTimerRef.current);
           setArenaState('LOBBY');
           setActiveMatchId(null);
+          return;
+        }
+
+        // At 6 seconds, fall back seamlessly to Ramesh Dalle
+        if (pollCount >= MATCHMAKING_TIMEOUT_SEC) {
+          if (matchmakingPollRef.current) clearInterval(matchmakingPollRef.current);
+          if (matchmakingTimerRef.current) clearInterval(matchmakingTimerRef.current);
+
+          try {
+            const fallbackRes = await duelService.fallbackToNpcMatch(matchId);
+            setOpponentName(fallbackRes.opponent_name || 'Ramesh Dalle');
+            setIsTestOpponent(false);
+            startVsCountdown(matchId);
+          } catch (fallbackErr) {
+            console.error('NPC fallback error:', fallbackErr);
+            setOpponentName('Ramesh Dalle');
+            setIsTestOpponent(false);
+            startVsCountdown(matchId);
+          }
         }
       } catch (err) {
         console.error('Error polling match status:', err);
       }
-    }, 1500);
+    }, 1000);
   };
 
   const handleStartMatchmaking = async () => {
@@ -232,13 +257,13 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
       if (matchResult.status === 'WAITING') {
         startMatchmakingPoll(matchResult.match_id, matchResult.player_slot);
       } else {
-        const oppName = matchResult.is_test_opponent ? 'Vortex (AI)' : 'ShadowNinja';
+        const oppName = (matchResult as any).opponent_name || 'Ramesh Dalle';
         setOpponentName(oppName);
 
         setTimeout(() => {
           if (matchmakingTimerRef.current) clearInterval(matchmakingTimerRef.current);
           startVsCountdown(matchResult.match_id);
-        }, 1500);
+        }, 1200);
       }
     } catch (err) {
       console.error('Matchmaking error:', err);
@@ -376,16 +401,16 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
     setMyScore(result.total_score);
 
     // Fetch authoritative live opponent score
-    duelService.getMatch(matchId).then(({ players }) => {
-      const opp = players.find((p) => p.player_slot !== myPlayerSlot);
-      if (opp && typeof opp.score === 'number' && opp.score > 0) {
-        setOpponentScore(opp.score);
-      } else {
-        setOpponentScore((prev) => prev + (Math.random() > 0.35 ? 120 + Math.floor(Math.random() * 25) : 0));
-      }
-    }).catch(() => {
-      setOpponentScore((prev) => prev + (Math.random() > 0.35 ? 120 + Math.floor(Math.random() * 25) : 0));
-    });
+    if (typeof result.opponent_total_score === 'number') {
+      setOpponentScore(result.opponent_total_score);
+    } else {
+      duelService.getMatch(matchId).then(({ players }) => {
+        const opp = players.find((p) => p.player_slot !== myPlayerSlot);
+        if (opp && typeof opp.score === 'number') {
+          setOpponentScore(opp.score);
+        }
+      }).catch(() => {});
+    }
 
     setRoundHistory((prev) => [
       ...prev,
@@ -481,9 +506,13 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
           </div>
         </div>
 
-        <h2 className="text-2xl font-black text-slate-900 mb-2">Searching for Opponent...</h2>
+        <h2 className="text-2xl font-black text-slate-900 mb-2">
+          {matchmakingSec < 3 ? 'Searching for Opponent...' : 'Matching with Challenger...'}
+        </h2>
         <p className="text-slate-500 text-sm max-w-xs mb-6">
-          Pairing you with a live challenger in your skill tier.
+          {matchmakingSec < 3
+            ? 'Looking for active players in your skill tier...'
+            : 'Synchronizing 5-round battle question roster...'}
         </p>
 
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-mono font-bold mb-8">
@@ -521,7 +550,10 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
             <span className="text-sm font-bold text-slate-900 truncate max-w-[110px]">
               {user?.full_name || 'You'}
             </span>
-            <span className="text-[11px] text-blue-600 font-bold mt-0.5">Player 1</span>
+            <div className="flex items-center gap-1 mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[11px] text-emerald-600 font-bold">Ready</span>
+            </div>
           </div>
 
           {/* Center VS Badge & Countdown */}
@@ -542,9 +574,10 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
             <span className="text-sm font-bold text-slate-900 truncate max-w-[110px]">
               {opponentName}
             </span>
-            <span className="text-[11px] text-rose-600 font-bold mt-0.5">
-              {isTestOpponent ? 'Challenger (AI)' : 'Player 2'}
-            </span>
+            <div className="flex items-center gap-1 mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[11px] text-emerald-600 font-bold">Ready</span>
+            </div>
           </div>
         </div>
 
@@ -595,8 +628,9 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
           <div className="grid grid-cols-3 items-center text-center">
             {/* You */}
             <div className="text-left">
-              <div className="text-xs text-slate-400 font-bold truncate max-w-[100px]">
-                {user?.full_name || 'You'}
+              <div className="flex items-center gap-1 text-xs text-slate-400 font-bold truncate max-w-[120px]">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                <span className="truncate">{user?.full_name || 'You'}</span>
               </div>
               <div className="text-2xl sm:text-3xl font-black text-amber-400 font-mono">
                 {myScore}
@@ -615,8 +649,9 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
 
             {/* Opponent */}
             <div className="text-right">
-              <div className="text-xs text-slate-400 font-bold truncate max-w-[100px] ml-auto">
-                {opponentName}
+              <div className="flex items-center justify-end gap-1 text-xs text-slate-400 font-bold truncate max-w-[120px] ml-auto">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                <span className="truncate">{opponentName}</span>
               </div>
               <div className="text-2xl sm:text-3xl font-black text-slate-200 font-mono">
                 {opponentScore}

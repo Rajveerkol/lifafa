@@ -1,0 +1,4412 @@
+[
+  {
+    "id": "q_0001",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which elementary subatomic particle carries a negative fundamental electric charge?",
+    "options": [
+      "Proton",
+      "Neutron",
+      "Electron",
+      "Positron"
+    ],
+    "correct_answer": "Electron",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Physics",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Electrons orbit atomic nuclei and carry a negative charge of -1e."
+  },
+  {
+    "id": "q_0002",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What optical phenomenon causes white light to split into component colors when traversing a glass prism?",
+    "options": [
+      "Dispersion",
+      "Total Internal Reflection",
+      "Diffraction",
+      "Polarization"
+    ],
+    "correct_answer": "Dispersion",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Optics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Dispersion occurs because refractive index varies with the wavelength of light."
+  },
+  {
+    "id": "q_0003",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which thermodynamic law states that the entropy of an isolated system never decreases over time?",
+    "options": [
+      "Zeroth Law",
+      "First Law",
+      "Second Law",
+      "Third Law"
+    ],
+    "correct_answer": "Second Law",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Thermodynamics",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Second Law establishes that natural processes increase the overall entropy of isolated systems."
+  },
+  {
+    "id": "q_0004",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the SI derived unit of electrical resistance?",
+    "options": [
+      "Volt",
+      "Ampere",
+      "Ohm",
+      "Siemens"
+    ],
+    "correct_answer": "Ohm",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Electricity",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Ohm (symbol: Ω) is defined as 1 volt per ampere."
+  },
+  {
+    "id": "q_0005",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which color of visible light has the shortest wavelength and highest frequency?",
+    "options": [
+      "Red",
+      "Green",
+      "Blue",
+      "Violet"
+    ],
+    "correct_answer": "Violet",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Optics",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "Violet light has a wavelength of approximately 380-450 nm, the shortest in the visible spectrum."
+  },
+  {
+    "id": "q_0006",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What physical principle explains why aeroplanes achieve aerodynamic lift over their curved wings?",
+    "options": [
+      "Archimedes Principle",
+      "Bernoulli Principle",
+      "Pascal Law",
+      "Coulomb Law"
+    ],
+    "correct_answer": "Bernoulli Principle",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Fluid Dynamics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Bernoulli principle relates higher fluid velocity above the aerofoil with lower pressure relative to the bottom."
+  },
+  {
+    "id": "q_0007",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the approximate escape velocity required to leave Earth surface without further propulsion?",
+    "options": [
+      "7.9 km/s",
+      "11.2 km/s",
+      "16.7 km/s",
+      "29.8 km/s"
+    ],
+    "correct_answer": "11.2 km/s",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Astrophysics",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 25,
+    "explanation": "Earth surface escape velocity is approximately 11.2 km/s (roughly 40,270 km/h)."
+  },
+  {
+    "id": "q_0008",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which fundamental force binds quarks together inside protons and neutrons?",
+    "options": [
+      "Gravitational force",
+      "Weak nuclear force",
+      "Strong nuclear force",
+      "Electromagnetic force"
+    ],
+    "correct_answer": "Strong nuclear force",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Nuclear Physics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "The strong force, mediated by gluons, binds quarks together to form nucleons."
+  },
+  {
+    "id": "q_0009",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "At what Celsius temperature does liquid water reach its maximum density at 1 atm?",
+    "options": [
+      "0°C",
+      "4°C",
+      "10°C",
+      "100°C"
+    ],
+    "correct_answer": "4°C",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Physical Chemistry",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Pure liquid water has an anomalous density peak at approximately 3.98°C."
+  },
+  {
+    "id": "q_0010",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What type of optical lens is prescribed to correct myopia (nearsightedness)?",
+    "options": [
+      "Convex lens",
+      "Concave lens",
+      "Cylindrical lens",
+      "Bifocal prism"
+    ],
+    "correct_answer": "Concave lens",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Optics",
+    "pattern_type": "Application",
+    "time_limit_sec": 25,
+    "explanation": "A diverging concave lens spreads incoming rays so the image focuses directly on the retina."
+  },
+  {
+    "id": "q_0011",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "In quantum physics, which constant establishes the direct relation E = hf?",
+    "options": [
+      "Boltzmann constant",
+      "Planck constant",
+      "Avogadro constant",
+      "Rydberg constant"
+    ],
+    "correct_answer": "Planck constant",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Quantum Physics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Max Planck introduced h (≈ 6.626 × 10⁻³⁴ J·s) to relate photon energy with electromagnetic frequency."
+  },
+  {
+    "id": "q_0012",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which metallic chemical element remains in liquid state at standard ambient temperature (25°C)?",
+    "options": [
+      "Gallium",
+      "Mercury",
+      "Bromine",
+      "Cesium"
+    ],
+    "correct_answer": "Mercury",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Chemistry",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Mercury (Hg) is the only metal that is liquid under standard ambient conditions."
+  },
+  {
+    "id": "q_0013",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What type of radioactive decay emits a helium nucleus consisting of 2 protons and 2 neutrons?",
+    "options": [
+      "Alpha decay",
+      "Beta-minus decay",
+      "Beta-plus decay",
+      "Gamma emission"
+    ],
+    "correct_answer": "Alpha decay",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Nuclear Physics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "An alpha particle is identical to a helium-4 nucleus (2 protons and 2 neutrons)."
+  },
+  {
+    "id": "q_0014",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the SI derived unit of magnetic flux density?",
+    "options": [
+      "Weber",
+      "Tesla",
+      "Henry",
+      "Gauss"
+    ],
+    "correct_answer": "Tesla",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Electromagnetism",
+    "pattern_type": "Unit Definition",
+    "time_limit_sec": 25,
+    "explanation": "One Tesla equals one Weber per square meter (Wb/m²)."
+  },
+  {
+    "id": "q_0015",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which phenomenon explains the apparent frequency shift of a wave when the source moves relative to an observer?",
+    "options": [
+      "Doppler Effect",
+      "Compton Effect",
+      "Photoelectric Effect",
+      "Cherenkov Radiation"
+    ],
+    "correct_answer": "Doppler Effect",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Acoustics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "The Doppler effect causes perceived frequency increases when approaching and decreases when receding."
+  },
+  {
+    "id": "q_0016",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which state of matter consists of a gas of ionized atoms with free electrons at high temperatures?",
+    "options": [
+      "Bose-Einstein Condensate",
+      "Plasma",
+      "Superfluid",
+      "Amorphous Solid"
+    ],
+    "correct_answer": "Plasma",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Physics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Plasma is the fourth state of matter, common in lightning, stars, and fusion reactors."
+  },
+  {
+    "id": "q_0017",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "According to Einstein Special Theory of Relativity, what happens to the relativistic mass of an object as velocity approaches light speed?",
+    "options": [
+      "Decreases to zero",
+      "Remains strictly constant",
+      "Increases towards infinity",
+      "Fluctuates periodically"
+    ],
+    "correct_answer": "Increases towards infinity",
+    "difficulty": "HARD",
+    "category": "Science",
+    "subcategory": "Relativity",
+    "pattern_type": "Cause and Effect",
+    "time_limit_sec": 25,
+    "explanation": "Relativistic mass approaches infinity as speed approaches c, requiring infinite energy to accelerate further."
+  },
+  {
+    "id": "q_0018",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which electromagnetic radiation possesses wavelengths immediately shorter than visible violet light?",
+    "options": [
+      "Infrared",
+      "Ultraviolet",
+      "X-rays",
+      "Microwaves"
+    ],
+    "correct_answer": "Ultraviolet",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Electromagnetism",
+    "pattern_type": "Sequence / Order",
+    "time_limit_sec": 25,
+    "explanation": "Ultraviolet radiation lies between visible violet light and higher-energy X-rays."
+  },
+  {
+    "id": "q_0019",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What property of a fluid measures its internal resistance to flow and shear deformation?",
+    "options": [
+      "Surface tension",
+      "Viscosity",
+      "Buoyancy",
+      "Capillarity"
+    ],
+    "correct_answer": "Viscosity",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Fluid Dynamics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Viscosity quantifies internal friction between moving fluid layers."
+  },
+  {
+    "id": "q_0020",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "In electrical circuits, what does Kirchhoff Current Law (KCL) state regarding a junction node?",
+    "options": [
+      "Total voltage across a node is zero",
+      "Sum of currents entering equals sum leaving",
+      "Resistance at a node is minimum",
+      "Power dissipated equals current squared"
+    ],
+    "correct_answer": "Sum of currents entering equals sum leaving",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Electrical Circuits",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "KCL is a direct consequence of the conservation of electric charge at any junction."
+  },
+  {
+    "id": "q_0021",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the speed of sound in dry air at 20°C approximately?",
+    "options": [
+      "150 m/s",
+      "343 m/s",
+      "767 m/s",
+      "1,500 m/s"
+    ],
+    "correct_answer": "343 m/s",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Acoustics",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 25,
+    "explanation": "At 20°C, the speed of sound in dry air is approximately 343 meters per second (1,235 km/h)."
+  },
+  {
+    "id": "q_0022",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which law of planetary motion formulated by Kepler states that planets move in elliptical orbits with the Sun at one focus?",
+    "options": [
+      "First Law",
+      "Second Law",
+      "Third Law",
+      "Universal Gravitation Law"
+    ],
+    "correct_answer": "First Law",
+    "difficulty": "MEDIUM",
+    "category": "Space",
+    "subcategory": "Orbital Mechanics",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Kepler First Law of Planetary Motion states that planetary orbits are ellipses with the Sun at one focus."
+  },
+  {
+    "id": "q_0023",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What astronomical object forms when a massive star core collapses completely past the neutron degeneracy limit?",
+    "options": [
+      "White dwarf",
+      "Neutron star",
+      "Black hole",
+      "Brown dwarf"
+    ],
+    "correct_answer": "Black hole",
+    "difficulty": "MEDIUM",
+    "category": "Space",
+    "subcategory": "Astrophysics",
+    "pattern_type": "Cause and Effect",
+    "time_limit_sec": 25,
+    "explanation": "When core mass exceeds the Tolman-Oppenheimer-Volkoff limit (approx 2-3 solar masses), complete gravitational collapse produces a black hole."
+  },
+  {
+    "id": "q_0024",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which device stores electrical energy in an electrostatic field between two conductive plates?",
+    "options": [
+      "Inductor",
+      "Resistor",
+      "Capacitor",
+      "Transformer"
+    ],
+    "correct_answer": "Capacitor",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Electronics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Capacitors store charge on conductive plates separated by an insulating dielectric material."
+  },
+  {
+    "id": "q_0025",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the term for heat transfer occurring through direct molecular collisions without net movement of the material?",
+    "options": [
+      "Convection",
+      "Conduction",
+      "Radiation",
+      "Advection"
+    ],
+    "correct_answer": "Conduction",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Thermodynamics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Conduction is thermal energy transfer via intermolecular vibrations in solids and stationary fluids."
+  },
+  {
+    "id": "q_0026",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the chemical formula of ozone, the atmospheric molecule that absorbs solar ultraviolet radiation?",
+    "options": [
+      "O2",
+      "O3",
+      "H2O2",
+      "CO2"
+    ],
+    "correct_answer": "O3",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Chemistry",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Ozone is a triatomic molecule composed of three oxygen atoms (O3)."
+  },
+  {
+    "id": "q_0027",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which element has the highest electrical conductivity of all metals at room temperature?",
+    "options": [
+      "Gold",
+      "Copper",
+      "Silver",
+      "Aluminum"
+    ],
+    "correct_answer": "Silver",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Materials Science",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "Silver has the highest electrical and thermal conductivity of any known metal."
+  },
+  {
+    "id": "q_0028",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the pH value of pure distilled water at 25°C?",
+    "options": [
+      "5.5",
+      "7.0",
+      "8.5",
+      "14.0"
+    ],
+    "correct_answer": "7.0",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Chemistry",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "At 25°C, pure water has equal concentrations of H+ and OH- ions, yielding a neutral pH of exactly 7.0."
+  },
+  {
+    "id": "q_0029",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which gas constitutes approximately 78% of Earth troposphere by volume?",
+    "options": [
+      "Oxygen",
+      "Carbon Dioxide",
+      "Nitrogen",
+      "Argon"
+    ],
+    "correct_answer": "Nitrogen",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Atmospheric Science",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Dry air is composed of approximately 78.08% nitrogen, 20.95% oxygen, and 0.93% argon."
+  },
+  {
+    "id": "q_0030",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What allotrope of pure carbon consists of a single layer of carbon atoms arranged in a 2D hexagonal lattice?",
+    "options": [
+      "Diamond",
+      "Graphene",
+      "Fullerene",
+      "Lonsdaleite"
+    ],
+    "correct_answer": "Graphene",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Materials Science",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Graphene is a single atomic monolayer of graphite arranged in a honeycomb sp2-bonded lattice."
+  },
+  {
+    "id": "q_0031",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which process describes the direct phase transition of a substance from solid to gas without passing through liquid?",
+    "options": [
+      "Evaporation",
+      "Sublimation",
+      "Deposition",
+      "Condensation"
+    ],
+    "correct_answer": "Sublimation",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Chemistry",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Sublimation occurs when solids like dry ice (solid CO2) transition directly into gaseous state."
+  },
+  {
+    "id": "q_0032",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which acid is naturally secreted by parietal cells in the human stomach to aid digestion?",
+    "options": [
+      "Sulfuric acid",
+      "Hydrochloric acid",
+      "Nitric acid",
+      "Acetic acid"
+    ],
+    "correct_answer": "Hydrochloric acid",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Biochemistry",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Gastric parietal cells secrete hydrochloric acid (HCl) maintaining an acidic gastric pH between 1.5 and 3.5."
+  },
+  {
+    "id": "q_0033",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the primary chemical component of natural gas used as household and vehicle fuel?",
+    "options": [
+      "Propane",
+      "Butane",
+      "Methane",
+      "Ethane"
+    ],
+    "correct_answer": "Methane",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Chemistry",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Natural gas is predominantly composed of methane (CH4, typically 70-90%)."
+  },
+  {
+    "id": "q_0034",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which metal is the principal constituent of bronze when alloyed with tin?",
+    "options": [
+      "Iron",
+      "Zinc",
+      "Copper",
+      "Lead"
+    ],
+    "correct_answer": "Copper",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Materials Science",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Bronze is traditionally an alloy composed of copper (typically 88%) and tin (12%)."
+  },
+  {
+    "id": "q_0035",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What chemical process converts vegetable oils into solid fats by adding hydrogen across double bonds?",
+    "options": [
+      "Esterification",
+      "Hydrogenation",
+      "Fermentation",
+      "Saponification"
+    ],
+    "correct_answer": "Hydrogenation",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Organic Chemistry",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Catalytic hydrogenation saturates carbon-carbon double bonds, raising melting points."
+  },
+  {
+    "id": "q_0036",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which element has the lowest atomic weight and is the most abundant chemical substance in the universe?",
+    "options": [
+      "Helium",
+      "Hydrogen",
+      "Lithium",
+      "Carbon"
+    ],
+    "correct_answer": "Hydrogen",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Chemistry",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Hydrogen (H, atomic number 1) accounts for approximately 75% of baryonic mass in the universe."
+  },
+  {
+    "id": "q_0037",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the chemical name of common baking soda used in cooking and baking?",
+    "options": [
+      "Sodium carbonate",
+      "Sodium bicarbonate",
+      "Sodium hydroxide",
+      "Calcium carbonate"
+    ],
+    "correct_answer": "Sodium bicarbonate",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Chemistry",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Baking soda is pure sodium bicarbonate (NaHCO3), which releases CO2 gas when reacting with acids."
+  },
+  {
+    "id": "q_0038",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which chemical bond forms through the electrostatic attraction between oppositely charged ions?",
+    "options": [
+      "Covalent bond",
+      "Ionic bond",
+      "Metallic bond",
+      "Hydrogen bond"
+    ],
+    "correct_answer": "Ionic bond",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Chemistry",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Ionic bonds involve electron transfer from a metal to a nonmetal, forming electrostatic lattice attractions."
+  },
+  {
+    "id": "q_0039",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the term for a substance that accelerates a chemical reaction without undergoing permanent chemical change itself?",
+    "options": [
+      "Catalyst",
+      "Reagent",
+      "Inhibitor",
+      "Solvent"
+    ],
+    "correct_answer": "Catalyst",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Chemistry",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "A catalyst lowers reaction activation energy without being consumed in the net process."
+  },
+  {
+    "id": "q_0040",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which radioactive isotope of carbon is universally used in radiocarbon dating of ancient organic materials?",
+    "options": [
+      "Carbon-12",
+      "Carbon-13",
+      "Carbon-14",
+      "Carbon-16"
+    ],
+    "correct_answer": "Carbon-14",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Nuclear Chemistry",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Carbon-14 has a half-life of approximately 5,730 years and decays into nitrogen-14 via beta decay."
+  },
+  {
+    "id": "q_0041",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which organelle is universally recognized as the powerhouse of eukaryotic cells due to ATP production?",
+    "options": [
+      "Ribosome",
+      "Golgi apparatus",
+      "Mitochondria",
+      "Endoplasmic reticulum"
+    ],
+    "correct_answer": "Mitochondria",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Cell Biology",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Mitochondria generate cellular adenosine triphosphate (ATP) through oxidative phosphorylation."
+  },
+  {
+    "id": "q_0042",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What nitrogenous base replaces thymine in single-stranded RNA molecules?",
+    "options": [
+      "Adenine",
+      "Cytosine",
+      "Uracil",
+      "Guanine"
+    ],
+    "correct_answer": "Uracil",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Genetics",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "In ribonucleic acid (RNA), uracil pairs with adenine where thymine would appear in DNA."
+  },
+  {
+    "id": "q_0043",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which chamber of the human heart pumps oxygenated blood directly into the aorta?",
+    "options": [
+      "Right atrium",
+      "Right ventricle",
+      "Left atrium",
+      "Left ventricle"
+    ],
+    "correct_answer": "Left ventricle",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Anatomy",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "The left ventricle features thick muscular walls to pump oxygenated blood under high pressure through systemic circulation."
+  },
+  {
+    "id": "q_0044",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What type of biological macromolecule are enzymes fundamentally composed of?",
+    "options": [
+      "Carbohydrates",
+      "Proteins",
+      "Lipids",
+      "Nucleic acids"
+    ],
+    "correct_answer": "Proteins",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Biochemistry",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Almost all biochemical enzymes are globular proteins folded into precise catalytic conformations."
+  },
+  {
+    "id": "q_0045",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which hormone secreted by the beta cells of the pancreas regulates blood glucose uptake?",
+    "options": [
+      "Glucagon",
+      "Insulin",
+      "Cortisol",
+      "Thyroxine"
+    ],
+    "correct_answer": "Insulin",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Physiology",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Insulin facilitates cellular absorption of glucose, lowering circulating blood sugar levels."
+  },
+  {
+    "id": "q_0046",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the basic functional, structural, and microscopic filtering unit of the human kidney?",
+    "options": [
+      "Nephron",
+      "Neuron",
+      "Alveolus",
+      "Hepatocyte"
+    ],
+    "correct_answer": "Nephron",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Physiology",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Each human kidney contains approximately one million nephrons that filter blood and form urine."
+  },
+  {
+    "id": "q_0047",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which pigment in plant chloroplasts is primarily responsible for absorbing sunlight during photosynthesis?",
+    "options": [
+      "Carotenoid",
+      "Anthocyanin",
+      "Chlorophyll",
+      "Xanthophyll"
+    ],
+    "correct_answer": "Chlorophyll",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Botany",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Chlorophyll a and b absorb blue and red light while reflecting green light, giving plants their green hue."
+  },
+  {
+    "id": "q_0048",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What blood type is universally designated as the universal red blood cell donor in transfusions?",
+    "options": [
+      "A positive",
+      "AB positive",
+      "O negative",
+      "B negative"
+    ],
+    "correct_answer": "O negative",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Medicine",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "O-negative erythrocytes lack A, B, and Rh surface antigens, preventing acute hemolytic transfusion reactions."
+  },
+  {
+    "id": "q_0049",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which human cranial nerve is primarily responsible for the sensory perception of smell?",
+    "options": [
+      "Optic nerve",
+      "Olfactory nerve",
+      "Trigeminal nerve",
+      "Vagus nerve"
+    ],
+    "correct_answer": "Olfactory nerve",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Neuroscience",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Cranial Nerve I (the olfactory nerve) transmits sensory olfactory data directly from the nasal epithelium to the brain."
+  },
+  {
+    "id": "q_0050",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the term for an organism genetic makeup compared to its observable physical characteristics?",
+    "options": [
+      "Phenotype",
+      "Genotype",
+      "Karyotype",
+      "Haplotype"
+    ],
+    "correct_answer": "Genotype",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Genetics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Genotype refers to the specific allelic genetic composition, while phenotype describes the expressed traits."
+  },
+  {
+    "id": "q_0051",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which specialized connective tissue connects skeletal muscle directly to bone?",
+    "options": [
+      "Ligament",
+      "Tendon",
+      "Cartilage",
+      "Fascia"
+    ],
+    "correct_answer": "Tendon",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Anatomy",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Tendons connect muscles to bones to transmit force, whereas ligaments connect bone to bone."
+  },
+  {
+    "id": "q_0052",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the longest and strongest bone in the human skeleton?",
+    "options": [
+      "Tibia",
+      "Fibula",
+      "Femur",
+      "Humerus"
+    ],
+    "correct_answer": "Femur",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Anatomy",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The femur (thigh bone) supports body weight during standing, running, and jumping."
+  },
+  {
+    "id": "q_0053",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which vitamin is synthesized photochemically in human skin upon exposure to solar UVB radiation?",
+    "options": [
+      "Vitamin A",
+      "Vitamin C",
+      "Vitamin D",
+      "Vitamin K"
+    ],
+    "correct_answer": "Vitamin D",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Physiology",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "UVB converts 7-dehydrocholesterol in the epidermis into pre-vitamin D3, subsequently converted into active calcitriol."
+  },
+  {
+    "id": "q_0054",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the medical term for the oxygen-carrying metalloprotein found in human red blood cells?",
+    "options": [
+      "Myoglobin",
+      "Hemoglobin",
+      "Albumin",
+      "Ferritin"
+    ],
+    "correct_answer": "Hemoglobin",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Hematology",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Hemoglobin contains four iron-bearing heme groups that reversibly bind oxygen molecules."
+  },
+  {
+    "id": "q_0055",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which cellular division process produces four genetically diverse haploid daughter gametes?",
+    "options": [
+      "Mitosis",
+      "Meiosis",
+      "Binary fission",
+      "Budding"
+    ],
+    "correct_answer": "Meiosis",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Genetics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Meiosis consists of two successive nuclear divisions reducing chromosomal count by half."
+  },
+  {
+    "id": "q_0056",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What disease is caused by a severe deficiency of Vitamin C in human diet?",
+    "options": [
+      "Rickets",
+      "Beri-beri",
+      "Scurvy",
+      "Pellagra"
+    ],
+    "correct_answer": "Scurvy",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Nutrition",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Scurvy impairs collagen synthesis, causing bleeding gums, skin spots, and delayed wound healing."
+  },
+  {
+    "id": "q_0057",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which organ in the human digestive system produces alkaline bile to emulsify dietary lipids?",
+    "options": [
+      "Gallbladder",
+      "Pancreas",
+      "Liver",
+      "Stomach"
+    ],
+    "correct_answer": "Liver",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Anatomy",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Bile is continuously synthesized by hepatocytes in the liver and stored/concentrated in the gallbladder."
+  },
+  {
+    "id": "q_0058",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What protective membrane encases the human brain and spinal cord in three concentric layers?",
+    "options": [
+      "Pleura",
+      "Pericardium",
+      "Meninges",
+      "Peritoneum"
+    ],
+    "correct_answer": "Meninges",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Anatomy",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "The meninges consist of the dura mater, arachnoid mater, and pia mater."
+  },
+  {
+    "id": "q_0059",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which group of microorganisms lacks a true membrane-bound nucleus and organelles?",
+    "options": [
+      "Eukaryotes",
+      "Prokaryotes",
+      "Fungi",
+      "Protozoa"
+    ],
+    "correct_answer": "Prokaryotes",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Microbiology",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Prokaryotes (bacteria and archaea) have uncompartmentalized genetic material lacking a nuclear envelope."
+  },
+  {
+    "id": "q_0060",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the term for the symbiotic biological relationship where both participating species derive mutual benefit?",
+    "options": [
+      "Commensalism",
+      "Mutualism",
+      "Parasitism",
+      "Amensalism"
+    ],
+    "correct_answer": "Mutualism",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Ecology",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Mutualism is an ecological interaction where both species increase their fitness (e.g., bees and flowering plants)."
+  },
+  {
+    "id": "q_0061",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What part of the human eye adjusts its curvature to focus light from varying distances onto the retina?",
+    "options": [
+      "Cornea",
+      "Crystalline lens",
+      "Iris",
+      "Pupil"
+    ],
+    "correct_answer": "Crystalline lens",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Anatomy",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Ciliary muscles contract or relax to alter lens curvature during optical accommodation."
+  },
+  {
+    "id": "q_0062",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which endocrine gland located at the base of the brain is often referred to as the master gland?",
+    "options": [
+      "Thyroid gland",
+      "Adrenal gland",
+      "Pituitary gland",
+      "Pineal gland"
+    ],
+    "correct_answer": "Pituitary gland",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Endocrinology",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The pituitary gland secretes tropic hormones that control thyroid, adrenals, and gonads."
+  },
+  {
+    "id": "q_0063",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which human blood cells are primarily tasked with phagocytosis and immune defense against pathogens?",
+    "options": [
+      "Erythrocytes",
+      "Thrombocytes",
+      "Leukocytes",
+      "Reticulocytes"
+    ],
+    "correct_answer": "Leukocytes",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Immunology",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Leukocytes (white blood cells) identify, engulf, and destroy invading foreign microbes."
+  },
+  {
+    "id": "q_0064",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the genetic condition where an organism has three copies of chromosome 21 instead of two?",
+    "options": [
+      "Turner Syndrome",
+      "Down Syndrome",
+      "Klinefelter Syndrome",
+      "Edwards Syndrome"
+    ],
+    "correct_answer": "Down Syndrome",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Genetics",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Trisomy 21 is known clinically as Down Syndrome."
+  },
+  {
+    "id": "q_0065",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What specialized cell-cell junction enables rapid electrical impulse transmission in cardiac muscle tissue?",
+    "options": [
+      "Tight junctions",
+      "Gap junctions",
+      "Desmosomes",
+      "Hemidesmosomes"
+    ],
+    "correct_answer": "Gap junctions",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Physiology",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Intercalated discs contain gap junctions that allow direct ionic current flow between adjacent cardiomyocytes."
+  },
+  {
+    "id": "q_0066",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which planet in our solar system has the most prominent and extensive planetary ring system visible from Earth?",
+    "options": [
+      "Jupiter",
+      "Saturn",
+      "Uranus",
+      "Neptune"
+    ],
+    "correct_answer": "Saturn",
+    "difficulty": "MEDIUM",
+    "category": "Space",
+    "subcategory": "Planetary Science",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Saturn has the most extensive planetary ring system composed primarily of water ice and rock particulates."
+  },
+  {
+    "id": "q_0067",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the name of the nearest major spiral galaxy to our Milky Way galaxy?",
+    "options": [
+      "Andromeda Galaxy",
+      "Triangulum Galaxy",
+      "Sombrero Galaxy",
+      "Whirlpool Galaxy"
+    ],
+    "correct_answer": "Andromeda Galaxy",
+    "difficulty": "EASY",
+    "category": "Space",
+    "subcategory": "Astronomy",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Andromeda Galaxy (M31) is a barred spiral galaxy approximately 2.5 million light-years from Earth."
+  },
+  {
+    "id": "q_0068",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which celestial body in our solar system possesses the highest volcanic activity and hundreds of active sulfur volcanoes?",
+    "options": [
+      "Europa",
+      "Io",
+      "Titan",
+      "Enceladus"
+    ],
+    "correct_answer": "Io",
+    "difficulty": "MEDIUM",
+    "category": "Space",
+    "subcategory": "Planetary Science",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Jupiter moon Io is the most volcanically active body in the solar system due to tidal gravitational friction."
+  },
+  {
+    "id": "q_0069",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the theoretical boundary region marking the outer gravitational edge of our solar system where comets originate?",
+    "options": [
+      "Kuiper Belt",
+      "Asteroid Belt",
+      "Oort Cloud",
+      "Heliosheath"
+    ],
+    "correct_answer": "Oort Cloud",
+    "difficulty": "MEDIUM",
+    "category": "Space",
+    "subcategory": "Astronomy",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "The Oort cloud is a theoretical spherical cloud of icy planetesimals surrounding the solar system out to 100,000 AU."
+  },
+  {
+    "id": "q_0070",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which NASA space telescope launched in December 2021 observes the universe primarily in infrared wavelengths from the Sun-Earth L2 Lagrange point?",
+    "options": [
+      "Hubble Space Telescope",
+      "James Webb Space Telescope",
+      "Spitzer Space Telescope",
+      "Kepler Space Telescope"
+    ],
+    "correct_answer": "James Webb Space Telescope",
+    "difficulty": "HARD",
+    "category": "Space",
+    "subcategory": "Space Exploration",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "JWST operates at the Sun-Earth L2 point, utilizing a 6.5-meter beryllium mirror for high-resolution deep infrared imaging."
+  },
+  {
+    "id": "q_0071",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the astronomical term for a lunar phase when the Moon passes directly between Earth and the Sun, obscuring the solar disk?",
+    "options": [
+      "Lunar Eclipse",
+      "Solar Eclipse",
+      "Transit of Venus",
+      "Equinox"
+    ],
+    "correct_answer": "Solar Eclipse",
+    "difficulty": "HARD",
+    "category": "Space",
+    "subcategory": "Astronomy",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "A solar eclipse occurs when the Moon occults the Sun, casting a shadow upon Earth."
+  },
+  {
+    "id": "q_0072",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which planet possesses the longest rotation period, taking approximately 243 Earth days to rotate once and spinning in a retrograde direction?",
+    "options": [
+      "Mercury",
+      "Venus",
+      "Mars",
+      "Uranus"
+    ],
+    "correct_answer": "Venus",
+    "difficulty": "HARD",
+    "category": "Space",
+    "subcategory": "Planetary Science",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "Venus rotates clockwise (retrograde) once every 243 Earth days, longer than its orbital period of 225 Earth days."
+  },
+  {
+    "id": "q_0073",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What type of stellar remnant is formed when a low-to-intermediate mass star (like our Sun) sheds its outer layers at the end of its life?",
+    "options": [
+      "Neutron star",
+      "White dwarf",
+      "Black hole",
+      "Pulsar"
+    ],
+    "correct_answer": "White dwarf",
+    "difficulty": "HARD",
+    "category": "Space",
+    "subcategory": "Astrophysics",
+    "pattern_type": "Cause and Effect",
+    "time_limit_sec": 25,
+    "explanation": "Stars with initial masses under roughly 8 solar masses end their lifecycle as degenerate carbon-oxygen white dwarfs."
+  },
+  {
+    "id": "q_0074",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which mission executed humanity first successful crewed lunar landing in July 1969?",
+    "options": [
+      "Apollo 8",
+      "Apollo 11",
+      "Apollo 13",
+      "Gemini 4"
+    ],
+    "correct_answer": "Apollo 11",
+    "difficulty": "EASY",
+    "category": "Space",
+    "subcategory": "Space Exploration",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Apollo 11 landed Neil Armstrong and Buzz Aldrin on the Sea of Tranquility on July 20, 1969."
+  },
+  {
+    "id": "q_0075",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the term for the explosion that marks the violent energetic collapse and death of a massive star?",
+    "options": [
+      "Protostar",
+      "Nova",
+      "Supernova",
+      "Gamma Ray Burst"
+    ],
+    "correct_answer": "Supernova",
+    "difficulty": "MEDIUM",
+    "category": "Space",
+    "subcategory": "Astrophysics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "A Type II supernova occurs when core iron synthesis triggers rapid gravitational collapse and catastrophic explosion."
+  },
+  {
+    "id": "q_0076",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What unit of distance in astronomy is defined as the distance at which 1 astronomical unit subtends an angle of one arcsecond?",
+    "options": [
+      "Light-year",
+      "Parsec",
+      "Astronomical Unit",
+      "Hubble Length"
+    ],
+    "correct_answer": "Parsec",
+    "difficulty": "MEDIUM",
+    "category": "Space",
+    "subcategory": "Astronomy",
+    "pattern_type": "Unit Definition",
+    "time_limit_sec": 25,
+    "explanation": "One parsec (parallax arcsecond) equals approximately 3.26 light-years or 3.086 × 10¹³ kilometers."
+  },
+  {
+    "id": "q_0077",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which moon of Saturn is known for possessing a dense nitrogen-rich atmosphere and liquid methane-ethane lakes?",
+    "options": [
+      "Titan",
+      "Enceladus",
+      "Mimas",
+      "Dione"
+    ],
+    "correct_answer": "Titan",
+    "difficulty": "MEDIUM",
+    "category": "Space",
+    "subcategory": "Planetary Science",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Titan is the only known moon with a substantial dense atmosphere and stable surface bodies of liquid hydrocarbons."
+  },
+  {
+    "id": "q_0078",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which dwarf planet located in the asteroid belt between Mars and Jupiter is the largest object in the main belt?",
+    "options": [
+      "Pluto",
+      "Ceres",
+      "Eris",
+      "Haumea"
+    ],
+    "correct_answer": "Ceres",
+    "difficulty": "MEDIUM",
+    "category": "Space",
+    "subcategory": "Planetary Science",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Ceres constitutes roughly one-third of the total mass of the asteroid belt and is classified as a dwarf planet."
+  },
+  {
+    "id": "q_0079",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the name of the supermassive black hole located at the dynamical center of the Milky Way galaxy?",
+    "options": [
+      "Cygnus X-1",
+      "Sagittarius A*",
+      "M87*",
+      "Centaurus A"
+    ],
+    "correct_answer": "Sagittarius A*",
+    "difficulty": "MEDIUM",
+    "category": "Space",
+    "subcategory": "Astrophysics",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Sagittarius A* is a compact astronomical radio source with a mass roughly 4.15 million times that of our Sun."
+  },
+  {
+    "id": "q_0080",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which planet has an extreme axial tilt of approximately 98 degrees, effectively rotating on its side?",
+    "options": [
+      "Saturn",
+      "Uranus",
+      "Neptune",
+      "Mars"
+    ],
+    "correct_answer": "Uranus",
+    "difficulty": "MEDIUM",
+    "category": "Space",
+    "subcategory": "Planetary Science",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Uranus has an axial tilt of 97.77°, giving it extreme 42-year long seasonal daylight and darkness cycles."
+  },
+  {
+    "id": "q_0081",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which is the longest river in the world by continuous channel length?",
+    "options": [
+      "Amazon River",
+      "Nile River",
+      "Yangtze River",
+      "Mississippi River"
+    ],
+    "correct_answer": "Nile River",
+    "difficulty": "EASY",
+    "category": "Geography",
+    "subcategory": "World Geography",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "The Nile River flows approximately 6,650 km through northeastern Africa, traditionally recognized as the longest river."
+  },
+  {
+    "id": "q_0082",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the deepest oceanic trench in the world, descending over 10,900 meters below sea level?",
+    "options": [
+      "Java Trench",
+      "Puerto Rico Trench",
+      "Mariana Trench",
+      "Tonga Trench"
+    ],
+    "correct_answer": "Mariana Trench",
+    "difficulty": "EASY",
+    "category": "Geography",
+    "subcategory": "Physical Geography",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "The Challenger Deep within the Mariana Trench in the western Pacific is Earth deepest known marine point."
+  },
+  {
+    "id": "q_0083",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which is the largest hot desert on Earth by surface area, covering roughly 9 million square kilometers across North Africa?",
+    "options": [
+      "Gobi Desert",
+      "Kalahari Desert",
+      "Sahara Desert",
+      "Arabian Desert"
+    ],
+    "correct_answer": "Sahara Desert",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "World Geography",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "The Sahara is the largest non-polar hot desert on Earth, spanning from the Atlantic Ocean to the Red Sea."
+  },
+  {
+    "id": "q_0084",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which narrow maritime strait separates the Iberian Peninsula of Europe from Morocco in North Africa?",
+    "options": [
+      "Strait of Malacca",
+      "Strait of Gibraltar",
+      "Bering Strait",
+      "Bosphorus Strait"
+    ],
+    "correct_answer": "Strait of Gibraltar",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Straits",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Strait of Gibraltar connects the Atlantic Ocean to the Mediterranean Sea and is only 13 km wide at its narrowest point."
+  },
+  {
+    "id": "q_0085",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which mountain range forms the traditional natural continental divide separating Europe from Asia?",
+    "options": [
+      "Alps",
+      "Ural Mountains",
+      "Caucasus Mountains",
+      "Carpathians"
+    ],
+    "correct_answer": "Ural Mountains",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "World Geography",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "The Ural Mountains run north-south through western Russia, delineating the conventional European-Asian border."
+  },
+  {
+    "id": "q_0086",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the capital city of Canada?",
+    "options": [
+      "Toronto",
+      "Vancouver",
+      "Montreal",
+      "Ottawa"
+    ],
+    "correct_answer": "Ottawa",
+    "difficulty": "EASY",
+    "category": "Geography",
+    "subcategory": "Political Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Ottawa in Ontario was selected as the capital of Canada by Queen Victoria in 1857."
+  },
+  {
+    "id": "q_0087",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which landlocked European nation is bordered by Germany, France, Italy, Austria, and Liechtenstein?",
+    "options": [
+      "Switzerland",
+      "Belgium",
+      "Luxembourg",
+      "Slovakia"
+    ],
+    "correct_answer": "Switzerland",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "World Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Switzerland is a landlocked alpine country surrounded by those five central European nations."
+  },
+  {
+    "id": "q_0088",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which continent contains the largest number of sovereign sovereign countries (54 recognized nations)?",
+    "options": [
+      "Asia",
+      "Africa",
+      "Europe",
+      "South America"
+    ],
+    "correct_answer": "Africa",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "World Geography",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "Africa consists of 54 fully recognized independent sovereign states."
+  },
+  {
+    "id": "q_0089",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which artificial waterway opened in 1869 connects the Mediterranean Sea directly to the Red Sea?",
+    "options": [
+      "Panama Canal",
+      "Suez Canal",
+      "Kiel Canal",
+      "Erie Canal"
+    ],
+    "correct_answer": "Suez Canal",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Canals & Maritime",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Suez Canal enables direct maritime transit between Europe and Asia without navigating around the African continent."
+  },
+  {
+    "id": "q_0090",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the capital city of Australia?",
+    "options": [
+      "Sydney",
+      "Melbourne",
+      "Brisbane",
+      "Canberra"
+    ],
+    "correct_answer": "Canberra",
+    "difficulty": "EASY",
+    "category": "Geography",
+    "subcategory": "Political Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Canberra was purpose-built as Australia federal capital as a compromise between rival cities Sydney and Melbourne."
+  },
+  {
+    "id": "q_0091",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which South American country has the longest north-to-south coastline along the Pacific Ocean?",
+    "options": [
+      "Peru",
+      "Chile",
+      "Argentina",
+      "Colombia"
+    ],
+    "correct_answer": "Chile",
+    "difficulty": "EASY",
+    "category": "Geography",
+    "subcategory": "World Geography",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "Chile extends over 4,300 km from north to south while averaging only 177 km in east-west width."
+  },
+  {
+    "id": "q_0092",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the highest uninterrupted single-drop waterfall in the world, located in Canaima National Park, Venezuela?",
+    "options": [
+      "Niagara Falls",
+      "Victoria Falls",
+      "Angel Falls",
+      "Iguazu Falls"
+    ],
+    "correct_answer": "Angel Falls",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Physical Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Angel Falls (Kerepakupai Meru) has a total height of 979 meters and an uninterrupted plunge of 807 meters."
+  },
+  {
+    "id": "q_0093",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which body of water is the world largest inland lake by surface area (roughly 371,000 km²)?",
+    "options": [
+      "Lake Superior",
+      "Caspian Sea",
+      "Lake Victoria",
+      "Lake Baikal"
+    ],
+    "correct_answer": "Caspian Sea",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "World Geography",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "The Caspian Sea is an endorheic basin considered the largest inland lake/sea on Earth by surface area."
+  },
+  {
+    "id": "q_0094",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the deepest freshwater lake in the world, containing over 20% of Earth unfrozen surface fresh water?",
+    "options": [
+      "Lake Baikal",
+      "Lake Tanganyika",
+      "Lake Superior",
+      "Lake Michigan"
+    ],
+    "correct_answer": "Lake Baikal",
+    "difficulty": "HARD",
+    "category": "Geography",
+    "subcategory": "Physical Geography",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "Lake Baikal in southern Siberia reaches an extraordinary maximum depth of 1,642 meters."
+  },
+  {
+    "id": "q_0095",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which strait connects the Black Sea directly to the Sea of Marmara, dividing Istanbul into European and Asian halves?",
+    "options": [
+      "Dardanelles",
+      "Bosphorus",
+      "Strait of Hormuz",
+      "Bab-el-Mandeb"
+    ],
+    "correct_answer": "Bosphorus",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Straits",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Bosphorus is an internationally significant strait dividing European Thrace from Asian Anatolia."
+  },
+  {
+    "id": "q_0096",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What major tectonic plate boundary runs along the Pacific Ocean basin, causing roughly 90% of the world earthquakes?",
+    "options": [
+      "Mid-Atlantic Ridge",
+      "Pacific Ring of Fire",
+      "San Andreas Fault",
+      "Alpine-Himalayan belt"
+    ],
+    "correct_answer": "Pacific Ring of Fire",
+    "difficulty": "HARD",
+    "category": "Geography",
+    "subcategory": "Geology",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "The Pacific Ring of Fire is a horseshoe-shaped basin characterized by active subduction zones, volcanoes, and earthquakes."
+  },
+  {
+    "id": "q_0097",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which African lake is the primary source reservoir of the White Nile river?",
+    "options": [
+      "Lake Chad",
+      "Lake Tanganyika",
+      "Lake Victoria",
+      "Lake Malawi"
+    ],
+    "correct_answer": "Lake Victoria",
+    "difficulty": "EASY",
+    "category": "Geography",
+    "subcategory": "World Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Lake Victoria, shared by Uganda, Kenya, and Tanzania, is the chief reservoir source for the White Nile."
+  },
+  {
+    "id": "q_0098",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which island is the world largest island by surface area that is not an independent continent?",
+    "options": [
+      "Madagascar",
+      "Greenland",
+      "Borneo",
+      "New Guinea"
+    ],
+    "correct_answer": "Greenland",
+    "difficulty": "EASY",
+    "category": "Geography",
+    "subcategory": "World Geography",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "Greenland covers roughly 2.16 million km², making it the largest island on Earth."
+  },
+  {
+    "id": "q_0099",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "In which mountain range is the highest peak outside Asia, Mount Aconcagua (6,961 meters), situated?",
+    "options": [
+      "Rockies",
+      "Alps",
+      "Andes",
+      "Caucasus"
+    ],
+    "correct_answer": "Andes",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Physical Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Aconcagua in western Argentina is the highest peak in both the Western and Southern Hemispheres."
+  },
+  {
+    "id": "q_0100",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which country contains the largest number of natural freshwater lakes in the world?",
+    "options": [
+      "United States",
+      "Russia",
+      "Canada",
+      "Finland"
+    ],
+    "correct_answer": "Canada",
+    "difficulty": "EASY",
+    "category": "Geography",
+    "subcategory": "Physical Geography",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "Canada contains over 60% of the world natural lakes, with an estimated 2 million lakes spanning its territory."
+  },
+  {
+    "id": "q_0101",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the name of the atmospheric circulation cell situated between the equator and roughly 30 degrees latitude north and south?",
+    "options": [
+      "Ferrel cell",
+      "Hadley cell",
+      "Polar cell",
+      "Walker circulation"
+    ],
+    "correct_answer": "Hadley cell",
+    "difficulty": "HARD",
+    "category": "Geography",
+    "subcategory": "Climatology",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "The Hadley cell involves tropical air rising at the ITCZ, flowing poleward, and descending in the subtropical high-pressure belt."
+  },
+  {
+    "id": "q_0102",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which European capital city is crossed by the river Danube alongside Vienna, Bratislava, and Belgrade?",
+    "options": [
+      "Prague",
+      "Budapest",
+      "Warsaw",
+      "Bucharest"
+    ],
+    "correct_answer": "Budapest",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "World Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Budapest, Hungary, is split into historic Buda and Pest across the banks of the Danube River."
+  },
+  {
+    "id": "q_0103",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which African nation was historically known as Abyssinia and was one of the few African countries never colonized by European powers?",
+    "options": [
+      "Ghana",
+      "Nigeria",
+      "Ethiopia",
+      "Kenya"
+    ],
+    "correct_answer": "Ethiopia",
+    "difficulty": "HARD",
+    "category": "Geography",
+    "subcategory": "World Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Ethiopia defeated Italian colonial forces at the Battle of Adwa in 1896, preserving its sovereignty."
+  },
+  {
+    "id": "q_0104",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the southernmost active volcano on planet Earth, located on Ross Island in Antarctica?",
+    "options": [
+      "Mount Erebus",
+      "Mount Vesuvius",
+      "Kilauea",
+      "Mount Etna"
+    ],
+    "correct_answer": "Mount Erebus",
+    "difficulty": "EASY",
+    "category": "Geography",
+    "subcategory": "Physical Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Mount Erebus in Antarctica is the southernmost continuously active volcano on Earth, known for its persistent phonolitic lava lake."
+  },
+  {
+    "id": "q_0105",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which nation controls the maritime chokepoint Strait of Malacca alongside Malaysia and Indonesia?",
+    "options": [
+      "Thailand",
+      "Singapore",
+      "Philippines",
+      "Brunei"
+    ],
+    "correct_answer": "Singapore",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Straits",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Singapore lies at the southern entrance of the Strait of Malacca, one of the world busiest trade corridors."
+  },
+  {
+    "id": "q_0106",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which Indian river is known as the Tsangpo in its upper course through Tibet before entering Arunachal Pradesh?",
+    "options": [
+      "Ganga",
+      "Indus",
+      "Brahmaputra",
+      "Yamuna"
+    ],
+    "correct_answer": "Brahmaputra",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Brahmaputra originates as the Yarlung Tsangpo in southwestern Tibet and cuts through the Himalayas into India."
+  },
+  {
+    "id": "q_0107",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the highest mountain peak located entirely within the territory of India?",
+    "options": [
+      "K2 (Godwin Austen)",
+      "Kangchenjunga",
+      "Nanda Devi",
+      "Kamet"
+    ],
+    "correct_answer": "Nanda Devi",
+    "difficulty": "EASY",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "While Kangchenjunga lies on the Sikkim-Nepal border, Nanda Devi (7,816 m) in Uttarakhand is the highest peak completely within India."
+  },
+  {
+    "id": "q_0108",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which state in India has the longest maritime coastline?",
+    "options": [
+      "Maharashtra",
+      "Tamil Nadu",
+      "Gujarat",
+      "Andhra Pradesh"
+    ],
+    "correct_answer": "Gujarat",
+    "difficulty": "EASY",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "Gujarat has the longest mainland coastline in India, extending approximately 1,600 kilometers."
+  },
+  {
+    "id": "q_0109",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the southern point of the Indian Union mainland located in Tamil Nadu?",
+    "options": [
+      "Indira Point",
+      "Kanyakumari (Cape Comorin)",
+      "Rameswaram",
+      "Dhanushkodi"
+    ],
+    "correct_answer": "Kanyakumari (Cape Comorin)",
+    "difficulty": "EASY",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Kanyakumari is the southernmost tip of the Indian mainland peninsula, while Indira Point in Nicobar is the southern tip of Indian territory."
+  },
+  {
+    "id": "q_0110",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which plateau is the oldest and largest geological physiographic division of India?",
+    "options": [
+      "Chota Nagpur Plateau",
+      "Malwa Plateau",
+      "Deccan Plateau",
+      "Shillong Plateau"
+    ],
+    "correct_answer": "Deccan Plateau",
+    "difficulty": "EASY",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "The Deccan Plateau is an ancient triangular peninsular plateau composed of ancient Precambrian shields and volcanic basalt traps."
+  },
+  {
+    "id": "q_0111",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which Indian river flows westward through a rift valley between the Vindhya and Satpura mountain ranges?",
+    "options": [
+      "Godavari",
+      "Narmada",
+      "Krishna",
+      "Mahanadi"
+    ],
+    "correct_answer": "Narmada",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Narmada flows westward through a tectonic rift valley between the Vindhya and Satpura ranges into the Arabian Sea."
+  },
+  {
+    "id": "q_0112",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which national park in Assam is renowned as the primary habitat of the endangered Great Indian One-horned Rhinoceros?",
+    "options": [
+      "Jim Corbett National Park",
+      "Kaziranga National Park",
+      "Ranthambore National Park",
+      "Sundarbans National Park"
+    ],
+    "correct_answer": "Kaziranga National Park",
+    "difficulty": "MEDIUM",
+    "category": "Environment",
+    "subcategory": "Indian Heritage",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Kaziranga National Park in Assam holds two-thirds of the world population of one-horned rhinoceroses."
+  },
+  {
+    "id": "q_0113",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the name of the high-altitude pass connecting Ladakh with Tibet, historically part of the ancient Silk Route?",
+    "options": [
+      "Rohtang Pass",
+      "Nathu La",
+      "Zoji La",
+      "Karakoram Pass"
+    ],
+    "correct_answer": "Karakoram Pass",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Karakoram Pass lies at an elevation of 5,540 meters between Ladakh and the Xinjiang region of China."
+  },
+  {
+    "id": "q_0114",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which state in India is widely known as the Spice Garden of India due to its extensive production of pepper and cardamom?",
+    "options": [
+      "Kerala",
+      "Karnataka",
+      "Tamil Nadu",
+      "Andhra Pradesh"
+    ],
+    "correct_answer": "Kerala",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Kerala has traded spices for over 3,000 years with ancient Sumerians, Phoenicians, Greeks, and Romans."
+  },
+  {
+    "id": "q_0115",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which lake in Odisha is the largest coastal brackish water lagoon in India and second largest in the world?",
+    "options": [
+      "Vembanad Lake",
+      "Chilika Lake",
+      "Pulicat Lake",
+      "Kolleru Lake"
+    ],
+    "correct_answer": "Chilika Lake",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "Chilika Lake is a vast coastal lagoon covering up to 1,165 km² designated as a Ramsar Wetland of International Importance."
+  },
+  {
+    "id": "q_0116",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which mountain pass connects Srinagar to Leh across the Great Himalayan Range in Jammu & Kashmir / Ladakh?",
+    "options": [
+      "Banihal Pass",
+      "Zoji La",
+      "Shipki La",
+      "Jelep La"
+    ],
+    "correct_answer": "Zoji La",
+    "difficulty": "HARD",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Zoji La is a strategic mountain pass on National Highway 1 connecting the Kashmir Valley with the Ladakh plateau."
+  },
+  {
+    "id": "q_0117",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which is the largest freshwater lake in India, located in the Bandipora district of Jammu and Kashmir?",
+    "options": [
+      "Dal Lake",
+      "Wular Lake",
+      "Loktak Lake",
+      "Nainital Lake"
+    ],
+    "correct_answer": "Wular Lake",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "Wular Lake is one of the largest freshwater lakes in Asia, formed by tectonic activity and fed by the Jhelum River."
+  },
+  {
+    "id": "q_0118",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which Indian river is affectionately revered as the Dakshin Ganga (Ganges of the South)?",
+    "options": [
+      "Krishna",
+      "Cauvery",
+      "Godavari",
+      "Tapti"
+    ],
+    "correct_answer": "Godavari",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Godavari is India second longest river (1,465 km) and is widely referred to as Dakshin Ganga."
+  },
+  {
+    "id": "q_0119",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the capital city of the northeastern Indian state of Meghalaya, nicknamed the Scotland of the East?",
+    "options": [
+      "Agartala",
+      "Imphal",
+      "Shillong",
+      "Aizawl"
+    ],
+    "correct_answer": "Shillong",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Shillong, the capital of Meghalaya, was historically dubbed Scotland of the East due to its rolling pine hills."
+  },
+  {
+    "id": "q_0120",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which river delta formed by the Ganga and Brahmaputra rivers is the largest river delta in the world?",
+    "options": [
+      "Mekong Delta",
+      "Sundarbans Delta",
+      "Mississippi Delta",
+      "Nile Delta"
+    ],
+    "correct_answer": "Sundarbans Delta",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "The Sundarbans Delta spans roughly 100,000 km² and contains the world largest continuous mangrove forest."
+  },
+  {
+    "id": "q_0121",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which city in India is universally known as the Diamond City because it cuts and polishes roughly 90% of the world diamonds?",
+    "options": [
+      "Jaipur",
+      "Surat",
+      "Mumbai",
+      "Hyderabad"
+    ],
+    "correct_answer": "Surat",
+    "difficulty": "HARD",
+    "category": "Business",
+    "subcategory": "Indian Economy",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Surat in Gujarat is the world primary diamond cutting and polishing center."
+  },
+  {
+    "id": "q_0122",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What imaginary geographic coordinate line passes almost directly through the center of eight Indian states?",
+    "options": [
+      "Equator",
+      "Tropic of Cancer",
+      "Tropic of Capricorn",
+      "Prime Meridian"
+    ],
+    "correct_answer": "Tropic of Cancer",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Tropic of Cancer (23.5° N) traverses Gujarat, Rajasthan, MP, Chhattisgarh, Jharkhand, West Bengal, Tripura, and Mizoram."
+  },
+  {
+    "id": "q_0123",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which island territory of India contains Barren Island, the only confirmed active volcano in South Asia?",
+    "options": [
+      "Lakshadweep",
+      "Andaman and Nicobar Islands",
+      "Daman and Diu",
+      "Majuli"
+    ],
+    "correct_answer": "Andaman and Nicobar Islands",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Barren Island in the Andaman Sea is the only active volcano along the chain from Sumatra to Myanmar."
+  },
+  {
+    "id": "q_0124",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which waterfall in Karnataka formed by the Sharavathi river is one of the highest plunge waterfalls in India?",
+    "options": [
+      "Dudhsagar Falls",
+      "Jog Falls (Gersoppa)",
+      "Athirappilly Falls",
+      "Hogenakkal Falls"
+    ],
+    "correct_answer": "Jog Falls (Gersoppa)",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Jog Falls drops 253 meters in a sheer plunge across four distinct cascades: Raja, Roarer, Rocket, and Rani."
+  },
+  {
+    "id": "q_0125",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the standard time meridian for Indian Standard Time (IST), located near Mirzapur in Uttar Pradesh?",
+    "options": [
+      "80° E",
+      "82.5° E",
+      "85° E",
+      "90° E"
+    ],
+    "correct_answer": "82.5° E",
+    "difficulty": "HARD",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 25,
+    "explanation": "Indian Standard Time is calculated based on the 82.5° E longitude meridian, which is UTC +5:30."
+  },
+  {
+    "id": "q_0126",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which desert in northwestern India forms the world ninth-largest subtropical desert by area?",
+    "options": [
+      "Rann of Kutch",
+      "Thar Desert (Great Indian Desert)",
+      "Ladakh Cold Desert",
+      "Spiti Desert"
+    ],
+    "correct_answer": "Thar Desert (Great Indian Desert)",
+    "difficulty": "EASY",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Thar Desert spans across Rajasthan, Gujarat, Punjab, and Sindh, covering approximately 200,000 km²."
+  },
+  {
+    "id": "q_0127",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which river is the longest tributary river in India, flowing parallel to the Ganga before merging at Prayagraj?",
+    "options": [
+      "Yamuna",
+      "Ghaghara",
+      "Kosi",
+      "Son"
+    ],
+    "correct_answer": "Yamuna",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "The Yamuna originates at the Yamunotri glacier and flows 1,376 km before its sacred confluence (Triveni Sangam) with the Ganga."
+  },
+  {
+    "id": "q_0128",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the largest river island in the world situated in the Brahmaputra river in Assam?",
+    "options": [
+      "Elephanta Island",
+      "Majuli Island",
+      "Srirangam Island",
+      "St Mary Island"
+    ],
+    "correct_answer": "Majuli Island",
+    "difficulty": "EASY",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "Majuli is the first island district of India and recognized by Guinness World Records as the largest inhabited river island."
+  },
+  {
+    "id": "q_0129",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which national park in Madhya Pradesh is famous for high Bengal tiger density and inspired Rudyard Kipling The Jungle Book?",
+    "options": [
+      "Kanha National Park",
+      "Bandhavgarh National Park",
+      "Pench National Park",
+      "Panna National Park"
+    ],
+    "correct_answer": "Pench National Park",
+    "difficulty": "MEDIUM",
+    "category": "Environment",
+    "subcategory": "Indian Heritage",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Seoni and Pench forest landscape provided the authentic setting for Mowgli story in Kipling Jungle Book."
+  },
+  {
+    "id": "q_0130",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which mountain range acts as a barrier preventing cold Siberian winds from entering the Indian subcontinent?",
+    "options": [
+      "Western Ghats",
+      "Aravalli Range",
+      "Himalayas",
+      "Satpura Range"
+    ],
+    "correct_answer": "Himalayas",
+    "difficulty": "MEDIUM",
+    "category": "Geography",
+    "subcategory": "Indian Geography",
+    "pattern_type": "Cause and Effect",
+    "time_limit_sec": 25,
+    "explanation": "The massive Himalayan barrier blocks freezing Arctic air masses from Central Asia, ensuring India warm monsoon-dominated climate."
+  },
+  {
+    "id": "q_0131",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which ancient civilization developed cuneiform, widely regarded as the earliest documented writing system?",
+    "options": [
+      "Ancient Egypt",
+      "Sumerian Civilization",
+      "Indus Valley Civilization",
+      "Minoan Civilization"
+    ],
+    "correct_answer": "Sumerian Civilization",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "World History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Cuneiform script was developed by the Sumerians of ancient Mesopotamia around 3400-3200 BCE using wedge-shaped reed styli."
+  },
+  {
+    "id": "q_0132",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "In which year did the French Revolution officially begin with the storming of the Bastille prison in Paris?",
+    "options": [
+      "1776",
+      "1789",
+      "1799",
+      "1804"
+    ],
+    "correct_answer": "1789",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "World History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The storming of the Bastille fortress on July 14, 1789, ignited the French Revolution against absolute monarchy."
+  },
+  {
+    "id": "q_0133",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Who was the Macedonian king who created one of the largest ancient empires stretching from Greece to northwestern India by age 30?",
+    "options": [
+      "Philip II",
+      "Alexander the Great",
+      "Julius Caesar",
+      "Cyrus the Great"
+    ],
+    "correct_answer": "Alexander the Great",
+    "difficulty": "HARD",
+    "category": "History",
+    "subcategory": "World History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Alexander III of Macedon undefeatedly campaigned across Asia Minor, Egypt, Persia, and Punjab before dying in Babylon in 323 BCE."
+  },
+  {
+    "id": "q_0134",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What decisive 1815 battle marked the final military defeat of French Emperor Napoleon Bonaparte?",
+    "options": [
+      "Battle of Austerlitz",
+      "Battle of Waterloo",
+      "Battle of Leipzig",
+      "Battle of Trafalgar"
+    ],
+    "correct_answer": "Battle of Waterloo",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "World History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Duke of Wellington allied forces and Gebhard von Blücher Prussian army defeated Napoleon at Waterloo in Belgium."
+  },
+  {
+    "id": "q_0135",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which global conflict was formally concluded by the signing of the Treaty of Versailles in June 1919?",
+    "options": [
+      "American Civil War",
+      "World War I",
+      "Franco-Prussian War",
+      "World War II"
+    ],
+    "correct_answer": "World War I",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "World History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Treaty of Versailles signed in the Hall of Mirrors assigned war guilt to Germany and concluded the First World War."
+  },
+  {
+    "id": "q_0136",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which empire built the ancient Andean mountain citadel of Machu Picchu in Peru during the 15th century?",
+    "options": [
+      "Maya Empire",
+      "Aztec Empire",
+      "Inca Empire",
+      "Olmec Civilization"
+    ],
+    "correct_answer": "Inca Empire",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "World History",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Machu Picchu was constructed around 1450 CE under the reign of Inca emperor Pachacuti on a high mountain ridge."
+  },
+  {
+    "id": "q_0137",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Who wrote the fundamental 1776 economic treatise The Wealth of Nations, articulating the concept of the invisible hand?",
+    "options": [
+      "John Maynard Keynes",
+      "Adam Smith",
+      "David Ricardo",
+      "Karl Marx"
+    ],
+    "correct_answer": "Adam Smith",
+    "difficulty": "MEDIUM",
+    "category": "Business",
+    "subcategory": "Economic History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Scottish philosopher Adam Smith established classical economics with An Inquiry into the Nature and Causes of the Wealth of Nations."
+  },
+  {
+    "id": "q_0138",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What wall built in 1961 stood as the physical symbol of the Cold War division between Western democracy and Eastern communism until 1989?",
+    "options": [
+      "Hadrian Wall",
+      "Great Wall of China",
+      "Berlin Wall",
+      "Maginot Line"
+    ],
+    "correct_answer": "Berlin Wall",
+    "difficulty": "HARD",
+    "category": "History",
+    "subcategory": "Cold War",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "The Berlin Wall encircled West Berlin for 28 years until peaceful protests brought about its fall on November 9, 1989."
+  },
+  {
+    "id": "q_0139",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which famous naval engagement fought off the coast of Spain in 1805 saw British Admiral Horatio Nelson defeat the combined French and Spanish fleets?",
+    "options": [
+      "Battle of Midway",
+      "Battle of Trafalgar",
+      "Battle of Jutland",
+      "Battle of Lepanto"
+    ],
+    "correct_answer": "Battle of Trafalgar",
+    "difficulty": "HARD",
+    "category": "History",
+    "subcategory": "World History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Nelson victory confirmed British maritime supremacy for over a century, although he was fatally wounded aboard HMS Victory."
+  },
+  {
+    "id": "q_0140",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What Italian intellectual movement of the 14th to 17th centuries marked the bridge between the Middle Ages and modern era?",
+    "options": [
+      "Enlightenment",
+      "Renaissance",
+      "Reformation",
+      "Romanticism"
+    ],
+    "correct_answer": "Renaissance",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "World History",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "The Renaissance originated in Florence, reviving classical philosophy, scientific inquiry, art, and humanism."
+  },
+  {
+    "id": "q_0141",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Who was the principal leader of the Bolshevik party that seized power during the 1917 Russian October Revolution?",
+    "options": [
+      "Joseph Stalin",
+      "Vladimir Lenin",
+      "Leon Trotsky",
+      "Nikita Khrushchev"
+    ],
+    "correct_answer": "Vladimir Lenin",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "World History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Vladimir Lenin led the Bolshevik overthrow of the Russian Provisional Government, establishing the Soviet state."
+  },
+  {
+    "id": "q_0142",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which charter agreed to by King John of England at Runnymede in 1215 established the fundamental principle that even the monarch is subject to the law?",
+    "options": [
+      "Habeas Corpus Act",
+      "Magna Carta",
+      "Bill of Rights",
+      "Petition of Right"
+    ],
+    "correct_answer": "Magna Carta",
+    "difficulty": "HARD",
+    "category": "History",
+    "subcategory": "World History",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "The Magna Carta (Great Charter) placed statutory limits on monarchical power and influenced modern constitutional law."
+  },
+  {
+    "id": "q_0143",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which ancient civilization constructed the monumental Pyramids of Giza during its Old Kingdom period?",
+    "options": [
+      "Mesopotamia",
+      "Ancient Egypt",
+      "Phoenicia",
+      "Persia"
+    ],
+    "correct_answer": "Ancient Egypt",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "World History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Fourth Dynasty pharaohs Khufu, Khafre, and Menkaure commissioned the Giza pyramid complex along the Nile."
+  },
+  {
+    "id": "q_0144",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What was the military alliance formed in 1955 between the Soviet Union and seven Eastern European satellite states in response to NATO?",
+    "options": [
+      "League of Nations",
+      "Warsaw Pact",
+      "Comintern",
+      "Comecon"
+    ],
+    "correct_answer": "Warsaw Pact",
+    "difficulty": "HARD",
+    "category": "History",
+    "subcategory": "Cold War",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Warsaw Treaty Organization established mutual defense among the USSR, Poland, East Germany, and allies during the Cold War."
+  },
+  {
+    "id": "q_0145",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which German goldsmith invented movable metal type printing in Europe around 1440, revolutionizing information dissemination?",
+    "options": [
+      "Johannes Gutenberg",
+      "Martin Luther",
+      "Albrecht Dürer",
+      "Desiderius Erasmus"
+    ],
+    "correct_answer": "Johannes Gutenberg",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "World History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Gutenberg printing press with hand-cast metal type made mass book publishing economically viable."
+  },
+  {
+    "id": "q_0146",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What ancient city-state was famous for its rigorous military training discipline (Agoge) and heroic stand at the Battle of Thermopylae?",
+    "options": [
+      "Athens",
+      "Sparta",
+      "Thebes",
+      "Corinth"
+    ],
+    "correct_answer": "Sparta",
+    "difficulty": "HARD",
+    "category": "History",
+    "subcategory": "World History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Spartan King Leonidas led 300 Spartans and Greek allies against Xerxes Persian invasion at Thermopylae in 480 BCE."
+  },
+  {
+    "id": "q_0147",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which major European power was unified as an Empire in 1871 largely through the diplomacy of Chancellor Otto von Bismarck?",
+    "options": [
+      "Italy",
+      "Germany",
+      "Austria-Hungary",
+      "Ottoman Empire"
+    ],
+    "correct_answer": "Germany",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "World History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Bismarck engineered the unification of German states under Prussian leadership following the Franco-Prussian War."
+  },
+  {
+    "id": "q_0148",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What code of ancient Babylonian laws promulgated around 1750 BCE is famous for establishing the eye for an eye principle of justice?",
+    "options": [
+      "Justinian Code",
+      "Code of Hammurabi",
+      "Twelve Tables",
+      "Draco Laws"
+    ],
+    "correct_answer": "Code of Hammurabi",
+    "difficulty": "HARD",
+    "category": "History",
+    "subcategory": "World History",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "King Hammurabi had 282 edicts carved on a basalt stele regulating commerce, property rights, and criminal penalties."
+  },
+  {
+    "id": "q_0149",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Who was the Roman general who was appointed dictator in perpetuo before being assassinated on the Ides of March in 44 BCE?",
+    "options": [
+      "Mark Antony",
+      "Julius Caesar",
+      "Augustus",
+      "Nero"
+    ],
+    "correct_answer": "Julius Caesar",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "World History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Julius Caesar assassination by Roman senators led to the collapse of the Roman Republic and birth of the Roman Empire."
+  },
+  {
+    "id": "q_0150",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What multinational peace organization was established in October 1945 in San Francisco following the end of World War II?",
+    "options": [
+      "League of Nations",
+      "United Nations",
+      "NATO",
+      "European Coal and Steel Community"
+    ],
+    "correct_answer": "United Nations",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "World History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The UN Charter was ratified by 51 original member states to prevent future global military cataclysms."
+  },
+  {
+    "id": "q_0151",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which Mauryan Emperor renounced military conquest and embraced Buddhism following the devastating Kalinga War in 261 BCE?",
+    "options": [
+      "Chandragupta Maurya",
+      "Bindusara",
+      "Ashoka the Great",
+      "Brihadratha"
+    ],
+    "correct_answer": "Ashoka the Great",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Cause and Effect",
+    "time_limit_sec": 25,
+    "explanation": "Emperor Ashoka embraced Buddhist Ahimsa (non-violence) and carved edicts across rock pillars throughout the subcontinent."
+  },
+  {
+    "id": "q_0152",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "In which year did the Great Rebellion (also known as the First War of Indian Independence) break out, sparked by the revolt at Meerut?",
+    "options": [
+      "1757",
+      "1857",
+      "1905",
+      "1942"
+    ],
+    "correct_answer": "1857",
+    "difficulty": "HARD",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The 1857 uprising led to the dissolution of the British East India Company and direct rule by the British Crown."
+  },
+  {
+    "id": "q_0153",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Who was the primary architect and Chairman of the Drafting Committee of the Constitution of India?",
+    "options": [
+      "Jawaharlal Nehru",
+      "Dr. B. R. Ambedkar",
+      "Sardar Vallabhbhai Patel",
+      "Dr. Rajendra Prasad"
+    ],
+    "correct_answer": "Dr. B. R. Ambedkar",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Dr. Bhimrao Ramji Ambedkar served as the chief drafter of India sovereign, democratic constitution."
+  },
+  {
+    "id": "q_0154",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which decisive 1757 battle established British East India Company territorial rule in Bengal under Robert Clive?",
+    "options": [
+      "Battle of Buxar",
+      "Battle of Plassey",
+      "Battle of Panipat",
+      "Battle of Wandiwash"
+    ],
+    "correct_answer": "Battle of Plassey",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Clive defeated Nawab Siraj-ud-Daulah at Plassey through political intrigue with commander Mir Jafar."
+  },
+  {
+    "id": "q_0155",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Who led the historic 24-day, 388-kilometer Salt March from Sabarmati Ashram to Dandi in 1930 to protest the British salt monopoly?",
+    "options": [
+      "Subhas Chandra Bose",
+      "Mahatma Gandhi",
+      "Bhagat Singh",
+      "Bal Gangadhar Tilak"
+    ],
+    "correct_answer": "Mahatma Gandhi",
+    "difficulty": "HARD",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Mahatma Gandhi initiated the Civil Disobedience Movement by breaking the salt law at coastal Dandi on April 6, 1930."
+  },
+  {
+    "id": "q_0156",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which Mughal emperor founded the city of Fatehpur Sikri and promulgated the syncretic spiritual movement Din-i Ilahi?",
+    "options": [
+      "Babur",
+      "Humayun",
+      "Akbar",
+      "Shah Jahan"
+    ],
+    "correct_answer": "Akbar",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Jalal-ud-din Muhammad Akbar pursued broad religious tolerance, administrative centralization, and patronage of the arts."
+  },
+  {
+    "id": "q_0157",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which ancient university in modern-day Bihar was a premier international center of Buddhist learning from the 5th to 12th century CE?",
+    "options": [
+      "Taxila",
+      "Nalanda",
+      "Vikramashila",
+      "Vallabhi"
+    ],
+    "correct_answer": "Nalanda",
+    "difficulty": "HARD",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Nalanda University attracted thousands of scholars from China, Korea, Japan, and Tibet before its destruction in 1193 CE."
+  },
+  {
+    "id": "q_0158",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Who gave the immortal slogan Give me blood, and I shall give you freedom! while leading the Indian National Army (Azad Hind Fauj)?",
+    "options": [
+      "Bhagat Singh",
+      "Chandrashekhar Azad",
+      "Subhas Chandra Bose",
+      "Lala Lajpat Rai"
+    ],
+    "correct_answer": "Subhas Chandra Bose",
+    "difficulty": "HARD",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Netaji Subhas Chandra Bose mobilized the Azad Hind Fauj in Southeast Asia to fight for India complete independence."
+  },
+  {
+    "id": "q_0159",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which Indian ruler of the Kingdom of Mysore was known as the Tiger of Mysore and pioneered military iron-cased rocketry?",
+    "options": [
+      "Hyder Ali",
+      "Tipu Sultan",
+      "Shivaji Maharaj",
+      "Krishnadevaraya"
+    ],
+    "correct_answer": "Tipu Sultan",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Tipu Sultan utilized Mysorean iron rockets against British forces during the Anglo-Mysore Wars."
+  },
+  {
+    "id": "q_0160",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "In which city did British troops under Brigadier General Reginald Dyer perpetrate the Jallianwala Bagh massacre on Baisakhi in April 1919?",
+    "options": [
+      "Lahore",
+      "Amritsar",
+      "Delhi",
+      "Jalandhar"
+    ],
+    "correct_answer": "Amritsar",
+    "difficulty": "HARD",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "General Dyer ordered troops to fire upon thousands of peaceful unarmed demonstrators gathered at Jallianwala Bagh in Amritsar."
+  },
+  {
+    "id": "q_0161",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Who was the founder of the Maratha Empire, crowned as Chhatrapati at Raigad Fort in 1674?",
+    "options": [
+      "Sambhajiraje",
+      "Shivaji Maharaj",
+      "Bajirao I",
+      "Madhavrao"
+    ],
+    "correct_answer": "Shivaji Maharaj",
+    "difficulty": "EASY",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Chhatrapati Shivaji Maharaj established a sovereign Maratha realm utilizing progressive civil administration and guerrilla warfare (Ganimi Kava)."
+  },
+  {
+    "id": "q_0162",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which ancient Indian kingdom ruler Krishnadevaraya presided over the golden age of the Vijayanagara Empire from Hampi?",
+    "options": [
+      "Hoysala Dynasty",
+      "Tuluva Dynasty",
+      "Chalukya Dynasty",
+      "Rashtrakuta Dynasty"
+    ],
+    "correct_answer": "Tuluva Dynasty",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Krishnadevaraya of the Tuluva Dynasty expanded the Vijayanagara Empire and patronized Telugu and Sanskrit literature."
+  },
+  {
+    "id": "q_0163",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What movement was launched by Mahatma Gandhi at the Gowalia Tank Maidan in Bombay on August 8, 1942, with the slogan Do or Die?",
+    "options": [
+      "Non-Cooperation Movement",
+      "Civil Disobedience Movement",
+      "Quit India Movement",
+      "Swadeshi Movement"
+    ],
+    "correct_answer": "Quit India Movement",
+    "difficulty": "HARD",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Quit India Resolution demanded an orderly British withdrawal from India during World War II."
+  },
+  {
+    "id": "q_0164",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Who was known as the Iron Man of India for successfully integrating over 560 princely states into the Indian Union?",
+    "options": [
+      "Jawaharlal Nehru",
+      "Sardar Vallabhbhai Patel",
+      "Maulana Abul Kalam Azad",
+      "C. Rajagopalachari"
+    ],
+    "correct_answer": "Sardar Vallabhbhai Patel",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "As Deputy Prime Minister and Home Minister, Sardar Patel unified the political fabric of independent India."
+  },
+  {
+    "id": "q_0165",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which Gupta dynasty king earned the title Kaviraja and is depicted playing the veena on his ancient gold coinage?",
+    "options": [
+      "Chandragupta I",
+      "Samudragupta",
+      "Chandragupta II (Vikramaditya)",
+      "Kumaragupta"
+    ],
+    "correct_answer": "Samudragupta",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Samudragupta was celebrated for his military conquests and artistic accomplishments, immortalized on the Allahabad Pillar inscription."
+  },
+  {
+    "id": "q_0166",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "In which year did the British transfer the capital of the British Indian Empire from Calcutta to Delhi?",
+    "options": [
+      "1905",
+      "1911",
+      "1919",
+      "1931"
+    ],
+    "correct_answer": "1911",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "King George V announced the capital relocation from Calcutta to Delhi at the Delhi Durbar in December 1911."
+  },
+  {
+    "id": "q_0167",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which freedom fighter founded the revolutionary organisation Hindustan Socialist Republican Association (HSRA) alongside Chandrashekhar Azad?",
+    "options": [
+      "Bhagat Singh",
+      "Subhas Chandra Bose",
+      "Vinayak Savarkar",
+      "Aurobindo Ghosh"
+    ],
+    "correct_answer": "Bhagat Singh",
+    "difficulty": "HARD",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Bhagat Singh transformed the HRA into the HSRA in 1928 at Feroz Shah Kotla, advocating socialism and independence."
+  },
+  {
+    "id": "q_0168",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which social reformer founded the Brahmo Samaj in Calcutta in 1828 and campaigned vigorously against the practice of Sati?",
+    "options": [
+      "Swami Vivekananda",
+      "Ishwar Chandra Vidyasagar",
+      "Raja Ram Mohan Roy",
+      "Dayananda Saraswati"
+    ],
+    "correct_answer": "Raja Ram Mohan Roy",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Raja Ram Mohan Roy is considered the Father of the Indian Renaissance for his advocacy of modern education and social reform."
+  },
+  {
+    "id": "q_0169",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Who served as the first female Prime Minister of India, in office from 1966 to 1977 and again from 1980 to 1984?",
+    "options": [
+      "Sarojini Naidu",
+      "Indira Gandhi",
+      "Sucheta Kripalani",
+      "Vijayalakshmi Pandit"
+    ],
+    "correct_answer": "Indira Gandhi",
+    "difficulty": "MEDIUM",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Indira Gandhi was India third Prime Minister and the world second democratically elected female prime minister."
+  },
+  {
+    "id": "q_0170",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which Indus Valley Civilization archaeological site located in Gujarat features a tidal dockyard engineered for maritime trade?",
+    "options": [
+      "Mohenjo-daro",
+      "Harappa",
+      "Lothal",
+      "Kalibangan"
+    ],
+    "correct_answer": "Lothal",
+    "difficulty": "HARD",
+    "category": "History",
+    "subcategory": "Indian History",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Lothal had a massive brick basin connected to an old course of the Sabarmati river, functioning as a world-class bronze-age dock."
+  },
+  {
+    "id": "q_0171",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What layer of the standard 7-layer OSI networking model is responsible for logical IP routing and packet forwarding?",
+    "options": [
+      "Data Link Layer",
+      "Network Layer",
+      "Transport Layer",
+      "Session Layer"
+    ],
+    "correct_answer": "Network Layer",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Networking",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Layer 3 (Network Layer) handles packet encapsulation, logical addressing (IPv4/IPv6), and routing across networks."
+  },
+  {
+    "id": "q_0172",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which protocol operates at the Transport Layer to provide connection-oriented, reliable, and ordered data byte-stream delivery?",
+    "options": [
+      "UDP",
+      "TCP",
+      "ICMP",
+      "IGMP"
+    ],
+    "correct_answer": "TCP",
+    "difficulty": "HARD",
+    "category": "Computers",
+    "subcategory": "Networking",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Transmission Control Protocol (TCP) ensures reliable delivery through three-way handshakes, sequence numbers, and ACKs."
+  },
+  {
+    "id": "q_0173",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the standard default port number used for secure encrypted HTTPS web traffic?",
+    "options": [
+      "80",
+      "443",
+      "8080",
+      "22"
+    ],
+    "correct_answer": "443",
+    "difficulty": "EASY",
+    "category": "Computers",
+    "subcategory": "Networking",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "HTTPS uses port 443 by default with TLS/SSL encryption, whereas plain HTTP uses port 80."
+  },
+  {
+    "id": "q_0174",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which fundamental memory architecture features a shared bus and single storage space for both instructions and program data?",
+    "options": [
+      "Harvard architecture",
+      "Von Neumann architecture",
+      "Modified Harvard",
+      "Turing architecture"
+    ],
+    "correct_answer": "Von Neumann architecture",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Architecture",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Von Neumann architecture uses a unified memory for code and data, which can result in the Von Neumann bottleneck."
+  },
+  {
+    "id": "q_0175",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "In Linux and Unix-like operating systems, which shell command is used to alter file and directory read/write/execute permissions?",
+    "options": [
+      "chown",
+      "chmod",
+      "chgrp",
+      "passwd"
+    ],
+    "correct_answer": "chmod",
+    "difficulty": "HARD",
+    "category": "Computers",
+    "subcategory": "Operating Systems",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The chmod (change mode) command modifies standard octal or symbolic POSIX file permission bits."
+  },
+  {
+    "id": "q_0176",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What data structure operates on a strict Last-In, First-Out (LIFO) order of element insertion and removal?",
+    "options": [
+      "Queue",
+      "Stack",
+      "Linked list",
+      "Binary heap"
+    ],
+    "correct_answer": "Stack",
+    "difficulty": "HARD",
+    "category": "Computers",
+    "subcategory": "Data Structures",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Stacks push and pop elements from the top, adhering strictly to Last-In, First-Out semantics."
+  },
+  {
+    "id": "q_0177",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which HTTP response status code series indicates a client-side error, such as a bad request or unauthorized access?",
+    "options": [
+      "2xx",
+      "3xx",
+      "4xx",
+      "5xx"
+    ],
+    "correct_answer": "4xx",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Web Standards",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "HTTP 4xx status codes (e.g. 400 Bad Request, 401 Unauthorized, 404 Not Found) denote client errors."
+  },
+  {
+    "id": "q_0178",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the maximum number of unique IPv4 addresses theoretically possible under standard 32-bit addressing?",
+    "options": [
+      "65,536",
+      "16.7 million",
+      "Approximately 4.29 billion",
+      "340 undecillion"
+    ],
+    "correct_answer": "Approximately 4.29 billion",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Networking",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 25,
+    "explanation": "2³² yields exactly 4,294,967,296 unique IPv4 addresses, leading to the transition towards 128-bit IPv6."
+  },
+  {
+    "id": "q_0179",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which computer bus standard designed in the 1990s replaced legacy serial and parallel ports for peripheral connections?",
+    "options": [
+      "SCSI",
+      "PCI",
+      "USB",
+      "FireWire"
+    ],
+    "correct_answer": "USB",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Hardware",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Universal Serial Bus (USB) standardized connectors and power delivery for keyboards, mice, and storage devices."
+  },
+  {
+    "id": "q_0180",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "In relational database design, what normal form requires that all non-key attributes are fully functionally dependent on the primary key (no partial dependencies)?",
+    "options": [
+      "First Normal Form (1NF)",
+      "Second Normal Form (2NF)",
+      "Third Normal Form (3NF)",
+      "Boyce-Codd Normal Form (BCNF)"
+    ],
+    "correct_answer": "Second Normal Form (2NF)",
+    "difficulty": "HARD",
+    "category": "Computers",
+    "subcategory": "Databases",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "2NF requires being in 1NF and ensuring all non-candidate-key attributes depend on the complete primary key."
+  },
+  {
+    "id": "q_0181",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which central processing unit component is responsible for executing arithmetic operations and boolean logic evaluations?",
+    "options": [
+      "Control Unit (CU)",
+      "Arithmetic Logic Unit (ALU)",
+      "Instruction Register",
+      "Program Counter"
+    ],
+    "correct_answer": "Arithmetic Logic Unit (ALU)",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Hardware",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "The ALU processes binary arithmetic (add, subtract) and bitwise logical operations (AND, OR, NOT)."
+  },
+  {
+    "id": "q_0182",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What type of operating system scheduler preemptively switches CPU execution between threads at rapid time slices?",
+    "options": [
+      "Batch scheduler",
+      "Round Robin scheduler",
+      "First-Come, First-Served",
+      "Shortest Job First"
+    ],
+    "correct_answer": "Round Robin scheduler",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Operating Systems",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Round Robin assigns fixed time quantum slices per process in circular order, ensuring responsive multitasking."
+  },
+  {
+    "id": "q_0183",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the term for volatile high-speed semiconductor storage located directly on the CPU die between registers and main RAM?",
+    "options": [
+      "Flash memory",
+      "Cache memory (L1/L2/L3)",
+      "Virtual memory",
+      "ROM"
+    ],
+    "correct_answer": "Cache memory (L1/L2/L3)",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Hardware",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "SRAM cache memory stores frequently referenced instructions and data to minimize high-latency DRAM bus roundtrips."
+  },
+  {
+    "id": "q_0184",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which internet protocol resolves human-friendly domain names (like google.com) into numerical machine IP addresses?",
+    "options": [
+      "DHCP",
+      "DNS",
+      "SNMP",
+      "ARP"
+    ],
+    "correct_answer": "DNS",
+    "difficulty": "HARD",
+    "category": "Computers",
+    "subcategory": "Networking",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Domain Name System (DNS) operates as the decentralized hierarchical naming directory of the Internet."
+  },
+  {
+    "id": "q_0185",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "In Git version control, which command combines changes from an external branch into the currently active branch?",
+    "options": [
+      "git fetch",
+      "git merge",
+      "git push",
+      "git branch"
+    ],
+    "correct_answer": "git merge",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Software Engineering",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "git merge integrates commit histories from a target branch into the current working branch."
+  },
+  {
+    "id": "q_0186",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What asymptotic time complexity does binary search achieve when querying a sorted array of N elements?",
+    "options": [
+      "O(1)",
+      "O(log N)",
+      "O(N)",
+      "O(N log N)"
+    ],
+    "correct_answer": "O(log N)",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Algorithms",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Binary search halves the remaining search interval on each step, yielding logarithmic O(log N) time performance."
+  },
+  {
+    "id": "q_0187",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which communication protocol is utilized by network devices to automatically assign dynamic IP configurations to client machines?",
+    "options": [
+      "DHCP",
+      "DNS",
+      "NTP",
+      "SMTP"
+    ],
+    "correct_answer": "DHCP",
+    "difficulty": "HARD",
+    "category": "Computers",
+    "subcategory": "Networking",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Dynamic Host Configuration Protocol (DHCP) automatically provides subnet masks, gateway addresses, and IP assignments."
+  },
+  {
+    "id": "q_0188",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the term for a software vulnerability where a program writes data beyond the allocated boundary of a fixed-size memory buffer?",
+    "options": [
+      "SQL Injection",
+      "Cross-Site Scripting (XSS)",
+      "Buffer Overflow",
+      "Race Condition"
+    ],
+    "correct_answer": "Buffer Overflow",
+    "difficulty": "HARD",
+    "category": "Computers",
+    "subcategory": "Cybersecurity",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Buffer overflows overwrite adjacent memory stacks, allowing malicious code injection or arbitrary instruction execution."
+  },
+  {
+    "id": "q_0189",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which Linux command is used to display live, dynamic system process metrics, CPU utilization, and memory usage?",
+    "options": [
+      "ps",
+      "top",
+      "df",
+      "free"
+    ],
+    "correct_answer": "top",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Operating Systems",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "top displays real-time interactive process list sorted by CPU or memory consumption."
+  },
+  {
+    "id": "q_0190",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the primary architectural purpose of a Database Index (such as a B-Tree or Hash Index)?",
+    "options": [
+      "Ensure data encryption on disk",
+      "Accelerate data retrieval query speeds",
+      "Compress database storage footprint",
+      "Enforce user role access control"
+    ],
+    "correct_answer": "Accelerate data retrieval query speeds",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Databases",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Indexes provide fast sorted lookups avoiding full sequential table scans on disk."
+  },
+  {
+    "id": "q_0191",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which asymmetric cryptographic algorithm published in 1977 by Rivest, Shamir, and Adleman relies on the difficulty of prime factorization?",
+    "options": [
+      "AES",
+      "DES",
+      "RSA",
+      "Diffie-Hellman"
+    ],
+    "correct_answer": "RSA",
+    "difficulty": "HARD",
+    "category": "Computers",
+    "subcategory": "Cryptography",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "RSA uses pairs of public and private keys derived from products of two large prime numbers."
+  },
+  {
+    "id": "q_0192",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What form of cyber attack deceives users into divulging confidential credentials by masquerading as a trustworthy entity?",
+    "options": [
+      "DDoS",
+      "Phishing",
+      "Man-in-the-Middle",
+      "Ransomware"
+    ],
+    "correct_answer": "Phishing",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Cybersecurity",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Phishing utilizes fraudulent emails, fake login portals, or messages to trick users into revealing passwords or credit card data."
+  },
+  {
+    "id": "q_0193",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What symmetric block cipher standard adopted by NIST in 2001 operates on 128-bit blocks with key lengths of 128, 192, or 256 bits?",
+    "options": [
+      "AES (Advanced Encryption Standard)",
+      "Triple DES",
+      "Blowfish",
+      "RC4"
+    ],
+    "correct_answer": "AES (Advanced Encryption Standard)",
+    "difficulty": "HARD",
+    "category": "Computers",
+    "subcategory": "Cryptography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "AES (Rijndael cipher) replaced DES as the federal standard for classified and commercial electronic data encryption."
+  },
+  {
+    "id": "q_0194",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What type of network attack floods a server with distributed traffic from hundreds or thousands of compromised botnet nodes?",
+    "options": [
+      "SQL Injection",
+      "Cross-Site Scripting (XSS)",
+      "DDoS (Distributed Denial of Service)",
+      "Zero-Day Exploit"
+    ],
+    "correct_answer": "DDoS (Distributed Denial of Service)",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Cybersecurity",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "A DDoS attack exhausts server bandwidth, sockets, or CPU resources, rendering websites unavailable to legitimate users."
+  },
+  {
+    "id": "q_0195",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "In public key infrastructure (PKI), which trusted entity issues and digitally signs cryptographic SSL/TLS certificates?",
+    "options": [
+      "Root Domain Registrar",
+      "Certificate Authority (CA)",
+      "Internet Service Provider",
+      "IANA"
+    ],
+    "correct_answer": "Certificate Authority (CA)",
+    "difficulty": "HARD",
+    "category": "Computers",
+    "subcategory": "Cybersecurity",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Certificate Authorities verify domain ownership and sign digital certificates that browsers trust."
+  },
+  {
+    "id": "q_0196",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the term for malicious software that encrypts victim files and demands extortion payment for decryption keys?",
+    "options": [
+      "Spyware",
+      "Adware",
+      "Ransomware",
+      "Keylogger"
+    ],
+    "correct_answer": "Ransomware",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Cybersecurity",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Ransomware locks victim data using asymmetric encryption until cryptocurrency ransom is paid."
+  },
+  {
+    "id": "q_0197",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What security mechanism requires users to authenticate identity using two distinct verification factors?",
+    "options": [
+      "Single Sign-On (SSO)",
+      "Two-Factor Authentication (2FA)",
+      "OAuth 2.0",
+      "CAPTCHA"
+    ],
+    "correct_answer": "Two-Factor Authentication (2FA)",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Cybersecurity",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "2FA combines something you know (password) with something you have (authenticator app / SMS token) or are (biometric)."
+  },
+  {
+    "id": "q_0198",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which HTTP header attribute prevents JavaScript from accessing session cookies, mitigating cross-site scripting cookie theft?",
+    "options": [
+      "Secure",
+      "HttpOnly",
+      "SameSite",
+      "Path"
+    ],
+    "correct_answer": "HttpOnly",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Web Security",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The HttpOnly flag blocks client-side scripts from reading document.cookie, preserving session tokens from XSS."
+  },
+  {
+    "id": "q_0199",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What security protocol secures web traffic between browser and server by establishing an encrypted session tunnel?",
+    "options": [
+      "FTP",
+      "TLS (Transport Layer Security)",
+      "Telnet",
+      "SNMP"
+    ],
+    "correct_answer": "TLS (Transport Layer Security)",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Web Security",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "TLS (superseding deprecated SSL) encrypts web data in transit, ensuring confidentiality and integrity."
+  },
+  {
+    "id": "q_0200",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What type of software vulnerability is actively exploited in the wild before the software developer has issued a patch?",
+    "options": [
+      "Trojan horse",
+      "Zero-Day Vulnerability",
+      "Brute force flaw",
+      "Dictionary flaw"
+    ],
+    "correct_answer": "Zero-Day Vulnerability",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Cybersecurity",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "A Zero-Day vulnerability represents an unpatched security hole that developers have had zero days to fix."
+  },
+  {
+    "id": "q_0201",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What mechanism allows client applications to access user resources hosted on third-party servers without exposing user passwords?",
+    "options": [
+      "SAML",
+      "OAuth 2.0",
+      "Kerberos",
+      "RADIUS"
+    ],
+    "correct_answer": "OAuth 2.0",
+    "difficulty": "HARD",
+    "category": "Computers",
+    "subcategory": "Web Standards",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "OAuth 2.0 issues scoped access tokens allowing authorization delegation (e.g. Sign in with Google)."
+  },
+  {
+    "id": "q_0202",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the function of a network firewall?",
+    "options": [
+      "Accelerate internet bandwidth speed",
+      "Filter and inspect inbound and outbound traffic according to security rules",
+      "Assign dynamic IP addresses",
+      "Host domain DNS records"
+    ],
+    "correct_answer": "Filter and inspect inbound and outbound traffic according to security rules",
+    "difficulty": "EASY",
+    "category": "Computers",
+    "subcategory": "Cybersecurity",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Firewalls inspect packet headers and states to block unauthorized network intrusions."
+  },
+  {
+    "id": "q_0203",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which hashing algorithm family designed by NSA is currently standard for digital certificates and git commits (e.g. SHA-256)?",
+    "options": [
+      "MD5",
+      "SHA-2",
+      "CRC32",
+      "Blowfish"
+    ],
+    "correct_answer": "SHA-2",
+    "difficulty": "HARD",
+    "category": "Computers",
+    "subcategory": "Cryptography",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "SHA-256 produces a fixed 256-bit cryptographic hash digest with high collision resistance."
+  },
+  {
+    "id": "q_0204",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What type of social engineering attack specifically targets high-profile corporate executives or government officials?",
+    "options": [
+      "Phishing",
+      "Spear Phishing",
+      "Whaling",
+      "Smishing"
+    ],
+    "correct_answer": "Whaling",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Cybersecurity",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Whaling is spear-phishing specifically customized to target C-suite executives for financial wire fraud or espionage."
+  },
+  {
+    "id": "q_0205",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What web security header instructs browsers to strictly communicate with a server exclusively via HTTPS?",
+    "options": [
+      "Content-Security-Policy",
+      "HSTS (HTTP Strict Transport Security)",
+      "X-Frame-Options",
+      "Access-Control-Allow-Origin"
+    ],
+    "correct_answer": "HSTS (HTTP Strict Transport Security)",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Web Security",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "HSTS forces browsers to automatically upgrade HTTP links to HTTPS and refuse invalid SSL certificate overrides."
+  },
+  {
+    "id": "q_0206",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What economic indicator measures the total monetary value of all finished goods and services produced within a country borders in a year?",
+    "options": [
+      "Gross National Product (GNP)",
+      "Gross Domestic Product (GDP)",
+      "Net National Income",
+      "Consumer Price Index (CPI)"
+    ],
+    "correct_answer": "Gross Domestic Product (GDP)",
+    "difficulty": "HARD",
+    "category": "Business",
+    "subcategory": "Economics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "GDP reflects the economic size and output generated within a nation geographical territory."
+  },
+  {
+    "id": "q_0207",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What central banking term refers to the persistent, broad-based rise in the overall price level of goods and services over time?",
+    "options": [
+      "Deflation",
+      "Stagflation",
+      "Inflation",
+      "Depreciation"
+    ],
+    "correct_answer": "Inflation",
+    "difficulty": "HARD",
+    "category": "Business",
+    "subcategory": "Economics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Inflation erodes purchasing power, meaning each unit of currency buys fewer goods and services."
+  },
+  {
+    "id": "q_0208",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which institution operates as the central bank and monetary regulatory authority of India, established in April 1935?",
+    "options": [
+      "State Bank of India (SBI)",
+      "Reserve Bank of India (RBI)",
+      "Securities and Exchange Board of India (SEBI)",
+      "NABARD"
+    ],
+    "correct_answer": "Reserve Bank of India (RBI)",
+    "difficulty": "MEDIUM",
+    "category": "Business",
+    "subcategory": "Banking",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The RBI controls the issuance and supply of the Indian Rupee and formulates national monetary policy."
+  },
+  {
+    "id": "q_0209",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What instant real-time payment system developed by the National Payments Corporation of India (NPCI) facilitates inter-bank peer-to-peer mobile transactions?",
+    "options": [
+      "RTGS",
+      "NEFT",
+      "IMPS",
+      "UPI (Unified Payments Interface)"
+    ],
+    "correct_answer": "UPI (Unified Payments Interface)",
+    "difficulty": "HARD",
+    "category": "Business",
+    "subcategory": "Fintech",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "UPI powers instant round-the-clock mobile payments across thousands of commercial banks and fintech applications in India."
+  },
+  {
+    "id": "q_0210",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the financial term for an investment vehicle funded by shareholders that trades diversified portfolios of stocks and bonds?",
+    "options": [
+      "Treasury bill",
+      "Mutual Fund",
+      "Hedge derivative",
+      "Commercial paper"
+    ],
+    "correct_answer": "Mutual Fund",
+    "difficulty": "HARD",
+    "category": "Business",
+    "subcategory": "Finance",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Mutual funds pool capital from multiple retail and institutional investors to purchase diversified security portfolios."
+  },
+  {
+    "id": "q_0211",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What financial metric calculates the total market value of a publicly traded company outstanding equity shares?",
+    "options": [
+      "Book Value",
+      "Enterprise Value",
+      "Market Capitalization",
+      "Price-to-Earnings Ratio"
+    ],
+    "correct_answer": "Market Capitalization",
+    "difficulty": "MEDIUM",
+    "category": "Business",
+    "subcategory": "Finance",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Market capitalization equals current share price multiplied by the total number of outstanding shares."
+  },
+  {
+    "id": "q_0212",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What economic market structure exists when a single seller completely dominates the supply of a commodity without close substitutes?",
+    "options": [
+      "Oligopoly",
+      "Monopoly",
+      "Monopolistic Competition",
+      "Perfect Competition"
+    ],
+    "correct_answer": "Monopoly",
+    "difficulty": "HARD",
+    "category": "Business",
+    "subcategory": "Economics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "A monopoly possesses significant pricing power due to high barriers to market entry for competitors."
+  },
+  {
+    "id": "q_0213",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "In finance, what does the rule of 72 approximately estimate?",
+    "options": [
+      "Years required for an investment to double at a fixed interest rate",
+      "Annual stock market volatility percentage",
+      "Credit score risk probability",
+      "Optimal bond maturity duration"
+    ],
+    "correct_answer": "Years required for an investment to double at a fixed interest rate",
+    "difficulty": "EASY",
+    "category": "Business",
+    "subcategory": "Finance",
+    "pattern_type": "Application",
+    "time_limit_sec": 25,
+    "explanation": "Dividing 72 by the annual percentage rate of return yields an approximation of the doubling period."
+  },
+  {
+    "id": "q_0214",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which regulatory body regulates securities and capital markets in India, safeguarding investor interests?",
+    "options": [
+      "RBI",
+      "SEBI",
+      "IRDAI",
+      "PFRDA"
+    ],
+    "correct_answer": "SEBI",
+    "difficulty": "MEDIUM",
+    "category": "Business",
+    "subcategory": "Regulation",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The Securities and Exchange Board of India (SEBI) oversees stock exchanges, brokers, and listed companies."
+  },
+  {
+    "id": "q_0215",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the term for interest earned not only on the initial principal but also on previously accumulated interest?",
+    "options": [
+      "Simple interest",
+      "Compound interest",
+      "Nominal interest",
+      "Discount interest"
+    ],
+    "correct_answer": "Compound interest",
+    "difficulty": "MEDIUM",
+    "category": "Business",
+    "subcategory": "Finance",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Compound interest causes exponential growth because interest yields further interest in subsequent periods."
+  },
+  {
+    "id": "q_0216",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is a bear market in financial market terminology?",
+    "options": [
+      "A market characterized by rising prices and investor optimism",
+      "A market experiencing prolonged price declines of 20% or more",
+      "A market with zero trading volume",
+      "A commodities-only futures exchange"
+    ],
+    "correct_answer": "A market experiencing prolonged price declines of 20% or more",
+    "difficulty": "EASY",
+    "category": "Business",
+    "subcategory": "Finance",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "A bear market denotes widespread pessimism and sustained price drops of at least 20% from recent highs."
+  },
+  {
+    "id": "q_0217",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the term for the ease with which an asset can be rapidly converted into ready cash without losing substantial value?",
+    "options": [
+      "Solvency",
+      "Liquidity",
+      "Volatility",
+      "Leverage"
+    ],
+    "correct_answer": "Liquidity",
+    "difficulty": "MEDIUM",
+    "category": "Business",
+    "subcategory": "Finance",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Cash is the most liquid asset; real estate and illiquid private equity require significant time and discount to convert."
+  },
+  {
+    "id": "q_0218",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which financial statement summarizes a company revenues, expenses, and net profit over a specific accounting period?",
+    "options": [
+      "Balance Sheet",
+      "Income Statement (P&L)",
+      "Cash Flow Statement",
+      "Statement of Retained Earnings"
+    ],
+    "correct_answer": "Income Statement (P&L)",
+    "difficulty": "MEDIUM",
+    "category": "Business",
+    "subcategory": "Accounting",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "The Income Statement shows the bottom line net profit or loss generated over a quarter or fiscal year."
+  },
+  {
+    "id": "q_0219",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What economic principle explains why individuals or nations benefit by specializing in producing goods where they hold the lowest opportunity cost?",
+    "options": [
+      "Absolute Advantage",
+      "Comparative Advantage",
+      "Economies of Scale",
+      "Diminishing Returns"
+    ],
+    "correct_answer": "Comparative Advantage",
+    "difficulty": "HARD",
+    "category": "Business",
+    "subcategory": "Economics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "David Ricardo theory of Comparative Advantage demonstrates that trade benefits all parties when specializing where opportunity cost is lowest."
+  },
+  {
+    "id": "q_0220",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the benchmark 30-stock index of the Bombay Stock Exchange (BSE), the oldest stock exchange in Asia?",
+    "options": [
+      "Nifty 50",
+      "BSE SENSEX",
+      "Bank Nifty",
+      "Dow Jones"
+    ],
+    "correct_answer": "BSE SENSEX",
+    "difficulty": "HARD",
+    "category": "Business",
+    "subcategory": "Finance",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The BSE SENSEX tracks 30 financially sound and actively traded blue-chip companies listed on the Bombay Stock Exchange."
+  },
+  {
+    "id": "q_0221",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the term for the interest rate at which the central bank (like RBI) lends short-term funds to commercial banks against government securities?",
+    "options": [
+      "Reverse Repo Rate",
+      "Repo Rate",
+      "Bank Rate",
+      "Cash Reserve Ratio (CRR)"
+    ],
+    "correct_answer": "Repo Rate",
+    "difficulty": "HARD",
+    "category": "Business",
+    "subcategory": "Banking",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "The Repo (Repurchasing Option) Rate is a primary monetary tool used to control money supply and inflation."
+  },
+  {
+    "id": "q_0222",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What international organization headquartered in Washington, D.C. works to foster global monetary cooperation and secure financial stability?",
+    "options": [
+      "World Trade Organization (WTO)",
+      "International Monetary Fund (IMF)",
+      "World Bank",
+      "Bank for International Settlements"
+    ],
+    "correct_answer": "International Monetary Fund (IMF)",
+    "difficulty": "HARD",
+    "category": "Business",
+    "subcategory": "Economics",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The IMF provides balance-of-payments financial assistance and policy surveillance to 190 member countries."
+  },
+  {
+    "id": "q_0223",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What type of debt security is issued by corporations or governments to borrow capital from public investors in exchange for periodic coupon payments?",
+    "options": [
+      "Common stock",
+      "Bond",
+      "Option",
+      "Future contract"
+    ],
+    "correct_answer": "Bond",
+    "difficulty": "HARD",
+    "category": "Business",
+    "subcategory": "Finance",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Bonds are fixed-income debt instruments where borrowers pay scheduled coupon interest until maturity."
+  },
+  {
+    "id": "q_0224",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What economic term describes a prolonged economic slump characterized by high inflation coupled with stagnant growth and high unemployment?",
+    "options": [
+      "Hyperinflation",
+      "Stagflation",
+      "Deflationary Spiral",
+      "Recession"
+    ],
+    "correct_answer": "Stagflation",
+    "difficulty": "HARD",
+    "category": "Business",
+    "subcategory": "Economics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Stagflation combines economic stagnation with persistent high inflation, posing severe central banking policy dilemmas."
+  },
+  {
+    "id": "q_0225",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the term for the portion of customer deposits that commercial banks are legally mandated to maintain as reserves with the central bank in cash?",
+    "options": [
+      "Statutory Liquidity Ratio (SLR)",
+      "Cash Reserve Ratio (CRR)",
+      "Capital Adequacy Ratio",
+      "Liquidity Coverage Ratio"
+    ],
+    "correct_answer": "Cash Reserve Ratio (CRR)",
+    "difficulty": "HARD",
+    "category": "Business",
+    "subcategory": "Banking",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "CRR is the percentage of net demand and time liabilities that banks must hold in cash reserves at the central bank."
+  },
+  {
+    "id": "q_0226",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which international technology company founded by Steve Jobs and Steve Wozniak in 1976 introduced the Macintosh, iPod, and iPhone?",
+    "options": [
+      "Microsoft",
+      "Apple",
+      "IBM",
+      "Intel"
+    ],
+    "correct_answer": "Apple",
+    "difficulty": "HARD",
+    "category": "Business",
+    "subcategory": "Corporate History",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Apple Inc. became the world first publicly traded company to reach a multi-trillion dollar market capitalization."
+  },
+  {
+    "id": "q_0227",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the basic economic law stating that all else being equal, as the price of a good increases, quantity demanded decreases?",
+    "options": [
+      "Law of Supply",
+      "Law of Demand",
+      "Say Law",
+      "Gresham Law"
+    ],
+    "correct_answer": "Law of Demand",
+    "difficulty": "HARD",
+    "category": "Business",
+    "subcategory": "Economics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "The Law of Demand reflects the downward-sloping demand curve resulting from substitution and income effects."
+  },
+  {
+    "id": "q_0228",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What financial term describes the legal status of a person or entity that cannot repay debts owed to creditors?",
+    "options": [
+      "Amortization",
+      "Bankruptcy / Insolvency",
+      "Foreclosure",
+      "Default"
+    ],
+    "correct_answer": "Bankruptcy / Insolvency",
+    "difficulty": "MEDIUM",
+    "category": "Business",
+    "subcategory": "Finance",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "Bankruptcy provides a court-administered legal framework for liquidating or reorganizing debts when liabilities exceed assets."
+  },
+  {
+    "id": "q_0229",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the term for the difference between a country total value of exports and the total value of its imports over a given period?",
+    "options": [
+      "Capital Account Balance",
+      "Balance of Trade",
+      "Foreign Exchange Reserves",
+      "Terms of Trade"
+    ],
+    "correct_answer": "Balance of Trade",
+    "difficulty": "HARD",
+    "category": "Business",
+    "subcategory": "Economics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 25,
+    "explanation": "A positive balance is a trade surplus (exports exceed imports); a negative balance is a trade deficit."
+  },
+  {
+    "id": "q_0230",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What is the global currency standard reserve asset created by the International Monetary Fund in 1969 to supplement member countries official reserves?",
+    "options": [
+      "Euro",
+      "Special Drawing Rights (SDR)",
+      "Gold Standard",
+      "Petrodollar"
+    ],
+    "correct_answer": "Special Drawing Rights (SDR)",
+    "difficulty": "HARD",
+    "category": "Business",
+    "subcategory": "Economics",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "SDRs are supplementary foreign exchange reserve assets defined and maintained by the IMF based on a basket of major currencies."
+  },
+  {
+    "id": "q_0231",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which batsman holds the international cricket record for the highest individual score in a single One Day International (ODI) match (264 runs)?",
+    "options": [
+      "Sachin Tendulkar",
+      "Rohit Sharma",
+      "Virender Sehwag",
+      "Chris Gayle"
+    ],
+    "correct_answer": "Rohit Sharma",
+    "difficulty": "HARD",
+    "category": "Sports",
+    "subcategory": "Cricket",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Rohit Sharma scored 264 runs off 173 balls for India against Sri Lanka at Eden Gardens, Kolkata, on November 13, 2014."
+  },
+  {
+    "id": "q_0232",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which country has won the FIFA Men World Cup tournament a record five times (1958, 1962, 1970, 1994, 2002)?",
+    "options": [
+      "Germany",
+      "Italy",
+      "Brazil",
+      "Argentina"
+    ],
+    "correct_answer": "Brazil",
+    "difficulty": "HARD",
+    "category": "Sports",
+    "subcategory": "Football",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "Brazil is the most successful national team in FIFA World Cup history with 5 championship titles."
+  },
+  {
+    "id": "q_0233",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Who was the first Indian citizen to win a Nobel Prize, awarded in 1913 in Literature for the poetry collection Gitanjali?",
+    "options": [
+      "C. V. Raman",
+      "Rabindranath Tagore",
+      "Mother Teresa",
+      "Amartya Sen"
+    ],
+    "correct_answer": "Rabindranath Tagore",
+    "difficulty": "MEDIUM",
+    "category": "Literature",
+    "subcategory": "Indian Heritage",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Rabindranath Tagore won the 1913 Nobel Prize in Literature, becoming the first non-European laureate in literature."
+  },
+  {
+    "id": "q_0234",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which grand slam tennis tournament is traditionally played annually on outdoor grass courts at the All England Club in London?",
+    "options": [
+      "Australian Open",
+      "French Open (Roland Garros)",
+      "Wimbledon Championships",
+      "US Open"
+    ],
+    "correct_answer": "Wimbledon Championships",
+    "difficulty": "MEDIUM",
+    "category": "Sports",
+    "subcategory": "Tennis",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Wimbledon is the oldest tennis tournament in the world (founded 1877) and the only major still played on traditional grass courts."
+  },
+  {
+    "id": "q_0235",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Who authored the tragic play Hamlet, Prince of Denmark during the Elizabethan era?",
+    "options": [
+      "Christopher Marlowe",
+      "William Shakespeare",
+      "Ben Jonson",
+      "John Webster"
+    ],
+    "correct_answer": "William Shakespeare",
+    "difficulty": "EASY",
+    "category": "Literature",
+    "subcategory": "World Classics",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "William Shakespeare wrote Hamlet between 1599 and 1601, featuring the famous soliloquy To be, or not to be."
+  },
+  {
+    "id": "q_0236",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which city hosted the first modern Olympic Games in 1896, reviving the ancient Greek Olympic tradition?",
+    "options": [
+      "Paris",
+      "Athens",
+      "London",
+      "Rome"
+    ],
+    "correct_answer": "Athens",
+    "difficulty": "MEDIUM",
+    "category": "Sports",
+    "subcategory": "Olympics",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "The 1896 Summer Olympics were held in Athens, Greece, organized by Pierre de Coubertin and the IOC."
+  },
+  {
+    "id": "q_0237",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Who painted the world-famous renaissance portrait Mona Lisa (La Gioconda), now housed in the Louvre Museum in Paris?",
+    "options": [
+      "Michelangelo",
+      "Leonardo da Vinci",
+      "Raphael",
+      "Donatello"
+    ],
+    "correct_answer": "Leonardo da Vinci",
+    "difficulty": "HARD",
+    "category": "Arts",
+    "subcategory": "Painting",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Leonardo da Vinci painted the Mona Lisa in Florence during the early 16th century using fine sfumato technique."
+  },
+  {
+    "id": "q_0238",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which country won the inaugural ICC Men T20 Cricket World Cup held in South Africa in 2007?",
+    "options": [
+      "Pakistan",
+      "India",
+      "Australia",
+      "West Indies"
+    ],
+    "correct_answer": "India",
+    "difficulty": "EASY",
+    "category": "Sports",
+    "subcategory": "Cricket",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "India captained by MS Dhoni defeated Pakistan by 5 runs in a thrilling final at the Wanderers Stadium in Johannesburg."
+  },
+  {
+    "id": "q_0239",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "In chess, what is the maximum number of squares a Knight can theoretically move to from an open central square on the board?",
+    "options": [
+      "4",
+      "6",
+      "8",
+      "10"
+    ],
+    "correct_answer": "8",
+    "difficulty": "MEDIUM",
+    "category": "Sports",
+    "subcategory": "Chess",
+    "pattern_type": "Logical Reasoning",
+    "time_limit_sec": 25,
+    "explanation": "A knight located in the center (e.g. d4 or e5) commands exactly eight candidate squares via its L-shaped leap."
+  },
+  {
+    "id": "q_0240",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which author created the legendary fictional consulting detective Sherlock Holmes and Dr. John Watson?",
+    "options": [
+      "Agatha Christie",
+      "Arthur Conan Doyle",
+      "Edgar Allan Poe",
+      "G. K. Chesterton"
+    ],
+    "correct_answer": "Arthur Conan Doyle",
+    "difficulty": "MEDIUM",
+    "category": "Literature",
+    "subcategory": "Classics",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Sir Arthur Conan Doyle introduced Sherlock Holmes in the 1887 novel A Study in Scarlet."
+  },
+  {
+    "id": "q_0241",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which athlete won 8 gold medals in a single Olympic Games (Beijing 2008), setting the all-time record for a single Olympiad?",
+    "options": [
+      "Usain Bolt",
+      "Michael Phelps",
+      "Carl Lewis",
+      "Mark Spitz"
+    ],
+    "correct_answer": "Michael Phelps",
+    "difficulty": "HARD",
+    "category": "Sports",
+    "subcategory": "Olympics",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "American swimmer Michael Phelps won 8 gold medals in Beijing 2008, breaking Mark Spitz 1972 record of seven."
+  },
+  {
+    "id": "q_0242",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which Indian athlete won the historic gold medal in Men Javelin Throw at the Tokyo 2020 Olympics with a throw of 87.58 meters?",
+    "options": [
+      "Neeraj Chopra",
+      "Abhinav Bindra",
+      "Milkha Singh",
+      "Bajrang Punia"
+    ],
+    "correct_answer": "Neeraj Chopra",
+    "difficulty": "MEDIUM",
+    "category": "Sports",
+    "subcategory": "Olympics",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Neeraj Chopra became the second Indian to win an individual Olympic gold medal and the first in track and field athletics."
+  },
+  {
+    "id": "q_0243",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What Spanish surrealist master painted the iconic 1931 artwork The Persistence of Memory featuring melting pocket watches?",
+    "options": [
+      "Pablo Picasso",
+      "Salvador Dalí",
+      "Joan Miró",
+      "Francisco Goya"
+    ],
+    "correct_answer": "Salvador Dalí",
+    "difficulty": "MEDIUM",
+    "category": "Arts",
+    "subcategory": "Painting",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Salvador Dalí depicted soft, melting clocks in a dreamlike Catalan landscape exploring the relativity of time."
+  },
+  {
+    "id": "q_0244",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "What ancient Indian epic composed in Sanskrit verse by Sage Vyasa is the longest epic poem known, containing over 100,000 shlokas?",
+    "options": [
+      "Ramayana",
+      "Mahabharata",
+      "Rigveda",
+      "Upanishads"
+    ],
+    "correct_answer": "Mahabharata",
+    "difficulty": "HARD",
+    "category": "Literature",
+    "subcategory": "Indian Heritage",
+    "pattern_type": "Comparison",
+    "time_limit_sec": 25,
+    "explanation": "The Mahabharata narrates the Kurukshetra War between the Pandavas and Kauravas, encompassing the philosophical Bhagavad Gita."
+  },
+  {
+    "id": "q_0245",
+    "round_type": "QUICK_QUIZ",
+    "prompt": "Which football legend led Argentina to victory in the 1986 FIFA World Cup in Mexico, famous for the Hand of God and Goal of the Century?",
+    "options": [
+      "Lionel Messi",
+      "Diego Maradona",
+      "Gabriel Batistuta",
+      "Mario Kempes"
+    ],
+    "correct_answer": "Diego Maradona",
+    "difficulty": "HARD",
+    "category": "Sports",
+    "subcategory": "Football",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 25,
+    "explanation": "Diego Armando Maradona scored both famous goals against England in the quarterfinals en route to winning the 1986 trophy."
+  }
+]

@@ -1,0 +1,4052 @@
+[
+  {
+    "id": "q_0924",
+    "round_type": "SPEED",
+    "prompt": "Compute the sum of 18 and 27:",
+    "options": [
+      "43",
+      "45",
+      "47",
+      "55"
+    ],
+    "correct_answer": "45",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Addition",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "18 + 27 = 45."
+  },
+  {
+    "id": "q_0925",
+    "round_type": "SPEED",
+    "prompt": "Divide 48 by 6:",
+    "options": [
+      "4",
+      "6",
+      "8",
+      "12"
+    ],
+    "correct_answer": "8",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Division",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "48 ÷ 6 = 8."
+  },
+  {
+    "id": "q_0926",
+    "round_type": "SPEED",
+    "prompt": "Multiply 14 by 5:",
+    "options": [
+      "60",
+      "65",
+      "70",
+      "75"
+    ],
+    "correct_answer": "70",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Multiplication",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "14 × 5 = 70."
+  },
+  {
+    "id": "q_0927",
+    "round_type": "SPEED",
+    "prompt": "Subtract 47 from 83:",
+    "options": [
+      "34",
+      "36",
+      "38",
+      "46"
+    ],
+    "correct_answer": "36",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Subtraction",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "83 - 47 = 36."
+  },
+  {
+    "id": "q_0928",
+    "round_type": "SPEED",
+    "prompt": "What is 16 quadrupled (16 × 4)?",
+    "options": [
+      "54",
+      "60",
+      "64",
+      "68"
+    ],
+    "correct_answer": "64",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Multiplication",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "16 × 4 = 64."
+  },
+  {
+    "id": "q_0929",
+    "round_type": "SPEED",
+    "prompt": "Add 39 and 46 together:",
+    "options": [
+      "75",
+      "83",
+      "85",
+      "87"
+    ],
+    "correct_answer": "85",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Addition",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "39 + 46 = 85."
+  },
+  {
+    "id": "q_0930",
+    "round_type": "SPEED",
+    "prompt": "Determine the quotient of 72 ÷ 8:",
+    "options": [
+      "7",
+      "8",
+      "9",
+      "12"
+    ],
+    "correct_answer": "9",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Division",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "72 ÷ 8 = 9."
+  },
+  {
+    "id": "q_0931",
+    "round_type": "SPEED",
+    "prompt": "Calculate the square of 12 (12 × 12):",
+    "options": [
+      "124",
+      "144",
+      "154",
+      "164"
+    ],
+    "correct_answer": "144",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Squares",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "12 × 12 = 144."
+  },
+  {
+    "id": "q_0932",
+    "round_type": "SPEED",
+    "prompt": "Deduct 68 from 150:",
+    "options": [
+      "72",
+      "82",
+      "84",
+      "92"
+    ],
+    "correct_answer": "82",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Subtraction",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "150 - 68 = 82."
+  },
+  {
+    "id": "q_0933",
+    "round_type": "SPEED",
+    "prompt": "Find the total when 67 is added to 28:",
+    "options": [
+      "85",
+      "93",
+      "95",
+      "97"
+    ],
+    "correct_answer": "95",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Addition",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "67 + 28 = 95."
+  },
+  {
+    "id": "q_0934",
+    "round_type": "SPEED",
+    "prompt": "Evaluate 25 multiplied by 6:",
+    "options": [
+      "125",
+      "140",
+      "150",
+      "160"
+    ],
+    "correct_answer": "150",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Multiplication",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "25 × 6 = 150."
+  },
+  {
+    "id": "q_0935",
+    "round_type": "SPEED",
+    "prompt": "What is 96 divided by 8?",
+    "options": [
+      "11",
+      "12",
+      "13",
+      "14"
+    ],
+    "correct_answer": "12",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Division",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "96 ÷ 8 = 12."
+  },
+  {
+    "id": "q_0936",
+    "round_type": "SPEED",
+    "prompt": "Calculate 200 minus 135:",
+    "options": [
+      "55",
+      "65",
+      "75",
+      "85"
+    ],
+    "correct_answer": "65",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Subtraction",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "200 - 135 = 65."
+  },
+  {
+    "id": "q_0937",
+    "round_type": "SPEED",
+    "prompt": "Combine 125 and 75:",
+    "options": [
+      "190",
+      "200",
+      "210",
+      "225"
+    ],
+    "correct_answer": "200",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Addition",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "125 + 75 = 200."
+  },
+  {
+    "id": "q_0938",
+    "round_type": "SPEED",
+    "prompt": "Determine the product of 13 and 7:",
+    "options": [
+      "81",
+      "87",
+      "91",
+      "93"
+    ],
+    "correct_answer": "91",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Multiplication",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "13 × 7 = 91."
+  },
+  {
+    "id": "q_0939",
+    "round_type": "SPEED",
+    "prompt": "Divide 105 by 5:",
+    "options": [
+      "19",
+      "21",
+      "23",
+      "25"
+    ],
+    "correct_answer": "21",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Division",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "105 ÷ 5 = 21."
+  },
+  {
+    "id": "q_0940",
+    "round_type": "SPEED",
+    "prompt": "What is 15 squared (15 × 15)?",
+    "options": [
+      "215",
+      "225",
+      "235",
+      "245"
+    ],
+    "correct_answer": "225",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Squares",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "15 × 15 = 225."
+  },
+  {
+    "id": "q_0941",
+    "round_type": "SPEED",
+    "prompt": "Subtract 46 from 90:",
+    "options": [
+      "42",
+      "44",
+      "46",
+      "54"
+    ],
+    "correct_answer": "44",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Subtraction",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "90 - 46 = 44."
+  },
+  {
+    "id": "q_0942",
+    "round_type": "SPEED",
+    "prompt": "Triple the number 18 (18 × 3):",
+    "options": [
+      "48",
+      "52",
+      "54",
+      "56"
+    ],
+    "correct_answer": "54",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Multiplication",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "18 × 3 = 54."
+  },
+  {
+    "id": "q_0943",
+    "round_type": "SPEED",
+    "prompt": "Sum 44 and 57:",
+    "options": [
+      "91",
+      "99",
+      "101",
+      "111"
+    ],
+    "correct_answer": "101",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Addition",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "44 + 57 = 101."
+  },
+  {
+    "id": "q_0944",
+    "round_type": "SPEED",
+    "prompt": "What is 132 divided by 11?",
+    "options": [
+      "10",
+      "11",
+      "12",
+      "15"
+    ],
+    "correct_answer": "12",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Division",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "132 ÷ 11 = 12."
+  },
+  {
+    "id": "q_0945",
+    "round_type": "SPEED",
+    "prompt": "Evaluate 19 × 4 mentally:",
+    "options": [
+      "72",
+      "74",
+      "76",
+      "78"
+    ],
+    "correct_answer": "76",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Multiplication",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "19 × 4 = 76."
+  },
+  {
+    "id": "q_0946",
+    "round_type": "SPEED",
+    "prompt": "Find the difference between 110 and 48:",
+    "options": [
+      "52",
+      "62",
+      "64",
+      "72"
+    ],
+    "correct_answer": "62",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Subtraction",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "110 - 48 = 62."
+  },
+  {
+    "id": "q_0947",
+    "round_type": "SPEED",
+    "prompt": "What do you get by adding 85 to 38?",
+    "options": [
+      "113",
+      "121",
+      "123",
+      "125"
+    ],
+    "correct_answer": "123",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Addition",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "85 + 38 = 123."
+  },
+  {
+    "id": "q_0948",
+    "round_type": "SPEED",
+    "prompt": "Compute the square of 14 (14²):",
+    "options": [
+      "186",
+      "196",
+      "206",
+      "216"
+    ],
+    "correct_answer": "196",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Squares",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "14 × 14 = 196."
+  },
+  {
+    "id": "q_0949",
+    "round_type": "SPEED",
+    "prompt": "Divide 140 by 7:",
+    "options": [
+      "18",
+      "20",
+      "22",
+      "25"
+    ],
+    "correct_answer": "20",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Division",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "140 ÷ 7 = 20."
+  },
+  {
+    "id": "q_0950",
+    "round_type": "SPEED",
+    "prompt": "Compute the product of 24 × 5:",
+    "options": [
+      "110",
+      "115",
+      "120",
+      "125"
+    ],
+    "correct_answer": "120",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Multiplication",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "24 × 5 = 120."
+  },
+  {
+    "id": "q_0951",
+    "round_type": "SPEED",
+    "prompt": "Reduce 75 by 29:",
+    "options": [
+      "44",
+      "46",
+      "48",
+      "56"
+    ],
+    "correct_answer": "46",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Subtraction",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "75 - 29 = 46."
+  },
+  {
+    "id": "q_0952",
+    "round_type": "SPEED",
+    "prompt": "Calculate the sum: 63 + 49:",
+    "options": [
+      "102",
+      "110",
+      "112",
+      "114"
+    ],
+    "correct_answer": "112",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Addition",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "63 + 49 = 112."
+  },
+  {
+    "id": "q_0953",
+    "round_type": "SPEED",
+    "prompt": "What is 17 times 3?",
+    "options": [
+      "41",
+      "49",
+      "51",
+      "53"
+    ],
+    "correct_answer": "51",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Multiplication",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "17 × 3 = 51."
+  },
+  {
+    "id": "q_0954",
+    "round_type": "SPEED",
+    "prompt": "Evaluate the quotient: 168 ÷ 12:",
+    "options": [
+      "12",
+      "14",
+      "16",
+      "18"
+    ],
+    "correct_answer": "14",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Division",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "168 ÷ 12 = 14."
+  },
+  {
+    "id": "q_0955",
+    "round_type": "SPEED",
+    "prompt": "Subtract 245 from 500:",
+    "options": [
+      "245",
+      "255",
+      "265",
+      "275"
+    ],
+    "correct_answer": "255",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Subtraction",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "500 - 245 = 255."
+  },
+  {
+    "id": "q_0956",
+    "round_type": "SPEED",
+    "prompt": "Compute 13 squared (13 × 13):",
+    "options": [
+      "159",
+      "169",
+      "179",
+      "189"
+    ],
+    "correct_answer": "169",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Squares",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "13 × 13 = 169."
+  },
+  {
+    "id": "q_0957",
+    "round_type": "SPEED",
+    "prompt": "What is 35 multiplied by 4?",
+    "options": [
+      "120",
+      "130",
+      "140",
+      "150"
+    ],
+    "correct_answer": "140",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Multiplication",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "35 × 4 = 140."
+  },
+  {
+    "id": "q_0958",
+    "round_type": "SPEED",
+    "prompt": "Add 147 and 53:",
+    "options": [
+      "190",
+      "200",
+      "210",
+      "220"
+    ],
+    "correct_answer": "200",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Addition",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "147 + 53 = 200."
+  },
+  {
+    "id": "q_0959",
+    "round_type": "SPEED",
+    "prompt": "Evaluate 180 divided by 9:",
+    "options": [
+      "18",
+      "20",
+      "22",
+      "24"
+    ],
+    "correct_answer": "20",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Division",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "180 ÷ 9 = 20."
+  },
+  {
+    "id": "q_0960",
+    "round_type": "SPEED",
+    "prompt": "Take 38 away from 92:",
+    "options": [
+      "52",
+      "54",
+      "56",
+      "58"
+    ],
+    "correct_answer": "54",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Subtraction",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "92 - 38 = 54."
+  },
+  {
+    "id": "q_0961",
+    "round_type": "SPEED",
+    "prompt": "What is 21 times 4?",
+    "options": [
+      "82",
+      "84",
+      "86",
+      "88"
+    ],
+    "correct_answer": "84",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Multiplication",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "21 × 4 = 84."
+  },
+  {
+    "id": "q_0962",
+    "round_type": "SPEED",
+    "prompt": "Compute 78 plus 36:",
+    "options": [
+      "104",
+      "112",
+      "114",
+      "116"
+    ],
+    "correct_answer": "114",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Addition",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "78 + 36 = 114."
+  },
+  {
+    "id": "q_0963",
+    "round_type": "SPEED",
+    "prompt": "How many times does 15 divide into 225?",
+    "options": [
+      "13",
+      "14",
+      "15",
+      "16"
+    ],
+    "correct_answer": "15",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Division",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "225 ÷ 15 = 15."
+  },
+  {
+    "id": "q_0964",
+    "round_type": "SPEED",
+    "prompt": "Calculate 16 squared (16²):",
+    "options": [
+      "246",
+      "256",
+      "266",
+      "276"
+    ],
+    "correct_answer": "256",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Squares",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "16 × 16 = 256."
+  },
+  {
+    "id": "q_0965",
+    "round_type": "SPEED",
+    "prompt": "What remains after subtracting 188 from 300?",
+    "options": [
+      "102",
+      "112",
+      "122",
+      "132"
+    ],
+    "correct_answer": "112",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Subtraction",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "300 - 188 = 112."
+  },
+  {
+    "id": "q_0966",
+    "round_type": "SPEED",
+    "prompt": "Calculate: 15 × 8 = ?",
+    "options": [
+      "100",
+      "110",
+      "120",
+      "130"
+    ],
+    "correct_answer": "120",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Multiplication",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "15 × 8 = 120."
+  },
+  {
+    "id": "q_0967",
+    "round_type": "SPEED",
+    "prompt": "Sum the two numbers 99 and 88:",
+    "options": [
+      "177",
+      "185",
+      "187",
+      "197"
+    ],
+    "correct_answer": "187",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Addition",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "99 + 88 = 187."
+  },
+  {
+    "id": "q_0968",
+    "round_type": "SPEED",
+    "prompt": "Evaluate 250 divided by 25:",
+    "options": [
+      "5",
+      "10",
+      "15",
+      "20"
+    ],
+    "correct_answer": "10",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Division",
+    "pattern_type": "Rapid Math",
+    "time_limit_sec": 15,
+    "explanation": "250 ÷ 25 = 10."
+  },
+  {
+    "id": "q_0969",
+    "round_type": "SPEED",
+    "prompt": "Which of these candidate numbers is an odd prime?",
+    "options": [
+      "9",
+      "15",
+      "17",
+      "21"
+    ],
+    "correct_answer": "17",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Number Theory",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "17 is prime. 9, 15, and 21 are composite."
+  },
+  {
+    "id": "q_0970",
+    "round_type": "SPEED",
+    "prompt": "Identify the number whose digits sum to a multiple of 9:",
+    "options": [
+      "142",
+      "234",
+      "311",
+      "412"
+    ],
+    "correct_answer": "234",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Divisibility",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "Sum of digits of 234 is 2 + 3 + 4 = 9 (divisible by 9)."
+  },
+  {
+    "id": "q_0971",
+    "round_type": "SPEED",
+    "prompt": "What is the only even prime number in mathematics?",
+    "options": [
+      "0",
+      "1",
+      "2",
+      "4"
+    ],
+    "correct_answer": "2",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Number Theory",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "2 is the only even prime number in mathematics."
+  },
+  {
+    "id": "q_0972",
+    "round_type": "SPEED",
+    "prompt": "Which number has its last two digits divisible by 4?",
+    "options": [
+      "314",
+      "526",
+      "736",
+      "818"
+    ],
+    "correct_answer": "736",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Divisibility",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "Last two digits 36 is divisible by 4, so 736 is divisible by 4."
+  },
+  {
+    "id": "q_0973",
+    "round_type": "SPEED",
+    "prompt": "Identify 4 cubed (4 × 4 × 4) among these values:",
+    "options": [
+      "16",
+      "36",
+      "64",
+      "100"
+    ],
+    "correct_answer": "64",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Powers & Roots",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "64 = 4³ (4 × 4 × 4)."
+  },
+  {
+    "id": "q_0974",
+    "round_type": "SPEED",
+    "prompt": "Which integer between 30 and 40 has no divisors other than 1 and itself?",
+    "options": [
+      "27",
+      "33",
+      "37",
+      "49"
+    ],
+    "correct_answer": "37",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Number Theory",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "37 is prime. 27=3³, 33=3×11, 49=7²."
+  },
+  {
+    "id": "q_0975",
+    "round_type": "SPEED",
+    "prompt": "Which value has digits that add up to 6, making it divisible by 3?",
+    "options": [
+      "112",
+      "124",
+      "141",
+      "155"
+    ],
+    "correct_answer": "141",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Divisibility",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "Sum of digits: 1 + 4 + 1 = 6 (divisible by 3)."
+  },
+  {
+    "id": "q_0976",
+    "round_type": "SPEED",
+    "prompt": "Which integer equals 12 multiplied by 7?",
+    "options": [
+      "64",
+      "76",
+      "84",
+      "92"
+    ],
+    "correct_answer": "84",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Divisibility",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "84 ÷ 12 = 7."
+  },
+  {
+    "id": "q_0977",
+    "round_type": "SPEED",
+    "prompt": "Identify the odd composite number having factors 5 and 7:",
+    "options": [
+      "19",
+      "23",
+      "29",
+      "35"
+    ],
+    "correct_answer": "35",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Number Theory",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "35 is composite (5 × 7); 19, 23, and 29 are prime."
+  },
+  {
+    "id": "q_0978",
+    "round_type": "SPEED",
+    "prompt": "Which even number is divisible by 3, making it a multiple of 6?",
+    "options": [
+      "74",
+      "86",
+      "96",
+      "104"
+    ],
+    "correct_answer": "96",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Divisibility",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "96 is even and divisible by 3 (9+6=15), hence divisible by 6."
+  },
+  {
+    "id": "q_0979",
+    "round_type": "SPEED",
+    "prompt": "Which value represents 12 squared (12² = 144)?",
+    "options": [
+      "120",
+      "144",
+      "150",
+      "160"
+    ],
+    "correct_answer": "144",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Powers & Roots",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "144 = 12²."
+  },
+  {
+    "id": "q_0980",
+    "round_type": "SPEED",
+    "prompt": "Select the prime number in the forties (40 to 49):",
+    "options": [
+      "41",
+      "51",
+      "57",
+      "63"
+    ],
+    "correct_answer": "41",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Number Theory",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "41 is prime. 51=3×17, 57=3×19, 63=7×9."
+  },
+  {
+    "id": "q_0981",
+    "round_type": "SPEED",
+    "prompt": "Which number equals 11 squared (11² = 121)?",
+    "options": [
+      "121",
+      "131",
+      "141",
+      "151"
+    ],
+    "correct_answer": "121",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Divisibility",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "121 = 11 × 11."
+  },
+  {
+    "id": "q_0982",
+    "round_type": "SPEED",
+    "prompt": "Which candidate integer is a product of 15 and 5?",
+    "options": [
+      "65",
+      "75",
+      "85",
+      "95"
+    ],
+    "correct_answer": "75",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Divisibility",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "75 = 15 × 5."
+  },
+  {
+    "id": "q_0983",
+    "round_type": "SPEED",
+    "prompt": "Which prime number lies between 50 and 60?",
+    "options": [
+      "49",
+      "53",
+      "55",
+      "65"
+    ],
+    "correct_answer": "53",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Number Theory",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "53 has no divisors other than 1 and 53."
+  },
+  {
+    "id": "q_0984",
+    "round_type": "SPEED",
+    "prompt": "Which value equals 8 multiplied by 16?",
+    "options": [
+      "108",
+      "116",
+      "128",
+      "134"
+    ],
+    "correct_answer": "128",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Divisibility",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "128 ÷ 8 = 16."
+  },
+  {
+    "id": "q_0985",
+    "round_type": "SPEED",
+    "prompt": "Identify 15 squared (15²) among these candidates:",
+    "options": [
+      "200",
+      "225",
+      "250",
+      "275"
+    ],
+    "correct_answer": "225",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Powers & Roots",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "225 = 15²."
+  },
+  {
+    "id": "q_0986",
+    "round_type": "SPEED",
+    "prompt": "Select the prime integer situated in the lower seventies:",
+    "options": [
+      "69",
+      "71",
+      "77",
+      "87"
+    ],
+    "correct_answer": "71",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Number Theory",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "71 is prime. 69=3×23, 77=7×11, 87=3×29."
+  },
+  {
+    "id": "q_0987",
+    "round_type": "SPEED",
+    "prompt": "Which multiple of 5 also has digits summing to 9?",
+    "options": [
+      "35",
+      "45",
+      "55",
+      "65"
+    ],
+    "correct_answer": "45",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Divisibility",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "45 ends in 5 and its digits sum to 9, so it is divisible by both 5 and 3."
+  },
+  {
+    "id": "q_0988",
+    "round_type": "SPEED",
+    "prompt": "Which of these numbers is odd but composite (equal to 3 × 7)?",
+    "options": [
+      "15",
+      "21",
+      "25",
+      "27"
+    ],
+    "correct_answer": "21",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Number Theory",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "21 is odd and composite (3 × 7)."
+  },
+  {
+    "id": "q_0989",
+    "round_type": "SPEED",
+    "prompt": "Which number ends in 50 and is an exact multiple of 25?",
+    "options": [
+      "320",
+      "350",
+      "380",
+      "410"
+    ],
+    "correct_answer": "350",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Divisibility",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "Numbers ending in 50 are divisible by 25. 350 ÷ 25 = 14."
+  },
+  {
+    "id": "q_0990",
+    "round_type": "SPEED",
+    "prompt": "Identify the prime number residing between 75 and 80:",
+    "options": [
+      "79",
+      "81",
+      "85",
+      "91"
+    ],
+    "correct_answer": "79",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Number Theory",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "79 is prime. 81=9², 85=5×17, 91=7×13."
+  },
+  {
+    "id": "q_0991",
+    "round_type": "SPEED",
+    "prompt": "Which value is the product of 7 and 9?",
+    "options": [
+      "58",
+      "63",
+      "67",
+      "72"
+    ],
+    "correct_answer": "63",
+    "difficulty": "EASY",
+    "category": "Mental Math",
+    "subcategory": "Divisibility",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "63 ÷ 7 = 9."
+  },
+  {
+    "id": "q_0992",
+    "round_type": "SPEED",
+    "prompt": "Which candidate integer equals 5 cubed (5³ = 125)?",
+    "options": [
+      "81",
+      "100",
+      "125",
+      "144"
+    ],
+    "correct_answer": "125",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Powers & Roots",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "125 = 5³."
+  },
+  {
+    "id": "q_0993",
+    "round_type": "SPEED",
+    "prompt": "Identify the prime number situated between 80 and 89:",
+    "options": [
+      "83",
+      "87",
+      "93",
+      "99"
+    ],
+    "correct_answer": "83",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Number Theory",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "83 is prime. 87=3×29, 93=3×31, 99=9×11."
+  },
+  {
+    "id": "q_0994",
+    "round_type": "SPEED",
+    "prompt": "Which number has last two digits 24, indicating divisibility by 4?",
+    "options": [
+      "114",
+      "124",
+      "134",
+      "142"
+    ],
+    "correct_answer": "124",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Divisibility",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "Last two digits 24 is divisible by 4, so 124 is divisible by 4."
+  },
+  {
+    "id": "q_0995",
+    "round_type": "SPEED",
+    "prompt": "What is the result of 16 × 4?",
+    "options": [
+      "44",
+      "56",
+      "64",
+      "74"
+    ],
+    "correct_answer": "64",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Divisibility",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "64 = 16 × 4."
+  },
+  {
+    "id": "q_0996",
+    "round_type": "SPEED",
+    "prompt": "Which number between 85 and 90 is a prime?",
+    "options": [
+      "89",
+      "91",
+      "95",
+      "99"
+    ],
+    "correct_answer": "89",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Number Theory",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "89 is prime. 91=7×13."
+  },
+  {
+    "id": "q_0997",
+    "round_type": "SPEED",
+    "prompt": "Which three-digit number has digits summing to 9 (5 + 2 + 2)?",
+    "options": [
+      "512",
+      "522",
+      "532",
+      "542"
+    ],
+    "correct_answer": "522",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Divisibility",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "5 + 2 + 2 = 9, so 522 is divisible by 9."
+  },
+  {
+    "id": "q_0998",
+    "round_type": "SPEED",
+    "prompt": "What is 16 squared (16²) evaluated as a perfect square?",
+    "options": [
+      "256",
+      "266",
+      "276",
+      "286"
+    ],
+    "correct_answer": "256",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Powers & Roots",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "256 = 16²."
+  },
+  {
+    "id": "q_0999",
+    "round_type": "SPEED",
+    "prompt": "Which candidate number ends in an even digit (8)?",
+    "options": [
+      "113",
+      "225",
+      "338",
+      "441"
+    ],
+    "correct_answer": "338",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Parity",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "338 ends in 8, an even digit."
+  },
+  {
+    "id": "q_1000",
+    "round_type": "SPEED",
+    "prompt": "What is the largest two-digit prime integer?",
+    "options": [
+      "91",
+      "93",
+      "97",
+      "99"
+    ],
+    "correct_answer": "97",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Number Theory",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "97 is the largest two-digit prime number."
+  },
+  {
+    "id": "q_1001",
+    "round_type": "SPEED",
+    "prompt": "Which number is an exact multiple of 12 (12 × 9)?",
+    "options": [
+      "108",
+      "114",
+      "126",
+      "136"
+    ],
+    "correct_answer": "108",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Divisibility",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "108 = 12 × 9."
+  },
+  {
+    "id": "q_1002",
+    "round_type": "SPEED",
+    "prompt": "Calculate the total when 18 is multiplied by 3:",
+    "options": [
+      "48",
+      "54",
+      "64",
+      "74"
+    ],
+    "correct_answer": "54",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Divisibility",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "54 = 18 × 3."
+  },
+  {
+    "id": "q_1003",
+    "round_type": "SPEED",
+    "prompt": "Determine the value of 3 cubed (3³):",
+    "options": [
+      "27",
+      "36",
+      "45",
+      "54"
+    ],
+    "correct_answer": "27",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Powers & Roots",
+    "pattern_type": "Instant Verification",
+    "time_limit_sec": 15,
+    "explanation": "27 = 3³."
+  },
+  {
+    "id": "q_1004",
+    "round_type": "SPEED",
+    "prompt": "Which word is the direct antonym of \"VAGUE\"?",
+    "options": [
+      "Hazy",
+      "Clear / Precise",
+      "Obscure",
+      "Dim"
+    ],
+    "correct_answer": "Clear / Precise",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "The direct opposite of vague is clear or precise."
+  },
+  {
+    "id": "q_1005",
+    "round_type": "SPEED",
+    "prompt": "Identify the opposite of \"CANDID\":",
+    "options": [
+      "Deceitful / Secretive",
+      "Frank",
+      "Honest",
+      "Sincere"
+    ],
+    "correct_answer": "Deceitful / Secretive",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Candid means frank and straightforward; deceitful is its antonym."
+  },
+  {
+    "id": "q_1006",
+    "round_type": "SPEED",
+    "prompt": "Select a synonym for \"SWIFT\":",
+    "options": [
+      "Sluggish",
+      "Rapid / Fast",
+      "Heavy",
+      "Stationary"
+    ],
+    "correct_answer": "Rapid / Fast",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Swift means rapid or fast."
+  },
+  {
+    "id": "q_1007",
+    "round_type": "SPEED",
+    "prompt": "What is the antonym of \"ARROGANT\"?",
+    "options": [
+      "Proud",
+      "Humble",
+      "Boastful",
+      "Defiant"
+    ],
+    "correct_answer": "Humble",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "The opposite of arrogant is humble."
+  },
+  {
+    "id": "q_1008",
+    "round_type": "SPEED",
+    "prompt": "Which word shares the meaning of \"ABUNDANT\"?",
+    "options": [
+      "Scarce",
+      "Plentiful",
+      "Empty",
+      "Sparse"
+    ],
+    "correct_answer": "Plentiful",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Abundant means plentiful or existing in large quantities."
+  },
+  {
+    "id": "q_1009",
+    "round_type": "SPEED",
+    "prompt": "Identify the direct antonym of \"BENEVOLENT\":",
+    "options": [
+      "Kind",
+      "Generous",
+      "Malevolent",
+      "Gracious"
+    ],
+    "correct_answer": "Malevolent",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Benevolent means wishing well; malevolent means wishing ill."
+  },
+  {
+    "id": "q_1010",
+    "round_type": "SPEED",
+    "prompt": "Select the closest synonym for \"METICULOUS\":",
+    "options": [
+      "Careless",
+      "Precise / Thorough",
+      "Hasty",
+      "Vague"
+    ],
+    "correct_answer": "Precise / Thorough",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Meticulous means taking extreme care about minute details."
+  },
+  {
+    "id": "q_1011",
+    "round_type": "SPEED",
+    "prompt": "What word is the opposite of \"CONCEAL\"?",
+    "options": [
+      "Hide",
+      "Cover",
+      "Reveal",
+      "Shroud"
+    ],
+    "correct_answer": "Reveal",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "To conceal is to hide; to reveal is to make known."
+  },
+  {
+    "id": "q_1012",
+    "round_type": "SPEED",
+    "prompt": "Which option is synonymous with \"FRUGAL\"?",
+    "options": [
+      "Wasteful",
+      "Economical / Thrifty",
+      "Extravagant",
+      "Generous"
+    ],
+    "correct_answer": "Economical / Thrifty",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Frugal means sparing or economical with money."
+  },
+  {
+    "id": "q_1013",
+    "round_type": "SPEED",
+    "prompt": "Select the antonym for \"EXPAND\":",
+    "options": [
+      "Grow",
+      "Contract",
+      "Enlarge",
+      "Broaden"
+    ],
+    "correct_answer": "Contract",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "To expand is to grow larger; to contract is to become smaller."
+  },
+  {
+    "id": "q_1014",
+    "round_type": "SPEED",
+    "prompt": "What word means the same as \"CANDOR\"?",
+    "options": [
+      "Deception",
+      "Honesty / Frankness",
+      "Secrecy",
+      "Guile"
+    ],
+    "correct_answer": "Honesty / Frankness",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Candor is the quality of being open and honest."
+  },
+  {
+    "id": "q_1015",
+    "round_type": "SPEED",
+    "prompt": "Identify the antonym of \"GENUINE\":",
+    "options": [
+      "Authentic",
+      "Real",
+      "Fake / Counterfeit",
+      "Legitimate"
+    ],
+    "correct_answer": "Fake / Counterfeit",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Genuine means authentic; fake is its direct opposite."
+  },
+  {
+    "id": "q_1016",
+    "round_type": "SPEED",
+    "prompt": "Which word is a synonym for \"HASTY\"?",
+    "options": [
+      "Slow",
+      "Hurried / Rash",
+      "Cautious",
+      "Deliberate"
+    ],
+    "correct_answer": "Hurried / Rash",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Hasty means acting with excessive or rash speed."
+  },
+  {
+    "id": "q_1017",
+    "round_type": "SPEED",
+    "prompt": "What is the opposite of \"OPTIMISTIC\"?",
+    "options": [
+      "Hopeful",
+      "Confident",
+      "Pessimistic",
+      "Cheerful"
+    ],
+    "correct_answer": "Pessimistic",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Optimistic anticipates good outcomes; pessimistic expects negative outcomes."
+  },
+  {
+    "id": "q_1018",
+    "round_type": "SPEED",
+    "prompt": "Which term is synonymous with \"ZENITH\"?",
+    "options": [
+      "Nadir",
+      "Base",
+      "Peak / Pinnacle",
+      "Bottom"
+    ],
+    "correct_answer": "Peak / Pinnacle",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Zenith represents the highest peak or culmination."
+  },
+  {
+    "id": "q_1019",
+    "round_type": "SPEED",
+    "prompt": "Identify the antonym of \"TRANSPARENT\":",
+    "options": [
+      "Clear",
+      "Lucid",
+      "Opaque",
+      "Pellucid"
+    ],
+    "correct_answer": "Opaque",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Transparent transmits light clearly; opaque blocks light entirely."
+  },
+  {
+    "id": "q_1020",
+    "round_type": "SPEED",
+    "prompt": "What word is synonymous with \"LUCID\"?",
+    "options": [
+      "Confusing",
+      "Clear / Comprehensible",
+      "Dark",
+      "Cloudy"
+    ],
+    "correct_answer": "Clear / Comprehensible",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Lucid means expressed clearly and easy to understand."
+  },
+  {
+    "id": "q_1021",
+    "round_type": "SPEED",
+    "prompt": "Which word is the opposite of \"FERTILE\"?",
+    "options": [
+      "Productive",
+      "Rich",
+      "Barren / Sterile",
+      "Arable"
+    ],
+    "correct_answer": "Barren / Sterile",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Fertile produces abundant crops; barren produces nothing."
+  },
+  {
+    "id": "q_1022",
+    "round_type": "SPEED",
+    "prompt": "Select a synonym for \"DILIGENT\":",
+    "options": [
+      "Lazy",
+      "Hardworking / Conscientious",
+      "Careless",
+      "Passive"
+    ],
+    "correct_answer": "Hardworking / Conscientious",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Diligent means showing persistent, industrious care."
+  },
+  {
+    "id": "q_1023",
+    "round_type": "SPEED",
+    "prompt": "What is the direct antonym of \"SCARCE\"?",
+    "options": [
+      "Rare",
+      "Few",
+      "Abundant",
+      "Meager"
+    ],
+    "correct_answer": "Abundant",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Scarce means insufficient; abundant means copious."
+  },
+  {
+    "id": "q_1024",
+    "round_type": "SPEED",
+    "prompt": "Which term means the same as \"COGNIZANT\"?",
+    "options": [
+      "Ignorant",
+      "Aware / Mindful",
+      "Unconscious",
+      "Blind"
+    ],
+    "correct_answer": "Aware / Mindful",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Cognizant means having knowledge or being aware."
+  },
+  {
+    "id": "q_1025",
+    "round_type": "SPEED",
+    "prompt": "Select the opposite of \"LENIENT\":",
+    "options": [
+      "Permissive",
+      "Strict / Severe",
+      "Forgiving",
+      "Tolerant"
+    ],
+    "correct_answer": "Strict / Severe",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Lenient means mild or tolerant; strict is its opposite."
+  },
+  {
+    "id": "q_1026",
+    "round_type": "SPEED",
+    "prompt": "Which word is synonymous with \"PRAGMATIC\"?",
+    "options": [
+      "Idealistic",
+      "Practical / Realistic",
+      "Theoretical",
+      "Romantic"
+    ],
+    "correct_answer": "Practical / Realistic",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Pragmatic means dealing with matters practically rather than theoretically."
+  },
+  {
+    "id": "q_1027",
+    "round_type": "SPEED",
+    "prompt": "What is the antonym of \"CHAOS\"?",
+    "options": [
+      "Disorder",
+      "Turmoil",
+      "Order / Harmony",
+      "Anarchy"
+    ],
+    "correct_answer": "Order / Harmony",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Chaos is total confusion; order is organized harmony."
+  },
+  {
+    "id": "q_1028",
+    "round_type": "SPEED",
+    "prompt": "Select the synonym for \"ADVERSARY\":",
+    "options": [
+      "Friend",
+      "Ally",
+      "Opponent / Rival",
+      "Partner"
+    ],
+    "correct_answer": "Opponent / Rival",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "An adversary is an opponent or rival."
+  },
+  {
+    "id": "q_1029",
+    "round_type": "SPEED",
+    "prompt": "Which word represents the antonym of \"EPHEMERAL\"?",
+    "options": [
+      "Brief",
+      "Transient",
+      "Permanent / Eternal",
+      "Short-lived"
+    ],
+    "correct_answer": "Permanent / Eternal",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Ephemeral means lasting a very short time; permanent is eternal."
+  },
+  {
+    "id": "q_1030",
+    "round_type": "SPEED",
+    "prompt": "Which adjective is synonymous with \"CANDID\"?",
+    "options": [
+      "Deceitful",
+      "Frank / Outspoken",
+      "Shy",
+      "Reserved"
+    ],
+    "correct_answer": "Frank / Outspoken",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Candid means frank, open, and sincere."
+  },
+  {
+    "id": "q_1031",
+    "round_type": "SPEED",
+    "prompt": "Identify the antonym of \"OBSTINATE\":",
+    "options": [
+      "Stubborn",
+      "Inflexible",
+      "Flexible / Compliant",
+      "Rigid"
+    ],
+    "correct_answer": "Flexible / Compliant",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Obstinate means stubbornly refusing to change; flexible is compliant."
+  },
+  {
+    "id": "q_1032",
+    "round_type": "SPEED",
+    "prompt": "What word is synonymous with \"RESOLUTE\"?",
+    "options": [
+      "Hesitant",
+      "Determined / Firm",
+      "Weak",
+      "Wavering"
+    ],
+    "correct_answer": "Determined / Firm",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Resolute means admirably purposeful, determined, and unwavering."
+  },
+  {
+    "id": "q_1033",
+    "round_type": "SPEED",
+    "prompt": "Which noun represents the exact opposite of \"NADIR\"?",
+    "options": [
+      "Base",
+      "Depression",
+      "Zenith / Peak",
+      "Bottom"
+    ],
+    "correct_answer": "Zenith / Peak",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Nadir is the lowest point; Zenith is the highest point."
+  },
+  {
+    "id": "q_1034",
+    "round_type": "SPEED",
+    "prompt": "Select the synonym for \"NOVICE\":",
+    "options": [
+      "Expert",
+      "Beginner / Trainee",
+      "Veteran",
+      "Master"
+    ],
+    "correct_answer": "Beginner / Trainee",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "A novice is a person new to or inexperienced in a field."
+  },
+  {
+    "id": "q_1035",
+    "round_type": "SPEED",
+    "prompt": "Identify the antonym of \"COPIOUS\":",
+    "options": [
+      "Plentiful",
+      "Ample",
+      "Scarce / Meager",
+      "Abundant"
+    ],
+    "correct_answer": "Scarce / Meager",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Copious means abundant; meager/scarce is its antonym."
+  },
+  {
+    "id": "q_1036",
+    "round_type": "SPEED",
+    "prompt": "What word shares the meaning of \"IMMENSE\"?",
+    "options": [
+      "Tiny",
+      "Huge / Enormous",
+      "Narrow",
+      "Thin"
+    ],
+    "correct_answer": "Huge / Enormous",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Immense means extremely large or enormous."
+  },
+  {
+    "id": "q_1037",
+    "round_type": "SPEED",
+    "prompt": "Which adjective is the opposite of \"PERILOUS\"?",
+    "options": [
+      "Hazardous",
+      "Dangerous",
+      "Safe / Secure",
+      "Risky"
+    ],
+    "correct_answer": "Safe / Secure",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Perilous means full of danger; safe is secure."
+  },
+  {
+    "id": "q_1038",
+    "round_type": "SPEED",
+    "prompt": "Identify the synonym for \"TENACIOUS\":",
+    "options": [
+      "Yielding",
+      "Persistent / Determined",
+      "Weak",
+      "Fragile"
+    ],
+    "correct_answer": "Persistent / Determined",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Tenacious means holding fast and keeping a firm hold."
+  },
+  {
+    "id": "q_1039",
+    "round_type": "SPEED",
+    "prompt": "What is the antonym of \"PRODIGAL\"?",
+    "options": [
+      "Extravagant",
+      "Wasteful",
+      "Thrifty / Frugal",
+      "Generous"
+    ],
+    "correct_answer": "Thrifty / Frugal",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Prodigal means wastefully extravagant; thrifty is frugal."
+  },
+  {
+    "id": "q_1040",
+    "round_type": "SPEED",
+    "prompt": "Which word is synonymous with \"BENIGN\"?",
+    "options": [
+      "Malignant",
+      "Harmless / Gentle",
+      "Harmful",
+      "Severe"
+    ],
+    "correct_answer": "Harmless / Gentle",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Benign means gentle, kind, or non-malignant."
+  },
+  {
+    "id": "q_1041",
+    "round_type": "SPEED",
+    "prompt": "Select the antonym for \"TACITURN\":",
+    "options": [
+      "Silent",
+      "Reserved",
+      "Talkative / Loquacious",
+      "Quiet"
+    ],
+    "correct_answer": "Talkative / Loquacious",
+    "difficulty": "EASY",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Taciturn means saying very little; talkative is loquacious."
+  },
+  {
+    "id": "q_1042",
+    "round_type": "SPEED",
+    "prompt": "Find the best synonym for the word \"DUBIOUS\":",
+    "options": [
+      "Certain",
+      "Doubtful / Questionable",
+      "Definite",
+      "Trustworthy"
+    ],
+    "correct_answer": "Doubtful / Questionable",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Synonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Dubious means hesitating or causing doubt."
+  },
+  {
+    "id": "q_1043",
+    "round_type": "SPEED",
+    "prompt": "Identify the direct antonym of \"CONCORD\":",
+    "options": [
+      "Harmony",
+      "Agreement",
+      "Discord / Strife",
+      "Peace"
+    ],
+    "correct_answer": "Discord / Strife",
+    "difficulty": "MEDIUM",
+    "category": "Language Reflexes",
+    "subcategory": "Antonyms",
+    "pattern_type": "Vocabulary Reflex",
+    "time_limit_sec": 15,
+    "explanation": "Concord means agreement and peace; discord is strife."
+  },
+  {
+    "id": "q_1044",
+    "round_type": "SPEED",
+    "prompt": "Which of these is an INERT NOBLE GAS in Group 18?",
+    "options": [
+      "Oxygen",
+      "Chlorine",
+      "Neon",
+      "Hydrogen"
+    ],
+    "correct_answer": "Neon",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Elements",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Neon is a Group 18 inert noble gas."
+  },
+  {
+    "id": "q_1045",
+    "round_type": "SPEED",
+    "prompt": "Which color is an additive PRIMARY COLOR of light (RGB model)?",
+    "options": [
+      "Yellow",
+      "Green",
+      "Magenta",
+      "Cyan"
+    ],
+    "correct_answer": "Green",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Optics",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Additive primary colors of light are Red, Green, and Blue."
+  },
+  {
+    "id": "q_1046",
+    "round_type": "SPEED",
+    "prompt": "Which mammal is strictly an HERBIVORE feeding on vegetation?",
+    "options": [
+      "Tiger",
+      "Deer",
+      "Hawk",
+      "Shark"
+    ],
+    "correct_answer": "Deer",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Biology",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Deer are primary consumers feeding exclusively on plants."
+  },
+  {
+    "id": "q_1047",
+    "round_type": "SPEED",
+    "prompt": "Which of these materials is an excellent ELECTRICAL CONDUCTOR?",
+    "options": [
+      "Glass",
+      "Rubber",
+      "Copper",
+      "Wood"
+    ],
+    "correct_answer": "Copper",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Physics",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Copper is an excellent metallic electrical conductor."
+  },
+  {
+    "id": "q_1048",
+    "round_type": "SPEED",
+    "prompt": "Which energy source is naturally and continuously RENEWABLE?",
+    "options": [
+      "Coal",
+      "Solar Energy",
+      "Natural Gas",
+      "Petroleum"
+    ],
+    "correct_answer": "Solar Energy",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Energy",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Solar energy is continuously replenished by the Sun."
+  },
+  {
+    "id": "q_1049",
+    "round_type": "SPEED",
+    "prompt": "Which of these animals is classified as an AMPHIBIAN?",
+    "options": [
+      "Crocodile",
+      "Frog",
+      "Lizard",
+      "Turtle"
+    ],
+    "correct_answer": "Frog",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Zoology",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Frogs are amphibians undergoing metamorphosis from aquatic tadpoles."
+  },
+  {
+    "id": "q_1050",
+    "round_type": "SPEED",
+    "prompt": "Which celestial object is a terrestrial PLANET orbiting the Sun?",
+    "options": [
+      "Sun",
+      "Moon",
+      "Mars",
+      "Sirius"
+    ],
+    "correct_answer": "Mars",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Astronomy",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Mars is a terrestrial planet orbiting the Sun."
+  },
+  {
+    "id": "q_1051",
+    "round_type": "SPEED",
+    "prompt": "Which peripheral hardware component is an INPUT DEVICE?",
+    "options": [
+      "Monitor",
+      "Keyboard",
+      "Speaker",
+      "Printer"
+    ],
+    "correct_answer": "Keyboard",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Computers",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Keyboard transmits character and command input to the system."
+  },
+  {
+    "id": "q_1052",
+    "round_type": "SPEED",
+    "prompt": "Which human organ is primarily responsible for FILTERING BLOOD to form urine?",
+    "options": [
+      "Heart",
+      "Liver",
+      "Kidney",
+      "Spleen"
+    ],
+    "correct_answer": "Kidney",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Anatomy",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Nephrons in the kidney filter blood to excrete metabolic waste as urine."
+  },
+  {
+    "id": "q_1053",
+    "round_type": "SPEED",
+    "prompt": "Which substance is a pure CHEMICAL ELEMENT, not a compound?",
+    "options": [
+      "Water",
+      "Salt",
+      "Carbon",
+      "Sugar"
+    ],
+    "correct_answer": "Carbon",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Chemistry",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Carbon is a pure chemical element (atomic number 6)."
+  },
+  {
+    "id": "q_1054",
+    "round_type": "SPEED",
+    "prompt": "Which of these animals is an egg-laying mammal (monotreme)?",
+    "options": [
+      "Kangaroo",
+      "Platypus",
+      "Koala",
+      "Bat"
+    ],
+    "correct_answer": "Platypus",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Zoology",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "The duck-billed platypus is one of the few living monotreme mammals."
+  },
+  {
+    "id": "q_1055",
+    "round_type": "SPEED",
+    "prompt": "Which musical instrument belongs to the PERCUSSION family?",
+    "options": [
+      "Violin",
+      "Flute",
+      "Snare Drum",
+      "Trumpet"
+    ],
+    "correct_answer": "Snare Drum",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Music",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Snare drum produces sound by striking its membrane."
+  },
+  {
+    "id": "q_1056",
+    "round_type": "SPEED",
+    "prompt": "Which of these vitamins is WATER-SOLUBLE in human biology?",
+    "options": [
+      "Vitamin A",
+      "Vitamin C",
+      "Vitamin D",
+      "Vitamin K"
+    ],
+    "correct_answer": "Vitamin C",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Nutrition",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Vitamin C and the B-complex vitamins are water-soluble; A, D, E, and K are fat-soluble."
+  },
+  {
+    "id": "q_1057",
+    "round_type": "SPEED",
+    "prompt": "Which sovereign nation is situated on the continent of SOUTH AMERICA?",
+    "options": [
+      "Mexico",
+      "Brazil",
+      "Spain",
+      "Egypt"
+    ],
+    "correct_answer": "Brazil",
+    "difficulty": "HARD",
+    "category": "General Knowledge",
+    "subcategory": "Geography",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Brazil is the largest nation in South America."
+  },
+  {
+    "id": "q_1058",
+    "round_type": "SPEED",
+    "prompt": "Which chemical element is classified as a HALOGEN in Group 17?",
+    "options": [
+      "Argon",
+      "Chlorine",
+      "Sodium",
+      "Calcium"
+    ],
+    "correct_answer": "Chlorine",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Chlorine is a Group 17 halogen alongside fluorine, bromine, and iodine."
+  },
+  {
+    "id": "q_1059",
+    "round_type": "SPEED",
+    "prompt": "Which geometric polygon possesses EXACTLY SIX straight sides?",
+    "options": [
+      "Pentagon",
+      "Hexagon",
+      "Heptagon",
+      "Octagon"
+    ],
+    "correct_answer": "Hexagon",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Geometry",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "A hexagon has six straight edges."
+  },
+  {
+    "id": "q_1060",
+    "round_type": "SPEED",
+    "prompt": "Which computer storage architecture represents VOLATILE memory?",
+    "options": [
+      "ROM",
+      "RAM",
+      "Hard Drive",
+      "Flash USB"
+    ],
+    "correct_answer": "RAM",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Computers",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "RAM loses its data when electrical power is cut."
+  },
+  {
+    "id": "q_1061",
+    "round_type": "SPEED",
+    "prompt": "Which chemical element is an ALKALI METAL found in Group 1?",
+    "options": [
+      "Magnesium",
+      "Potassium",
+      "Aluminum",
+      "Iron"
+    ],
+    "correct_answer": "Potassium",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Potassium is an alkali metal in Group 1."
+  },
+  {
+    "id": "q_1062",
+    "round_type": "SPEED",
+    "prompt": "Which avian creature is a large flightless ratite bird native to Africa?",
+    "options": [
+      "Eagle",
+      "Ostrich",
+      "Hawk",
+      "Seagull"
+    ],
+    "correct_answer": "Ostrich",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Zoology",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Ostriches are flightless ratite birds native to Africa."
+  },
+  {
+    "id": "q_1063",
+    "round_type": "SPEED",
+    "prompt": "Which of these software items is an OPERATING SYSTEM kernel?",
+    "options": [
+      "Linux",
+      "Photoshop",
+      "Excel",
+      "Chrome"
+    ],
+    "correct_answer": "Linux",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Computers",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Linux is an open-source Unix-like operating system kernel."
+  },
+  {
+    "id": "q_1064",
+    "round_type": "SPEED",
+    "prompt": "Which of these combustible energy resources is a FOSSIL FUEL?",
+    "options": [
+      "Uranium",
+      "Coal",
+      "Biomass",
+      "Hydro"
+    ],
+    "correct_answer": "Coal",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Energy",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Coal is a combustible black sedimentary rock formed from ancient vegetation."
+  },
+  {
+    "id": "q_1065",
+    "round_type": "SPEED",
+    "prompt": "Which shape is a quadrilateral having four equal sides and 90° right angles?",
+    "options": [
+      "Rectangle",
+      "Square",
+      "Rhombus",
+      "Trapezoid"
+    ],
+    "correct_answer": "Square",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Geometry",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "A square has 4 congruent sides and 4 interior 90° right angles."
+  },
+  {
+    "id": "q_1066",
+    "round_type": "SPEED",
+    "prompt": "Which blood component forms cellular plugs essential for coagulation (clotting)?",
+    "options": [
+      "Red Blood Cells",
+      "Platelets (Thrombocytes)",
+      "White Blood Cells",
+      "Plasma"
+    ],
+    "correct_answer": "Platelets (Thrombocytes)",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Biology",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Platelets aggregate to form hemostatic plugs preventing hemorrhage."
+  },
+  {
+    "id": "q_1067",
+    "round_type": "SPEED",
+    "prompt": "Which celestial neighbor in our solar system is nicknamed the RED PLANET?",
+    "options": [
+      "Venus",
+      "Mars",
+      "Jupiter",
+      "Mercury"
+    ],
+    "correct_answer": "Mars",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Astronomy",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Mars appears reddish due to abundant iron oxide (rust) on its surface."
+  },
+  {
+    "id": "q_1068",
+    "round_type": "SPEED",
+    "prompt": "Which atmospheric gas is mandatory for aerobic cellular respiration in mammals?",
+    "options": [
+      "Carbon Dioxide",
+      "Oxygen",
+      "Helium",
+      "Nitrogen"
+    ],
+    "correct_answer": "Oxygen",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Biology",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Oxygen acts as the terminal electron acceptor in cellular respiration."
+  },
+  {
+    "id": "q_1069",
+    "round_type": "SPEED",
+    "prompt": "Which platform is an online web search engine, rather than a web browser?",
+    "options": [
+      "Firefox",
+      "Google Search",
+      "Safari",
+      "Edge"
+    ],
+    "correct_answer": "Google Search",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Internet",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Google Search is an indexing web engine; Firefox and Safari are client browsers."
+  },
+  {
+    "id": "q_1070",
+    "round_type": "SPEED",
+    "prompt": "Which of these measurement units belongs to the international metric mass system?",
+    "options": [
+      "Pound",
+      "Gram",
+      "Ounce",
+      "Stone"
+    ],
+    "correct_answer": "Gram",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Measurement",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Gram is a standard metric unit of mass (0.001 kg)."
+  },
+  {
+    "id": "q_1071",
+    "round_type": "SPEED",
+    "prompt": "Which chemical metallic element remains in LIQUID state at 20°C room temperature?",
+    "options": [
+      "Gold",
+      "Mercury",
+      "Silver",
+      "Copper"
+    ],
+    "correct_answer": "Mercury",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Chemistry",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Mercury is liquid under normal room temperature and pressure."
+  },
+  {
+    "id": "q_1072",
+    "round_type": "SPEED",
+    "prompt": "Which of these sovereign countries is situated in Southeast ASIA?",
+    "options": [
+      "Nigeria",
+      "Vietnam",
+      "Peru",
+      "Poland"
+    ],
+    "correct_answer": "Vietnam",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Geography",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Vietnam is located in Southeast Asia."
+  },
+  {
+    "id": "q_1073",
+    "round_type": "SPEED",
+    "prompt": "Which value is a whole signed INTEGER, rather than a decimal or fraction?",
+    "options": [
+      "3/4",
+      "2.5",
+      "-7",
+      "0.125"
+    ],
+    "correct_answer": "-7",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Number Sets",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "-7 is a whole negative integer."
+  },
+  {
+    "id": "q_1074",
+    "round_type": "SPEED",
+    "prompt": "Which of these chemical compounds is a strong ALKALI base with high pH?",
+    "options": [
+      "Vinegar (Acetic Acid)",
+      "Sodium Hydroxide (NaOH)",
+      "Lemon Juice (Citric Acid)",
+      "Hydrochloric Acid"
+    ],
+    "correct_answer": "Sodium Hydroxide (NaOH)",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Chemistry",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "NaOH is a strong chemical base with high pH."
+  },
+  {
+    "id": "q_1075",
+    "round_type": "SPEED",
+    "prompt": "Which animal is an ECTOTHERMIC (cold-blooded) reptile?",
+    "options": [
+      "Pigeon",
+      "Lizard",
+      "Rabbit",
+      "Tiger"
+    ],
+    "correct_answer": "Lizard",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Zoology",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Lizards rely on ambient environmental heat to regulate body temperature."
+  },
+  {
+    "id": "q_1076",
+    "round_type": "SPEED",
+    "prompt": "Which official currency is issued as legal tender in the UNITED KINGDOM?",
+    "options": [
+      "Euro",
+      "British Pound Sterling",
+      "Dollar",
+      "Franc"
+    ],
+    "correct_answer": "British Pound Sterling",
+    "difficulty": "HARD",
+    "category": "General Knowledge",
+    "subcategory": "Currencies",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "The official legal tender of the UK is the Pound Sterling (£)."
+  },
+  {
+    "id": "q_1077",
+    "round_type": "SPEED",
+    "prompt": "Which internet protocol is utilized specifically to send outgoing email messages?",
+    "options": [
+      "SMTP",
+      "HTTP",
+      "FTP",
+      "SSH"
+    ],
+    "correct_answer": "SMTP",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Networking",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "Simple Mail Transfer Protocol (SMTP) transmits outgoing electronic mail."
+  },
+  {
+    "id": "q_1078",
+    "round_type": "SPEED",
+    "prompt": "Which astronomical body is the primary NATURAL SATELLITE orbiting Earth?",
+    "options": [
+      "Hubble",
+      "Moon",
+      "ISS",
+      "GPS Satellite"
+    ],
+    "correct_answer": "Moon",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Astronomy",
+    "pattern_type": "Category Sorting",
+    "time_limit_sec": 15,
+    "explanation": "The Moon is Earth sole natural satellite."
+  },
+  {
+    "id": "q_1079",
+    "round_type": "SPEED",
+    "prompt": "What is the sovereign capital of JAPAN?",
+    "options": [
+      "Osaka",
+      "Kyoto",
+      "Tokyo",
+      "Hiroshima"
+    ],
+    "correct_answer": "Tokyo",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Tokyo is the capital of Japan."
+  },
+  {
+    "id": "q_1080",
+    "round_type": "SPEED",
+    "prompt": "Which city serves as the federal capital of GERMANY?",
+    "options": [
+      "Munich",
+      "Frankfurt",
+      "Berlin",
+      "Hamburg"
+    ],
+    "correct_answer": "Berlin",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Berlin is the capital of Germany."
+  },
+  {
+    "id": "q_1081",
+    "round_type": "SPEED",
+    "prompt": "Name the historic capital city of FRANCE:",
+    "options": [
+      "Marseille",
+      "Lyon",
+      "Paris",
+      "Nice"
+    ],
+    "correct_answer": "Paris",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Paris is the capital of France."
+  },
+  {
+    "id": "q_1082",
+    "round_type": "SPEED",
+    "prompt": "Identify the national capital of ITALY:",
+    "options": [
+      "Milan",
+      "Rome",
+      "Venice",
+      "Naples"
+    ],
+    "correct_answer": "Rome",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Rome is the capital of Italy."
+  },
+  {
+    "id": "q_1083",
+    "round_type": "SPEED",
+    "prompt": "What city serves as the seat of government in SPAIN?",
+    "options": [
+      "Barcelona",
+      "Seville",
+      "Madrid",
+      "Valencia"
+    ],
+    "correct_answer": "Madrid",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Madrid is the capital of Spain."
+  },
+  {
+    "id": "q_1084",
+    "round_type": "SPEED",
+    "prompt": "Name the national capital city of RUSSIA:",
+    "options": [
+      "Saint Petersburg",
+      "Kazan",
+      "Moscow",
+      "Novosibirsk"
+    ],
+    "correct_answer": "Moscow",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Moscow is the capital of Russia."
+  },
+  {
+    "id": "q_1085",
+    "round_type": "SPEED",
+    "prompt": "Which metropolis is the official capital of CHINA?",
+    "options": [
+      "Shanghai",
+      "Guangzhou",
+      "Beijing",
+      "Shenzhen"
+    ],
+    "correct_answer": "Beijing",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Beijing is the capital of China."
+  },
+  {
+    "id": "q_1086",
+    "round_type": "SPEED",
+    "prompt": "Identify the ancient capital city of modern EGYPT:",
+    "options": [
+      "Alexandria",
+      "Giza",
+      "Cairo",
+      "Luxor"
+    ],
+    "correct_answer": "Cairo",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Cairo is the capital of Egypt."
+  },
+  {
+    "id": "q_1087",
+    "round_type": "SPEED",
+    "prompt": "Which planned modern metropolis serves as the federal capital of BRAZIL?",
+    "options": [
+      "Rio de Janeiro",
+      "Sao Paulo",
+      "Brasilia",
+      "Salvador"
+    ],
+    "correct_answer": "Brasilia",
+    "difficulty": "HARD",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Brasilia is the purpose-built federal capital of Brazil."
+  },
+  {
+    "id": "q_1088",
+    "round_type": "SPEED",
+    "prompt": "What is the national capital city of SOUTH KOREA?",
+    "options": [
+      "Busan",
+      "Incheon",
+      "Seoul",
+      "Daegu"
+    ],
+    "correct_answer": "Seoul",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Seoul is the capital of South Korea."
+  },
+  {
+    "id": "q_1089",
+    "round_type": "SPEED",
+    "prompt": "Identify the coastal capital city of ARGENTINA:",
+    "options": [
+      "Cordoba",
+      "Rosario",
+      "Buenos Aires",
+      "Mendoza"
+    ],
+    "correct_answer": "Buenos Aires",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Buenos Aires is the capital of Argentina."
+  },
+  {
+    "id": "q_1090",
+    "round_type": "SPEED",
+    "prompt": "Which city is the political capital of TURKEY (not Istanbul)?",
+    "options": [
+      "Istanbul",
+      "Ankara",
+      "Izmir",
+      "Antalya"
+    ],
+    "correct_answer": "Ankara",
+    "difficulty": "HARD",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Ankara is the capital of Turkey (not Istanbul)."
+  },
+  {
+    "id": "q_1091",
+    "round_type": "SPEED",
+    "prompt": "What is the federal capital of CANADA located in Ontario?",
+    "options": [
+      "Ottawa",
+      "Calgary",
+      "Edmonton",
+      "Quebec City"
+    ],
+    "correct_answer": "Ottawa",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Ottawa is the capital of Canada."
+  },
+  {
+    "id": "q_1092",
+    "round_type": "SPEED",
+    "prompt": "Which planned city is the federal capital of AUSTRALIA?",
+    "options": [
+      "Canberra",
+      "Perth",
+      "Adelaide",
+      "Hobart"
+    ],
+    "correct_answer": "Canberra",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Canberra is the federal capital of Australia."
+  },
+  {
+    "id": "q_1093",
+    "round_type": "SPEED",
+    "prompt": "Name the national capital territory of INDIA:",
+    "options": [
+      "Mumbai",
+      "Kolkata",
+      "New Delhi",
+      "Bengaluru"
+    ],
+    "correct_answer": "New Delhi",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "New Delhi is the official national capital of India."
+  },
+  {
+    "id": "q_1094",
+    "round_type": "SPEED",
+    "prompt": "What is the vibrant capital city of THAILAND?",
+    "options": [
+      "Phuket",
+      "Chiang Mai",
+      "Bangkok",
+      "Pattaya"
+    ],
+    "correct_answer": "Bangkok",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Bangkok is the capital of Thailand."
+  },
+  {
+    "id": "q_1095",
+    "round_type": "SPEED",
+    "prompt": "Identify the historic cradle of democracy and capital of GREECE:",
+    "options": [
+      "Sparta",
+      "Thessaloniki",
+      "Athens",
+      "Heraklion"
+    ],
+    "correct_answer": "Athens",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Athens is the capital of Greece."
+  },
+  {
+    "id": "q_1096",
+    "round_type": "SPEED",
+    "prompt": "What high-altitude metropolis serves as the capital of MEXICO?",
+    "options": [
+      "Guadalajara",
+      "Monterrey",
+      "Mexico City",
+      "Cancun"
+    ],
+    "correct_answer": "Mexico City",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Mexico City is the capital of Mexico."
+  },
+  {
+    "id": "q_1097",
+    "round_type": "SPEED",
+    "prompt": "Name the Scandinavian capital city of NORWAY:",
+    "options": [
+      "Bergen",
+      "Oslo",
+      "Trondheim",
+      "Stavanger"
+    ],
+    "correct_answer": "Oslo",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Oslo is the capital of Norway."
+  },
+  {
+    "id": "q_1098",
+    "round_type": "SPEED",
+    "prompt": "Which Baltic archipelago city is the capital of SWEDEN?",
+    "options": [
+      "Gothenburg",
+      "Malmo",
+      "Stockholm",
+      "Uppsala"
+    ],
+    "correct_answer": "Stockholm",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Stockholm is the capital of Sweden."
+  },
+  {
+    "id": "q_1099",
+    "round_type": "SPEED",
+    "prompt": "Identify the royal capital of SAUDI ARABIA:",
+    "options": [
+      "Jeddah",
+      "Mecca",
+      "Riyadh",
+      "Medina"
+    ],
+    "correct_answer": "Riyadh",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Riyadh is the capital of Saudi Arabia."
+  },
+  {
+    "id": "q_1100",
+    "round_type": "SPEED",
+    "prompt": "What city has historically served as the national capital of INDONESIA on Java?",
+    "options": [
+      "Surabaya",
+      "Bandung",
+      "Jakarta",
+      "Medan"
+    ],
+    "correct_answer": "Jakarta",
+    "difficulty": "HARD",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Jakarta has served as the historic capital of Indonesia."
+  },
+  {
+    "id": "q_1101",
+    "round_type": "SPEED",
+    "prompt": "Which East African city serves as the capital of KENYA?",
+    "options": [
+      "Mombasa",
+      "Kisumu",
+      "Nairobi",
+      "Nakuru"
+    ],
+    "correct_answer": "Nairobi",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Nairobi is the capital of Kenya."
+  },
+  {
+    "id": "q_1102",
+    "round_type": "SPEED",
+    "prompt": "Name the southern capital of NEW ZEALAND (not Auckland):",
+    "options": [
+      "Auckland",
+      "Christchurch",
+      "Wellington",
+      "Hamilton"
+    ],
+    "correct_answer": "Wellington",
+    "difficulty": "HARD",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Wellington is the capital of New Zealand (not Auckland)."
+  },
+  {
+    "id": "q_1103",
+    "round_type": "SPEED",
+    "prompt": "Which federal city is the de facto capital of SWITZERLAND?",
+    "options": [
+      "Zurich",
+      "Geneva",
+      "Bern",
+      "Basel"
+    ],
+    "correct_answer": "Bern",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Bern is the de facto federal city/capital of Switzerland."
+  },
+  {
+    "id": "q_1104",
+    "round_type": "SPEED",
+    "prompt": "What Atlantic coastal city serves as the capital of PORTUGAL?",
+    "options": [
+      "Porto",
+      "Braga",
+      "Lisbon",
+      "Coimbra"
+    ],
+    "correct_answer": "Lisbon",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Lisbon is the capital of Portugal."
+  },
+  {
+    "id": "q_1105",
+    "round_type": "SPEED",
+    "prompt": "Identify the historical capital city of POLAND on the Vistula River:",
+    "options": [
+      "Krakow",
+      "Gdansk",
+      "Warsaw",
+      "Wroclaw"
+    ],
+    "correct_answer": "Warsaw",
+    "difficulty": "HARD",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Warsaw is the capital of Poland."
+  },
+  {
+    "id": "q_1106",
+    "round_type": "SPEED",
+    "prompt": "Which music-rich city on the Danube is the capital of AUSTRIA?",
+    "options": [
+      "Salzburg",
+      "Innsbruck",
+      "Vienna",
+      "Graz"
+    ],
+    "correct_answer": "Vienna",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Vienna is the capital of Austria."
+  },
+  {
+    "id": "q_1107",
+    "round_type": "SPEED",
+    "prompt": "Name the constitutional capital of the NETHERLANDS:",
+    "options": [
+      "Rotterdam",
+      "The Hague",
+      "Amsterdam",
+      "Utrecht"
+    ],
+    "correct_answer": "Amsterdam",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Amsterdam is the constitutional capital of the Netherlands."
+  },
+  {
+    "id": "q_1108",
+    "round_type": "SPEED",
+    "prompt": "Which European headquarters city is the sovereign capital of BELGIUM?",
+    "options": [
+      "Antwerp",
+      "Ghent",
+      "Brussels",
+      "Bruges"
+    ],
+    "correct_answer": "Brussels",
+    "difficulty": "HARD",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Brussels is the capital of Belgium."
+  },
+  {
+    "id": "q_1109",
+    "round_type": "SPEED",
+    "prompt": "What is the national capital city of the Republic of IRELAND?",
+    "options": [
+      "Cork",
+      "Galway",
+      "Dublin",
+      "Limerick"
+    ],
+    "correct_answer": "Dublin",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Dublin is the capital of Ireland."
+  },
+  {
+    "id": "q_1110",
+    "round_type": "SPEED",
+    "prompt": "Name the maritime capital city of DENMARK:",
+    "options": [
+      "Aarhus",
+      "Odense",
+      "Copenhagen",
+      "Aalborg"
+    ],
+    "correct_answer": "Copenhagen",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Copenhagen is the capital of Denmark."
+  },
+  {
+    "id": "q_1111",
+    "round_type": "SPEED",
+    "prompt": "Which northern European coastal city is the capital of FINLAND?",
+    "options": [
+      "Tampere",
+      "Turku",
+      "Helsinki",
+      "Oulu"
+    ],
+    "correct_answer": "Helsinki",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Helsinki is the capital of Finland."
+  },
+  {
+    "id": "q_1112",
+    "round_type": "SPEED",
+    "prompt": "Which city is the administrative and executive capital of SOUTH AFRICA?",
+    "options": [
+      "Cape Town",
+      "Johannesburg",
+      "Pretoria",
+      "Durban"
+    ],
+    "correct_answer": "Pretoria",
+    "difficulty": "HARD",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Pretoria is the administrative and executive capital of South Africa."
+  },
+  {
+    "id": "q_1113",
+    "round_type": "SPEED",
+    "prompt": "What modern skyline metropolis serves as the federal capital of MALAYSIA?",
+    "options": [
+      "Penang",
+      "Johor Bahru",
+      "Kuala Lumpur",
+      "Malacca"
+    ],
+    "correct_answer": "Kuala Lumpur",
+    "difficulty": "HARD",
+    "category": "General Knowledge",
+    "subcategory": "Capitals",
+    "pattern_type": "Rapid Recall",
+    "time_limit_sec": 15,
+    "explanation": "Kuala Lumpur is the national capital of Malaysia."
+  },
+  {
+    "id": "q_1114",
+    "round_type": "SPEED",
+    "prompt": "Which decimal value represents the LARGEST quantity?",
+    "options": [
+      "0.45",
+      "0.5",
+      "0.499",
+      "0.09"
+    ],
+    "correct_answer": "0.5",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Decimals",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "0.5 = 0.500, which is strictly greater than 0.499 or 0.45."
+  },
+  {
+    "id": "q_1115",
+    "round_type": "SPEED",
+    "prompt": "Which of these four fractions holds the GREATEST numerical value?",
+    "options": [
+      "1/2",
+      "2/3",
+      "3/5",
+      "5/8"
+    ],
+    "correct_answer": "2/3",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Fractions",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "2/3 ≈ 0.667; 5/8 = 0.625; 3/5 = 0.60; 1/2 = 0.50."
+  },
+  {
+    "id": "q_1116",
+    "round_type": "SPEED",
+    "prompt": "Which thermometer reading represents the COLDEST temperature?",
+    "options": [
+      "0°C",
+      "-5°C",
+      "10°C",
+      "-1°C"
+    ],
+    "correct_answer": "-5°C",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Temperature",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "-5°C is the lowest temperature."
+  },
+  {
+    "id": "q_1117",
+    "round_type": "SPEED",
+    "prompt": "Which integer has the smallest distance (is CLOSEST) to 100?",
+    "options": [
+      "89",
+      "94",
+      "107",
+      "112"
+    ],
+    "correct_answer": "94",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Proximity",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "|94 - 100| = 6; |107 - 100| = 7."
+  },
+  {
+    "id": "q_1118",
+    "round_type": "SPEED",
+    "prompt": "Which linear measurement indicates the LONGEST physical distance?",
+    "options": [
+      "500 meters",
+      "0.8 kilometers",
+      "650 meters",
+      "75,000 centimeters"
+    ],
+    "correct_answer": "0.8 kilometers",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Units",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "0.8 km = 800 m; 75,000 cm = 750 m; 650 m and 500 m are smaller."
+  },
+  {
+    "id": "q_1119",
+    "round_type": "SPEED",
+    "prompt": "Which of these masses is the HEAVIEST?",
+    "options": [
+      "1,500 grams",
+      "2 kilograms",
+      "1,800,000 milligrams",
+      "1.2 kg"
+    ],
+    "correct_answer": "2 kilograms",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Units",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "2 kg = 2,000 grams."
+  },
+  {
+    "id": "q_1120",
+    "round_type": "SPEED",
+    "prompt": "Which time period represents the SHORTEST duration?",
+    "options": [
+      "45 minutes",
+      "0.5 hours",
+      "2,400 seconds",
+      "1,500 seconds"
+    ],
+    "correct_answer": "1,500 seconds",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Time",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "1,500 s = 25 minutes; 0.5 h = 30 min; 2,400 s = 40 min."
+  },
+  {
+    "id": "q_1121",
+    "round_type": "SPEED",
+    "prompt": "Which fraction corresponds to EXACTLY 75%?",
+    "options": [
+      "2/3",
+      "3/4",
+      "4/5",
+      "5/6"
+    ],
+    "correct_answer": "3/4",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Percentages",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "3/4 = 0.75 = 75%."
+  },
+  {
+    "id": "q_1122",
+    "round_type": "SPEED",
+    "prompt": "What is the SMALLEST strictly positive integer?",
+    "options": [
+      "0",
+      "1",
+      "2",
+      "0.5"
+    ],
+    "correct_answer": "1",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Number Sets",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "1 is the smallest positive whole integer (0 is neither positive nor negative)."
+  },
+  {
+    "id": "q_1123",
+    "round_type": "SPEED",
+    "prompt": "Which mathematical exponential expression evaluates to the GREATEST result?",
+    "options": [
+      "2⁴ (2 to the 4th power)",
+      "3³ (3 cubed)",
+      "4² (4 squared)",
+      "5² (5 squared)"
+    ],
+    "correct_answer": "3³ (3 cubed)",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Powers",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "3³ = 27; 5² = 25; 2⁴ = 16; 4² = 16. The greatest is 27."
+  },
+  {
+    "id": "q_1124",
+    "round_type": "SPEED",
+    "prompt": "Which 2D geometric polygon features the HIGHEST number of sides?",
+    "options": [
+      "Pentagon",
+      "Hexagon",
+      "Octagon",
+      "Heptagon"
+    ],
+    "correct_answer": "Octagon",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Geometry",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "Octagon has 8 sides; Heptagon 7; Hexagon 6; Pentagon 5."
+  },
+  {
+    "id": "q_1125",
+    "round_type": "SPEED",
+    "prompt": "Which digital storage capacity is the LARGEST?",
+    "options": [
+      "500 Megabytes",
+      "0.5 Gigabytes",
+      "750 Megabytes",
+      "0.8 Gigabytes"
+    ],
+    "correct_answer": "0.8 Gigabytes",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Data Units",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "0.8 GB = 800 MB."
+  },
+  {
+    "id": "q_1126",
+    "round_type": "SPEED",
+    "prompt": "Which SI metric prefix designates the SMALLEST fractional multiplier?",
+    "options": [
+      "Milli-",
+      "Micro-",
+      "Nano-",
+      "Pico-"
+    ],
+    "correct_answer": "Pico-",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Prefixes",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "Pico- is 10⁻¹²; Nano- is 10⁻⁹; Micro- is 10⁻⁶; Milli- is 10⁻³."
+  },
+  {
+    "id": "q_1127",
+    "round_type": "SPEED",
+    "prompt": "Which decimal notation represents EXACTLY ONE-FOURTH (1/4)?",
+    "options": [
+      "0.20",
+      "0.25",
+      "0.40",
+      "0.50"
+    ],
+    "correct_answer": "0.25",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Decimals",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "1 ÷ 4 = 0.25."
+  },
+  {
+    "id": "q_1128",
+    "round_type": "SPEED",
+    "prompt": "Which geometric angle qualifies as an OBTUSE angle?",
+    "options": [
+      "45°",
+      "90°",
+      "120°",
+      "180°"
+    ],
+    "correct_answer": "120°",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Geometry",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "An obtuse angle measures strictly between 90° and 180°."
+  },
+  {
+    "id": "q_1129",
+    "round_type": "SPEED",
+    "prompt": "Which travelling speed is numerically the FASTEST velocity?",
+    "options": [
+      "50 km/h",
+      "15 m/s",
+      "72 km/h",
+      "18 m/s"
+    ],
+    "correct_answer": "72 km/h",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Physics",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "72 km/h = 20 m/s, which is faster than 18 m/s, 15 m/s, and 50 km/h (13.9 m/s)."
+  },
+  {
+    "id": "q_1130",
+    "round_type": "SPEED",
+    "prompt": "Which liquid container holds the GREATEST total volume capacity?",
+    "options": [
+      "2 liters",
+      "1,800 mL",
+      "2,500 mL",
+      "0.002 cubic meters"
+    ],
+    "correct_answer": "2,500 mL",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Volume",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "2,500 mL = 2.5 liters."
+  },
+  {
+    "id": "q_1131",
+    "round_type": "SPEED",
+    "prompt": "Which signed integer represents the LOWEST numerical value?",
+    "options": [
+      "-10",
+      "-25",
+      "0",
+      "-5"
+    ],
+    "correct_answer": "-25",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Negative Numbers",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "-25 is the smallest (most negative) number."
+  },
+  {
+    "id": "q_1132",
+    "round_type": "SPEED",
+    "prompt": "Which planetary body in the Solar System possesses the LARGEST equatorial diameter?",
+    "options": [
+      "Earth",
+      "Venus",
+      "Jupiter",
+      "Mars"
+    ],
+    "correct_answer": "Jupiter",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Astronomy",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "Jupiter is the largest planet in our solar system."
+  },
+  {
+    "id": "q_1133",
+    "round_type": "SPEED",
+    "prompt": "Which candidate fraction reduces directly to 1/2?",
+    "options": [
+      "3/5",
+      "4/8",
+      "5/9",
+      "6/14"
+    ],
+    "correct_answer": "4/8",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Fractions",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "4/8 simplifies directly to 1/2."
+  },
+  {
+    "id": "q_1134",
+    "round_type": "SPEED",
+    "prompt": "Which angular measurement designates a STRAIGHT angle?",
+    "options": [
+      "90°",
+      "180°",
+      "270°",
+      "360°"
+    ],
+    "correct_answer": "180°",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Geometry",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "A straight angle equals exactly 180°."
+  },
+  {
+    "id": "q_1135",
+    "round_type": "SPEED",
+    "prompt": "Which of these four decimal numbers has the GREATEST magnitude?",
+    "options": [
+      "0.9",
+      "0.89",
+      "0.099",
+      "0.899"
+    ],
+    "correct_answer": "0.9",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Decimals",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "0.9 = 0.900, which is greater than 0.899."
+  },
+  {
+    "id": "q_1136",
+    "round_type": "SPEED",
+    "prompt": "Which terrestrial mammal achieves the FASTEST sprinting speed on land?",
+    "options": [
+      "Lion",
+      "Cheetah",
+      "Horse",
+      "Gazelle"
+    ],
+    "correct_answer": "Cheetah",
+    "difficulty": "HARD",
+    "category": "General Knowledge",
+    "subcategory": "Zoology",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "The cheetah can reach sprinting speeds up to 110-120 km/h."
+  },
+  {
+    "id": "q_1137",
+    "round_type": "SPEED",
+    "prompt": "Which calendar year is an astronomical LEAP YEAR (366 days)?",
+    "options": [
+      "2019",
+      "2020",
+      "2021",
+      "2022"
+    ],
+    "correct_answer": "2020",
+    "difficulty": "HARD",
+    "category": "General Knowledge",
+    "subcategory": "Calendar",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "2020 is divisible by 4 and is a leap year."
+  },
+  {
+    "id": "q_1138",
+    "round_type": "SPEED",
+    "prompt": "Which chemical element has the LIGHTEST atomic mass on the periodic table?",
+    "options": [
+      "Hydrogen",
+      "Nitrogen",
+      "Oxygen",
+      "Argon"
+    ],
+    "correct_answer": "Hydrogen",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "Hydrogen has atomic mass ≈ 1.008."
+  },
+  {
+    "id": "q_1139",
+    "round_type": "SPEED",
+    "prompt": "Which storage data unit is strictly LARGER than a Gigabyte (GB)?",
+    "options": [
+      "Megabyte",
+      "Kilobyte",
+      "Terabyte",
+      "Byte"
+    ],
+    "correct_answer": "Terabyte",
+    "difficulty": "HARD",
+    "category": "Computers",
+    "subcategory": "Data Units",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "1 Terabyte = 1,024 Gigabytes."
+  },
+  {
+    "id": "q_1140",
+    "round_type": "SPEED",
+    "prompt": "Which simple fraction evaluates to EXACTLY 20%?",
+    "options": [
+      "1/4",
+      "1/5",
+      "1/6",
+      "1/10"
+    ],
+    "correct_answer": "1/5",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Percentages",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "1/5 = 0.20 = 20%."
+  },
+  {
+    "id": "q_1141",
+    "round_type": "SPEED",
+    "prompt": "Which polygon shape has the FEWEST number of edges/vertices?",
+    "options": [
+      "Quadrilateral",
+      "Triangle",
+      "Pentagon",
+      "Hexagon"
+    ],
+    "correct_answer": "Triangle",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Geometry",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "A triangle has 3 sides."
+  },
+  {
+    "id": "q_1142",
+    "round_type": "SPEED",
+    "prompt": "Which fractional value represents the SMALLEST positive quantity?",
+    "options": [
+      "1/10",
+      "1/100",
+      "1/1000",
+      "1/2"
+    ],
+    "correct_answer": "1/1000",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Fractions",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "1/1000 = 0.001."
+  },
+  {
+    "id": "q_1143",
+    "round_type": "SPEED",
+    "prompt": "Which quadrilateral is a REGULAR polygon with 4 equal sides and 4 equal angles?",
+    "options": [
+      "Rectangle",
+      "Parallelogram",
+      "Square",
+      "Trapezoid"
+    ],
+    "correct_answer": "Square",
+    "difficulty": "HARD",
+    "category": "Mental Math",
+    "subcategory": "Geometry",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "A square is the unique regular quadrilateral."
+  },
+  {
+    "id": "q_1144",
+    "round_type": "SPEED",
+    "prompt": "Which planetary neighbor is the HOTTEST planet in the solar system (~465°C)?",
+    "options": [
+      "Mercury",
+      "Venus",
+      "Pluto",
+      "Mars"
+    ],
+    "correct_answer": "Venus",
+    "difficulty": "HARD",
+    "category": "Science Reflexes",
+    "subcategory": "Astronomy",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "Venus has an average surface temperature of ~465°C due to runaway greenhouse effect."
+  },
+  {
+    "id": "q_1145",
+    "round_type": "SPEED",
+    "prompt": "Which measured distance is LONGEST overall?",
+    "options": [
+      "1,000 meters",
+      "1 kilometer",
+      "1,200 yards",
+      "1 mile"
+    ],
+    "correct_answer": "1 mile",
+    "difficulty": "MEDIUM",
+    "category": "Science Reflexes",
+    "subcategory": "Measurement",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "1 mile ≈ 1,609 meters; 1,200 yards ≈ 1,097 meters; 1 km = 1,000 meters."
+  },
+  {
+    "id": "q_1146",
+    "round_type": "SPEED",
+    "prompt": "Which of these signed numbers has the LARGEST absolute value |x|?",
+    "options": [
+      "15",
+      "-22",
+      "18",
+      "-19"
+    ],
+    "correct_answer": "-22",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Absolute Value",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "|-22| = 22, which is greater than 19, 18, and 15."
+  },
+  {
+    "id": "q_1147",
+    "round_type": "SPEED",
+    "prompt": "Which fraction is exactly equivalent to the decimal 0.6?",
+    "options": [
+      "1/3",
+      "2/5",
+      "3/5",
+      "5/8"
+    ],
+    "correct_answer": "3/5",
+    "difficulty": "MEDIUM",
+    "category": "Mental Math",
+    "subcategory": "Fractions",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "3/5 = 0.60."
+  },
+  {
+    "id": "q_1148",
+    "round_type": "SPEED",
+    "prompt": "Which Roman numeral symbol represents the number 50?",
+    "options": [
+      "V",
+      "X",
+      "L",
+      "C"
+    ],
+    "correct_answer": "L",
+    "difficulty": "MEDIUM",
+    "category": "General Knowledge",
+    "subcategory": "Roman Numerals",
+    "pattern_type": "Rapid Comparison",
+    "time_limit_sec": 15,
+    "explanation": "L represents 50 (V=5, X=10, C=100)."
+  }
+]

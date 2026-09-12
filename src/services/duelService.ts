@@ -17,6 +17,9 @@ export interface SubmitAnswerResult {
   is_correct: boolean;
   score_awarded: number;
   total_score: number;
+  opponent_round_score?: number;
+  opponent_total_score?: number;
+  opponent_response_time_ms?: number;
   message?: string;
 }
 
@@ -534,7 +537,8 @@ export const duelService = {
       status: 'MATCHED',
       current_round: 1,
       winner_id: null,
-      is_test_opponent: safeAllowTest,
+      match_type: 'NPC_FALLBACK',
+      is_test_opponent: false,
       started_at: new Date().toISOString(),
       completed_at: null,
       created_at: new Date().toISOString(),
@@ -546,6 +550,7 @@ export const duelService = {
       match_id: matchId,
       player_id: 'user_current',
       player_slot: 'PLAYER_1',
+      player_type: 'HUMAN',
       status: 'READY',
       display_name: displayName || 'Challenger',
       avatar_url: avatarUrl || null,
@@ -560,14 +565,16 @@ export const duelService = {
     const player2: DuelPlayer = {
       id: `p2_${Date.now()}`,
       match_id: matchId,
-      player_id: safeAllowTest ? null : `opponent_${Date.now()}`,
+      player_id: null,
       player_slot: 'PLAYER_2',
+      player_type: 'NPC',
+      npc_id: 'ramesh_dalle',
       status: 'READY',
-      display_name: safeAllowTest ? 'Vortex (AI)' : 'ShadowNinja',
+      display_name: 'Ramesh Dalle',
       avatar_url: null,
       score: 0,
       result: 'PLAYING',
-      is_test_opponent: safeAllowTest,
+      is_test_opponent: false,
       last_heartbeat_at: new Date().toISOString(),
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -589,7 +596,71 @@ export const duelService = {
       match_id: matchId,
       player_slot: 'PLAYER_1',
       status: 'MATCHED',
-      is_test_opponent: safeAllowTest,
+      is_test_opponent: false,
+    };
+  },
+
+  /**
+   * Transition a waiting match to production NPC (Ramesh Dalle) after timeout.
+   * STRICT: Sets match_type = 'NPC_FALLBACK', player_type = 'NPC', npc_id = 'ramesh_dalle', is_test_opponent = false.
+   */
+  async fallbackToNpcMatch(matchId: string): Promise<{
+    success: boolean;
+    match_id: string;
+    player_slot: 'PLAYER_1' | 'PLAYER_2';
+    status: DuelMatchStatus;
+    match_type?: 'NPC_FALLBACK';
+    is_test_opponent: boolean;
+    opponent_name: string;
+  }> {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase.rpc('fallback_to_npc_match_rpc', {
+          p_match_id: matchId,
+        });
+
+        if (error) {
+          console.error('RPC fallback_to_npc_match_rpc error:', error.message);
+          throw new Error(error.message);
+        }
+
+        if (data?.success) {
+          return data;
+        }
+      } catch (err: any) {
+        if (err?.message && !err.message.includes('fetch')) {
+          throw err;
+        }
+        console.warn('Network issue calling fallback_to_npc_match_rpc, falling back to local simulation:', err);
+      }
+    }
+
+    // Local simulation fallback
+    const match = localMatches.get(matchId);
+    if (match) {
+      match.status = 'MATCHED';
+      match.match_type = 'NPC_FALLBACK';
+      match.is_test_opponent = false;
+      const players = localPlayers.get(matchId) || [];
+      const p2 = players.find((p) => p.player_slot === 'PLAYER_2');
+      if (p2) {
+        p2.display_name = 'Ramesh Dalle';
+        p2.player_type = 'NPC';
+        p2.npc_id = 'ramesh_dalle';
+        p2.is_test_opponent = false;
+        p2.player_id = null;
+        p2.status = 'READY';
+      }
+    }
+
+    return {
+      success: true,
+      match_id: matchId,
+      player_slot: 'PLAYER_1',
+      status: 'MATCHED',
+      match_type: 'NPC_FALLBACK',
+      is_test_opponent: false,
+      opponent_name: 'Ramesh Dalle',
     };
   },
 
@@ -612,6 +683,39 @@ export const duelService = {
       return true;
     }
     return true;
+  },
+
+  /**
+   * Fetch live genuine platform and games activity metrics.
+   * Returns legitimate counts of players online, currently playing, and matches today.
+   * Never fabricates numbers. A genuine zero is accepted as valid.
+   */
+  async getGamesLiveActivity(): Promise<{
+    currently_playing: number;
+    matches_today: number;
+    players_online: number;
+  }> {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase.rpc('get_games_live_activity_rpc');
+        if (!error && data?.success) {
+          return {
+            currently_playing: Number(data.currently_playing) || 0,
+            matches_today: Number(data.matches_today) || 0,
+            players_online: Number(data.players_online) || 0,
+          };
+        }
+      } catch (err) {
+        console.warn('Error fetching games live activity:', err);
+      }
+    }
+
+    // Fallback when offline or error: Genuine 0 counts
+    return {
+      currently_playing: 0,
+      matches_today: 0,
+      players_online: 0,
+    };
   },
 
   /**
@@ -998,12 +1102,12 @@ export const duelService = {
       },
       {
         matchId: 'match_hist_3',
-        opponentName: 'Vortex (AI)',
+        opponentName: 'Ramesh Dalle',
         playerScore: 610,
         opponentScore: 450,
         result: 'WON' as DuelPlayerResult,
         date: new Date(Date.now() - 172800000).toISOString(),
-        isTestOpponent: true,
+        isTestOpponent: false,
       },
     ];
 

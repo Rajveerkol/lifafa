@@ -1,0 +1,4052 @@
+[
+  {
+    "id": "q_0699",
+    "round_type": "ACCURACY",
+    "prompt": "Calculate with exact precision following standard order of operations: 18 - 3 × 4 + 6",
+    "options": [
+      "10",
+      "12",
+      "14",
+      "66"
+    ],
+    "correct_answer": "12",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "Multiplication takes precedence: 3 × 4 = 12. Then left-to-right: 18 - 12 = 6; 6 + 6 = 12."
+  },
+  {
+    "id": "q_0700",
+    "round_type": "ACCURACY",
+    "prompt": "Evaluate with strict accuracy: 24 ÷ 4 × 2 + (8 - 3)",
+    "options": [
+      "17",
+      "8",
+      "11",
+      "14"
+    ],
+    "correct_answer": "17",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "Parentheses first: (8 - 3) = 5. Left-to-right division/multiplication: 24 ÷ 4 = 6; 6 × 2 = 12. Finally: 12 + 5 = 17."
+  },
+  {
+    "id": "q_0701",
+    "round_type": "ACCURACY",
+    "prompt": "Calculate the exact value of: 5² - 4 × (6 - 2) + 10 ÷ 2",
+    "options": [
+      "14",
+      "16",
+      "18",
+      "20"
+    ],
+    "correct_answer": "14",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "Exponents: 5² = 25. Parentheses: (6 - 2) = 4. Multiplication: 4 × 4 = 16. Division: 10 ÷ 2 = 5. Result: 25 - 16 + 5 = 14."
+  },
+  {
+    "id": "q_0702",
+    "round_type": "ACCURACY",
+    "prompt": "Determine the precise result of: 50 - 5 × (3 + 4) + 12",
+    "options": [
+      "27",
+      "327",
+      "35",
+      "37"
+    ],
+    "correct_answer": "27",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "Parentheses: 3 + 4 = 7. Multiplication: 5 × 7 = 35. Left-to-right: 50 - 35 = 15; 15 + 12 = 27."
+  },
+  {
+    "id": "q_0703",
+    "round_type": "ACCURACY",
+    "prompt": "Evaluate precisely: 100 - (4 × 5² - 15) ÷ 5",
+    "options": [
+      "83",
+      "85",
+      "87",
+      "90"
+    ],
+    "correct_answer": "83",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "Inside parentheses: 5² = 25; 4 × 25 = 100; 100 - 15 = 85. Division: 85 ÷ 5 = 17. Subtraction: 100 - 17 = 83."
+  },
+  {
+    "id": "q_0704",
+    "round_type": "ACCURACY",
+    "prompt": "Calculate the exact value: 7 × 8 - 42 ÷ 6 + 3",
+    "options": [
+      "52",
+      "54",
+      "56",
+      "58"
+    ],
+    "correct_answer": "52",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "7 × 8 = 56. 42 ÷ 6 = 7. 56 - 7 + 3 = 52."
+  },
+  {
+    "id": "q_0705",
+    "round_type": "ACCURACY",
+    "prompt": "Evaluate with accuracy: (15 + 25) ÷ 8 × 3 - 5",
+    "options": [
+      "10",
+      "12",
+      "15",
+      "8"
+    ],
+    "correct_answer": "10",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "Parentheses: 15 + 25 = 40. Division: 40 ÷ 8 = 5. Multiplication: 5 × 3 = 15. Subtraction: 15 - 5 = 10."
+  },
+  {
+    "id": "q_0706",
+    "round_type": "ACCURACY",
+    "prompt": "Determine the exact value of: 2³ + 3² × 2 - 14 ÷ 2",
+    "options": [
+      "19",
+      "21",
+      "23",
+      "25"
+    ],
+    "correct_answer": "19",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "Powers: 2³ = 8, 3² = 9. Multiplication: 9 × 2 = 18. Division: 14 ÷ 2 = 7. Result: 8 + 18 - 7 = 19."
+  },
+  {
+    "id": "q_0707",
+    "round_type": "ACCURACY",
+    "prompt": "Calculate precisely: 48 ÷ (2 × 3) + 4 × 5",
+    "options": [
+      "28",
+      "32",
+      "36",
+      "40"
+    ],
+    "correct_answer": "28",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "Parentheses: 2 × 3 = 6. Division: 48 ÷ 6 = 8. Multiplication: 4 × 5 = 20. Result: 8 + 20 = 28."
+  },
+  {
+    "id": "q_0708",
+    "round_type": "ACCURACY",
+    "prompt": "Evaluate with strict precision: 12 + 6 × (14 - 4 × 3)²",
+    "options": [
+      "36",
+      "24",
+      "48",
+      "60"
+    ],
+    "correct_answer": "36",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "Inside parentheses: 4 × 3 = 12; 14 - 12 = 2. Square: 2² = 4. Multiplication: 6 × 4 = 24. Sum: 12 + 24 = 36."
+  },
+  {
+    "id": "q_0709",
+    "round_type": "ACCURACY",
+    "prompt": "What is the exact product of 17 × 19?",
+    "options": [
+      "313",
+      "323",
+      "333",
+      "343"
+    ],
+    "correct_answer": "323",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Mental Arithmetic",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "17 × 19 = (18 - 1)(18 + 1) = 18² - 1 = 324 - 1 = 323."
+  },
+  {
+    "id": "q_0710",
+    "round_type": "ACCURACY",
+    "prompt": "What is the square of 25 evaluated precisely?",
+    "options": [
+      "525",
+      "625",
+      "675",
+      "725"
+    ],
+    "correct_answer": "625",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Powers & Roots",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "25 × 25 = 625."
+  },
+  {
+    "id": "q_0711",
+    "round_type": "ACCURACY",
+    "prompt": "Calculate the exact value of: 144 ÷ 12 + 169 ÷ 13",
+    "options": [
+      "23",
+      "24",
+      "25",
+      "26"
+    ],
+    "correct_answer": "25",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "144 ÷ 12 = 12. 169 ÷ 13 = 13. 12 + 13 = 25."
+  },
+  {
+    "id": "q_0712",
+    "round_type": "ACCURACY",
+    "prompt": "Evaluate precisely: 90 - (30 - (15 - 5))",
+    "options": [
+      "60",
+      "70",
+      "80",
+      "50"
+    ],
+    "correct_answer": "70",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Nested Brackets",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "Innermost: 15 - 5 = 10. Next: 30 - 10 = 20. Outermost: 90 - 20 = 70."
+  },
+  {
+    "id": "q_0713",
+    "round_type": "ACCURACY",
+    "prompt": "Find the exact value of: 3 × (4 + 5) - 2 × (6 - 1)",
+    "options": [
+      "17",
+      "19",
+      "21",
+      "23"
+    ],
+    "correct_answer": "17",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "3 × 9 = 27. 2 × 5 = 10. 27 - 10 = 17."
+  },
+  {
+    "id": "q_0714",
+    "round_type": "ACCURACY",
+    "prompt": "Evaluate with precision: (64 ÷ 8) × (81 ÷ 9) - 50",
+    "options": [
+      "22",
+      "24",
+      "26",
+      "28"
+    ],
+    "correct_answer": "22",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "8 × 9 = 72. 72 - 50 = 22."
+  },
+  {
+    "id": "q_0715",
+    "round_type": "ACCURACY",
+    "prompt": "Calculate: 15% of 840 evaluated with exact precision",
+    "options": [
+      "122",
+      "124",
+      "126",
+      "128"
+    ],
+    "correct_answer": "126",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Percentages",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "10% of 840 = 84; 5% = 42. 84 + 42 = 126."
+  },
+  {
+    "id": "q_0716",
+    "round_type": "ACCURACY",
+    "prompt": "What is the exact value of 2⁸ (2 to the eighth power)?",
+    "options": [
+      "128",
+      "256",
+      "512",
+      "1024"
+    ],
+    "correct_answer": "256",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Powers & Roots",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "2⁸ = 256."
+  },
+  {
+    "id": "q_0717",
+    "round_type": "ACCURACY",
+    "prompt": "Evaluate precisely: 75 ÷ 5 + 4 × 12 - 20",
+    "options": [
+      "41",
+      "43",
+      "45",
+      "47"
+    ],
+    "correct_answer": "43",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "75 ÷ 5 = 15; 4 × 12 = 48. 15 + 48 = 63. 63 - 20 = 43."
+  },
+  {
+    "id": "q_0718",
+    "round_type": "ACCURACY",
+    "prompt": "Calculate: (10 + 20 + 30 + 40) ÷ 4 with exact precision",
+    "options": [
+      "22.5",
+      "25",
+      "27.5",
+      "30"
+    ],
+    "correct_answer": "25",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Averages",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Sum is 100. 100 ÷ 4 = 25."
+  },
+  {
+    "id": "q_0719",
+    "round_type": "ACCURACY",
+    "prompt": "Solve the nested expression: 2 × [15 - 3 × (8 - 6)]",
+    "options": [
+      "16",
+      "18",
+      "20",
+      "24"
+    ],
+    "correct_answer": "18",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Nested Brackets",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "Innermost: 8 - 6 = 2. Multiplication: 3 × 2 = 6. Subtraction: 15 - 6 = 9. Outer: 2 × 9 = 18."
+  },
+  {
+    "id": "q_0720",
+    "round_type": "ACCURACY",
+    "prompt": "What is the exact square root of 576?",
+    "options": [
+      "21",
+      "24",
+      "27",
+      "29"
+    ],
+    "correct_answer": "24",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Powers & Roots",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "24² = 576."
+  },
+  {
+    "id": "q_0721",
+    "round_type": "ACCURACY",
+    "prompt": "Evaluate precisely: 30 - 2 × 5 + 16 ÷ 4",
+    "options": [
+      "22",
+      "24",
+      "26",
+      "28"
+    ],
+    "correct_answer": "24",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "2 × 5 = 10. 16 ÷ 4 = 4. 30 - 10 + 4 = 24."
+  },
+  {
+    "id": "q_0722",
+    "round_type": "ACCURACY",
+    "prompt": "Calculate the exact product: 25 × 36",
+    "options": [
+      "850",
+      "900",
+      "925",
+      "950"
+    ],
+    "correct_answer": "900",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Mental Arithmetic",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "25 × 36 = 25 × 4 × 9 = 100 × 9 = 900."
+  },
+  {
+    "id": "q_0723",
+    "round_type": "ACCURACY",
+    "prompt": "Evaluate with accuracy: 50 ÷ 2 × 5 - 100",
+    "options": [
+      "25",
+      "30",
+      "35",
+      "40"
+    ],
+    "correct_answer": "25",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "Left-to-right: 50 ÷ 2 = 25; 25 × 5 = 125. 125 - 100 = 25."
+  },
+  {
+    "id": "q_0724",
+    "round_type": "ACCURACY",
+    "prompt": "Calculate the exact value: 3³ + 4³ + 5³",
+    "options": [
+      "214",
+      "216",
+      "218",
+      "225"
+    ],
+    "correct_answer": "216",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Powers & Roots",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "3³ = 27, 4³ = 64, 5³ = 125. 27 + 64 + 125 = 216 (which equals 6³)."
+  },
+  {
+    "id": "q_0725",
+    "round_type": "ACCURACY",
+    "prompt": "Evaluate precisely: (100 - 64) ÷ (3² - 5)",
+    "options": [
+      "8",
+      "9",
+      "10",
+      "12"
+    ],
+    "correct_answer": "9",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "Numerator: 100 - 64 = 36. Denominator: 3² - 5 = 9 - 5 = 4. 36 ÷ 4 = 9."
+  },
+  {
+    "id": "q_0726",
+    "round_type": "ACCURACY",
+    "prompt": "What is the exact value of 11³ (11 cubed)?",
+    "options": [
+      "1221",
+      "1331",
+      "1441",
+      "1321"
+    ],
+    "correct_answer": "1331",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Powers & Roots",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "11³ = 121 × 11 = 1331."
+  },
+  {
+    "id": "q_0727",
+    "round_type": "ACCURACY",
+    "prompt": "Find 35% of 400:",
+    "options": [
+      "130",
+      "135",
+      "140",
+      "145"
+    ],
+    "correct_answer": "140",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Percentages",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "35 × 4 = 140."
+  },
+  {
+    "id": "q_0728",
+    "round_type": "ACCURACY",
+    "prompt": "Evaluate precisely: 18 ÷ 2 × (1 + 2)",
+    "options": [
+      "3",
+      "9",
+      "27",
+      "36"
+    ],
+    "correct_answer": "27",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "Parentheses: 1 + 2 = 3. Left-to-right: 18 ÷ 2 = 9. 9 × 3 = 27."
+  },
+  {
+    "id": "q_0729",
+    "round_type": "ACCURACY",
+    "prompt": "Calculate the exact value of: 100 - 4 × 20 + 35 ÷ 7",
+    "options": [
+      "20",
+      "25",
+      "30",
+      "35"
+    ],
+    "correct_answer": "25",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "4 × 20 = 80; 35 ÷ 7 = 5. 100 - 80 + 5 = 25."
+  },
+  {
+    "id": "q_0730",
+    "round_type": "ACCURACY",
+    "prompt": "Evaluate: (20 - 5) × (12 - 8) - 15",
+    "options": [
+      "40",
+      "45",
+      "50",
+      "55"
+    ],
+    "correct_answer": "45",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "15 × 4 = 60. 60 - 15 = 45."
+  },
+  {
+    "id": "q_0731",
+    "round_type": "ACCURACY",
+    "prompt": "What is the exact value of 15 × 16?",
+    "options": [
+      "225",
+      "230",
+      "240",
+      "250"
+    ],
+    "correct_answer": "240",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Mental Arithmetic",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "15 × 16 = 240."
+  },
+  {
+    "id": "q_0732",
+    "round_type": "ACCURACY",
+    "prompt": "Evaluate precisely: 60 ÷ 5 × 2 + 18",
+    "options": [
+      "36",
+      "40",
+      "42",
+      "44"
+    ],
+    "correct_answer": "42",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "60 ÷ 5 = 12; 12 × 2 = 24. 24 + 18 = 42."
+  },
+  {
+    "id": "q_0733",
+    "round_type": "ACCURACY",
+    "prompt": "Calculate the exact value of: 8² - 6² + 4²",
+    "options": [
+      "40",
+      "42",
+      "44",
+      "46"
+    ],
+    "correct_answer": "44",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Powers & Roots",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "64 - 36 + 16 = 28 + 16 = 44."
+  },
+  {
+    "id": "q_0734",
+    "round_type": "ACCURACY",
+    "prompt": "Compute: 4 × (10 - 2) - 3 × (7 - 4)",
+    "options": [
+      "21",
+      "23",
+      "25",
+      "27"
+    ],
+    "correct_answer": "23",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "4 × 8 = 32. 3 × 3 = 9. 32 - 9 = 23."
+  },
+  {
+    "id": "q_0735",
+    "round_type": "ACCURACY",
+    "prompt": "What is the exact cube of 7 (7³)?",
+    "options": [
+      "323",
+      "333",
+      "343",
+      "353"
+    ],
+    "correct_answer": "343",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Powers & Roots",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "7³ = 49 × 7 = 343."
+  },
+  {
+    "id": "q_0736",
+    "round_type": "ACCURACY",
+    "prompt": "Calculate: 12.5% of 640 evaluated precisely",
+    "options": [
+      "70",
+      "75",
+      "80",
+      "85"
+    ],
+    "correct_answer": "80",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Percentages",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "12.5% is 1/8. 640 ÷ 8 = 80."
+  },
+  {
+    "id": "q_0737",
+    "round_type": "ACCURACY",
+    "prompt": "Evaluate precisely: (50 + 14) ÷ (2³)",
+    "options": [
+      "2",
+      "4",
+      "8",
+      "16"
+    ],
+    "correct_answer": "8",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Arithmetic",
+    "pattern_type": "PEMDAS Evaluation",
+    "time_limit_sec": 20,
+    "explanation": "50 + 14 = 64; 2³ = 8. 64 ÷ 8 = 8."
+  },
+  {
+    "id": "q_0738",
+    "round_type": "ACCURACY",
+    "prompt": "Calculate: 99 × 25 with exact accuracy",
+    "options": [
+      "2450",
+      "2475",
+      "2485",
+      "2500"
+    ],
+    "correct_answer": "2475",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Mental Arithmetic",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "(100 - 1) × 25 = 2500 - 25 = 2475."
+  },
+  {
+    "id": "q_0739",
+    "round_type": "ACCURACY",
+    "prompt": "Convert exactly 72 kilometers per hour (km/h) into meters per second (m/s):",
+    "options": [
+      "15 m/s",
+      "18 m/s",
+      "20 m/s",
+      "25 m/s"
+    ],
+    "correct_answer": "20 m/s",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Physics",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "Multiply by 5/18: 72 × (5/18) = 4 × 5 = 20 m/s."
+  },
+  {
+    "id": "q_0740",
+    "round_type": "ACCURACY",
+    "prompt": "How many seconds are in exactly one complete 24-hour day?",
+    "options": [
+      "84,600 seconds",
+      "86,400 seconds",
+      "88,200 seconds",
+      "90,000 seconds"
+    ],
+    "correct_answer": "86,400 seconds",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Time Units",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "24 hours × 60 minutes × 60 seconds = 86,400 seconds."
+  },
+  {
+    "id": "q_0741",
+    "round_type": "ACCURACY",
+    "prompt": "How many bytes are in exactly 1 Megabyte under standard binary prefix (1 MiB)?",
+    "options": [
+      "1,000,000 bytes",
+      "1,024,000 bytes",
+      "1,048,576 bytes",
+      "1,073,741 bytes"
+    ],
+    "correct_answer": "1,048,576 bytes",
+    "difficulty": "HARD",
+    "category": "Computers",
+    "subcategory": "Data Units",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 MiB = 1024 × 1024 bytes = 1,048,576 bytes (2²⁰ bytes)."
+  },
+  {
+    "id": "q_0742",
+    "round_type": "ACCURACY",
+    "prompt": "Convert 100 degrees Celsius (°C) into degrees Fahrenheit (°F):",
+    "options": [
+      "180°F",
+      "200°F",
+      "212°F",
+      "220°F"
+    ],
+    "correct_answer": "212°F",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Thermodynamics",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "F = (C × 9/5) + 32 = (100 × 1.8) + 32 = 180 + 32 = 212°F."
+  },
+  {
+    "id": "q_0743",
+    "round_type": "ACCURACY",
+    "prompt": "How many milliliters (mL) are contained in exactly 3.75 liters?",
+    "options": [
+      "375 mL",
+      "3,750 mL",
+      "37,500 mL",
+      "375,000 mL"
+    ],
+    "correct_answer": "3,750 mL",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Volume",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 liter = 1,000 mL. 3.75 × 1,000 = 3,750 mL."
+  },
+  {
+    "id": "q_0744",
+    "round_type": "ACCURACY",
+    "prompt": "Convert 1 nautical mile into exact meters according to the international standard definition:",
+    "options": [
+      "1,609 meters",
+      "1,760 meters",
+      "1,852 meters",
+      "2,000 meters"
+    ],
+    "correct_answer": "1,852 meters",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Navigation",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "The international nautical mile is defined as exactly 1,852 meters."
+  },
+  {
+    "id": "q_0745",
+    "round_type": "ACCURACY",
+    "prompt": "How many square meters (m²) are in exactly one hectare?",
+    "options": [
+      "1,000 m²",
+      "5,000 m²",
+      "10,000 m²",
+      "100,000 m²"
+    ],
+    "correct_answer": "10,000 m²",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Area Units",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 hectare = 100 meters × 100 meters = 10,000 m²."
+  },
+  {
+    "id": "q_0746",
+    "round_type": "ACCURACY",
+    "prompt": "Convert a speed of 54 km/h into meters per second (m/s):",
+    "options": [
+      "12 m/s",
+      "15 m/s",
+      "18 m/s",
+      "20 m/s"
+    ],
+    "correct_answer": "15 m/s",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Physics",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "54 × (5/18) = 3 × 5 = 15 m/s."
+  },
+  {
+    "id": "q_0747",
+    "round_type": "ACCURACY",
+    "prompt": "How many watts (W) are in one mechanical horsepower (hp) approximately?",
+    "options": [
+      "720 W",
+      "735.5 W",
+      "745.7 W",
+      "760 W"
+    ],
+    "correct_answer": "745.7 W",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Physics",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "One mechanical horsepower equals approximately 745.7 Watts."
+  },
+  {
+    "id": "q_0748",
+    "round_type": "ACCURACY",
+    "prompt": "How many millimeters (mm) are in exactly 2.5 meters?",
+    "options": [
+      "250 mm",
+      "2,500 mm",
+      "25,000 mm",
+      "25 mm"
+    ],
+    "correct_answer": "2,500 mm",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Metric System",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 meter = 1,000 mm. 2.5 × 1,000 = 2,500 mm."
+  },
+  {
+    "id": "q_0749",
+    "round_type": "ACCURACY",
+    "prompt": "What is 0 Kelvin (-273.15°C) commonly referred to in thermodynamics?",
+    "options": [
+      "Triple Point",
+      "Absolute Zero",
+      "Critical Point",
+      "Boyle Point"
+    ],
+    "correct_answer": "Absolute Zero",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Thermodynamics",
+    "pattern_type": "Concept Identification",
+    "time_limit_sec": 20,
+    "explanation": "Absolute Zero (0 K or -273.15°C) is the theoretical temperature where enthalpy and entropy reach minimum values."
+  },
+  {
+    "id": "q_0750",
+    "round_type": "ACCURACY",
+    "prompt": "How many grams (g) are in exactly 4.2 kilograms (kg)?",
+    "options": [
+      "420 g",
+      "4,200 g",
+      "42,000 g",
+      "420,000 g"
+    ],
+    "correct_answer": "4,200 g",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Metric System",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 kg = 1,000 g. 4.2 × 1,000 = 4,200 g."
+  },
+  {
+    "id": "q_0751",
+    "round_type": "ACCURACY",
+    "prompt": "A high-speed train travels at 90 km/h. What is its velocity in meters per second (m/s)?",
+    "options": [
+      "20 m/s",
+      "22.5 m/s",
+      "25 m/s",
+      "27.5 m/s"
+    ],
+    "correct_answer": "25 m/s",
+    "difficulty": "HARD",
+    "category": "Science",
+    "subcategory": "Physics",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "90 × (5/18) = 5 × 5 = 25 m/s."
+  },
+  {
+    "id": "q_0752",
+    "round_type": "ACCURACY",
+    "prompt": "How many bits are in exactly 4 bytes of digital data?",
+    "options": [
+      "16 bits",
+      "24 bits",
+      "32 bits",
+      "64 bits"
+    ],
+    "correct_answer": "32 bits",
+    "difficulty": "EASY",
+    "category": "Computers",
+    "subcategory": "Data Units",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 byte = 8 bits. 4 × 8 = 32 bits."
+  },
+  {
+    "id": "q_0753",
+    "round_type": "ACCURACY",
+    "prompt": "Convert 32 degrees Fahrenheit (°F) into degrees Celsius (°C):",
+    "options": [
+      "0°C",
+      "-10°C",
+      "10°C",
+      "32°C"
+    ],
+    "correct_answer": "0°C",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Thermodynamics",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "32°F corresponds to the freezing point of water, which is exactly 0°C."
+  },
+  {
+    "id": "q_0754",
+    "round_type": "ACCURACY",
+    "prompt": "Convert 1.85 meters into centimeters (cm):",
+    "options": [
+      "18.5 cm",
+      "185 cm",
+      "1,850 cm",
+      "18500 cm"
+    ],
+    "correct_answer": "185 cm",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Metric System",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 meter = 100 cm. 1.85 × 100 = 185 cm."
+  },
+  {
+    "id": "q_0755",
+    "round_type": "ACCURACY",
+    "prompt": "How many minutes are in exactly 3.5 hours?",
+    "options": [
+      "180 minutes",
+      "200 minutes",
+      "210 minutes",
+      "225 minutes"
+    ],
+    "correct_answer": "210 minutes",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Time Units",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "3.5 × 60 = 210 minutes."
+  },
+  {
+    "id": "q_0756",
+    "round_type": "ACCURACY",
+    "prompt": "How many milliliters (mL) are in 0.5 liters?",
+    "options": [
+      "50 mL",
+      "500 mL",
+      "5,000 mL",
+      "5 mL"
+    ],
+    "correct_answer": "500 mL",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Metric System",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "0.5 × 1,000 = 500 mL."
+  },
+  {
+    "id": "q_0757",
+    "round_type": "ACCURACY",
+    "prompt": "How many square feet (sq ft) are in one standard square yard?",
+    "options": [
+      "3 sq ft",
+      "6 sq ft",
+      "9 sq ft",
+      "12 sq ft"
+    ],
+    "correct_answer": "9 sq ft",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Area Units",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 yard = 3 feet, so 1 sq yard = 3 × 3 = 9 sq ft."
+  },
+  {
+    "id": "q_0758",
+    "round_type": "ACCURACY",
+    "prompt": "How many meters are in exactly 5.5 kilometers?",
+    "options": [
+      "550 m",
+      "5,500 m",
+      "55,000 m",
+      "550,000 m"
+    ],
+    "correct_answer": "5,500 m",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Metric System",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "5.5 × 1,000 = 5,500 meters."
+  },
+  {
+    "id": "q_0759",
+    "round_type": "ACCURACY",
+    "prompt": "Convert 68°F into Celsius (°C):",
+    "options": [
+      "15°C",
+      "18°C",
+      "20°C",
+      "22°C"
+    ],
+    "correct_answer": "20°C",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Thermodynamics",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "(68 - 32) × (5/9) = 36 × (5/9) = 4 × 5 = 20°C."
+  },
+  {
+    "id": "q_0760",
+    "round_type": "ACCURACY",
+    "prompt": "How many square centimeters (cm²) are in one square meter (m²)?",
+    "options": [
+      "100 cm²",
+      "1,000 cm²",
+      "10,000 cm²",
+      "100,000 cm²"
+    ],
+    "correct_answer": "10,000 cm²",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Area Units",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 m = 100 cm. 1 m² = 100 × 100 = 10,000 cm²."
+  },
+  {
+    "id": "q_0761",
+    "round_type": "ACCURACY",
+    "prompt": "How many days are in a standard leap year?",
+    "options": [
+      "364 days",
+      "365 days",
+      "366 days",
+      "367 days"
+    ],
+    "correct_answer": "366 days",
+    "difficulty": "EASY",
+    "category": "General Knowledge",
+    "subcategory": "Calendar",
+    "pattern_type": "Direct Factual Recall",
+    "time_limit_sec": 20,
+    "explanation": "A leap year contains 366 days due to the inclusion of February 29."
+  },
+  {
+    "id": "q_0762",
+    "round_type": "ACCURACY",
+    "prompt": "How many centimeters (cm) are equivalent to one international inch (in)?",
+    "options": [
+      "2.24 cm",
+      "2.54 cm",
+      "2.75 cm",
+      "3.00 cm"
+    ],
+    "correct_answer": "2.54 cm",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Measurement Systems",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 inch is defined as exactly 2.54 centimeters."
+  },
+  {
+    "id": "q_0763",
+    "round_type": "ACCURACY",
+    "prompt": "How many Joules are equivalent to one calorie (thermochemical) approximately?",
+    "options": [
+      "3.14 J",
+      "4.184 J",
+      "5.20 J",
+      "9.81 J"
+    ],
+    "correct_answer": "4.184 J",
+    "difficulty": "HARD",
+    "category": "Science",
+    "subcategory": "Thermodynamics",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "One calorie equals exactly 4.184 Joules."
+  },
+  {
+    "id": "q_0764",
+    "round_type": "ACCURACY",
+    "prompt": "How many bytes are in exactly 8 Kilobytes (KB, decimal)?",
+    "options": [
+      "800 bytes",
+      "8,000 bytes",
+      "80,000 bytes",
+      "8,192 bytes"
+    ],
+    "correct_answer": "8,000 bytes",
+    "difficulty": "MEDIUM",
+    "category": "Computers",
+    "subcategory": "Data Units",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "Under decimal SI prefix, 1 KB = 1,000 bytes; 8 KB = 8,000 bytes."
+  },
+  {
+    "id": "q_0765",
+    "round_type": "ACCURACY",
+    "prompt": "Convert standard atmospheric pressure of 1 bar into kilopascals (kPa):",
+    "options": [
+      "10 kPa",
+      "50 kPa",
+      "100 kPa",
+      "101.3 kPa"
+    ],
+    "correct_answer": "100 kPa",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Physics",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 bar is defined as exactly 100,000 Pa = 100 kPa."
+  },
+  {
+    "id": "q_0766",
+    "round_type": "ACCURACY",
+    "prompt": "How many inches are in exactly one foot?",
+    "options": [
+      "10 inches",
+      "12 inches",
+      "14 inches",
+      "16 inches"
+    ],
+    "correct_answer": "12 inches",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Measurement Systems",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 foot equals exactly 12 inches."
+  },
+  {
+    "id": "q_0767",
+    "round_type": "ACCURACY",
+    "prompt": "How many yards are in one statute mile?",
+    "options": [
+      "1,500 yards",
+      "1,650 yards",
+      "1,760 yards",
+      "1,820 yards"
+    ],
+    "correct_answer": "1,760 yards",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Measurement Systems",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 mile = 5,280 feet = 1,760 yards."
+  },
+  {
+    "id": "q_0768",
+    "round_type": "ACCURACY",
+    "prompt": "How many millimeters (mm) are in 0.75 centimeters (cm)?",
+    "options": [
+      "0.075 mm",
+      "7.5 mm",
+      "75 mm",
+      "750 mm"
+    ],
+    "correct_answer": "7.5 mm",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Metric System",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 cm = 10 mm. 0.75 × 10 = 7.5 mm."
+  },
+  {
+    "id": "q_0769",
+    "round_type": "ACCURACY",
+    "prompt": "How many pounds (lbs) are approximately equivalent to 1 kilogram (kg)?",
+    "options": [
+      "1.5 lbs",
+      "2.0 lbs",
+      "2.205 lbs",
+      "2.5 lbs"
+    ],
+    "correct_answer": "2.205 lbs",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Measurement Systems",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 kg is approximately 2.20462 lbs (≈ 2.205 lbs)."
+  },
+  {
+    "id": "q_0770",
+    "round_type": "ACCURACY",
+    "prompt": "How many micrograms (µg) are in 1 milligram (mg)?",
+    "options": [
+      "10 µg",
+      "100 µg",
+      "1,000 µg",
+      "10,000 µg"
+    ],
+    "correct_answer": "1,000 µg",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Metric System",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 mg = 1,000 micrograms."
+  },
+  {
+    "id": "q_0771",
+    "round_type": "ACCURACY",
+    "prompt": "How many degrees Celsius (°C) is 212°F equal to?",
+    "options": [
+      "95°C",
+      "100°C",
+      "105°C",
+      "110°C"
+    ],
+    "correct_answer": "100°C",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Thermodynamics",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "212°F is the boiling point of water at sea level, which equals 100°C."
+  },
+  {
+    "id": "q_0772",
+    "round_type": "ACCURACY",
+    "prompt": "How many milligrams (mg) are in 2.5 grams (g)?",
+    "options": [
+      "250 mg",
+      "2,500 mg",
+      "25,000 mg",
+      "250,000 mg"
+    ],
+    "correct_answer": "2,500 mg",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Metric System",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "2.5 × 1,000 = 2,500 mg."
+  },
+  {
+    "id": "q_0773",
+    "round_type": "ACCURACY",
+    "prompt": "How many fluid ounces (fl oz, US) are in one standard US liquid gallon?",
+    "options": [
+      "64 fl oz",
+      "96 fl oz",
+      "128 fl oz",
+      "160 fl oz"
+    ],
+    "correct_answer": "128 fl oz",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Volume Units",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 US gallon = 4 quarts = 8 pints = 16 cups = 128 fl oz."
+  },
+  {
+    "id": "q_0774",
+    "round_type": "ACCURACY",
+    "prompt": "How many ounces (avoirdupois) are in one standard pound (lb)?",
+    "options": [
+      "12 oz",
+      "14 oz",
+      "16 oz",
+      "20 oz"
+    ],
+    "correct_answer": "16 oz",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Measurement Systems",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 pound (lb) = 16 ounces (oz)."
+  },
+  {
+    "id": "q_0775",
+    "round_type": "ACCURACY",
+    "prompt": "How many cubic centimeters (cm³ or cc) are in exactly one liter?",
+    "options": [
+      "100 cm³",
+      "1,000 cm³",
+      "10,000 cm³",
+      "100,000 cm²"
+    ],
+    "correct_answer": "1,000 cm³",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Volume Units",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "1 liter = 1 dm³ = 1,000 cm³."
+  },
+  {
+    "id": "q_0776",
+    "round_type": "ACCURACY",
+    "prompt": "What is 50°F expressed in Celsius (°C)?",
+    "options": [
+      "8°C",
+      "10°C",
+      "12°C",
+      "15°C"
+    ],
+    "correct_answer": "10°C",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Thermodynamics",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "(50 - 32) × (5/9) = 18 × (5/9) = 10°C."
+  },
+  {
+    "id": "q_0777",
+    "round_type": "ACCURACY",
+    "prompt": "How many seconds are in 2.5 hours?",
+    "options": [
+      "7,200 seconds",
+      "8,400 seconds",
+      "9,000 seconds",
+      "9,600 seconds"
+    ],
+    "correct_answer": "9,000 seconds",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Time Units",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "2.5 × 3,600 = 9,000 seconds."
+  },
+  {
+    "id": "q_0778",
+    "round_type": "ACCURACY",
+    "prompt": "Convert normal human core body temperature 37°C into degrees Fahrenheit (°F):",
+    "options": [
+      "96.8°F",
+      "97.6°F",
+      "98.6°F",
+      "99.2°F"
+    ],
+    "correct_answer": "98.6°F",
+    "difficulty": "HARD",
+    "category": "Science",
+    "subcategory": "Biology",
+    "pattern_type": "Unit Conversion",
+    "time_limit_sec": 20,
+    "explanation": "37 × 1.8 + 32 = 66.6 + 32 = 98.6°F."
+  },
+  {
+    "id": "q_0779",
+    "round_type": "ACCURACY",
+    "prompt": "Select the correct spelling of the word meaning to provide lodging or make sufficient room for:",
+    "options": [
+      "Accomodate",
+      "Acommodate",
+      "Accommodate",
+      "Acomodate"
+    ],
+    "correct_answer": "Accommodate",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Accommodate is spelled with double-c and double-m."
+  },
+  {
+    "id": "q_0780",
+    "round_type": "ACCURACY",
+    "prompt": "Which option represents the correct orthography for close observation, especially of a suspected person?",
+    "options": [
+      "Surveilance",
+      "Surveillance",
+      "Surveillence",
+      "Survalance"
+    ],
+    "correct_answer": "Surveillance",
+    "difficulty": "HARD",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Surveillance is spelled with double-l and ends in -ance."
+  },
+  {
+    "id": "q_0781",
+    "round_type": "ACCURACY",
+    "prompt": "Choose the correct spelling for a special right or advantage granted only to a particular person or group:",
+    "options": [
+      "Privilege",
+      "Privelege",
+      "Priviledge",
+      "Priveledge"
+    ],
+    "correct_answer": "Privilege",
+    "difficulty": "HARD",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Privilege is spelled with -i- and no d."
+  },
+  {
+    "id": "q_0782",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the proper spelling for a set of printed questions devised for a survey or statistical study:",
+    "options": [
+      "Questionaire",
+      "Questionnaire",
+      "Questionare",
+      "Questionnair"
+    ],
+    "correct_answer": "Questionnaire",
+    "difficulty": "HARD",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Questionnaire has double-n and ends in -aire."
+  },
+  {
+    "id": "q_0783",
+    "round_type": "ACCURACY",
+    "prompt": "Which is the accurate spelling for causing someone to feel awkward, self-conscious, or ashamed?",
+    "options": [
+      "Embarrass",
+      "Embarass",
+      "Emberrass",
+      "Embarras"
+    ],
+    "correct_answer": "Embarrass",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Embarrass is spelled with double-r and double-s."
+  },
+  {
+    "id": "q_0784",
+    "round_type": "ACCURACY",
+    "prompt": "Select the correct spelling for a particular event, time, or celebration:",
+    "options": [
+      "Occasion",
+      "Ocassion",
+      "Occassion",
+      "Occation"
+    ],
+    "correct_answer": "Occasion",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Occasion has double-c and single-s."
+  },
+  {
+    "id": "q_0785",
+    "round_type": "ACCURACY",
+    "prompt": "Which option correctly spells the adjective describing playful troublemaking or teasing behavior?",
+    "options": [
+      "Mischievous",
+      "Mischevious",
+      "Mischievious",
+      "Mischevous"
+    ],
+    "correct_answer": "Mischievous",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Mischievous has three syllables and no extra i before -ous."
+  },
+  {
+    "id": "q_0786",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the accurate spelling for a strong, regular repeated pattern of movement or sound in music:",
+    "options": [
+      "Rhythm",
+      "Rythm",
+      "Rhythym",
+      "Rhytm"
+    ],
+    "correct_answer": "Rhythm",
+    "difficulty": "HARD",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Rhythm is spelled R-H-Y-T-H-M."
+  },
+  {
+    "id": "q_0787",
+    "round_type": "ACCURACY",
+    "prompt": "Which is the correct spelling for a system of government in which most decisions are taken by state officials?",
+    "options": [
+      "Bureaucracy",
+      "Beurocracy",
+      "Burocracy",
+      "Bureacracy"
+    ],
+    "correct_answer": "Bureaucracy",
+    "difficulty": "HARD",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Bureaucracy begins with B-U-R-E-A-U."
+  },
+  {
+    "id": "q_0788",
+    "round_type": "ACCURACY",
+    "prompt": "Select the proper spelling for a system in which members of an organization are ranked by status:",
+    "options": [
+      "Hierarchy",
+      "Heirarchy",
+      "Hierachy",
+      "Hierarcy"
+    ],
+    "correct_answer": "Hierarchy",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Hierarchy begins with H-I-E."
+  },
+  {
+    "id": "q_0789",
+    "round_type": "ACCURACY",
+    "prompt": "Which option is the accurate spelling for wishing to do what is right, especially to do work thoroughly?",
+    "options": [
+      "Conscientious",
+      "Conscencious",
+      "Consciencous",
+      "Conscintious"
+    ],
+    "correct_answer": "Conscientious",
+    "difficulty": "HARD",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Conscientious is spelled C-O-N-S-C-I-E-N-T-I-O-U-S."
+  },
+  {
+    "id": "q_0790",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the correct spelling for a period of one thousand years:",
+    "options": [
+      "Millennium",
+      "Millenium",
+      "Milennium",
+      "Milennum"
+    ],
+    "correct_answer": "Millennium",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Millennium has double-l and double-n."
+  },
+  {
+    "id": "q_0791",
+    "round_type": "ACCURACY",
+    "prompt": "Which is the accurate spelling for clearly stated, decided, or unambiguous?",
+    "options": [
+      "Definite",
+      "Defanite",
+      "Defanit",
+      "Definate"
+    ],
+    "correct_answer": "Definite",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Definite ends in -ite, not -ate."
+  },
+  {
+    "id": "q_0792",
+    "round_type": "ACCURACY",
+    "prompt": "Select the correct spelling for the manner in which a spoken word or language is uttered:",
+    "options": [
+      "Pronunciation",
+      "Pronounciation",
+      "Pronuntiation",
+      "Pronounciate"
+    ],
+    "correct_answer": "Pronunciation",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Pronunciation has -nun-, unlike the verb pronounce."
+  },
+  {
+    "id": "q_0793",
+    "round_type": "ACCURACY",
+    "prompt": "Which option correctly spells the process of preserving a condition or keeping equipment in good repair?",
+    "options": [
+      "Maintenance",
+      "Maintainance",
+      "Maintenence",
+      "Maintanence"
+    ],
+    "correct_answer": "Maintenance",
+    "difficulty": "HARD",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Maintenance is spelled M-A-I-N-T-E-N-A-N-C-E."
+  },
+  {
+    "id": "q_0794",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the correct spelling for the action of moving or being parted from others:",
+    "options": [
+      "Separation",
+      "Seperation",
+      "Separaton",
+      "Sepuration"
+    ],
+    "correct_answer": "Separation",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Separation has an a after the p: S-E-P-A-R-A-T-I-O-N."
+  },
+  {
+    "id": "q_0795",
+    "round_type": "ACCURACY",
+    "prompt": "Which is the accurate spelling for a person who sets up a business, taking on financial risks for profit?",
+    "options": [
+      "Entrepreneur",
+      "Entreprenur",
+      "Enterpreneur",
+      "Entrepeneur"
+    ],
+    "correct_answer": "Entrepreneur",
+    "difficulty": "HARD",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Entrepreneur retains its French spelling: E-N-T-R-E-P-R-E-N-E-U-R."
+  },
+  {
+    "id": "q_0796",
+    "round_type": "ACCURACY",
+    "prompt": "Select the proper spelling for an adjective meaning of immense, colossal, or gigantic size:",
+    "options": [
+      "Gargantuan",
+      "Gargantun",
+      "Gargantion",
+      "Gargantuanne"
+    ],
+    "correct_answer": "Gargantuan",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Gargantuan is spelled G-A-R-G-A-N-T-U-A-N."
+  },
+  {
+    "id": "q_0797",
+    "round_type": "ACCURACY",
+    "prompt": "Which option correctly spells the word describing an action resulting from lack of attention or unintentional?",
+    "options": [
+      "Inadvertent",
+      "Inadvertant",
+      "Inadvertentt",
+      "Inadvertunt"
+    ],
+    "correct_answer": "Inadvertent",
+    "difficulty": "HARD",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Inadvertent ends in -ent."
+  },
+  {
+    "id": "q_0798",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the accurate spelling for steadfast persistence in doing something despite obstacles or delay:",
+    "options": [
+      "Perseverance",
+      "Perseverence",
+      "Perseverencee",
+      "Persevirence"
+    ],
+    "correct_answer": "Perseverance",
+    "difficulty": "HARD",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Perseverance ends in -ance."
+  },
+  {
+    "id": "q_0799",
+    "round_type": "ACCURACY",
+    "prompt": "Which is the correct spelling for a military commissioned officer rank just above second lieutenant?",
+    "options": [
+      "Lieutenant",
+      "Leutenant",
+      "Lieutenent",
+      "Lietenant"
+    ],
+    "correct_answer": "Lieutenant",
+    "difficulty": "HARD",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Lieutenant begins with L-I-E-U."
+  },
+  {
+    "id": "q_0800",
+    "round_type": "ACCURACY",
+    "prompt": "Select the proper spelling for the use of materials or coloration for concealment and disguise:",
+    "options": [
+      "Camouflage",
+      "Camoflage",
+      "Camoflauge",
+      "Camaflage"
+    ],
+    "correct_answer": "Camouflage",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Camouflage is spelled C-A-M-O-U-F-L-A-G-E."
+  },
+  {
+    "id": "q_0801",
+    "round_type": "ACCURACY",
+    "prompt": "Which option correctly spells the noun referring to supreme power, autonomy, or authority of a nation?",
+    "options": [
+      "Sovereignty",
+      "Soverignty",
+      "Soverenty",
+      "Soveriegnty"
+    ],
+    "correct_answer": "Sovereignty",
+    "difficulty": "HARD",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Sovereignty has -eign-."
+  },
+  {
+    "id": "q_0802",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the accurate spelling for substances that emit light when subjected to electromagnetic radiation:",
+    "options": [
+      "Fluorescent",
+      "Flourescent",
+      "Florescent",
+      "Flourecent"
+    ],
+    "correct_answer": "Fluorescent",
+    "difficulty": "HARD",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Fluorescent begins with F-L-U-O-R."
+  },
+  {
+    "id": "q_0803",
+    "round_type": "ACCURACY",
+    "prompt": "Which is the correct spelling for a story told about a past event remembered by the narrator?",
+    "options": [
+      "Reminiscence",
+      "Reminisence",
+      "Reminiscense",
+      "Reminescence"
+    ],
+    "correct_answer": "Reminiscence",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Reminiscence contains -sc- and ends in -ence."
+  },
+  {
+    "id": "q_0804",
+    "round_type": "ACCURACY",
+    "prompt": "Select the proper spelling for stating something as being greater, larger, or better than it really is:",
+    "options": [
+      "Exaggerate",
+      "Exagerate",
+      "Exagerrate",
+      "Exaggerite"
+    ],
+    "correct_answer": "Exaggerate",
+    "difficulty": "HARD",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Exaggerate has double-g and single-r."
+  },
+  {
+    "id": "q_0805",
+    "round_type": "ACCURACY",
+    "prompt": "Which option correctly spells an event causing great and often sudden damage, ruin, or suffering?",
+    "options": [
+      "Catastrophe",
+      "Catastrofe",
+      "Catastrophy",
+      "Catestrophe"
+    ],
+    "correct_answer": "Catastrophe",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Catastrophe ends in -phe."
+  },
+  {
+    "id": "q_0806",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the accurate spelling for a situation in which a difficult choice has to be made between alternatives:",
+    "options": [
+      "Dilemma",
+      "Dilemna",
+      "Dillema",
+      "Dilema"
+    ],
+    "correct_answer": "Dilemma",
+    "difficulty": "HARD",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Dilemma has double-m and single-l."
+  },
+  {
+    "id": "q_0807",
+    "round_type": "ACCURACY",
+    "prompt": "Which is the correct spelling for hostile, aggressive, or warlike demeanor?",
+    "options": [
+      "Belligerent",
+      "Beligerent",
+      "Belligerant",
+      "Beligerant"
+    ],
+    "correct_answer": "Belligerent",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Belligerent has double-l and ends in -ent."
+  },
+  {
+    "id": "q_0808",
+    "round_type": "ACCURACY",
+    "prompt": "Select the proper spelling for the medical action of treating with a vaccine to produce immunity:",
+    "options": [
+      "Inoculate",
+      "Innoculate",
+      "Inocculate",
+      "Innocculate"
+    ],
+    "correct_answer": "Inoculate",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Inoculate has single-n and single-c."
+  },
+  {
+    "id": "q_0809",
+    "round_type": "ACCURACY",
+    "prompt": "Which option correctly spells side by side with equal distance continuously remaining between them?",
+    "options": [
+      "Parallel",
+      "Paralell",
+      "Parrallel",
+      "Parralell"
+    ],
+    "correct_answer": "Parallel",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Parallel has double-l in the middle and single-l at the end."
+  },
+  {
+    "id": "q_0810",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the accurate spelling for an inflammatory lung condition primarily affecting the microscopic air sacs:",
+    "options": [
+      "Pneumonia",
+      "Neumonia",
+      "Pnumonia",
+      "Pneumona"
+    ],
+    "correct_answer": "Pneumonia",
+    "difficulty": "HARD",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Pneumonia begins with silent P-N."
+  },
+  {
+    "id": "q_0811",
+    "round_type": "ACCURACY",
+    "prompt": "Which is the correct spelling for something so delicate, understated, or precise as to be difficult to analyze?",
+    "options": [
+      "Subtle",
+      "Suttle",
+      "Subtel",
+      "Subtule"
+    ],
+    "correct_answer": "Subtle",
+    "difficulty": "HARD",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Subtle retains the silent b."
+  },
+  {
+    "id": "q_0812",
+    "round_type": "ACCURACY",
+    "prompt": "Select the proper spelling for having a name that is unrevealed, undisclosed, or unknown by design:",
+    "options": [
+      "Anonymous",
+      "Anonimous",
+      "Anonamous",
+      "Annonymous"
+    ],
+    "correct_answer": "Anonymous",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Anonymous is spelled A-N-O-N-Y-M-O-U-S."
+  },
+  {
+    "id": "q_0813",
+    "round_type": "ACCURACY",
+    "prompt": "Which option correctly spells taking the place of a person or thing previously in authority or use?",
+    "options": [
+      "Supersede",
+      "Supercede",
+      "Superseed",
+      "Superceed"
+    ],
+    "correct_answer": "Supersede",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Spelling",
+    "pattern_type": "Orthographic Precision",
+    "time_limit_sec": 20,
+    "explanation": "Supersede is spelled with -sede (from Latin supersedere), not -cede."
+  },
+  {
+    "id": "q_0814",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the sentence that strictly adheres to correct subject-verb agreement:",
+    "options": [
+      "The team of researchers are publishing their findings.",
+      "The team of researchers is publishing its findings.",
+      "The team of researchers have published its findings.",
+      "The team of researchers were publishing its findings."
+    ],
+    "correct_answer": "The team of researchers is publishing its findings.",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "Collective noun \"team\" is singular, taking the singular verb \"is\" and pronoun \"its\"."
+  },
+  {
+    "id": "q_0815",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the grammatically correct sentence:",
+    "options": [
+      "Neither the teacher nor the students was present.",
+      "Neither the teacher nor the students were present.",
+      "Neither the teacher nor the students is present.",
+      "Neither the teacher nor the students has been present."
+    ],
+    "correct_answer": "Neither the teacher nor the students were present.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "In \"neither... nor\", the verb agrees with the closer subject (\"students\", plural -> \"were\")."
+  },
+  {
+    "id": "q_0816",
+    "round_type": "ACCURACY",
+    "prompt": "Which sentence correctly uses \"fewer\" versus \"less\"?",
+    "options": [
+      "There are less people in the auditorium today.",
+      "There are fewer people in the auditorium today.",
+      "There is fewer water in the reservoir.",
+      "There is less apples in the basket."
+    ],
+    "correct_answer": "There are fewer people in the auditorium today.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"Fewer\" is used for countable nouns (people); \"less\" is used for uncountable quantities."
+  },
+  {
+    "id": "q_0817",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the sentence with correct pronoun case:",
+    "options": [
+      "Between you and I, this decision is final.",
+      "Between you and me, this decision is final.",
+      "Between you and myself, this decision is final.",
+      "Between him and I, this decision is final."
+    ],
+    "correct_answer": "Between you and me, this decision is final.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "Preposition \"between\" requires objective case pronouns (\"me\", not \"I\")."
+  },
+  {
+    "id": "q_0818",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the grammatically flawless sentence:",
+    "options": [
+      "Each of the participants have submitted their form.",
+      "Each of the participants has submitted his or her form.",
+      "Each of the participants were submitting their form.",
+      "Each of the participants are submitting their form."
+    ],
+    "correct_answer": "Each of the participants has submitted his or her form.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"Each\" is grammatically singular and requires the singular verb \"has\"."
+  },
+  {
+    "id": "q_0819",
+    "round_type": "ACCURACY",
+    "prompt": "Which sentence correctly utilizes the subjunctive mood?",
+    "options": [
+      "I wish I was a bird.",
+      "I wish I were a bird.",
+      "I wish I am a bird.",
+      "I wish I be a bird."
+    ],
+    "correct_answer": "I wish I were a bird.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "Hypothetical contrary-to-fact wishes require the subjunctive \"were\"."
+  },
+  {
+    "id": "q_0820",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the sentence free of misplaced modifiers:",
+    "options": [
+      "Walking to the store, the rain soaked John.",
+      "Walking to the store, John was soaked by the rain.",
+      "Walking to the store, the rain began to fall on John.",
+      "John, walking to the store, the rain fell."
+    ],
+    "correct_answer": "Walking to the store, John was soaked by the rain.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "The subject doing the walking (\"John\") must immediately follow the introductory participial phrase."
+  },
+  {
+    "id": "q_0821",
+    "round_type": "ACCURACY",
+    "prompt": "Which sentence demonstrates proper grammatical use of the objective pronoun \"whom\"?",
+    "options": [
+      "Whom is speaking at the conference tomorrow?",
+      "To whom should this official letter be addressed?",
+      "Whom went to the market?",
+      "Whom made this delicious dessert?"
+    ],
+    "correct_answer": "To whom should this official letter be addressed?",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"Whom\" is the objective case pronoun used as the object of preposition \"to\"."
+  },
+  {
+    "id": "q_0822",
+    "round_type": "ACCURACY",
+    "prompt": "Which sentence correctly avoids a dangling participle?",
+    "options": [
+      "Having finished the assignment, the TV was turned on.",
+      "Having finished the assignment, the student turned on the TV.",
+      "Having finished the assignment, dinner was served.",
+      "Having finished the assignment, sleep was welcome."
+    ],
+    "correct_answer": "Having finished the assignment, the student turned on the TV.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"The student\" is the agent who finished the assignment, properly anchoring the participle."
+  },
+  {
+    "id": "q_0823",
+    "round_type": "ACCURACY",
+    "prompt": "Which sentence successfully maintains parallel grammatical structure throughout?",
+    "options": [
+      "She likes hiking, swimming, and to ride bicycles.",
+      "She likes hiking, swimming, and riding bicycles.",
+      "She likes to hike, swimming, and bicycle riding.",
+      "She likes hiking, to swim, and riding."
+    ],
+    "correct_answer": "She likes hiking, swimming, and riding bicycles.",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "Parallelism requires maintaining identical grammatical forms (all gerunds: hiking, swimming, riding)."
+  },
+  {
+    "id": "q_0824",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the sentence with correct apostrophe usage:",
+    "options": [
+      "The dogs wagged it's tails.",
+      "The dogs wagged its' tails.",
+      "The dogs wagged their tails.",
+      "The dog's wagged their tails."
+    ],
+    "correct_answer": "The dogs wagged their tails.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"Their\" is the correct possessive plural pronoun; \"it's\" is the contraction for \"it is\"."
+  },
+  {
+    "id": "q_0825",
+    "round_type": "ACCURACY",
+    "prompt": "Which sentence correctly distinguishes \"affect\" and \"effect\"?",
+    "options": [
+      "The new policy will have a positive affect on productivity.",
+      "The weather did not effect our travel plans.",
+      "The new policy will have a positive effect on productivity.",
+      "The medicine had an immediate affect."
+    ],
+    "correct_answer": "The new policy will have a positive effect on productivity.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"Effect\" is typically a noun meaning result; \"affect\" is typically a verb meaning to influence."
+  },
+  {
+    "id": "q_0826",
+    "round_type": "ACCURACY",
+    "prompt": "Which sentence correctly links independent clauses using a semicolon?",
+    "options": [
+      "I have a big test tomorrow; therefore, I can't go to the movie.",
+      "I have a big test tomorrow, therefore; I can't go to the movie.",
+      "I have a big test tomorrow; and therefore, I can't go.",
+      "I have a big test tomorrow, therefore, I can't go;"
+    ],
+    "correct_answer": "I have a big test tomorrow; therefore, I can't go to the movie.",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "A semicolon joins two independent clauses linked by a conjunctive adverb (\"therefore\")."
+  },
+  {
+    "id": "q_0827",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the sentence with correct subject-verb agreement for plural measurements:",
+    "options": [
+      "Ten kilometers are a long distance to walk.",
+      "Ten kilometers is a long distance to walk.",
+      "Ten kilometers have been a long distance.",
+      "Ten kilometers were a long distance."
+    ],
+    "correct_answer": "Ten kilometers is a long distance to walk.",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "Measurements of distance, time, and money viewed as a single quantity take singular verbs (\"is\")."
+  },
+  {
+    "id": "q_0828",
+    "round_type": "ACCURACY",
+    "prompt": "Which sentence correctly employs \"its\" vs \"it's\"?",
+    "options": [
+      "The company announced it's quarterly earnings.",
+      "The cat licked it's paw.",
+      "It's raining heavily outside.",
+      "Every country must defend it's borders."
+    ],
+    "correct_answer": "It's raining heavily outside.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"It's\" is the contraction for \"It is\"; possessive forms use \"its\"."
+  },
+  {
+    "id": "q_0829",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the sentence that correctly uses \"lay\" vs \"lie\":",
+    "options": [
+      "I am going to lay down on the bed for an hour.",
+      "I am going to lie down on the bed for an hour.",
+      "Yesterday, he laid in bed all morning.",
+      "The book was laying on the table."
+    ],
+    "correct_answer": "I am going to lie down on the bed for an hour.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"Lie\" is intransitive (recline); \"lay\" is transitive (place something down)."
+  },
+  {
+    "id": "q_0830",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the sentence with correct verb tense consistency:",
+    "options": [
+      "When the bell rang, the students pack their bags and left.",
+      "When the bell rang, the students packed their bags and left.",
+      "When the bell rings, the students packed their bags.",
+      "When the bell rang, the students are packing."
+    ],
+    "correct_answer": "When the bell rang, the students packed their bags and left.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "All verbs must consistently remain in past tense: rang, packed, left."
+  },
+  {
+    "id": "q_0831",
+    "round_type": "ACCURACY",
+    "prompt": "Which sentence correctly uses \"allusion\" vs \"illusion\"?",
+    "options": [
+      "The magician created an optical allusion.",
+      "The poem contains an allusion to Greek mythology.",
+      "Mirages in deserts are optical allusions.",
+      "He was under the allusion that he won."
+    ],
+    "correct_answer": "The poem contains an allusion to Greek mythology.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"Allusion\" means an indirect reference; \"illusion\" means a deceptive appearance."
+  },
+  {
+    "id": "q_0832",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the sentence that correctly handles correlative conjunctions:",
+    "options": [
+      "He not only lost his ticket but also his passport.",
+      "He lost not only his ticket but also his passport.",
+      "He not only lost his ticket but his passport too.",
+      "He lost not only his ticket but his passport."
+    ],
+    "correct_answer": "He lost not only his ticket but also his passport.",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "Correlative conjunctions must balance parallel parts of speech: \"not only [noun] but also [noun]\"."
+  },
+  {
+    "id": "q_0833",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the sentence with correct comparative adjective usage:",
+    "options": [
+      "Of the two sisters, Maya is the tallest.",
+      "Of the two sisters, Maya is the taller.",
+      "Of the two sisters, Maya is more tall.",
+      "Of the two sisters, Maya is most tall."
+    ],
+    "correct_answer": "Of the two sisters, Maya is the taller.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "When comparing exactly two items, use the comparative (\"taller\"), not the superlative (\"tallest\")."
+  },
+  {
+    "id": "q_0834",
+    "round_type": "ACCURACY",
+    "prompt": "Which sentence demonstrates correct collective noun agreement with singular intent?",
+    "options": [
+      "The committee has reached their decision.",
+      "The committee has reached its decision.",
+      "The committee have reached its decision.",
+      "The committee are reaching its decision."
+    ],
+    "correct_answer": "The committee has reached its decision.",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "Singular collective noun \"committee\" takes singular verb \"has\" and pronoun \"its\"."
+  },
+  {
+    "id": "q_0835",
+    "round_type": "ACCURACY",
+    "prompt": "Select the sentence that accurately uses the transitive verb \"comprise\":",
+    "options": [
+      "The team is comprised of eleven players.",
+      "The team comprises eleven players.",
+      "Eleven players comprises the team.",
+      "The team is comprising of eleven players."
+    ],
+    "correct_answer": "The team comprises eleven players.",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"The whole comprises the parts.\" The phrase \"is comprised of\" is traditionally discouraged in formal syntax."
+  },
+  {
+    "id": "q_0836",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the sentence with correct relative pronoun usage:",
+    "options": [
+      "The man which called yesterday was polite.",
+      "The man whom called yesterday was polite.",
+      "The man who called yesterday was polite.",
+      "The man whose called yesterday was polite."
+    ],
+    "correct_answer": "The man who called yesterday was polite.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"Who\" is the subject relative pronoun referring to persons."
+  },
+  {
+    "id": "q_0837",
+    "round_type": "ACCURACY",
+    "prompt": "Which sentence correctly uses \"principal\" vs \"principle\"?",
+    "options": [
+      "The school principle addressed the assembly.",
+      "He refuses to compromise his moral principles.",
+      "The principle reason for his success was hard work.",
+      "The principle of the college was respected."
+    ],
+    "correct_answer": "He refuses to compromise his moral principles.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"Principle\" refers to a fundamental truth or moral rule; \"principal\" refers to a school head or chief matter."
+  },
+  {
+    "id": "q_0838",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the sentence with correct comma placement with non-restrictive clause:",
+    "options": [
+      "My brother who lives in London is a doctor.",
+      "My brother, who lives in London, is a doctor.",
+      "My brother who lives in London, is a doctor.",
+      "My brother, who lives in London is a doctor."
+    ],
+    "correct_answer": "My brother, who lives in London, is a doctor.",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "Non-restrictive relative clauses providing supplementary information are bracketed by paired commas."
+  },
+  {
+    "id": "q_0839",
+    "round_type": "ACCURACY",
+    "prompt": "Choose the sentence that displays a flawless third conditional structure:",
+    "options": [
+      "If he would have studied, he would have passed.",
+      "If he had studied, he would have passed.",
+      "If he studied, he would have passed.",
+      "If he had studied, he would pass."
+    ],
+    "correct_answer": "If he had studied, he would have passed.",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "Third conditional requires \"if + past perfect, would have + past participle\"."
+  },
+  {
+    "id": "q_0840",
+    "round_type": "ACCURACY",
+    "prompt": "Which sentence correctly uses \"stationary\" vs \"stationery\"?",
+    "options": [
+      "The weather front remained stationery for three days.",
+      "She wrote the letter on elegant personal stationery.",
+      "The stationery bicycle in the gym was broken.",
+      "The car was stationery at the red traffic signal."
+    ],
+    "correct_answer": "She wrote the letter on elegant personal stationery.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"Stationery\" with an -e refers to writing paper/pens; \"stationary\" with an -a means immobile."
+  },
+  {
+    "id": "q_0841",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the sentence with correct use of \"either\":",
+    "options": [
+      "Either of the two routes are safe.",
+      "Either of the two routes is safe.",
+      "Either of the two routes were safe.",
+      "Either of the two routes have been safe."
+    ],
+    "correct_answer": "Either of the two routes is safe.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"Either\" as a pronoun is singular and requires the singular verb \"is\"."
+  },
+  {
+    "id": "q_0842",
+    "round_type": "ACCURACY",
+    "prompt": "Which sentence correctly uses the subjective pronoun after the comparative conjunction than?",
+    "options": [
+      "He is taller than me.",
+      "He is taller than I.",
+      "He is taller then I.",
+      "He is more tall than me."
+    ],
+    "correct_answer": "He is taller than I.",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "In formal grammar, \"than I\" is an elliptical construction for \"than I am\"."
+  },
+  {
+    "id": "q_0843",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the sentence free of redundancy:",
+    "options": [
+      "He returned back to his hometown.",
+      "He reverted back to his old habits.",
+      "He returned to his hometown.",
+      "The two twins look identical."
+    ],
+    "correct_answer": "He returned to his hometown.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"Returned back\" is redundant because \"return\" already means to go back."
+  },
+  {
+    "id": "q_0844",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the sentence with correct collective noun agreement:",
+    "options": [
+      "A flock of birds were flying overhead.",
+      "A flock of birds was flying overhead.",
+      "A flock of birds have been flying.",
+      "A flock of birds are flying."
+    ],
+    "correct_answer": "A flock of birds was flying overhead.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "The singular subject \"flock\" governs the singular verb \"was\"."
+  },
+  {
+    "id": "q_0845",
+    "round_type": "ACCURACY",
+    "prompt": "Which sentence correctly uses \"disinterested\" vs \"uninterested\"?",
+    "options": [
+      "A judge must be completely disinterested in the outcome of the trial.",
+      "He was disinterested in sports and preferred reading.",
+      "The bored student appeared disinterested in the lecture.",
+      "She was disinterested in going to the party."
+    ],
+    "correct_answer": "A judge must be completely disinterested in the outcome of the trial.",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"Disinterested\" means impartial/unbiased; \"uninterested\" means having no interest/bored."
+  },
+  {
+    "id": "q_0846",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the sentence with correct placement of \"only\":",
+    "options": [
+      "She only told him the truth yesterday.",
+      "She told him the truth only yesterday.",
+      "Only she told him the truth yesterday.",
+      "She told only him the truth yesterday."
+    ],
+    "correct_answer": "She told him the truth only yesterday.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"Only\" should immediately precede the word it modifies (\"yesterday\")."
+  },
+  {
+    "id": "q_0847",
+    "round_type": "ACCURACY",
+    "prompt": "Which sentence correctly uses \"complement\" vs \"compliment\"?",
+    "options": [
+      "The fine wine was a perfect compliment to the meal.",
+      "The fine wine was a perfect complement to the meal.",
+      "He paid her a sincere complement on her presentation.",
+      "The two colors compliment each other."
+    ],
+    "correct_answer": "The fine wine was a perfect complement to the meal.",
+    "difficulty": "EASY",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "\"Complement\" means something that completes or enhances; \"compliment\" is praise."
+  },
+  {
+    "id": "q_0848",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the sentence with correct verb agreement when joined by \"as well as\":",
+    "options": [
+      "The captain, as well as the players, are excited.",
+      "The captain, as well as the players, is excited.",
+      "The captain, as well as the players, were excited.",
+      "The captain, as well as the players, have been excited."
+    ],
+    "correct_answer": "The captain, as well as the players, is excited.",
+    "difficulty": "MEDIUM",
+    "category": "English",
+    "subcategory": "Grammar",
+    "pattern_type": "Grammatical Accuracy",
+    "time_limit_sec": 20,
+    "explanation": "Parenthetical phrases like \"as well as\" do not alter the number of the subject (\"captain\" is singular -> \"is\")."
+  },
+  {
+    "id": "q_0849",
+    "round_type": "ACCURACY",
+    "prompt": "What is the approximate speed of light in a vacuum (c) in meters per second?",
+    "options": [
+      "2.998 × 10⁸ m/s",
+      "3.844 × 10⁸ m/s",
+      "1.496 × 10¹¹ m/s",
+      "6.674 × 10⁻¹¹ m/s"
+    ],
+    "correct_answer": "2.998 × 10⁸ m/s",
+    "difficulty": "HARD",
+    "category": "Science",
+    "subcategory": "Physics Constants",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "The speed of light in vacuum is defined as exactly 299,792,458 m/s (≈ 2.998 × 10⁸ m/s)."
+  },
+  {
+    "id": "q_0850",
+    "round_type": "ACCURACY",
+    "prompt": "What is Avogadro's constant (NA), representing the number of constituent particles per mole?",
+    "options": [
+      "6.022 × 10²³ mol⁻¹",
+      "1.602 × 10⁻¹⁹ mol⁻¹",
+      "9.109 × 10⁻³¹ mol⁻¹",
+      "1.381 × 10⁻²³ mol⁻¹"
+    ],
+    "correct_answer": "6.022 × 10²³ mol⁻¹",
+    "difficulty": "HARD",
+    "category": "Science",
+    "subcategory": "Chemistry Constants",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Avogadro's constant is defined as exactly 6.02214076 × 10²³ particles per mole."
+  },
+  {
+    "id": "q_0851",
+    "round_type": "ACCURACY",
+    "prompt": "What is the standard acceleration due to gravity on Earth surface (g) to two decimal places?",
+    "options": [
+      "9.81 m/s²",
+      "9.78 m/s²",
+      "9.83 m/s²",
+      "10.00 m/s²"
+    ],
+    "correct_answer": "9.81 m/s²",
+    "difficulty": "HARD",
+    "category": "Science",
+    "subcategory": "Physics Constants",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Standard gravity g is defined as 9.80665 m/s² (commonly rounded to 9.81 m/s²)."
+  },
+  {
+    "id": "q_0852",
+    "round_type": "ACCURACY",
+    "prompt": "What is the atomic number of Gold (chemical symbol Au)?",
+    "options": [
+      "47",
+      "78",
+      "79",
+      "82"
+    ],
+    "correct_answer": "79",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Gold has atomic number 79 (47 is Silver, 78 is Platinum, 82 is Lead)."
+  },
+  {
+    "id": "q_0853",
+    "round_type": "ACCURACY",
+    "prompt": "What is standard atmospheric pressure at sea level in Pascals (Pa)?",
+    "options": [
+      "100,000 Pa",
+      "101,325 Pa",
+      "105,400 Pa",
+      "98,066 Pa"
+    ],
+    "correct_answer": "101,325 Pa",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Thermodynamics",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Standard 1 atm is defined as exactly 101,325 Pa (101.325 kPa)."
+  },
+  {
+    "id": "q_0854",
+    "round_type": "ACCURACY",
+    "prompt": "What is the elementary electric charge of a proton or electron in Coulombs (C)?",
+    "options": [
+      "1.602 × 10⁻¹⁹ C",
+      "6.626 × 10⁻³⁴ C",
+      "9.109 × 10⁻³¹ C",
+      "8.854 × 10⁻¹² C"
+    ],
+    "correct_answer": "1.602 × 10⁻¹⁹ C",
+    "difficulty": "HARD",
+    "category": "Science",
+    "subcategory": "Physics Constants",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "The elementary charge e is defined as exactly 1.602176634 × 10⁻¹⁹ Coulombs."
+  },
+  {
+    "id": "q_0855",
+    "round_type": "ACCURACY",
+    "prompt": "What is the universal gravitational constant (G) approximately?",
+    "options": [
+      "6.674 × 10⁻¹¹ N·m²/kg²",
+      "8.314 × 10⁻¹¹ N·m²/kg²",
+      "1.381 × 10⁻²³ N·m²/kg²",
+      "8.988 × 10⁹ N·m²/kg²"
+    ],
+    "correct_answer": "6.674 × 10⁻¹¹ N·m²/kg²",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Physics Constants",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Newton's gravitational constant G ≈ 6.67430 × 10⁻¹¹ N·m²/kg²."
+  },
+  {
+    "id": "q_0856",
+    "round_type": "ACCURACY",
+    "prompt": "What is the molar gas constant (R) in J/(mol·K) to two decimal places?",
+    "options": [
+      "6.02 J/(mol·K)",
+      "8.31 J/(mol·K)",
+      "9.81 J/(mol·K)",
+      "1.38 J/(mol·K)"
+    ],
+    "correct_answer": "8.31 J/(mol·K)",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Physical Chemistry",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "The ideal gas constant R ≈ 8.314 J/(mol·K)."
+  },
+  {
+    "id": "q_0857",
+    "round_type": "ACCURACY",
+    "prompt": "What is the atomic number of Iron (Fe)?",
+    "options": [
+      "24",
+      "26",
+      "28",
+      "30"
+    ],
+    "correct_answer": "26",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Iron has atomic number 26."
+  },
+  {
+    "id": "q_0858",
+    "round_type": "ACCURACY",
+    "prompt": "What is the approximate rest mass of an electron in kilograms?",
+    "options": [
+      "9.109 × 10⁻³¹ kg",
+      "1.673 × 10⁻²⁷ kg",
+      "1.675 × 10⁻²⁷ kg",
+      "6.645 × 10⁻²⁷ kg"
+    ],
+    "correct_answer": "9.109 × 10⁻³¹ kg",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Physics Constants",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "The electron rest mass is approximately 9.1093837 × 10⁻³¹ kg."
+  },
+  {
+    "id": "q_0859",
+    "round_type": "ACCURACY",
+    "prompt": "What is the atomic number of Uranium (U)?",
+    "options": [
+      "88",
+      "90",
+      "92",
+      "94"
+    ],
+    "correct_answer": "92",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Nuclear Chemistry",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Uranium has atomic number 92."
+  },
+  {
+    "id": "q_0860",
+    "round_type": "ACCURACY",
+    "prompt": "What is the boiling point of pure liquid nitrogen at 1 atm in Celsius?",
+    "options": [
+      "-196°C",
+      "-183°C",
+      "-210°C",
+      "-269°C"
+    ],
+    "correct_answer": "-196°C",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Chemistry",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Liquid nitrogen boils at 77 K (-195.79°C ≈ -196°C)."
+  },
+  {
+    "id": "q_0861",
+    "round_type": "ACCURACY",
+    "prompt": "In the periodic table, Carbon (C) has which atomic number?",
+    "options": [
+      "4",
+      "6",
+      "8",
+      "12"
+    ],
+    "correct_answer": "6",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Carbon has atomic number 6 and standard atomic mass ≈ 12.011."
+  },
+  {
+    "id": "q_0862",
+    "round_type": "ACCURACY",
+    "prompt": "What is the exact half-life of Carbon-14 used in radiocarbon dating?",
+    "options": [
+      "4,500 years",
+      "5,730 years",
+      "6,200 years",
+      "8,190 years"
+    ],
+    "correct_answer": "5,730 years",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Nuclear Chemistry",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Carbon-14 has an internationally recognized half-life of 5,730 ± 40 years."
+  },
+  {
+    "id": "q_0863",
+    "round_type": "ACCURACY",
+    "prompt": "What is the atomic number of Oxygen (O)?",
+    "options": [
+      "6",
+      "8",
+      "10",
+      "16"
+    ],
+    "correct_answer": "8",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Oxygen has atomic number 8."
+  },
+  {
+    "id": "q_0864",
+    "round_type": "ACCURACY",
+    "prompt": "What is the density of pure liquid water at 4°C in grams per cubic centimeter (g/cm³)?",
+    "options": [
+      "0.90 g/cm³",
+      "1.00 g/cm³",
+      "1.10 g/cm³",
+      "1.25 g/cm³"
+    ],
+    "correct_answer": "1.00 g/cm³",
+    "difficulty": "HARD",
+    "category": "Science",
+    "subcategory": "Physical Properties",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "At 3.98°C, pure water reaches its maximum density of exactly 1.000 g/cm³."
+  },
+  {
+    "id": "q_0865",
+    "round_type": "ACCURACY",
+    "prompt": "What is the atomic number of Copper (Cu)?",
+    "options": [
+      "27",
+      "29",
+      "31",
+      "33"
+    ],
+    "correct_answer": "29",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Copper has atomic number 29."
+  },
+  {
+    "id": "q_0866",
+    "round_type": "ACCURACY",
+    "prompt": "What is the average distance from the Earth to the Sun (1 Astronomical Unit) approximately?",
+    "options": [
+      "100 million km",
+      "150 million km",
+      "200 million km",
+      "250 million km"
+    ],
+    "correct_answer": "150 million km",
+    "difficulty": "HARD",
+    "category": "Space",
+    "subcategory": "Astronomy",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "1 AU is officially defined as exactly 149,597,870,700 meters (≈ 150 million km)."
+  },
+  {
+    "id": "q_0867",
+    "round_type": "ACCURACY",
+    "prompt": "What is the atomic number of Lead (Pb)?",
+    "options": [
+      "80",
+      "82",
+      "84",
+      "86"
+    ],
+    "correct_answer": "82",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Lead has atomic number 82."
+  },
+  {
+    "id": "q_0868",
+    "round_type": "ACCURACY",
+    "prompt": "What is Planck's constant (h) in Joule-seconds (J·s) approximately?",
+    "options": [
+      "6.626 × 10⁻³⁴ J·s",
+      "1.055 × 10⁻³⁴ J·s",
+      "8.854 × 10⁻¹² J·s",
+      "5.670 × 10⁻⁸ J·s"
+    ],
+    "correct_answer": "6.626 × 10⁻³⁴ J·s",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Quantum Physics",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Planck's constant h is defined as exactly 6.62607015 × 10⁻³⁴ J·s."
+  },
+  {
+    "id": "q_0869",
+    "round_type": "ACCURACY",
+    "prompt": "Identify the atomic number of the noble gas Helium (He):",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "correct_answer": "2",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Helium has atomic number 2 and atomic weight 4.0026."
+  },
+  {
+    "id": "q_0870",
+    "round_type": "ACCURACY",
+    "prompt": "What is the approximate age of planet Earth according to radiometric dating of meteorites?",
+    "options": [
+      "3.5 billion years",
+      "4.54 billion years",
+      "5.2 billion years",
+      "6.1 billion years"
+    ],
+    "correct_answer": "4.54 billion years",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Geology",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Earth is approximately 4.54 ± 0.05 billion years old."
+  },
+  {
+    "id": "q_0871",
+    "round_type": "ACCURACY",
+    "prompt": "What is the atomic number of Silver (Ag)?",
+    "options": [
+      "45",
+      "47",
+      "49",
+      "51"
+    ],
+    "correct_answer": "47",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Silver has atomic number 47."
+  },
+  {
+    "id": "q_0872",
+    "round_type": "ACCURACY",
+    "prompt": "What is the critical angle for total internal reflection of light from diamond into air (refractive index n ≈ 2.42)?",
+    "options": [
+      "18.5°",
+      "24.4°",
+      "32.1°",
+      "42.0°"
+    ],
+    "correct_answer": "24.4°",
+    "difficulty": "HARD",
+    "category": "Science",
+    "subcategory": "Optics",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "sin(θc) = 1 / 2.42 ≈ 0.4132, yielding critical angle θc ≈ 24.4°."
+  },
+  {
+    "id": "q_0873",
+    "round_type": "ACCURACY",
+    "prompt": "Determine the atomic number of Sodium (Na):",
+    "options": [
+      "11",
+      "12",
+      "13",
+      "14"
+    ],
+    "correct_answer": "11",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Sodium has atomic number 11."
+  },
+  {
+    "id": "q_0874",
+    "round_type": "ACCURACY",
+    "prompt": "What is the speed of sound in pure fresh water at 25°C approximately?",
+    "options": [
+      "343 m/s",
+      "1,497 m/s",
+      "3,000 m/s",
+      "5,000 m/s"
+    ],
+    "correct_answer": "1,497 m/s",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Acoustics",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Sound travels at approximately 1,497 m/s in water (more than four times faster than in air)."
+  },
+  {
+    "id": "q_0875",
+    "round_type": "ACCURACY",
+    "prompt": "Which atomic number corresponds to Platinum (Pt)?",
+    "options": [
+      "76",
+      "77",
+      "78",
+      "79"
+    ],
+    "correct_answer": "78",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Platinum has atomic number 78."
+  },
+  {
+    "id": "q_0876",
+    "round_type": "ACCURACY",
+    "prompt": "What is the estimated age of the observable universe according to cosmic microwave background data?",
+    "options": [
+      "10.2 billion years",
+      "13.8 billion years",
+      "15.5 billion years",
+      "18.0 billion years"
+    ],
+    "correct_answer": "13.8 billion years",
+    "difficulty": "MEDIUM",
+    "category": "Space",
+    "subcategory": "Cosmology",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Planck spacecraft data estimates the universe age at 13.787 ± 0.020 billion years."
+  },
+  {
+    "id": "q_0877",
+    "round_type": "ACCURACY",
+    "prompt": "Chlorine (Cl) has an atomic number of:",
+    "options": [
+      "15",
+      "16",
+      "17",
+      "18"
+    ],
+    "correct_answer": "17",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Chlorine has atomic number 17."
+  },
+  {
+    "id": "q_0878",
+    "round_type": "ACCURACY",
+    "prompt": "What is the boiling point of pure water in Kelvin at 1 atm pressure?",
+    "options": [
+      "273.15 K",
+      "310.15 K",
+      "373.15 K",
+      "400.00 K"
+    ],
+    "correct_answer": "373.15 K",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Thermodynamics",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "100°C + 273.15 = 373.15 K."
+  },
+  {
+    "id": "q_0879",
+    "round_type": "ACCURACY",
+    "prompt": "How many protons (atomic number) are in Potassium (K)?",
+    "options": [
+      "17",
+      "18",
+      "19",
+      "20"
+    ],
+    "correct_answer": "19",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Potassium has atomic number 19."
+  },
+  {
+    "id": "q_0880",
+    "round_type": "ACCURACY",
+    "prompt": "What is the freezing point of mercury at standard atmospheric pressure in Celsius?",
+    "options": [
+      "-38.83°C",
+      "-10.50°C",
+      "-50.25°C",
+      "-78.50°C"
+    ],
+    "correct_answer": "-38.83°C",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Physical Chemistry",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Mercury solidifies at -38.83°C (234.32 K)."
+  },
+  {
+    "id": "q_0881",
+    "round_type": "ACCURACY",
+    "prompt": "Calcium (Ca) possesses what atomic number?",
+    "options": [
+      "18",
+      "19",
+      "20",
+      "21"
+    ],
+    "correct_answer": "20",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Calcium has atomic number 20."
+  },
+  {
+    "id": "q_0882",
+    "round_type": "ACCURACY",
+    "prompt": "What is the Stefan-Boltzmann constant (σ) approximately in W/(m²·K⁴)?",
+    "options": [
+      "5.670 × 10⁻⁸ W/(m²·K⁴)",
+      "6.674 × 10⁻¹¹ W/(m²·K⁴)",
+      "1.381 × 10⁻²³ W/(m²·K⁴)",
+      "8.314 × 10⁻² W/(m²·K⁴)"
+    ],
+    "correct_answer": "5.670 × 10⁻⁸ W/(m²·K⁴)",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Thermodynamics",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "The Stefan-Boltzmann constant σ ≈ 5.670374 × 10⁻⁸ W/(m²·K⁴)."
+  },
+  {
+    "id": "q_0883",
+    "round_type": "ACCURACY",
+    "prompt": "Select the correct atomic number for Aluminum (Al):",
+    "options": [
+      "11",
+      "12",
+      "13",
+      "14"
+    ],
+    "correct_answer": "13",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Aluminum has atomic number 13."
+  },
+  {
+    "id": "q_0884",
+    "round_type": "ACCURACY",
+    "prompt": "What is the mass of one proton compared to an electron approximately?",
+    "options": [
+      "100 times heavier",
+      "500 times heavier",
+      "1,836 times heavier",
+      "10,000 times heavier"
+    ],
+    "correct_answer": "1,836 times heavier",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Physics",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "A proton mass (1.6726 × 10⁻²⁷ kg) is approximately 1,836 times the rest mass of an electron."
+  },
+  {
+    "id": "q_0885",
+    "round_type": "ACCURACY",
+    "prompt": "What is the atomic number of Zinc (Zn)?",
+    "options": [
+      "28",
+      "29",
+      "30",
+      "31"
+    ],
+    "correct_answer": "30",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Zinc has atomic number 30."
+  },
+  {
+    "id": "q_0886",
+    "round_type": "ACCURACY",
+    "prompt": "What is the radius of the Earth at the equator to the nearest hundred kilometers?",
+    "options": [
+      "5,400 km",
+      "6,378 km",
+      "7,200 km",
+      "8,150 km"
+    ],
+    "correct_answer": "6,378 km",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Geophysics",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Earth equatorial radius is approximately 6,378.1 kilometers."
+  },
+  {
+    "id": "q_0887",
+    "round_type": "ACCURACY",
+    "prompt": "What is the atomic number of Magnesium (Mg)?",
+    "options": [
+      "10",
+      "11",
+      "12",
+      "13"
+    ],
+    "correct_answer": "12",
+    "difficulty": "MEDIUM",
+    "category": "Science",
+    "subcategory": "Periodic Table",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "Magnesium has atomic number 12."
+  },
+  {
+    "id": "q_0888",
+    "round_type": "ACCURACY",
+    "prompt": "What is the triple point of pure water in Kelvin?",
+    "options": [
+      "273.15 K",
+      "273.16 K",
+      "274.00 K",
+      "300.00 K"
+    ],
+    "correct_answer": "273.16 K",
+    "difficulty": "EASY",
+    "category": "Science",
+    "subcategory": "Thermodynamics",
+    "pattern_type": "Precision Value",
+    "time_limit_sec": 20,
+    "explanation": "The triple point of water where solid, liquid, and vapor coexist is exactly 273.16 K (0.01°C)."
+  },
+  {
+    "id": "q_0889",
+    "round_type": "ACCURACY",
+    "prompt": "An item priced at ₹1,200 is offered with a 15% discount. What is the discounted price before tax?",
+    "options": [
+      "₹1,000",
+      "₹1,020",
+      "₹1,050",
+      "₹1,080"
+    ],
+    "correct_answer": "₹1,020",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Commercial Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "15% of 1,200 = 180. 1,200 - 180 = ₹1,020."
+  },
+  {
+    "id": "q_0890",
+    "round_type": "ACCURACY",
+    "prompt": "A product costing ₹800 is sold for ₹1,000. What is the profit percentage on cost?",
+    "options": [
+      "20%",
+      "25%",
+      "30%",
+      "15%"
+    ],
+    "correct_answer": "25%",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Commercial Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Profit = 1,000 - 800 = 200. Profit % = (200 / 800) × 100 = 25%."
+  },
+  {
+    "id": "q_0891",
+    "round_type": "ACCURACY",
+    "prompt": "Calculate simple interest on a principal of ₹5,000 at 8% per annum for 3 years:",
+    "options": [
+      "₹1,000",
+      "₹1,200",
+      "₹1,400",
+      "₹1,500"
+    ],
+    "correct_answer": "₹1,200",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Interest Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "SI = (P × R × T) / 100 = (5,000 × 8 × 3) / 100 = ₹1,200."
+  },
+  {
+    "id": "q_0892",
+    "round_type": "ACCURACY",
+    "prompt": "An article listed at ₹2,500 is sold with successive discounts of 10% and 20%. What is the final selling price?",
+    "options": [
+      "₹1,750",
+      "₹1,800",
+      "₹1,850",
+      "₹1,900"
+    ],
+    "correct_answer": "₹1,800",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Commercial Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "First discount: 2,500 - 250 = 2,250. Second discount: 20% of 2,250 = 450. 2,250 - 450 = ₹1,800."
+  },
+  {
+    "id": "q_0893",
+    "round_type": "ACCURACY",
+    "prompt": "What is the compound amount on ₹10,000 invested at 10% per annum compounded annually for 2 years?",
+    "options": [
+      "₹12,000",
+      "₹12,100",
+      "₹12,200",
+      "₹12,500"
+    ],
+    "correct_answer": "₹12,100",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Compound Interest",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "A = P(1 + r)² = 10,000 × (1.10)² = 10,000 × 1.21 = ₹12,100."
+  },
+  {
+    "id": "q_0894",
+    "round_type": "ACCURACY",
+    "prompt": "A trader marks goods 40% above cost price and allows a 20% discount. What is the net profit percentage?",
+    "options": [
+      "10%",
+      "12%",
+      "15%",
+      "20%"
+    ],
+    "correct_answer": "12%",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Commercial Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Let cost = 100. Marked price = 140. Selling price = 140 - 28 = 112. Net profit = 12%."
+  },
+  {
+    "id": "q_0895",
+    "round_type": "ACCURACY",
+    "prompt": "If 5 pens cost ₹75, what is the exact cost of 14 pens at the same rate?",
+    "options": [
+      "₹190",
+      "₹200",
+      "₹210",
+      "₹225"
+    ],
+    "correct_answer": "₹210",
+    "difficulty": "MEDIUM",
+    "category": "Finance",
+    "subcategory": "Unitary Method",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Cost per pen = 75 ÷ 5 = ₹15. 14 × 15 = ₹210."
+  },
+  {
+    "id": "q_0896",
+    "round_type": "ACCURACY",
+    "prompt": "A shopkeeper sells a book for ₹450 suffering a 10% loss. What was the original cost price?",
+    "options": [
+      "₹480",
+      "₹500",
+      "₹520",
+      "₹550"
+    ],
+    "correct_answer": "₹500",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Commercial Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Selling price = 90% of cost. Cost = 450 / 0.90 = ₹500."
+  },
+  {
+    "id": "q_0897",
+    "round_type": "ACCURACY",
+    "prompt": "What is the effective annual rate for a nominal rate of 12% compounded semi-annually?",
+    "options": [
+      "12.00%",
+      "12.36%",
+      "12.50%",
+      "12.68%"
+    ],
+    "correct_answer": "12.36%",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Interest Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "EAR = (1 + 0.06)² - 1 = 1.1236 - 1 = 12.36%."
+  },
+  {
+    "id": "q_0898",
+    "round_type": "ACCURACY",
+    "prompt": "An investment of ₹4,000 doubles in 6 years under simple interest. What is the annual interest rate?",
+    "options": [
+      "14.28%",
+      "16.67%",
+      "18.50%",
+      "20.00%"
+    ],
+    "correct_answer": "16.67%",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Interest Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Interest = ₹4,000. Rate = (4,000 × 100) / (4,000 × 6) = 100 / 6 = 16.67%."
+  },
+  {
+    "id": "q_0899",
+    "round_type": "ACCURACY",
+    "prompt": "A mobile phone priced at ₹15,000 attracts 18% GST. What is the total invoice amount including tax?",
+    "options": [
+      "₹17,200",
+      "₹17,500",
+      "₹17,700",
+      "₹18,000"
+    ],
+    "correct_answer": "₹17,700",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Tax Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "GST = 18% of 15,000 = 2,700. Total = 15,000 + 2,700 = ₹17,700."
+  },
+  {
+    "id": "q_0900",
+    "round_type": "ACCURACY",
+    "prompt": "Calculate the ratio of 45 minutes to 2.5 hours in simplest form:",
+    "options": [
+      "3 : 10",
+      "9 : 25",
+      "1 : 3",
+      "3 : 8"
+    ],
+    "correct_answer": "3 : 10",
+    "difficulty": "EASY",
+    "category": "Mathematics",
+    "subcategory": "Ratios",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "2.5 hours = 150 minutes. 45 / 150 = 3 / 10."
+  },
+  {
+    "id": "q_0901",
+    "round_type": "ACCURACY",
+    "prompt": "If the selling price of 10 articles equals the cost price of 12 articles, what is the profit percentage?",
+    "options": [
+      "16.67%",
+      "20%",
+      "25%",
+      "15%"
+    ],
+    "correct_answer": "20%",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Commercial Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Profit on 10 articles = cost of 2 articles. Profit % = (2 / 10) × 100 = 20%."
+  },
+  {
+    "id": "q_0902",
+    "round_type": "ACCURACY",
+    "prompt": "A sum of ₹8,000 yields ₹1,200 simple interest in 3 years. What is the annual interest rate?",
+    "options": [
+      "4%",
+      "5%",
+      "6%",
+      "7%"
+    ],
+    "correct_answer": "5%",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Interest Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "R = (1,200 × 100) / (8,000 × 3) = 120,000 / 24,000 = 5%."
+  },
+  {
+    "id": "q_0903",
+    "round_type": "ACCURACY",
+    "prompt": "What single discount is equivalent to two successive discounts of 20% and 10%?",
+    "options": [
+      "26%",
+      "28%",
+      "30%",
+      "32%"
+    ],
+    "correct_answer": "28%",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Commercial Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Net discount = 20 + 10 - (20 × 10 / 100) = 30 - 2 = 28%."
+  },
+  {
+    "id": "q_0904",
+    "round_type": "ACCURACY",
+    "prompt": "A car depreciates by 10% annually. If its current value is ₹500,000, what is its value after one year?",
+    "options": [
+      "₹425,000",
+      "₹450,000",
+      "₹475,000",
+      "₹400,000"
+    ],
+    "correct_answer": "₹450,000",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Depreciation",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Depreciation = 10% of 500,000 = 50,000. Value = ₹450,000."
+  },
+  {
+    "id": "q_0905",
+    "round_type": "ACCURACY",
+    "prompt": "A person buys a bike for ₹60,000 and spends ₹5,000 on repairs. He sells it for ₹78,000. What is his profit %?",
+    "options": [
+      "15%",
+      "18%",
+      "20%",
+      "22%"
+    ],
+    "correct_answer": "20%",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Commercial Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Total cost = 65,000. Profit = 78,000 - 65,000 = 13,000. Profit % = (13,000 / 65,000) × 100 = 20%."
+  },
+  {
+    "id": "q_0906",
+    "round_type": "ACCURACY",
+    "prompt": "Divide ₹1,800 among A, B, and C in the ratio 2 : 3 : 4. What is B's share?",
+    "options": [
+      "₹400",
+      "₹600",
+      "₹800",
+      "₹500"
+    ],
+    "correct_answer": "₹600",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Ratios",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Total parts = 2 + 3 + 4 = 9. Part value = 1,800 / 9 = 200. B's share = 3 × 200 = ₹600."
+  },
+  {
+    "id": "q_0907",
+    "round_type": "ACCURACY",
+    "prompt": "A retailer offers Buy 3, Get 1 Free. What is the effective percentage discount offered?",
+    "options": [
+      "20%",
+      "25%",
+      "33.33%",
+      "15%"
+    ],
+    "correct_answer": "25%",
+    "difficulty": "MEDIUM",
+    "category": "Finance",
+    "subcategory": "Commercial Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Customer receives 4 items for the price of 3. Discount = 1 free out of 4 total = 1/4 = 25%."
+  },
+  {
+    "id": "q_0908",
+    "round_type": "ACCURACY",
+    "prompt": "What is the compound interest on ₹5,000 at 10% per annum for 2 years compounded annually?",
+    "options": [
+      "₹1,000",
+      "₹1,050",
+      "₹1,100",
+      "₹1,150"
+    ],
+    "correct_answer": "₹1,050",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Compound Interest",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Amount = 5,000 × 1.21 = 6,050. CI = 6,050 - 5,000 = ₹1,050."
+  },
+  {
+    "id": "q_0909",
+    "round_type": "ACCURACY",
+    "prompt": "A shirt is marked at ₹1,500 and sold for ₹1,200. What is the discount percentage?",
+    "options": [
+      "15%",
+      "18%",
+      "20%",
+      "25%"
+    ],
+    "correct_answer": "20%",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Commercial Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Discount = 300. Discount % = (300 / 1,500) × 100 = 20%."
+  },
+  {
+    "id": "q_0910",
+    "round_type": "ACCURACY",
+    "prompt": "If a sum triples itself in 10 years under simple interest, what is the annual interest rate?",
+    "options": [
+      "15%",
+      "20%",
+      "25%",
+      "30%"
+    ],
+    "correct_answer": "20%",
+    "difficulty": "MEDIUM",
+    "category": "Finance",
+    "subcategory": "Interest Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Interest = 2P. Rate = (2P × 100) / (P × 10) = 200 / 10 = 20%."
+  },
+  {
+    "id": "q_0911",
+    "round_type": "ACCURACY",
+    "prompt": "A trader sells goods at cost price but uses a false weight of 900 grams instead of 1 kilogram. What is his profit %?",
+    "options": [
+      "10%",
+      "11.11%",
+      "12.5%",
+      "15%"
+    ],
+    "correct_answer": "11.11%",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Commercial Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Profit % = (Error / True - Error) × 100 = (100 / 900) × 100 = 11.11%."
+  },
+  {
+    "id": "q_0912",
+    "round_type": "ACCURACY",
+    "prompt": "If 8 men can complete a project in 15 days, how many days will 12 men take at the same work rate?",
+    "options": [
+      "8 days",
+      "10 days",
+      "12 days",
+      "14 days"
+    ],
+    "correct_answer": "10 days",
+    "difficulty": "MEDIUM",
+    "category": "Mathematics",
+    "subcategory": "Work and Time",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Total man-days = 8 × 15 = 120. Days for 12 men = 120 ÷ 12 = 10 days."
+  },
+  {
+    "id": "q_0913",
+    "round_type": "ACCURACY",
+    "prompt": "An investor buys 100 shares at ₹50 each and pays 1% brokerage. What is the total outlay?",
+    "options": [
+      "₹5,000",
+      "₹5,050",
+      "₹5,100",
+      "₹5,150"
+    ],
+    "correct_answer": "₹5,050",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Investment Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Share value = 5,000. Brokerage = 1% of 5,000 = 50. Total = ₹5,050."
+  },
+  {
+    "id": "q_0914",
+    "round_type": "ACCURACY",
+    "prompt": "A vendor sells two items for ₹990 each, making a 10% profit on one and a 10% loss on the other. What is the net result?",
+    "options": [
+      "No profit, no loss",
+      "1% loss",
+      "1% profit",
+      "2% loss"
+    ],
+    "correct_answer": "1% loss",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Commercial Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "When two items are sold at equal price with equal profit and loss percentages x, there is always a loss of (x/10)²% = (10/10)² = 1% loss."
+  },
+  {
+    "id": "q_0915",
+    "round_type": "ACCURACY",
+    "prompt": "If the cost price of an item is ₹250 and selling price is ₹325, what is the profit percentage?",
+    "options": [
+      "25%",
+      "30%",
+      "35%",
+      "40%"
+    ],
+    "correct_answer": "30%",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Commercial Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Profit = 325 - 250 = 75. Profit % = (75 / 250) × 100 = 30%."
+  },
+  {
+    "id": "q_0916",
+    "round_type": "ACCURACY",
+    "prompt": "What is the simple interest on ₹12,000 at 6% per annum for 9 months?",
+    "options": [
+      "₹480",
+      "₹520",
+      "₹540",
+      "₹600"
+    ],
+    "correct_answer": "₹540",
+    "difficulty": "MEDIUM",
+    "category": "Finance",
+    "subcategory": "Interest Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Time = 9/12 = 0.75 years. SI = (12,000 × 6 × 0.75) / 100 = 120 × 4.5 = ₹540."
+  },
+  {
+    "id": "q_0917",
+    "round_type": "ACCURACY",
+    "prompt": "A merchant offers a discount of 25% on marked price and still makes a 20% profit. If cost price is ₹500, what is marked price?",
+    "options": [
+      "₹750",
+      "₹800",
+      "₹850",
+      "₹900"
+    ],
+    "correct_answer": "₹800",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Commercial Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "SP = 500 × 1.20 = 600. MP = 600 / 0.75 = ₹800."
+  },
+  {
+    "id": "q_0918",
+    "round_type": "ACCURACY",
+    "prompt": "If annual inflation is 6%, how much will a basket of goods costing ₹1,000 today cost one year from now?",
+    "options": [
+      "₹1,030",
+      "₹1,060",
+      "₹1,090",
+      "₹1,120"
+    ],
+    "correct_answer": "₹1,060",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Inflation",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "1,000 × 1.06 = ₹1,060."
+  },
+  {
+    "id": "q_0919",
+    "round_type": "ACCURACY",
+    "prompt": "A bank charges 1.5% interest per month on credit card balances. What is the nominal annual percentage rate (APR)?",
+    "options": [
+      "15%",
+      "16.5%",
+      "18%",
+      "19.5%"
+    ],
+    "correct_answer": "18%",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Banking",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "1.5% × 12 months = 18% APR."
+  },
+  {
+    "id": "q_0920",
+    "round_type": "ACCURACY",
+    "prompt": "A car is bought for ₹400,000 and sold after 2 years at a 20% total depreciation. What is the sale value?",
+    "options": [
+      "₹300,000",
+      "₹320,000",
+      "₹340,000",
+      "₹350,000"
+    ],
+    "correct_answer": "₹320,000",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Depreciation",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Depreciation = 20% of 400,000 = 80,000. Sale value = 400,000 - 80,000 = ₹320,000."
+  },
+  {
+    "id": "q_0921",
+    "round_type": "ACCURACY",
+    "prompt": "A person pays ₹3,600 annual premium on a term life policy with sum assured of ₹1,000,000. What is premium per ₹1,000 sum assured?",
+    "options": [
+      "₹2.50",
+      "₹3.60",
+      "₹4.00",
+      "₹5.00"
+    ],
+    "correct_answer": "₹3.60",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Insurance",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "3,600 / (1,000,000 / 1,000) = 3,600 / 1,000 = ₹3.60."
+  },
+  {
+    "id": "q_0922",
+    "round_type": "ACCURACY",
+    "prompt": "Calculate the profit percentage when cost price is ₹1,600 and profit is ₹240:",
+    "options": [
+      "12.5%",
+      "15%",
+      "16%",
+      "17.5%"
+    ],
+    "correct_answer": "15%",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Commercial Math",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "(240 / 1,600) × 100 = 15%."
+  },
+  {
+    "id": "q_0923",
+    "round_type": "ACCURACY",
+    "prompt": "If 3 apples cost ₹45, what is the cost of 2 dozen apples at the same unit rate?",
+    "options": [
+      "₹320",
+      "₹340",
+      "₹360",
+      "₹380"
+    ],
+    "correct_answer": "₹360",
+    "difficulty": "HARD",
+    "category": "Finance",
+    "subcategory": "Unitary Method",
+    "pattern_type": "Precision Calculation",
+    "time_limit_sec": 20,
+    "explanation": "Cost per apple = 45 / 3 = ₹15. 2 dozen = 24 apples. 24 × 15 = ₹360."
+  }
+]

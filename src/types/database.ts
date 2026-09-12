@@ -313,11 +313,15 @@ export interface DuelQuestion {
   time_limit_sec: number;
 }
 
+export type DuelMatchType = 'PVP' | 'NPC_FALLBACK' | 'DEV_TEST';
+export type DuelPlayerType = 'HUMAN' | 'NPC' | 'DEV_TEST';
+
 export interface DuelMatch {
   id: string;
   status: DuelMatchStatus;
   current_round: number;
   winner_id: string | null;
+  match_type?: DuelMatchType;
   is_test_opponent: boolean;
   match_config?: Record<string, any>;
   started_at: string | null;
@@ -332,6 +336,8 @@ export interface DuelPlayer {
   match_id: string;
   player_id: string | null;
   player_slot: DuelPlayerSlot;
+  player_type?: DuelPlayerType;
+  npc_id?: string | null;
   status: DuelPlayerStatus;
   display_name: string;
   avatar_url: string | null;

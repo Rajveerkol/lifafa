@@ -1,0 +1,4106 @@
+[
+  {
+    "id": "q_0471",
+    "round_type": "MEMORY",
+    "prompt": "Memorize & recall the 4-symbol sequence: [💎, ⚡, 👑, 🔥]. Which option matches the original order?",
+    "options": [
+      "💎, ⚡, 👑, 🔥",
+      "⚡, 💎, 🔥, 👑",
+      "👑, 💎, ⚡, 🔥",
+      "🔥, ⚡, 💎, 👑"
+    ],
+    "correct_answer": "💎, ⚡, 👑, 🔥",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Emoji Sequences",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original sequence is [💎, ⚡, 👑, 🔥]."
+  },
+  {
+    "id": "q_0472",
+    "round_type": "MEMORY",
+    "prompt": "Memorize & recall the 4-color pattern: [Red, Blue, Green, Yellow]. Which option reproduces the exact sequence?",
+    "options": [
+      "Red, Blue, Green, Yellow",
+      "Blue, Red, Yellow, Green",
+      "Green, Red, Blue, Yellow",
+      "Yellow, Blue, Green, Red"
+    ],
+    "correct_answer": "Red, Blue, Green, Yellow",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Color Sequences",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [Red, Blue, Green, Yellow]."
+  },
+  {
+    "id": "q_0473",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4-fruit sequence: [Apple, Banana, Cherry, Date]. Which option matches the exact original order?",
+    "options": [
+      "Apple, Banana, Cherry, Date",
+      "Banana, Apple, Date, Cherry",
+      "Cherry, Banana, Apple, Date",
+      "Date, Cherry, Banana, Apple"
+    ],
+    "correct_answer": "Apple, Banana, Cherry, Date",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Word Sequences",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [Apple, Banana, Cherry, Date]."
+  },
+  {
+    "id": "q_0474",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4-shape sequence: [Circle, Triangle, Square, Pentagon]. Which option reproduces the original sequence?",
+    "options": [
+      "Circle, Triangle, Square, Pentagon",
+      "Triangle, Circle, Pentagon, Square",
+      "Square, Circle, Triangle, Pentagon",
+      "Pentagon, Square, Triangle, Circle"
+    ],
+    "correct_answer": "Circle, Triangle, Square, Pentagon",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Shape Sequences",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [Circle, Triangle, Square, Pentagon]."
+  },
+  {
+    "id": "q_0475",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the celestial sequence: [Sun, Moon, Star, Comet]. Which option matches the original order?",
+    "options": [
+      "Sun, Moon, Star, Comet",
+      "Moon, Sun, Comet, Star",
+      "Star, Moon, Sun, Comet",
+      "Comet, Star, Moon, Sun"
+    ],
+    "correct_answer": "Sun, Moon, Star, Comet",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Celestial Sequences",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [Sun, Moon, Star, Comet]."
+  },
+  {
+    "id": "q_0476",
+    "round_type": "MEMORY",
+    "prompt": "Memorize & recall the 4-card suit sequence: [♠ Spades, ♥ Hearts, ♦ Diamonds, ♣ Clubs]. Which option matches the original order?",
+    "options": [
+      "♠ Spades, ♥ Hearts, ♦ Diamonds, ♣ Clubs",
+      "♥ Hearts, ♠ Spades, ♣ Clubs, ♦ Diamonds",
+      "♦ Diamonds, ♠ Spades, ♥ Hearts, ♣ Clubs",
+      "♣ Clubs, ♦ Diamonds, ♥ Hearts, ♠ Spades"
+    ],
+    "correct_answer": "♠ Spades, ♥ Hearts, ♦ Diamonds, ♣ Clubs",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Symbol Sequences",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [♠ Spades, ♥ Hearts, ♦ Diamonds, ♣ Clubs]."
+  },
+  {
+    "id": "q_0477",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the Greek letter sequence: [Alpha, Beta, Gamma, Delta]. Which option reproduces the exact order?",
+    "options": [
+      "Alpha, Beta, Gamma, Delta",
+      "Beta, Alpha, Delta, Gamma",
+      "Gamma, Beta, Alpha, Delta",
+      "Delta, Gamma, Beta, Alpha"
+    ],
+    "correct_answer": "Alpha, Beta, Gamma, Delta",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Greek Letters",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [Alpha, Beta, Gamma, Delta]."
+  },
+  {
+    "id": "q_0478",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4-instrument sequence: [Violin, Flute, Drum, Piano]. Which option reproduces the exact sequence?",
+    "options": [
+      "Violin, Flute, Drum, Piano",
+      "Flute, Violin, Piano, Drum",
+      "Drum, Flute, Violin, Piano",
+      "Piano, Drum, Flute, Violin"
+    ],
+    "correct_answer": "Violin, Flute, Drum, Piano",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Word Sequences",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [Violin, Flute, Drum, Piano]."
+  },
+  {
+    "id": "q_0479",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4-element sequence: [Earth, Air, Fire, Water]. Which option matches the exact order?",
+    "options": [
+      "Earth, Air, Fire, Water",
+      "Air, Earth, Water, Fire",
+      "Fire, Air, Earth, Water",
+      "Water, Fire, Air, Earth"
+    ],
+    "correct_answer": "Earth, Air, Fire, Water",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Classical Elements",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [Earth, Air, Fire, Water]."
+  },
+  {
+    "id": "q_0480",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4-currency sequence: [Dollar, Euro, Pound, Yen]. Which option reproduces the exact original order?",
+    "options": [
+      "Dollar, Euro, Pound, Yen",
+      "Euro, Dollar, Yen, Pound",
+      "Pound, Euro, Dollar, Yen",
+      "Yen, Pound, Euro, Dollar"
+    ],
+    "correct_answer": "Dollar, Euro, Pound, Yen",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Currencies",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [Dollar, Euro, Pound, Yen]."
+  },
+  {
+    "id": "q_0481",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4-gemstone sequence: [Ruby, Emerald, Sapphire, Diamond]. Which option matches the exact order?",
+    "options": [
+      "Ruby, Emerald, Sapphire, Diamond",
+      "Emerald, Ruby, Diamond, Sapphire",
+      "Sapphire, Emerald, Ruby, Diamond",
+      "Diamond, Sapphire, Emerald, Ruby"
+    ],
+    "correct_answer": "Ruby, Emerald, Sapphire, Diamond",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Gemstones",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [Ruby, Emerald, Sapphire, Diamond]."
+  },
+  {
+    "id": "q_0482",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4-metal sequence: [Gold, Silver, Bronze, Platinum]. Which option matches the original order?",
+    "options": [
+      "Gold, Silver, Bronze, Platinum",
+      "Silver, Gold, Platinum, Bronze",
+      "Bronze, Silver, Gold, Platinum",
+      "Platinum, Bronze, Silver, Gold"
+    ],
+    "correct_answer": "Gold, Silver, Bronze, Platinum",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Metals",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [Gold, Silver, Bronze, Platinum]."
+  },
+  {
+    "id": "q_0483",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4-season sequence: [Spring, Summer, Autumn, Winter]. Which option reproduces the exact order?",
+    "options": [
+      "Spring, Summer, Autumn, Winter",
+      "Summer, Spring, Winter, Autumn",
+      "Autumn, Summer, Spring, Winter",
+      "Winter, Autumn, Summer, Spring"
+    ],
+    "correct_answer": "Spring, Summer, Autumn, Winter",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Seasons",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [Spring, Summer, Autumn, Winter]."
+  },
+  {
+    "id": "q_0484",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4-direction sequence: [North, East, South, West]. Which option matches the exact order?",
+    "options": [
+      "North, East, South, West",
+      "East, North, West, South",
+      "South, East, North, West",
+      "West, South, East, North"
+    ],
+    "correct_answer": "North, East, South, West",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Compass Directions",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [North, East, South, West]."
+  },
+  {
+    "id": "q_0485",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4-digit sequence: [7, 3, 9, 2]. Which option reproduces the exact sequence?",
+    "options": [
+      "7, 3, 9, 2",
+      "3, 7, 2, 9",
+      "9, 3, 7, 2",
+      "2, 9, 3, 7"
+    ],
+    "correct_answer": "7, 3, 9, 2",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Sequences",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [7, 3, 9, 2]."
+  },
+  {
+    "id": "q_0486",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4-digit sequence: [5, 8, 1, 4]. Which option reproduces the exact sequence?",
+    "options": [
+      "5, 8, 1, 4",
+      "8, 5, 4, 1",
+      "1, 5, 8, 4",
+      "4, 1, 8, 5"
+    ],
+    "correct_answer": "5, 8, 1, 4",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Sequences",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [5, 8, 1, 4]."
+  },
+  {
+    "id": "q_0487",
+    "round_type": "MEMORY",
+    "prompt": "Observe the aerospace sequence: [🚀, 🛰️, 🛸, 🪐]. Select the matching exact order:",
+    "options": [
+      "🚀, 🛰️, 🛸, 🪐",
+      "🛰️, 🚀, 🪐, 🛸",
+      "🛸, 🚀, 🛰️, 🪐",
+      "🪐, 🛸, 🛰️, 🚀"
+    ],
+    "correct_answer": "🚀, 🛰️, 🛸, 🪐",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Emoji Sequences",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original sequence is [🚀, 🛰️, 🛸, 🪐]."
+  },
+  {
+    "id": "q_0488",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4-animal sequence: [Lion, Tiger, Leopard, Cheetah]. Which option reproduces the exact order?",
+    "options": [
+      "Lion, Tiger, Leopard, Cheetah",
+      "Tiger, Lion, Cheetah, Leopard",
+      "Leopard, Tiger, Lion, Cheetah",
+      "Cheetah, Leopard, Tiger, Lion"
+    ],
+    "correct_answer": "Lion, Tiger, Leopard, Cheetah",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Animals",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [Lion, Tiger, Leopard, Cheetah]."
+  },
+  {
+    "id": "q_0489",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4-planet sequence: [Mercury, Venus, Earth, Mars]. Which option reproduces the exact order?",
+    "options": [
+      "Mercury, Venus, Earth, Mars",
+      "Venus, Mercury, Mars, Earth",
+      "Earth, Venus, Mercury, Mars",
+      "Mars, Earth, Venus, Mercury"
+    ],
+    "correct_answer": "Mercury, Venus, Earth, Mars",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Planets",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [Mercury, Venus, Earth, Mars]."
+  },
+  {
+    "id": "q_0490",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4-tree sequence: [Oak, Pine, Birch, Cedar]. Which option matches the exact order?",
+    "options": [
+      "Oak, Pine, Birch, Cedar",
+      "Pine, Oak, Cedar, Birch",
+      "Birch, Pine, Oak, Cedar",
+      "Cedar, Birch, Pine, Oak"
+    ],
+    "correct_answer": "Oak, Pine, Birch, Cedar",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Trees",
+    "pattern_type": "Sequence Retention",
+    "time_limit_sec": 25,
+    "explanation": "The original order is [Oak, Pine, Birch, Cedar]."
+  },
+  {
+    "id": "q_0491",
+    "round_type": "MEMORY",
+    "prompt": "Retain this 4-word sequence: [Mercury, Venus, Earth, Mars]. Which planet appeared in the 3rd position?",
+    "options": [
+      "Mercury",
+      "Venus",
+      "Earth",
+      "Mars"
+    ],
+    "correct_answer": "Earth",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In the sequence [Mercury, Venus, Earth, Mars], Earth is the 3rd item."
+  },
+  {
+    "id": "q_0492",
+    "round_type": "MEMORY",
+    "prompt": "Study this ordered list: [Router, Switch, Firewall, Gateway]. Which network device was in the 2nd position?",
+    "options": [
+      "Router",
+      "Switch",
+      "Firewall",
+      "Gateway"
+    ],
+    "correct_answer": "Switch",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In the sequence [Router, Switch, Firewall, Gateway], Switch is the 2nd item."
+  },
+  {
+    "id": "q_0493",
+    "round_type": "MEMORY",
+    "prompt": "Remember this 4-item list: [Argon, Neon, Helium, Krypton]. Which noble gas occupied the 1st position?",
+    "options": [
+      "Argon",
+      "Neon",
+      "Helium",
+      "Krypton"
+    ],
+    "correct_answer": "Argon",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In the list [Argon, Neon, Helium, Krypton], Argon is the 1st item."
+  },
+  {
+    "id": "q_0494",
+    "round_type": "MEMORY",
+    "prompt": "Study the 4-city order: [Tokyo, Paris, Cairo, Lima]. Which city appeared in the 4th position?",
+    "options": [
+      "Tokyo",
+      "Paris",
+      "Cairo",
+      "Lima"
+    ],
+    "correct_answer": "Lima",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In [Tokyo, Paris, Cairo, Lima], Lima is the 4th item."
+  },
+  {
+    "id": "q_0495",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the code sequence: [Echo, Bravo, Delta, Alpha]. Which phonetic codeword was 3rd?",
+    "options": [
+      "Echo",
+      "Bravo",
+      "Delta",
+      "Alpha"
+    ],
+    "correct_answer": "Delta",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Phonetic Codes",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In [Echo, Bravo, Delta, Alpha], Delta is in the 3rd position."
+  },
+  {
+    "id": "q_0496",
+    "round_type": "MEMORY",
+    "prompt": "Retain this list: [Copper, Zinc, Nickel, Cobalt]. Which metal was listed in the 2nd position?",
+    "options": [
+      "Copper",
+      "Zinc",
+      "Nickel",
+      "Cobalt"
+    ],
+    "correct_answer": "Zinc",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In [Copper, Zinc, Nickel, Cobalt], Zinc is the 2nd item."
+  },
+  {
+    "id": "q_0497",
+    "round_type": "MEMORY",
+    "prompt": "Study the sequence: [Cello, Viola, Harp, Flute]. Which instrument was in the 3rd position?",
+    "options": [
+      "Cello",
+      "Viola",
+      "Harp",
+      "Flute"
+    ],
+    "correct_answer": "Harp",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In [Cello, Viola, Harp, Flute], Harp is the 3rd item."
+  },
+  {
+    "id": "q_0498",
+    "round_type": "MEMORY",
+    "prompt": "Memorize this sequence of terrestrial planets: [Mercury, Venus, Earth, Mars]. Which planet was 1st?",
+    "options": [
+      "Mercury",
+      "Venus",
+      "Earth",
+      "Mars"
+    ],
+    "correct_answer": "Mercury",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In [Mercury, Venus, Earth, Mars], Mercury is the 1st item."
+  },
+  {
+    "id": "q_0499",
+    "round_type": "MEMORY",
+    "prompt": "Retain this list: [Amazon, Nile, Yangtze, Danube]. Which river was in the 4th position?",
+    "options": [
+      "Amazon",
+      "Nile",
+      "Yangtze",
+      "Danube"
+    ],
+    "correct_answer": "Danube",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In [Amazon, Nile, Yangtze, Danube], Danube is the 4th item."
+  },
+  {
+    "id": "q_0500",
+    "round_type": "MEMORY",
+    "prompt": "Study the sequence: [Graphene, Diamond, Fullerene, Graphite]. Which allotrope was 2nd?",
+    "options": [
+      "Graphene",
+      "Diamond",
+      "Fullerene",
+      "Graphite"
+    ],
+    "correct_answer": "Diamond",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In [Graphene, Diamond, Fullerene, Graphite], Diamond is in the 2nd position."
+  },
+  {
+    "id": "q_0501",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the list: [Proton, Electron, Neutron, Positron]. Which subatomic particle was 3rd?",
+    "options": [
+      "Proton",
+      "Electron",
+      "Neutron",
+      "Positron"
+    ],
+    "correct_answer": "Neutron",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In [Proton, Electron, Neutron, Positron], Neutron is in the 3rd position."
+  },
+  {
+    "id": "q_0502",
+    "round_type": "MEMORY",
+    "prompt": "Retain the sequence: [Sapphire, Ruby, Topaz, Opal]. Which gemstone was 1st?",
+    "options": [
+      "Sapphire",
+      "Ruby",
+      "Topaz",
+      "Opal"
+    ],
+    "correct_answer": "Sapphire",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In [Sapphire, Ruby, Topaz, Opal], Sapphire is the 1st item."
+  },
+  {
+    "id": "q_0503",
+    "round_type": "MEMORY",
+    "prompt": "Study this list: [Himalayas, Andes, Rockies, Alps]. Which mountain range was 2nd?",
+    "options": [
+      "Himalayas",
+      "Andes",
+      "Rockies",
+      "Alps"
+    ],
+    "correct_answer": "Andes",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In [Himalayas, Andes, Rockies, Alps], Andes is the 2nd item."
+  },
+  {
+    "id": "q_0504",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4 numbers: [42, 17, 89, 63]. Which number was in the 4th position?",
+    "options": [
+      "42",
+      "17",
+      "89",
+      "63"
+    ],
+    "correct_answer": "63",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In [42, 17, 89, 63], 63 is the 4th number."
+  },
+  {
+    "id": "q_0505",
+    "round_type": "MEMORY",
+    "prompt": "Retain this order: [Python, Rust, Kotlin, Swift]. Which programming language was 1st?",
+    "options": [
+      "Python",
+      "Rust",
+      "Kotlin",
+      "Swift"
+    ],
+    "correct_answer": "Python",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In [Python, Rust, Kotlin, Swift], Python is the 1st language."
+  },
+  {
+    "id": "q_0506",
+    "round_type": "MEMORY",
+    "prompt": "Study the order: [Oxygen, Nitrogen, Hydrogen, Carbon]. Which element was in the 3rd position?",
+    "options": [
+      "Oxygen",
+      "Nitrogen",
+      "Hydrogen",
+      "Carbon"
+    ],
+    "correct_answer": "Hydrogen",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In [Oxygen, Nitrogen, Hydrogen, Carbon], Hydrogen is the 3rd element."
+  },
+  {
+    "id": "q_0507",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the list: [Cornea, Retina, Iris, Pupil]. Which anatomical part of the eye was 2nd?",
+    "options": [
+      "Cornea",
+      "Retina",
+      "Iris",
+      "Pupil"
+    ],
+    "correct_answer": "Retina",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In [Cornea, Retina, Iris, Pupil], Retina is the 2nd item."
+  },
+  {
+    "id": "q_0508",
+    "round_type": "MEMORY",
+    "prompt": "Retain this list: [Linux, Windows, macOS, Android]. Which operating system was 4th?",
+    "options": [
+      "Linux",
+      "Windows",
+      "macOS",
+      "Android"
+    ],
+    "correct_answer": "Android",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In [Linux, Windows, macOS, Android], Android is the 4th OS."
+  },
+  {
+    "id": "q_0509",
+    "round_type": "MEMORY",
+    "prompt": "Study the sequence: [TCP, UDP, IP, ICMP]. Which protocol was in the 1st position?",
+    "options": [
+      "TCP",
+      "UDP",
+      "IP",
+      "ICMP"
+    ],
+    "correct_answer": "TCP",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In [TCP, UDP, IP, ICMP], TCP is the 1st protocol."
+  },
+  {
+    "id": "q_0510",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the list: [Gold, Silver, Platinum, Palladium]. Which precious metal was 3rd?",
+    "options": [
+      "Gold",
+      "Silver",
+      "Platinum",
+      "Palladium"
+    ],
+    "correct_answer": "Platinum",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Ordinal Recall",
+    "pattern_type": "Position Retrieval",
+    "time_limit_sec": 25,
+    "explanation": "In [Gold, Silver, Platinum, Palladium], Platinum is the 3rd metal."
+  },
+  {
+    "id": "q_0511",
+    "round_type": "MEMORY",
+    "prompt": "Study this order: [Router, Switch, Firewall, Server]. Which device immediately preceded Firewall?",
+    "options": [
+      "Router",
+      "Switch",
+      "Server",
+      "Gateway"
+    ],
+    "correct_answer": "Switch",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Predecessor Recall",
+    "time_limit_sec": 25,
+    "explanation": "In [Router, Switch, Firewall, Server], Switch immediately precedes Firewall."
+  },
+  {
+    "id": "q_0512",
+    "round_type": "MEMORY",
+    "prompt": "Memorize this sequence: [Alpha, Beta, Gamma, Delta]. Which letter immediately followed Beta?",
+    "options": [
+      "Alpha",
+      "Gamma",
+      "Delta",
+      "Epsilon"
+    ],
+    "correct_answer": "Gamma",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Successor Recall",
+    "time_limit_sec": 25,
+    "explanation": "Gamma immediately follows Beta in the sequence [Alpha, Beta, Gamma, Delta]."
+  },
+  {
+    "id": "q_0513",
+    "round_type": "MEMORY",
+    "prompt": "Study the order: [Mercury, Venus, Earth, Mars]. Which planet immediately preceded Earth?",
+    "options": [
+      "Mercury",
+      "Venus",
+      "Mars",
+      "Jupiter"
+    ],
+    "correct_answer": "Venus",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Predecessor Recall",
+    "time_limit_sec": 25,
+    "explanation": "Venus immediately precedes Earth in the sequence [Mercury, Venus, Earth, Mars]."
+  },
+  {
+    "id": "q_0514",
+    "round_type": "MEMORY",
+    "prompt": "Memorize this list: [Spring, Summer, Autumn, Winter]. Which season immediately followed Summer?",
+    "options": [
+      "Spring",
+      "Autumn",
+      "Winter",
+      "Monsoon"
+    ],
+    "correct_answer": "Autumn",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Successor Recall",
+    "time_limit_sec": 25,
+    "explanation": "Autumn immediately follows Summer in [Spring, Summer, Autumn, Winter]."
+  },
+  {
+    "id": "q_0515",
+    "round_type": "MEMORY",
+    "prompt": "Study the sequence: [Red, Orange, Yellow, Green]. Which color immediately preceded Yellow?",
+    "options": [
+      "Red",
+      "Orange",
+      "Green",
+      "Blue"
+    ],
+    "correct_answer": "Orange",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Predecessor Recall",
+    "time_limit_sec": 25,
+    "explanation": "Orange immediately precedes Yellow in [Red, Orange, Yellow, Green]."
+  },
+  {
+    "id": "q_0516",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the order: [Gold, Silver, Bronze, Copper]. Which metal immediately followed Silver?",
+    "options": [
+      "Gold",
+      "Bronze",
+      "Copper",
+      "Iron"
+    ],
+    "correct_answer": "Bronze",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Successor Recall",
+    "time_limit_sec": 25,
+    "explanation": "Bronze immediately follows Silver in [Gold, Silver, Bronze, Copper]."
+  },
+  {
+    "id": "q_0517",
+    "round_type": "MEMORY",
+    "prompt": "Study this list: [Circle, Triangle, Square, Pentagon]. Which shape immediately preceded Square?",
+    "options": [
+      "Circle",
+      "Triangle",
+      "Pentagon",
+      "Hexagon"
+    ],
+    "correct_answer": "Triangle",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Predecessor Recall",
+    "time_limit_sec": 25,
+    "explanation": "Triangle immediately precedes Square in [Circle, Triangle, Square, Pentagon]."
+  },
+  {
+    "id": "q_0518",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the sequence: [North, East, South, West]. Which direction immediately followed East?",
+    "options": [
+      "North",
+      "South",
+      "West",
+      "Northeast"
+    ],
+    "correct_answer": "South",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Successor Recall",
+    "time_limit_sec": 25,
+    "explanation": "South immediately follows East in [North, East, South, West]."
+  },
+  {
+    "id": "q_0519",
+    "round_type": "MEMORY",
+    "prompt": "Study the list: [Violin, Viola, Cello, Bass]. Which instrument immediately preceded Cello?",
+    "options": [
+      "Violin",
+      "Viola",
+      "Bass",
+      "Harp"
+    ],
+    "correct_answer": "Viola",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Predecessor Recall",
+    "time_limit_sec": 25,
+    "explanation": "Viola immediately precedes Cello in [Violin, Viola, Cello, Bass]."
+  },
+  {
+    "id": "q_0520",
+    "round_type": "MEMORY",
+    "prompt": "Memorize this order: [Solid, Liquid, Gas, Plasma]. Which state of matter immediately followed Liquid?",
+    "options": [
+      "Solid",
+      "Gas",
+      "Plasma",
+      "Superfluid"
+    ],
+    "correct_answer": "Gas",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Successor Recall",
+    "time_limit_sec": 25,
+    "explanation": "Gas immediately follows Liquid in [Solid, Liquid, Gas, Plasma]."
+  },
+  {
+    "id": "q_0521",
+    "round_type": "MEMORY",
+    "prompt": "Study this order: [Apple, Banana, Cherry, Date]. Which fruit immediately preceded Date?",
+    "options": [
+      "Apple",
+      "Banana",
+      "Cherry",
+      "Elderberry"
+    ],
+    "correct_answer": "Cherry",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Predecessor Recall",
+    "time_limit_sec": 25,
+    "explanation": "Cherry immediately precedes Date in [Apple, Banana, Cherry, Date]."
+  },
+  {
+    "id": "q_0522",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the list: [Proton, Neutron, Electron, Photon]. Which particle immediately followed Neutron?",
+    "options": [
+      "Proton",
+      "Electron",
+      "Photon",
+      "Neutrino"
+    ],
+    "correct_answer": "Electron",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Successor Recall",
+    "time_limit_sec": 25,
+    "explanation": "Electron immediately follows Neutron in [Proton, Neutron, Electron, Photon]."
+  },
+  {
+    "id": "q_0523",
+    "round_type": "MEMORY",
+    "prompt": "Study the sequence: [Kilobyte, Megabyte, Gigabyte, Terabyte]. Which unit immediately preceded Terabyte?",
+    "options": [
+      "Kilobyte",
+      "Megabyte",
+      "Gigabyte",
+      "Petabyte"
+    ],
+    "correct_answer": "Gigabyte",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Predecessor Recall",
+    "time_limit_sec": 25,
+    "explanation": "Gigabyte immediately precedes Terabyte in [Kilobyte, Megabyte, Gigabyte, Terabyte]."
+  },
+  {
+    "id": "q_0524",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the order: [Delhi, Mumbai, Kolkata, Chennai]. Which city immediately followed Mumbai?",
+    "options": [
+      "Delhi",
+      "Kolkata",
+      "Chennai",
+      "Bengaluru"
+    ],
+    "correct_answer": "Kolkata",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Successor Recall",
+    "time_limit_sec": 25,
+    "explanation": "Kolkata immediately follows Mumbai in [Delhi, Mumbai, Kolkata, Chennai]."
+  },
+  {
+    "id": "q_0525",
+    "round_type": "MEMORY",
+    "prompt": "Study the list: [Troposphere, Stratosphere, Mesosphere, Thermosphere]. Which atmospheric layer immediately preceded Mesosphere?",
+    "options": [
+      "Troposphere",
+      "Stratosphere",
+      "Thermosphere",
+      "Exosphere"
+    ],
+    "correct_answer": "Stratosphere",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Predecessor Recall",
+    "time_limit_sec": 25,
+    "explanation": "Stratosphere immediately precedes Mesosphere in [Troposphere, Stratosphere, Mesosphere, Thermosphere]."
+  },
+  {
+    "id": "q_0526",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the sequence: [10, 25, 50, 100]. Which number immediately followed 25?",
+    "options": [
+      "10",
+      "50",
+      "100",
+      "75"
+    ],
+    "correct_answer": "50",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Successor Recall",
+    "time_limit_sec": 25,
+    "explanation": "50 immediately follows 25 in [10, 25, 50, 100]."
+  },
+  {
+    "id": "q_0527",
+    "round_type": "MEMORY",
+    "prompt": "Study the list: [Genesis, Exodus, Leviticus, Numbers]. Which book immediately preceded Numbers?",
+    "options": [
+      "Genesis",
+      "Exodus",
+      "Leviticus",
+      "Deuteronomy"
+    ],
+    "correct_answer": "Leviticus",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Predecessor Recall",
+    "time_limit_sec": 25,
+    "explanation": "Leviticus immediately precedes Numbers in the provided list."
+  },
+  {
+    "id": "q_0528",
+    "round_type": "MEMORY",
+    "prompt": "Memorize this order: [Iron, Copper, Silver, Gold]. Which metal immediately followed Copper?",
+    "options": [
+      "Iron",
+      "Silver",
+      "Gold",
+      "Bronze"
+    ],
+    "correct_answer": "Silver",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Relative Position",
+    "pattern_type": "Successor Recall",
+    "time_limit_sec": 25,
+    "explanation": "Silver immediately follows Copper in [Iron, Copper, Silver, Gold]."
+  },
+  {
+    "id": "q_0529",
+    "round_type": "MEMORY",
+    "prompt": "A presented list contained: [Argon, Neon, Helium, Krypton]. Which of the following elements was present in that list?",
+    "options": [
+      "Xenon",
+      "Radon",
+      "Argon",
+      "Nitrogen"
+    ],
+    "correct_answer": "Argon",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Set Membership",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "Argon was one of the four elements in [Argon, Neon, Helium, Krypton]."
+  },
+  {
+    "id": "q_0530",
+    "round_type": "MEMORY",
+    "prompt": "The memorized set was: [Sapphire, Emerald, Ruby, Topaz]. Which gemstone was part of the original set?",
+    "options": [
+      "Diamond",
+      "Opal",
+      "Emerald",
+      "Amethyst"
+    ],
+    "correct_answer": "Emerald",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Set Membership",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "Emerald was included in [Sapphire, Emerald, Ruby, Topaz]."
+  },
+  {
+    "id": "q_0531",
+    "round_type": "MEMORY",
+    "prompt": "A four-item list showed: [Nile, Amazon, Yangtze, Mississippi]. Which river was in the original list?",
+    "options": [
+      "Danube",
+      "Volga",
+      "Yangtze",
+      "Thames"
+    ],
+    "correct_answer": "Yangtze",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Set Membership",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "Yangtze was in the original four-item list."
+  },
+  {
+    "id": "q_0532",
+    "round_type": "MEMORY",
+    "prompt": "The initial list contained: [Pluto, Ceres, Eris, Haumea]. Which dwarf planet was NOT in the initial list?",
+    "options": [
+      "Pluto",
+      "Ceres",
+      "Makemake",
+      "Eris"
+    ],
+    "correct_answer": "Makemake",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Exclusion Recognition",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "Makemake was not in the original list [Pluto, Ceres, Eris, Haumea]."
+  },
+  {
+    "id": "q_0533",
+    "round_type": "MEMORY",
+    "prompt": "A set contained the animals: [Lion, Leopard, Cheetah, Jaguar]. Which animal was in the set?",
+    "options": [
+      "Tiger",
+      "Puma",
+      "Leopard",
+      "Cougar"
+    ],
+    "correct_answer": "Leopard",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Set Membership",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "Leopard was part of the set [Lion, Leopard, Cheetah, Jaguar]."
+  },
+  {
+    "id": "q_0534",
+    "round_type": "MEMORY",
+    "prompt": "The memorized group consisted of: [Tokyo, Seoul, Beijing, Bangkok]. Which Asian capital was in the group?",
+    "options": [
+      "Hanoi",
+      "Seoul",
+      "Manila",
+      "Jakarta"
+    ],
+    "correct_answer": "Seoul",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Set Membership",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "Seoul was in the list [Tokyo, Seoul, Beijing, Bangkok]."
+  },
+  {
+    "id": "q_0535",
+    "round_type": "MEMORY",
+    "prompt": "A sequence displayed: [Python, C++, Java, JavaScript]. Which language was NOT in the sequence?",
+    "options": [
+      "Python",
+      "Rust",
+      "Java",
+      "C++"
+    ],
+    "correct_answer": "Rust",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Exclusion Recognition",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "Rust was not in the original list [Python, C++, Java, JavaScript]."
+  },
+  {
+    "id": "q_0536",
+    "round_type": "MEMORY",
+    "prompt": "The initial group showed: [Mars, Venus, Saturn, Neptune]. Which planet was present in the group?",
+    "options": [
+      "Jupiter",
+      "Uranus",
+      "Venus",
+      "Mercury"
+    ],
+    "correct_answer": "Venus",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Set Membership",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "Venus was in the group [Mars, Venus, Saturn, Neptune]."
+  },
+  {
+    "id": "q_0537",
+    "round_type": "MEMORY",
+    "prompt": "A set contained the musical notes: [Do, Re, Mi, Fa]. Which note was part of the set?",
+    "options": [
+      "Sol",
+      "La",
+      "Mi",
+      "Ti"
+    ],
+    "correct_answer": "Mi",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Set Membership",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "Mi was part of the set [Do, Re, Mi, Fa]."
+  },
+  {
+    "id": "q_0538",
+    "round_type": "MEMORY",
+    "prompt": "The memorized set included: [Diamond, Graphite, Graphene, Fullerene]. Which carbon allotrope was in the set?",
+    "options": [
+      "Lonsdaleite",
+      "Graphite",
+      "Carbyne",
+      "Amorphous Carbon"
+    ],
+    "correct_answer": "Graphite",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Set Membership",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "Graphite was in the set [Diamond, Graphite, Graphene, Fullerene]."
+  },
+  {
+    "id": "q_0539",
+    "round_type": "MEMORY",
+    "prompt": "A list showed: [Hydrogen, Helium, Lithium, Beryllium]. Which chemical element was in the list?",
+    "options": [
+      "Boron",
+      "Carbon",
+      "Lithium",
+      "Nitrogen"
+    ],
+    "correct_answer": "Lithium",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Set Membership",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "Lithium was present in [Hydrogen, Helium, Lithium, Beryllium]."
+  },
+  {
+    "id": "q_0540",
+    "round_type": "MEMORY",
+    "prompt": "The initial set showed: [TCP, UDP, FTP, HTTP]. Which protocol was in the set?",
+    "options": [
+      "SMTP",
+      "DNS",
+      "UDP",
+      "SSH"
+    ],
+    "correct_answer": "UDP",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Set Membership",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "UDP was in the set [TCP, UDP, FTP, HTTP]."
+  },
+  {
+    "id": "q_0541",
+    "round_type": "MEMORY",
+    "prompt": "A four-item list showed: [Whale, Dolphin, Porpoise, Seal]. Which mammal was present in the list?",
+    "options": [
+      "Walrus",
+      "Sea Otter",
+      "Dolphin",
+      "Manatee"
+    ],
+    "correct_answer": "Dolphin",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Set Membership",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "Dolphin was part of [Whale, Dolphin, Porpoise, Seal]."
+  },
+  {
+    "id": "q_0542",
+    "round_type": "MEMORY",
+    "prompt": "The memorized list contained: [Red, Blue, Yellow, Green]. Which secondary color was NOT in the list?",
+    "options": [
+      "Orange",
+      "Yellow",
+      "Blue",
+      "Red"
+    ],
+    "correct_answer": "Orange",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Exclusion Recognition",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "Orange was not in the original list [Red, Blue, Yellow, Green]."
+  },
+  {
+    "id": "q_0543",
+    "round_type": "MEMORY",
+    "prompt": "A displayed set showed: [Andes, Alps, Rockies, Urals]. Which mountain chain was in the set?",
+    "options": [
+      "Caucasus",
+      "Himalayas",
+      "Alps",
+      "Pyrenees"
+    ],
+    "correct_answer": "Alps",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Set Membership",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "Alps was in the set [Andes, Alps, Rockies, Urals]."
+  },
+  {
+    "id": "q_0544",
+    "round_type": "MEMORY",
+    "prompt": "The group contained: [Guitar, Bass, Drums, Keyboard]. Which musical instrument was in the group?",
+    "options": [
+      "Saxophone",
+      "Trumpet",
+      "Keyboard",
+      "Violin"
+    ],
+    "correct_answer": "Keyboard",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Set Membership",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "Keyboard was in the group [Guitar, Bass, Drums, Keyboard]."
+  },
+  {
+    "id": "q_0545",
+    "round_type": "MEMORY",
+    "prompt": "A list displayed: [11, 13, 17, 19]. Which prime number was in the list?",
+    "options": [
+      "23",
+      "29",
+      "17",
+      "31"
+    ],
+    "correct_answer": "17",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Set Membership",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "17 was in the list [11, 13, 17, 19]."
+  },
+  {
+    "id": "q_0546",
+    "round_type": "MEMORY",
+    "prompt": "The memorized items were: [Chrome, Firefox, Safari, Edge]. Which browser was in the group?",
+    "options": [
+      "Opera",
+      "Brave",
+      "Safari",
+      "Tor"
+    ],
+    "correct_answer": "Safari",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Set Membership",
+    "pattern_type": "Item Recognition",
+    "time_limit_sec": 25,
+    "explanation": "Safari was in the group [Chrome, Firefox, Safari, Edge]."
+  },
+  {
+    "id": "q_0547",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4-color pattern: [Amber, Cyan, Magenta, Violet]. What is the exact reverse order?",
+    "options": [
+      "Violet, Magenta, Cyan, Amber",
+      "Magenta, Violet, Amber, Cyan",
+      "Cyan, Amber, Violet, Magenta",
+      "Amber, Cyan, Magenta, Violet"
+    ],
+    "correct_answer": "Violet, Magenta, Cyan, Amber",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Reverse Recall",
+    "pattern_type": "Reverse Order",
+    "time_limit_sec": 25,
+    "explanation": "Reversing [Amber, Cyan, Magenta, Violet] yields [Violet, Magenta, Cyan, Amber]."
+  },
+  {
+    "id": "q_0548",
+    "round_type": "MEMORY",
+    "prompt": "Remember the 4-letter sequence: [W, X, Y, Z]. What is the exact reverse sequence?",
+    "options": [
+      "Z, Y, X, W",
+      "Y, Z, W, X",
+      "X, W, Z, Y",
+      "W, X, Y, Z"
+    ],
+    "correct_answer": "Z, Y, X, W",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Reverse Recall",
+    "pattern_type": "Reverse Order",
+    "time_limit_sec": 25,
+    "explanation": "Reversing [W, X, Y, Z] gives [Z, Y, X, W]."
+  },
+  {
+    "id": "q_0549",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the word list: [North, East, South, West]. What is the exact reverse order?",
+    "options": [
+      "West, South, East, North",
+      "South, West, North, East",
+      "East, North, West, South",
+      "North, East, South, West"
+    ],
+    "correct_answer": "West, South, East, North",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Reverse Recall",
+    "pattern_type": "Reverse Order",
+    "time_limit_sec": 25,
+    "explanation": "Reversing [North, East, South, West] gives [West, South, East, North]."
+  },
+  {
+    "id": "q_0550",
+    "round_type": "MEMORY",
+    "prompt": "Remember the 4 numbers: [1, 2, 3, 4]. What is the reverse sequence?",
+    "options": [
+      "4, 3, 2, 1",
+      "3, 4, 1, 2",
+      "2, 1, 4, 3",
+      "1, 2, 3, 4"
+    ],
+    "correct_answer": "4, 3, 2, 1",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Reverse Recall",
+    "pattern_type": "Reverse Order",
+    "time_limit_sec": 25,
+    "explanation": "Reversing [1, 2, 3, 4] gives [4, 3, 2, 1]."
+  },
+  {
+    "id": "q_0551",
+    "round_type": "MEMORY",
+    "prompt": "Memorize this sequence: [Gold, Silver, Bronze, Iron]. What is the reverse order?",
+    "options": [
+      "Iron, Bronze, Silver, Gold",
+      "Bronze, Iron, Gold, Silver",
+      "Silver, Gold, Iron, Bronze",
+      "Gold, Silver, Bronze, Iron"
+    ],
+    "correct_answer": "Iron, Bronze, Silver, Gold",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Reverse Recall",
+    "pattern_type": "Reverse Order",
+    "time_limit_sec": 25,
+    "explanation": "Reversing [Gold, Silver, Bronze, Iron] yields [Iron, Bronze, Silver, Gold]."
+  },
+  {
+    "id": "q_0552",
+    "round_type": "MEMORY",
+    "prompt": "Remember the 4 seasons: [Spring, Summer, Autumn, Winter]. What is the exact reverse order?",
+    "options": [
+      "Winter, Autumn, Summer, Spring",
+      "Autumn, Winter, Spring, Summer",
+      "Summer, Spring, Winter, Autumn",
+      "Spring, Summer, Autumn, Winter"
+    ],
+    "correct_answer": "Winter, Autumn, Summer, Spring",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Reverse Recall",
+    "pattern_type": "Reverse Order",
+    "time_limit_sec": 25,
+    "explanation": "Reversing [Spring, Summer, Autumn, Winter] yields [Winter, Autumn, Summer, Spring]."
+  },
+  {
+    "id": "q_0553",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the list: [Sun, Earth, Moon, Mars]. What is the reverse sequence?",
+    "options": [
+      "Mars, Moon, Earth, Sun",
+      "Moon, Mars, Sun, Earth",
+      "Earth, Sun, Mars, Moon",
+      "Sun, Earth, Moon, Mars"
+    ],
+    "correct_answer": "Mars, Moon, Earth, Sun",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Reverse Recall",
+    "pattern_type": "Reverse Order",
+    "time_limit_sec": 25,
+    "explanation": "Reversing [Sun, Earth, Moon, Mars] yields [Mars, Moon, Earth, Sun]."
+  },
+  {
+    "id": "q_0554",
+    "round_type": "MEMORY",
+    "prompt": "Remember the order: [Alpha, Beta, Gamma, Delta]. What is the reverse order?",
+    "options": [
+      "Delta, Gamma, Beta, Alpha",
+      "Gamma, Delta, Alpha, Beta",
+      "Beta, Alpha, Delta, Gamma",
+      "Alpha, Beta, Gamma, Delta"
+    ],
+    "correct_answer": "Delta, Gamma, Beta, Alpha",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Reverse Recall",
+    "pattern_type": "Reverse Order",
+    "time_limit_sec": 25,
+    "explanation": "Reversing [Alpha, Beta, Gamma, Delta] yields [Delta, Gamma, Beta, Alpha]."
+  },
+  {
+    "id": "q_0555",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4 animals: [Cat, Dog, Fox, Wolf]. What is the reverse order?",
+    "options": [
+      "Wolf, Fox, Dog, Cat",
+      "Fox, Wolf, Cat, Dog",
+      "Dog, Cat, Wolf, Fox",
+      "Cat, Dog, Fox, Wolf"
+    ],
+    "correct_answer": "Wolf, Fox, Dog, Cat",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Reverse Recall",
+    "pattern_type": "Reverse Order",
+    "time_limit_sec": 25,
+    "explanation": "Reversing [Cat, Dog, Fox, Wolf] yields [Wolf, Fox, Dog, Cat]."
+  },
+  {
+    "id": "q_0556",
+    "round_type": "MEMORY",
+    "prompt": "Remember the list: [Red, Green, Blue, White]. What is the exact reverse order?",
+    "options": [
+      "White, Blue, Green, Red",
+      "Blue, White, Red, Green",
+      "Green, Red, White, Blue",
+      "Red, Green, Blue, White"
+    ],
+    "correct_answer": "White, Blue, Green, Red",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Reverse Recall",
+    "pattern_type": "Reverse Order",
+    "time_limit_sec": 25,
+    "explanation": "Reversing [Red, Green, Blue, White] yields [White, Blue, Green, Red]."
+  },
+  {
+    "id": "q_0557",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the digits: [9, 6, 3, 0]. What is the exact reverse order?",
+    "options": [
+      "0, 3, 6, 9",
+      "3, 0, 9, 6",
+      "6, 9, 0, 3",
+      "9, 6, 3, 0"
+    ],
+    "correct_answer": "0, 3, 6, 9",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Reverse Recall",
+    "pattern_type": "Reverse Order",
+    "time_limit_sec": 25,
+    "explanation": "Reversing [9, 6, 3, 0] gives [0, 3, 6, 9]."
+  },
+  {
+    "id": "q_0558",
+    "round_type": "MEMORY",
+    "prompt": "Remember the order: [Rome, Paris, Berlin, Madrid]. What is the reverse order?",
+    "options": [
+      "Madrid, Berlin, Paris, Rome",
+      "Berlin, Madrid, Rome, Paris",
+      "Paris, Rome, Madrid, Berlin",
+      "Rome, Paris, Berlin, Madrid"
+    ],
+    "correct_answer": "Madrid, Berlin, Paris, Rome",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Reverse Recall",
+    "pattern_type": "Reverse Order",
+    "time_limit_sec": 25,
+    "explanation": "Reversing [Rome, Paris, Berlin, Madrid] yields [Madrid, Berlin, Paris, Rome]."
+  },
+  {
+    "id": "q_0559",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 4 trees: [Cedar, Birch, Pine, Oak]. What is the reverse order?",
+    "options": [
+      "Oak, Pine, Birch, Cedar",
+      "Pine, Oak, Cedar, Birch",
+      "Birch, Cedar, Oak, Pine",
+      "Cedar, Birch, Pine, Oak"
+    ],
+    "correct_answer": "Oak, Pine, Birch, Cedar",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Reverse Recall",
+    "pattern_type": "Reverse Order",
+    "time_limit_sec": 25,
+    "explanation": "Reversing [Cedar, Birch, Pine, Oak] gives [Oak, Pine, Birch, Cedar]."
+  },
+  {
+    "id": "q_0560",
+    "round_type": "MEMORY",
+    "prompt": "Remember the sequence: [Solid, Liquid, Gas, Plasma]. What is the reverse order?",
+    "options": [
+      "Plasma, Gas, Liquid, Solid",
+      "Gas, Plasma, Solid, Liquid",
+      "Liquid, Solid, Plasma, Gas",
+      "Solid, Liquid, Gas, Plasma"
+    ],
+    "correct_answer": "Plasma, Gas, Liquid, Solid",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Reverse Recall",
+    "pattern_type": "Reverse Order",
+    "time_limit_sec": 25,
+    "explanation": "Reversing [Solid, Liquid, Gas, Plasma] gives [Plasma, Gas, Liquid, Solid]."
+  },
+  {
+    "id": "q_0561",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the list: [Pen, Pencil, Brush, Chalk]. What is the reverse order?",
+    "options": [
+      "Chalk, Brush, Pencil, Pen",
+      "Brush, Chalk, Pen, Pencil",
+      "Pencil, Pen, Chalk, Brush",
+      "Pen, Pencil, Brush, Chalk"
+    ],
+    "correct_answer": "Chalk, Brush, Pencil, Pen",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Reverse Recall",
+    "pattern_type": "Reverse Order",
+    "time_limit_sec": 25,
+    "explanation": "Reversing [Pen, Pencil, Brush, Chalk] gives [Chalk, Brush, Pencil, Pen]."
+  },
+  {
+    "id": "q_0562",
+    "round_type": "MEMORY",
+    "prompt": "Remember the list: [Hour, Minute, Second, Millisecond]. What is the reverse sequence?",
+    "options": [
+      "Millisecond, Second, Minute, Hour",
+      "Second, Millisecond, Hour, Minute",
+      "Minute, Hour, Millisecond, Second",
+      "Hour, Minute, Second, Millisecond"
+    ],
+    "correct_answer": "Millisecond, Second, Minute, Hour",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Reverse Recall",
+    "pattern_type": "Reverse Order",
+    "time_limit_sec": 25,
+    "explanation": "Reversing [Hour, Minute, Second, Millisecond] gives [Millisecond, Second, Minute, Hour]."
+  },
+  {
+    "id": "q_0563",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the items: [Cup, Plate, Bowl, Fork]. What is the exact reverse order?",
+    "options": [
+      "Fork, Bowl, Plate, Cup",
+      "Bowl, Fork, Cup, Plate",
+      "Plate, Cup, Fork, Bowl",
+      "Cup, Plate, Bowl, Fork"
+    ],
+    "correct_answer": "Fork, Bowl, Plate, Cup",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Reverse Recall",
+    "pattern_type": "Reverse Order",
+    "time_limit_sec": 25,
+    "explanation": "Reversing [Cup, Plate, Bowl, Fork] gives [Fork, Bowl, Plate, Cup]."
+  },
+  {
+    "id": "q_0564",
+    "round_type": "MEMORY",
+    "prompt": "Memory test: [Alpha = 12, Beta = 34, Gamma = 56, Delta = 78]. Which number was paired with Gamma?",
+    "options": [
+      "12",
+      "34",
+      "56",
+      "78"
+    ],
+    "correct_answer": "56",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "In the pairings, Gamma was paired with 56."
+  },
+  {
+    "id": "q_0565",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [Red = Circle, Blue = Square, Green = Triangle, Yellow = Star]. What shape was paired with Green?",
+    "options": [
+      "Circle",
+      "Square",
+      "Triangle",
+      "Star"
+    ],
+    "correct_answer": "Triangle",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "Green was paired with Triangle."
+  },
+  {
+    "id": "q_0566",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the codes: [Server = 8080, Database = 5432, Cache = 6379, Web = 443]. Which port was paired with Database?",
+    "options": [
+      "8080",
+      "5432",
+      "6379",
+      "443"
+    ],
+    "correct_answer": "5432",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "Database was paired with port 5432."
+  },
+  {
+    "id": "q_0567",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [Cat = Whiskers, Dog = Bark, Bird = Feather, Fish = Scales]. What attribute was paired with Bird?",
+    "options": [
+      "Whiskers",
+      "Bark",
+      "Feather",
+      "Scales"
+    ],
+    "correct_answer": "Feather",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "Bird was paired with Feather."
+  },
+  {
+    "id": "q_0568",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the associations: [Paris = France, Berlin = Germany, Rome = Italy, Madrid = Spain]. Which capital was paired with Italy?",
+    "options": [
+      "Paris",
+      "Berlin",
+      "Rome",
+      "Madrid"
+    ],
+    "correct_answer": "Rome",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "Rome was paired with Italy."
+  },
+  {
+    "id": "q_0569",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [Gold = Au, Silver = Ag, Iron = Fe, Copper = Cu]. What symbol was paired with Iron?",
+    "options": [
+      "Au",
+      "Ag",
+      "Fe",
+      "Cu"
+    ],
+    "correct_answer": "Fe",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "Iron was paired with Fe."
+  },
+  {
+    "id": "q_0570",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the values: [X = 15, Y = 25, Z = 35, W = 45]. What value was paired with Z?",
+    "options": [
+      "15",
+      "25",
+      "35",
+      "45"
+    ],
+    "correct_answer": "35",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "Z was paired with 35."
+  },
+  {
+    "id": "q_0571",
+    "round_type": "MEMORY",
+    "prompt": "Study the associations: [Jupiter = Europa, Saturn = Titan, Uranus = Titania, Neptune = Triton]. Which moon was paired with Saturn?",
+    "options": [
+      "Europa",
+      "Titan",
+      "Titania",
+      "Triton"
+    ],
+    "correct_answer": "Titan",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "Saturn was paired with Titan."
+  },
+  {
+    "id": "q_0572",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the colors: [Apple = Red, Banana = Yellow, Lime = Green, Blueberry = Blue]. What color was paired with Lime?",
+    "options": [
+      "Red",
+      "Yellow",
+      "Green",
+      "Blue"
+    ],
+    "correct_answer": "Green",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "Lime was paired with Green."
+  },
+  {
+    "id": "q_0573",
+    "round_type": "MEMORY",
+    "prompt": "Study the associations: [Hydrogen = 1, Helium = 2, Lithium = 3, Carbon = 6]. What atomic number was paired with Lithium?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "6"
+    ],
+    "correct_answer": "3",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "Lithium was paired with atomic number 3."
+  },
+  {
+    "id": "q_0574",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [India = Rupee, USA = Dollar, UK = Pound, Japan = Yen]. Which currency was paired with Japan?",
+    "options": [
+      "Rupee",
+      "Dollar",
+      "Pound",
+      "Yen"
+    ],
+    "correct_answer": "Yen",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "Japan was paired with Yen."
+  },
+  {
+    "id": "q_0575",
+    "round_type": "MEMORY",
+    "prompt": "Study the list: [Car = Road, Plane = Sky, Boat = Water, Train = Tracks]. What path was paired with Train?",
+    "options": [
+      "Road",
+      "Sky",
+      "Water",
+      "Tracks"
+    ],
+    "correct_answer": "Tracks",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "Train was paired with Tracks."
+  },
+  {
+    "id": "q_0576",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Doctor = Stethoscope, Chef = Knife, Painter = Brush, Carpenter = Hammer]. What tool was paired with Chef?",
+    "options": [
+      "Stethoscope",
+      "Knife",
+      "Brush",
+      "Hammer"
+    ],
+    "correct_answer": "Knife",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "Chef was paired with Knife."
+  },
+  {
+    "id": "q_0577",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [A = 100, B = 200, C = 300, D = 400]. What number was paired with B?",
+    "options": [
+      "100",
+      "200",
+      "300",
+      "400"
+    ],
+    "correct_answer": "200",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "B was paired with 200."
+  },
+  {
+    "id": "q_0578",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Lion = Roar, Cow = Moo, Sheep = Baa, Horse = Neigh]. Which sound was paired with Cow?",
+    "options": [
+      "Roar",
+      "Moo",
+      "Baa",
+      "Neigh"
+    ],
+    "correct_answer": "Moo",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "Cow was paired with Moo."
+  },
+  {
+    "id": "q_0579",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [Mars = Red, Earth = Blue, Sun = Yellow, Moon = Grey]. What color was paired with Earth?",
+    "options": [
+      "Red",
+      "Blue",
+      "Yellow",
+      "Grey"
+    ],
+    "correct_answer": "Blue",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "Earth was paired with Blue."
+  },
+  {
+    "id": "q_0580",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Winter = Cold, Summer = Hot, Spring = Warm, Autumn = Cool]. Which temperature was paired with Autumn?",
+    "options": [
+      "Cold",
+      "Hot",
+      "Warm",
+      "Cool"
+    ],
+    "correct_answer": "Cool",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "Autumn was paired with Cool."
+  },
+  {
+    "id": "q_0581",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [Water = H2O, Salt = NaCl, Carbon Dioxide = CO2, Methane = CH4]. What formula was paired with Salt?",
+    "options": [
+      "H2O",
+      "NaCl",
+      "CO2",
+      "CH4"
+    ],
+    "correct_answer": "NaCl",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "Salt was paired with NaCl."
+  },
+  {
+    "id": "q_0582",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Eagle = Sky, Shark = Ocean, Mole = Ground, Monkey = Tree]. Which habitat was paired with Shark?",
+    "options": [
+      "Sky",
+      "Ocean",
+      "Ground",
+      "Tree"
+    ],
+    "correct_answer": "Ocean",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "Shark was paired with Ocean."
+  },
+  {
+    "id": "q_0583",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [1st = Gold, 2nd = Silver, 3rd = Bronze, 4th = Ribbon]. What was paired with 2nd place?",
+    "options": [
+      "Gold",
+      "Silver",
+      "Bronze",
+      "Ribbon"
+    ],
+    "correct_answer": "Silver",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Paired Associations",
+    "pattern_type": "Attribute Recall",
+    "time_limit_sec": 25,
+    "explanation": "2nd place was paired with Silver."
+  },
+  {
+    "id": "q_0584",
+    "round_type": "MEMORY",
+    "prompt": "A drone followed the flight path: [North, East, East, South, West]. What was the 4th navigational movement?",
+    "options": [
+      "North",
+      "East",
+      "South",
+      "West"
+    ],
+    "correct_answer": "South",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The sequence of movements was 1: North, 2: East, 3: East, 4: South, 5: West. The 4th movement was South."
+  },
+  {
+    "id": "q_0585",
+    "round_type": "MEMORY",
+    "prompt": "A robot navigates a grid with steps: [Forward, Turn Right, Forward, Forward, Turn Left]. What was the 2nd command?",
+    "options": [
+      "Forward",
+      "Turn Right",
+      "Turn Left",
+      "Reverse"
+    ],
+    "correct_answer": "Turn Right",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 2nd command in the sequence was Turn Right."
+  },
+  {
+    "id": "q_0586",
+    "round_type": "MEMORY",
+    "prompt": "Study the delivery path: [Warehouse, Hub A, Depot B, Station C, Customer]. Which stop was 3rd?",
+    "options": [
+      "Warehouse",
+      "Hub A",
+      "Depot B",
+      "Station C"
+    ],
+    "correct_answer": "Depot B",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 3rd stop was Depot B."
+  },
+  {
+    "id": "q_0587",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the directions: [Up, Up, Down, Left, Right]. What was the 4th command?",
+    "options": [
+      "Up",
+      "Down",
+      "Left",
+      "Right"
+    ],
+    "correct_answer": "Left",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 4th command was Left."
+  },
+  {
+    "id": "q_0588",
+    "round_type": "MEMORY",
+    "prompt": "Study the metro stops: [Station 1, Station 2, Station 3, Station 4, Station 5]. Which station was immediately before Station 4?",
+    "options": [
+      "Station 1",
+      "Station 2",
+      "Station 3",
+      "Station 5"
+    ],
+    "correct_answer": "Station 3",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "Station 3 immediately preceded Station 4."
+  },
+  {
+    "id": "q_0589",
+    "round_type": "MEMORY",
+    "prompt": "A ship steered through coordinates: [Alpha, Echo, Delta, Zulu]. Which coordinate was in the 2nd position?",
+    "options": [
+      "Alpha",
+      "Echo",
+      "Delta",
+      "Zulu"
+    ],
+    "correct_answer": "Echo",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 2nd coordinate was Echo."
+  },
+  {
+    "id": "q_0590",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the path: [Left, Right, Straight, Right, Left]. Which action immediately followed the first Right?",
+    "options": [
+      "Left",
+      "Right",
+      "Straight",
+      "Stop"
+    ],
+    "correct_answer": "Straight",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "Straight immediately followed the first Right."
+  },
+  {
+    "id": "q_0591",
+    "round_type": "MEMORY",
+    "prompt": "Study the vehicle transit: [Garage, Highway, Bridge, Tunnel, Airport]. Which location was 4th?",
+    "options": [
+      "Highway",
+      "Bridge",
+      "Tunnel",
+      "Airport"
+    ],
+    "correct_answer": "Tunnel",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "Tunnel was the 4th location."
+  },
+  {
+    "id": "q_0592",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the climb: [Base Camp, Camp 1, Camp 2, Camp 3, Summit]. Which location was 3rd?",
+    "options": [
+      "Camp 1",
+      "Camp 2",
+      "Camp 3",
+      "Summit"
+    ],
+    "correct_answer": "Camp 2",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "Camp 2 was the 3rd location."
+  },
+  {
+    "id": "q_0593",
+    "round_type": "MEMORY",
+    "prompt": "A hiker took bearings: [30°, 90°, 180°, 270°]. Which bearing was in the 3rd position?",
+    "options": [
+      "30°",
+      "90°",
+      "180°",
+      "270°"
+    ],
+    "correct_answer": "180°",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 3rd bearing was 180°."
+  },
+  {
+    "id": "q_0594",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the turns: [East, South, East, North]. What was the last turn?",
+    "options": [
+      "East",
+      "South",
+      "North",
+      "West"
+    ],
+    "correct_answer": "North",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The last turn was North."
+  },
+  {
+    "id": "q_0595",
+    "round_type": "MEMORY",
+    "prompt": "Study the track laps: [Lap 1: Orange, Lap 2: Purple, Lap 3: Teal, Lap 4: Amber]. What color was Lap 3?",
+    "options": [
+      "Orange",
+      "Purple",
+      "Teal",
+      "Amber"
+    ],
+    "correct_answer": "Teal",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "Lap 3 was Teal."
+  },
+  {
+    "id": "q_0596",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the movement: [Hop, Skip, Jump, Step]. What was the 2nd movement?",
+    "options": [
+      "Hop",
+      "Skip",
+      "Jump",
+      "Step"
+    ],
+    "correct_answer": "Skip",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 2nd movement was Skip."
+  },
+  {
+    "id": "q_0597",
+    "round_type": "MEMORY",
+    "prompt": "Study the trail: [Canyon, Ridge, Valley, Peak]. Which landmark was 1st?",
+    "options": [
+      "Canyon",
+      "Ridge",
+      "Valley",
+      "Peak"
+    ],
+    "correct_answer": "Canyon",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 1st landmark was Canyon."
+  },
+  {
+    "id": "q_0598",
+    "round_type": "MEMORY",
+    "prompt": "A rover moved: [Forward 5m, Turn 90°, Forward 10m, Reverse 2m]. What was the 3rd action?",
+    "options": [
+      "Forward 5m",
+      "Turn 90°",
+      "Forward 10m",
+      "Reverse 2m"
+    ],
+    "correct_answer": "Forward 10m",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 3rd action was Forward 10m."
+  },
+  {
+    "id": "q_0599",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the route: [Paris, Lyon, Marseille, Nice]. Which city was 2nd?",
+    "options": [
+      "Paris",
+      "Lyon",
+      "Marseille",
+      "Nice"
+    ],
+    "correct_answer": "Lyon",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "Lyon was the 2nd city."
+  },
+  {
+    "id": "q_0600",
+    "round_type": "MEMORY",
+    "prompt": "Study the itinerary: [London, Brussels, Amsterdam, Berlin]. Which city was 3rd?",
+    "options": [
+      "London",
+      "Brussels",
+      "Amsterdam",
+      "Berlin"
+    ],
+    "correct_answer": "Amsterdam",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "Amsterdam was the 3rd city."
+  },
+  {
+    "id": "q_0601",
+    "round_type": "MEMORY",
+    "prompt": "A package moved: [Sender, Sorting Center, Regional Hub, Delivery Van, Doorstep]. Which stage was 4th?",
+    "options": [
+      "Sorting Center",
+      "Regional Hub",
+      "Delivery Van",
+      "Doorstep"
+    ],
+    "correct_answer": "Delivery Van",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "Delivery Van was the 4th stage."
+  },
+  {
+    "id": "q_0602",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the flight stops: [Dubai, Singapore, Sydney, Auckland]. Which stop was immediately before Sydney?",
+    "options": [
+      "Dubai",
+      "Singapore",
+      "Auckland",
+      "Perth"
+    ],
+    "correct_answer": "Singapore",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "Singapore was immediately before Sydney."
+  },
+  {
+    "id": "q_0603",
+    "round_type": "MEMORY",
+    "prompt": "Study the track: [Start, Checkpoint 1, Checkpoint 2, Checkpoint 3, Finish]. Which checkpoint was 2nd in order?",
+    "options": [
+      "Start",
+      "Checkpoint 1",
+      "Checkpoint 2",
+      "Checkpoint 3"
+    ],
+    "correct_answer": "Checkpoint 2",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "Checkpoint 2 was the 2nd checkpoint in order."
+  },
+  {
+    "id": "q_0604",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the compass steps: [NW, NE, SE, SW]. What was the 3rd bearing?",
+    "options": [
+      "NW",
+      "NE",
+      "SE",
+      "SW"
+    ],
+    "correct_answer": "SE",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "SE was the 3rd bearing."
+  },
+  {
+    "id": "q_0605",
+    "round_type": "MEMORY",
+    "prompt": "Study the orbit phases: [Launch, Staging, Burn, Orbit Insertion]. Which phase was 2nd?",
+    "options": [
+      "Launch",
+      "Staging",
+      "Burn",
+      "Orbit Insertion"
+    ],
+    "correct_answer": "Staging",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "Staging was the 2nd phase."
+  },
+  {
+    "id": "q_0606",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the relay: [Runner A, Runner B, Runner C, Runner D]. Who ran the 4th leg?",
+    "options": [
+      "Runner A",
+      "Runner B",
+      "Runner C",
+      "Runner D"
+    ],
+    "correct_answer": "Runner D",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "Runner D ran the 4th leg."
+  },
+  {
+    "id": "q_0607",
+    "round_type": "MEMORY",
+    "prompt": "Study the corridor: [Room 101, Room 102, Room 103, Room 104]. Which room was 1st?",
+    "options": [
+      "Room 101",
+      "Room 102",
+      "Room 103",
+      "Room 104"
+    ],
+    "correct_answer": "Room 101",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "Room 101 was 1st."
+  },
+  {
+    "id": "q_0608",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the maze turns: [Left, Left, Right, Straight]. What was the 3rd turn?",
+    "options": [
+      "Left",
+      "Right",
+      "Straight",
+      "Reverse"
+    ],
+    "correct_answer": "Right",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Navigation Recall",
+    "pattern_type": "Movement Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 3rd turn was Right."
+  },
+  {
+    "id": "q_0609",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the 5-digit PIN: [8, 2, 9, 4, 1]. Which digit occupied the 3rd position?",
+    "options": [
+      "8",
+      "2",
+      "9",
+      "4"
+    ],
+    "correct_answer": "9",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "In [8, 2, 9, 4, 1], the 3rd digit is 9."
+  },
+  {
+    "id": "q_0610",
+    "round_type": "MEMORY",
+    "prompt": "Study the 5-digit security code: [3, 7, 1, 8, 5]. Which digit was 1st?",
+    "options": [
+      "3",
+      "7",
+      "1",
+      "8"
+    ],
+    "correct_answer": "3",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 1st digit was 3."
+  },
+  {
+    "id": "q_0611",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the sequence: [6, 0, 4, 2, 8]. Which digit occupied the 4th position?",
+    "options": [
+      "6",
+      "0",
+      "4",
+      "2"
+    ],
+    "correct_answer": "2",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 4th digit was 2."
+  },
+  {
+    "id": "q_0612",
+    "round_type": "MEMORY",
+    "prompt": "Remember this sequence: [1, 9, 7, 5, 3]. Which digit was in the 2nd position?",
+    "options": [
+      "1",
+      "9",
+      "7",
+      "5"
+    ],
+    "correct_answer": "9",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 2nd digit was 9."
+  },
+  {
+    "id": "q_0613",
+    "round_type": "MEMORY",
+    "prompt": "Study the code: [4, 4, 8, 2, 6]. Which digit was 5th?",
+    "options": [
+      "4",
+      "8",
+      "2",
+      "6"
+    ],
+    "correct_answer": "6",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 5th digit was 6."
+  },
+  {
+    "id": "q_0614",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the numbers: [9, 1, 8, 2, 7]. What was the 3rd number?",
+    "options": [
+      "9",
+      "1",
+      "8",
+      "2"
+    ],
+    "correct_answer": "8",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 3rd number was 8."
+  },
+  {
+    "id": "q_0615",
+    "round_type": "MEMORY",
+    "prompt": "Study the sequence: [5, 2, 0, 9, 4]. Which digit immediately followed 0?",
+    "options": [
+      "5",
+      "2",
+      "9",
+      "4"
+    ],
+    "correct_answer": "9",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "9 immediately followed 0."
+  },
+  {
+    "id": "q_0616",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the code: [7, 3, 6, 1, 0]. Which digit immediately preceded 6?",
+    "options": [
+      "7",
+      "3",
+      "1",
+      "0"
+    ],
+    "correct_answer": "3",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "3 immediately preceded 6."
+  },
+  {
+    "id": "q_0617",
+    "round_type": "MEMORY",
+    "prompt": "Remember the values: [15, 30, 45, 60, 75]. Which value was 4th?",
+    "options": [
+      "30",
+      "45",
+      "60",
+      "75"
+    ],
+    "correct_answer": "60",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 4th value was 60."
+  },
+  {
+    "id": "q_0618",
+    "round_type": "MEMORY",
+    "prompt": "Study the digits: [2, 8, 4, 6, 0]. What was the reverse order?",
+    "options": [
+      "0, 6, 4, 8, 2",
+      "0, 4, 6, 8, 2",
+      "2, 4, 6, 8, 0",
+      "6, 0, 4, 8, 2"
+    ],
+    "correct_answer": "0, 6, 4, 8, 2",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "Reverse PIN",
+    "time_limit_sec": 25,
+    "explanation": "The reverse order is 0, 6, 4, 8, 2."
+  },
+  {
+    "id": "q_0619",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the sequence: [9, 8, 7, 6, 5]. What digit was 2nd?",
+    "options": [
+      "9",
+      "8",
+      "7",
+      "6"
+    ],
+    "correct_answer": "8",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 2nd digit was 8."
+  },
+  {
+    "id": "q_0620",
+    "round_type": "MEMORY",
+    "prompt": "Study the numbers: [11, 22, 33, 44, 55]. Which number was 3rd?",
+    "options": [
+      "11",
+      "22",
+      "33",
+      "44"
+    ],
+    "correct_answer": "33",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 3rd number was 33."
+  },
+  {
+    "id": "q_0621",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the digits: [3, 1, 4, 1, 5]. What was the 4th digit?",
+    "options": [
+      "3",
+      "1",
+      "4",
+      "5"
+    ],
+    "correct_answer": "1",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 4th digit was 1."
+  },
+  {
+    "id": "q_0622",
+    "round_type": "MEMORY",
+    "prompt": "Remember this code: [2, 7, 1, 8, 2]. What was the 3rd digit?",
+    "options": [
+      "2",
+      "7",
+      "1",
+      "8"
+    ],
+    "correct_answer": "1",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 3rd digit was 1."
+  },
+  {
+    "id": "q_0623",
+    "round_type": "MEMORY",
+    "prompt": "Study the digits: [1, 6, 1, 8, 0]. What was the 5th digit?",
+    "options": [
+      "1",
+      "6",
+      "8",
+      "0"
+    ],
+    "correct_answer": "0",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 5th digit was 0."
+  },
+  {
+    "id": "q_0624",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the code: [4, 0, 4, 2, 0]. What was the 2nd digit?",
+    "options": [
+      "4",
+      "0",
+      "2",
+      "5"
+    ],
+    "correct_answer": "0",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 2nd digit was 0."
+  },
+  {
+    "id": "q_0625",
+    "round_type": "MEMORY",
+    "prompt": "Study the numbers: [100, 200, 300, 400]. Which number was 1st?",
+    "options": [
+      "100",
+      "200",
+      "300",
+      "400"
+    ],
+    "correct_answer": "100",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 1st number was 100."
+  },
+  {
+    "id": "q_0626",
+    "round_type": "MEMORY",
+    "prompt": "Memorize this sequence: [5, 5, 5, 1]. Which digit was in the 4th position?",
+    "options": [
+      "5",
+      "1",
+      "0",
+      "2"
+    ],
+    "correct_answer": "1",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 4th digit was 1."
+  },
+  {
+    "id": "q_0627",
+    "round_type": "MEMORY",
+    "prompt": "Study the code: [8, 3, 5, 9, 2]. Which digit immediately preceded 2?",
+    "options": [
+      "8",
+      "3",
+      "5",
+      "9"
+    ],
+    "correct_answer": "9",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "9 immediately preceded 2."
+  },
+  {
+    "id": "q_0628",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the values: [12, 24, 36, 48]. What was the 2nd value?",
+    "options": [
+      "12",
+      "24",
+      "36",
+      "48"
+    ],
+    "correct_answer": "24",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 2nd value was 24."
+  },
+  {
+    "id": "q_0629",
+    "round_type": "MEMORY",
+    "prompt": "Recall the sequence [7, 0, 7, 0, 7]: What was the 4th digit?",
+    "options": [
+      "7",
+      "0",
+      "1",
+      "5"
+    ],
+    "correct_answer": "0",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 4th digit was 0."
+  },
+  {
+    "id": "q_0630",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the sequence: [6, 1, 9, 3, 5]. What was the 1st digit?",
+    "options": [
+      "6",
+      "1",
+      "9",
+      "3"
+    ],
+    "correct_answer": "6",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 1st digit was 6."
+  },
+  {
+    "id": "q_0631",
+    "round_type": "MEMORY",
+    "prompt": "Study the numbers: [25, 50, 75, 100]. Which number was 3rd?",
+    "options": [
+      "25",
+      "50",
+      "75",
+      "100"
+    ],
+    "correct_answer": "75",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 3rd number was 75."
+  },
+  {
+    "id": "q_0632",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the digits: [1, 3, 5, 7, 9]. What digit immediately followed 5?",
+    "options": [
+      "1",
+      "3",
+      "7",
+      "9"
+    ],
+    "correct_answer": "7",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "7 immediately followed 5."
+  },
+  {
+    "id": "q_0633",
+    "round_type": "MEMORY",
+    "prompt": "Inspect the code [9, 4, 2, 7, 1]: which digit appeared in the 5th position?",
+    "options": [
+      "9",
+      "4",
+      "2",
+      "1"
+    ],
+    "correct_answer": "1",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Digit Recall",
+    "pattern_type": "PIN Sequence",
+    "time_limit_sec": 25,
+    "explanation": "The 5th digit was 1."
+  },
+  {
+    "id": "q_0634",
+    "round_type": "MEMORY",
+    "prompt": "Historic timeline displayed: [1776, 1789, 1804, 1815]. Which year was in the 2nd position?",
+    "options": [
+      "1776",
+      "1789",
+      "1804",
+      "1815"
+    ],
+    "correct_answer": "1789",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Timeline Recall",
+    "pattern_type": "Milestone Order",
+    "time_limit_sec": 25,
+    "explanation": "The 2nd year displayed was 1789."
+  },
+  {
+    "id": "q_0635",
+    "round_type": "MEMORY",
+    "prompt": "Study the chronology: [1914, 1918, 1939, 1945]. Which year occupied the 3rd position?",
+    "options": [
+      "1914",
+      "1918",
+      "1939",
+      "1945"
+    ],
+    "correct_answer": "1939",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Timeline Recall",
+    "pattern_type": "Milestone Order",
+    "time_limit_sec": 25,
+    "explanation": "The 3rd year was 1939."
+  },
+  {
+    "id": "q_0636",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the sequence of scientific eras: [Classical, Renaissance, Enlightenment, Modern]. Which era was 3rd?",
+    "options": [
+      "Classical",
+      "Renaissance",
+      "Enlightenment",
+      "Modern"
+    ],
+    "correct_answer": "Enlightenment",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Timeline Recall",
+    "pattern_type": "Milestone Order",
+    "time_limit_sec": 25,
+    "explanation": "The 3rd era was Enlightenment."
+  },
+  {
+    "id": "q_0637",
+    "round_type": "MEMORY",
+    "prompt": "Study the list of space missions: [Sputnik 1, Vostok 1, Apollo 11, Voyager 1]. Which mission was 2nd?",
+    "options": [
+      "Sputnik 1",
+      "Vostok 1",
+      "Apollo 11",
+      "Voyager 1"
+    ],
+    "correct_answer": "Vostok 1",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Timeline Recall",
+    "pattern_type": "Milestone Order",
+    "time_limit_sec": 25,
+    "explanation": "Vostok 1 was in the 2nd position."
+  },
+  {
+    "id": "q_0638",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the vocabulary list: [Benevolent, Courageous, Diligent, Eloquent, Fearless]. Which word was 4th?",
+    "options": [
+      "Benevolent",
+      "Courageous",
+      "Diligent",
+      "Eloquent"
+    ],
+    "correct_answer": "Eloquent",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Word Recall",
+    "pattern_type": "Vocabulary List",
+    "time_limit_sec": 25,
+    "explanation": "Eloquent was the 4th word in the list."
+  },
+  {
+    "id": "q_0639",
+    "round_type": "MEMORY",
+    "prompt": "Study the word sequence: [Zenith, Apex, Pinnacle, Summit]. Which synonym was in the 1st position?",
+    "options": [
+      "Zenith",
+      "Apex",
+      "Pinnacle",
+      "Summit"
+    ],
+    "correct_answer": "Zenith",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Word Recall",
+    "pattern_type": "Vocabulary List",
+    "time_limit_sec": 25,
+    "explanation": "Zenith was the 1st word."
+  },
+  {
+    "id": "q_0640",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the adjectives: [Swift, Agile, Nimble, Quick]. Which word was in the 3rd position?",
+    "options": [
+      "Swift",
+      "Agile",
+      "Nimble",
+      "Quick"
+    ],
+    "correct_answer": "Nimble",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Word Recall",
+    "pattern_type": "Vocabulary List",
+    "time_limit_sec": 25,
+    "explanation": "Nimble was the 3rd adjective."
+  },
+  {
+    "id": "q_0641",
+    "round_type": "MEMORY",
+    "prompt": "Remember the sequence of elements: [Iron, Bronze, Steel, Titanium]. Which material was 2nd?",
+    "options": [
+      "Iron",
+      "Bronze",
+      "Steel",
+      "Titanium"
+    ],
+    "correct_answer": "Bronze",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Word Recall",
+    "pattern_type": "Material List",
+    "time_limit_sec": 25,
+    "explanation": "Bronze was in the 2nd position."
+  },
+  {
+    "id": "q_0642",
+    "round_type": "MEMORY",
+    "prompt": "Study this list: [Neutron, Proton, Electron, Quark]. Which particle was 4th?",
+    "options": [
+      "Neutron",
+      "Proton",
+      "Electron",
+      "Quark"
+    ],
+    "correct_answer": "Quark",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Word Recall",
+    "pattern_type": "Particle List",
+    "time_limit_sec": 25,
+    "explanation": "Quark was in the 4th position."
+  },
+  {
+    "id": "q_0643",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the color palette: [Teal, Indigo, Maroon, Ochre]. Which pigment was in the 3rd position?",
+    "options": [
+      "Teal",
+      "Indigo",
+      "Maroon",
+      "Ochre"
+    ],
+    "correct_answer": "Maroon",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Color Recall",
+    "pattern_type": "Color Palette",
+    "time_limit_sec": 25,
+    "explanation": "Maroon was the 3rd pigment."
+  },
+  {
+    "id": "q_0644",
+    "round_type": "MEMORY",
+    "prompt": "Study the tech sequence: [Vacuum Tube, Transistor, Integrated Circuit, Microprocessor]. Which generation was 2nd?",
+    "options": [
+      "Vacuum Tube",
+      "Transistor",
+      "Integrated Circuit",
+      "Microprocessor"
+    ],
+    "correct_answer": "Transistor",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Timeline Recall",
+    "pattern_type": "Tech Generations",
+    "time_limit_sec": 25,
+    "explanation": "Transistor was in the 2nd position."
+  },
+  {
+    "id": "q_0645",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the architectural terms: [Column, Arch, Dome, Spire]. Which feature was 3rd?",
+    "options": [
+      "Column",
+      "Arch",
+      "Dome",
+      "Spire"
+    ],
+    "correct_answer": "Dome",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Word Recall",
+    "pattern_type": "Architectural Terms",
+    "time_limit_sec": 25,
+    "explanation": "Dome was in the 3rd position."
+  },
+  {
+    "id": "q_0646",
+    "round_type": "MEMORY",
+    "prompt": "Study the sequence: [Seed, Sprout, Sapling, Tree]. Which growth phase was 2nd?",
+    "options": [
+      "Seed",
+      "Sprout",
+      "Sapling",
+      "Tree"
+    ],
+    "correct_answer": "Sprout",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Word Recall",
+    "pattern_type": "Botany Lifecycle",
+    "time_limit_sec": 25,
+    "explanation": "Sprout was the 2nd growth phase."
+  },
+  {
+    "id": "q_0647",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the list: [Kilogram, Gram, Milligram, Microgram]. Which unit was in the 3rd position?",
+    "options": [
+      "Kilogram",
+      "Gram",
+      "Milligram",
+      "Microgram"
+    ],
+    "correct_answer": "Milligram",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Measurement Recall",
+    "pattern_type": "Mass Units",
+    "time_limit_sec": 25,
+    "explanation": "Milligram was the 3rd unit."
+  },
+  {
+    "id": "q_0648",
+    "round_type": "MEMORY",
+    "prompt": "Study the four oceans: [Pacific, Atlantic, Indian, Arctic]. Which ocean was 2nd in the displayed list?",
+    "options": [
+      "Pacific",
+      "Atlantic",
+      "Indian",
+      "Arctic"
+    ],
+    "correct_answer": "Atlantic",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Geography Recall",
+    "pattern_type": "Ocean List",
+    "time_limit_sec": 25,
+    "explanation": "Atlantic was the 2nd ocean in the list."
+  },
+  {
+    "id": "q_0649",
+    "round_type": "MEMORY",
+    "prompt": "Memorize this sequence: [Byte, Kilobyte, Megabyte, Gigabyte]. Which storage unit was 1st?",
+    "options": [
+      "Byte",
+      "Kilobyte",
+      "Megabyte",
+      "Gigabyte"
+    ],
+    "correct_answer": "Byte",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Computers Recall",
+    "pattern_type": "Storage Units",
+    "time_limit_sec": 25,
+    "explanation": "Byte was the 1st storage unit."
+  },
+  {
+    "id": "q_0650",
+    "round_type": "MEMORY",
+    "prompt": "Study the terms: [Hypothesis, Experiment, Observation, Conclusion]. Which scientific stage was 3rd?",
+    "options": [
+      "Hypothesis",
+      "Experiment",
+      "Observation",
+      "Conclusion"
+    ],
+    "correct_answer": "Observation",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Scientific Method",
+    "pattern_type": "Process Steps",
+    "time_limit_sec": 25,
+    "explanation": "Observation was the 3rd stage in the list."
+  },
+  {
+    "id": "q_0651",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the list of gems: [Emerald, Diamond, Pearl, Jade]. Which item was in the 4th position?",
+    "options": [
+      "Emerald",
+      "Diamond",
+      "Pearl",
+      "Jade"
+    ],
+    "correct_answer": "Jade",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Gem Recall",
+    "pattern_type": "Gemstones",
+    "time_limit_sec": 25,
+    "explanation": "Jade was the 4th item."
+  },
+  {
+    "id": "q_0652",
+    "round_type": "MEMORY",
+    "prompt": "Study the sports: [Cricket, Football, Tennis, Badminton]. Which sport was 1st in the list?",
+    "options": [
+      "Cricket",
+      "Football",
+      "Tennis",
+      "Badminton"
+    ],
+    "correct_answer": "Cricket",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Sports Recall",
+    "pattern_type": "Sports List",
+    "time_limit_sec": 25,
+    "explanation": "Cricket was the 1st sport."
+  },
+  {
+    "id": "q_0653",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the sequence: [Solid, Liquid, Gas, Supercritical Fluid]. Which state was 4th?",
+    "options": [
+      "Solid",
+      "Liquid",
+      "Gas",
+      "Supercritical Fluid"
+    ],
+    "correct_answer": "Supercritical Fluid",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Science Recall",
+    "pattern_type": "States of Matter",
+    "time_limit_sec": 25,
+    "explanation": "Supercritical Fluid was the 4th state in the list."
+  },
+  {
+    "id": "q_0654",
+    "round_type": "MEMORY",
+    "prompt": "Study the four directions: [North, West, South, East]. Which direction was in the 2nd position?",
+    "options": [
+      "North",
+      "West",
+      "South",
+      "East"
+    ],
+    "correct_answer": "West",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Direction Recall",
+    "pattern_type": "Compass",
+    "time_limit_sec": 25,
+    "explanation": "West was in the 2nd position in this list."
+  },
+  {
+    "id": "q_0655",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the animals: [Falcon, Hawk, Eagle, Owl]. Which bird was 3rd in the list?",
+    "options": [
+      "Falcon",
+      "Hawk",
+      "Eagle",
+      "Owl"
+    ],
+    "correct_answer": "Eagle",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Animal Recall",
+    "pattern_type": "Birds of Prey",
+    "time_limit_sec": 25,
+    "explanation": "Eagle was 3rd in the list."
+  },
+  {
+    "id": "q_0656",
+    "round_type": "MEMORY",
+    "prompt": "Study the instruments: [Piano, Guitar, Drums, Bass]. Which instrument was in the 4th position?",
+    "options": [
+      "Piano",
+      "Guitar",
+      "Drums",
+      "Bass"
+    ],
+    "correct_answer": "Bass",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Instrument Recall",
+    "pattern_type": "Music Gear",
+    "time_limit_sec": 25,
+    "explanation": "Bass was the 4th instrument."
+  },
+  {
+    "id": "q_0657",
+    "round_type": "MEMORY",
+    "prompt": "Memorize this order: [Spring, Autumn, Summer, Winter]. Which season was in the 2nd position in this list?",
+    "options": [
+      "Spring",
+      "Autumn",
+      "Summer",
+      "Winter"
+    ],
+    "correct_answer": "Autumn",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Season Recall",
+    "pattern_type": "Seasons List",
+    "time_limit_sec": 25,
+    "explanation": "Autumn was in the 2nd position in this specific list."
+  },
+  {
+    "id": "q_0658",
+    "round_type": "MEMORY",
+    "prompt": "Study the list: [Gold, Bronze, Silver, Copper]. Which metal was 3rd in the list?",
+    "options": [
+      "Gold",
+      "Bronze",
+      "Silver",
+      "Copper"
+    ],
+    "correct_answer": "Silver",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Metal Recall",
+    "pattern_type": "Metals List",
+    "time_limit_sec": 25,
+    "explanation": "Silver was the 3rd metal in this list."
+  },
+  {
+    "id": "q_0659",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the planets: [Jupiter, Saturn, Earth, Mars]. Which planet was 1st in the list?",
+    "options": [
+      "Jupiter",
+      "Saturn",
+      "Earth",
+      "Mars"
+    ],
+    "correct_answer": "Jupiter",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Planet Recall",
+    "pattern_type": "Planets List",
+    "time_limit_sec": 25,
+    "explanation": "Jupiter was 1st in this list."
+  },
+  {
+    "id": "q_0660",
+    "round_type": "MEMORY",
+    "prompt": "Study the sequence: [Red, Yellow, Blue, Green]. Which color was 3rd in the list?",
+    "options": [
+      "Red",
+      "Yellow",
+      "Blue",
+      "Green"
+    ],
+    "correct_answer": "Blue",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Color Recall",
+    "pattern_type": "Colors List",
+    "time_limit_sec": 25,
+    "explanation": "Blue was the 3rd color in this list."
+  },
+  {
+    "id": "q_0661",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the list: [Triangle, Circle, Square, Hexagon]. Which polygon was in the 1st position?",
+    "options": [
+      "Triangle",
+      "Circle",
+      "Square",
+      "Hexagon"
+    ],
+    "correct_answer": "Triangle",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Shape Recall",
+    "pattern_type": "Shapes List",
+    "time_limit_sec": 25,
+    "explanation": "Triangle was in the 1st position."
+  },
+  {
+    "id": "q_0662",
+    "round_type": "MEMORY",
+    "prompt": "Study the terms: [Input, Processing, Storage, Output]. Which computing stage was in the 3rd position?",
+    "options": [
+      "Input",
+      "Processing",
+      "Storage",
+      "Output"
+    ],
+    "correct_answer": "Storage",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Computers Recall",
+    "pattern_type": "System Flow",
+    "time_limit_sec": 25,
+    "explanation": "Storage was in the 3rd position."
+  },
+  {
+    "id": "q_0663",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the vehicles: [Car, Bicycle, Train, Plane]. Which mode of transport was 2nd?",
+    "options": [
+      "Car",
+      "Bicycle",
+      "Train",
+      "Plane"
+    ],
+    "correct_answer": "Bicycle",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Vehicle Recall",
+    "pattern_type": "Transport List",
+    "time_limit_sec": 25,
+    "explanation": "Bicycle was 2nd in the list."
+  },
+  {
+    "id": "q_0664",
+    "round_type": "MEMORY",
+    "prompt": "Study the element symbols: [Na = Sodium, K = Potassium, Fe = Iron, Pb = Lead]. Which element was paired with K?",
+    "options": [
+      "Sodium",
+      "Potassium",
+      "Iron",
+      "Lead"
+    ],
+    "correct_answer": "Potassium",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Chemical Symbols",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "K is paired with Potassium."
+  },
+  {
+    "id": "q_0665",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Hg = Mercury, Sn = Tin, W = Tungsten, Ag = Silver]. Which element was paired with W?",
+    "options": [
+      "Mercury",
+      "Tin",
+      "Tungsten",
+      "Silver"
+    ],
+    "correct_answer": "Tungsten",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Chemical Symbols",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "W is paired with Tungsten (from Wolfram)."
+  },
+  {
+    "id": "q_0666",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [Oxygen = 8, Carbon = 6, Nitrogen = 7, Neon = 10]. Which atomic number was paired with Nitrogen?",
+    "options": [
+      "8",
+      "6",
+      "7",
+      "10"
+    ],
+    "correct_answer": "7",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Chemistry Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Nitrogen was paired with 7."
+  },
+  {
+    "id": "q_0667",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Helium = 2, Beryllium = 4, Fluorine = 9, Magnesium = 12]. What was paired with Fluorine?",
+    "options": [
+      "2",
+      "4",
+      "9",
+      "12"
+    ],
+    "correct_answer": "9",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Chemistry Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Fluorine was paired with atomic number 9."
+  },
+  {
+    "id": "q_0668",
+    "round_type": "MEMORY",
+    "prompt": "Study the animal habitats: [Penguin = Antarctica, Kangaroo = Australia, Panda = China, Bison = North America]. Which animal was paired with Australia?",
+    "options": [
+      "Penguin",
+      "Kangaroo",
+      "Panda",
+      "Bison"
+    ],
+    "correct_answer": "Kangaroo",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Zoology Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Kangaroo was paired with Australia."
+  },
+  {
+    "id": "q_0669",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Tiger = Forest, Camel = Desert, Polar Bear = Tundra, Dolphin = Sea]. Which habitat was paired with Camel?",
+    "options": [
+      "Forest",
+      "Desert",
+      "Tundra",
+      "Sea"
+    ],
+    "correct_answer": "Desert",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Zoology Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Camel was paired with Desert."
+  },
+  {
+    "id": "q_0670",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [Tokyo = Yen, London = Pound, Washington = Dollar, New Delhi = Rupee]. What currency was paired with London?",
+    "options": [
+      "Yen",
+      "Pound",
+      "Dollar",
+      "Rupee"
+    ],
+    "correct_answer": "Pound",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Geography Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "London was paired with Pound."
+  },
+  {
+    "id": "q_0671",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Madrid = Spain, Lisbon = Portugal, Rome = Italy, Athens = Greece]. What capital was paired with Portugal?",
+    "options": [
+      "Madrid",
+      "Lisbon",
+      "Rome",
+      "Athens"
+    ],
+    "correct_answer": "Lisbon",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Geography Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Lisbon was paired with Portugal."
+  },
+  {
+    "id": "q_0672",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [Nile = Africa, Amazon = South America, Yangtze = Asia, Danube = Europe]. Which river was paired with South America?",
+    "options": [
+      "Nile",
+      "Amazon",
+      "Yangtze",
+      "Danube"
+    ],
+    "correct_answer": "Amazon",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Geography Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Amazon was paired with South America."
+  },
+  {
+    "id": "q_0673",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Everest = Asia, Aconcagua = South America, Denali = North America, Elbrus = Europe]. Which peak was paired with Europe?",
+    "options": [
+      "Everest",
+      "Aconcagua",
+      "Denali",
+      "Elbrus"
+    ],
+    "correct_answer": "Elbrus",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Geography Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Mount Elbrus was paired with Europe."
+  },
+  {
+    "id": "q_0674",
+    "round_type": "MEMORY",
+    "prompt": "Study the device roles: [Router = IP Routing, Switch = MAC Switching, Firewall = Security Filter, Modem = Signal Modulation]. Which role was paired with Modem?",
+    "options": [
+      "IP Routing",
+      "MAC Switching",
+      "Security Filter",
+      "Signal Modulation"
+    ],
+    "correct_answer": "Signal Modulation",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Tech Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Modem was paired with Signal Modulation."
+  },
+  {
+    "id": "q_0675",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [HTTP = 80, HTTPS = 443, SSH = 22, DNS = 53]. Which port was paired with SSH?",
+    "options": [
+      "80",
+      "443",
+      "22",
+      "53"
+    ],
+    "correct_answer": "22",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Tech Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "SSH was paired with port 22."
+  },
+  {
+    "id": "q_0676",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [RAM = Volatile, ROM = Non-volatile, SSD = Flash, HDD = Magnetic]. Which attribute was paired with RAM?",
+    "options": [
+      "Volatile",
+      "Non-volatile",
+      "Flash",
+      "Magnetic"
+    ],
+    "correct_answer": "Volatile",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Tech Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "RAM was paired with Volatile."
+  },
+  {
+    "id": "q_0677",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [CPU = Processor, GPU = Graphics, PSU = Power, Motherboard = Mainboard]. Which component was paired with GPU?",
+    "options": [
+      "Processor",
+      "Graphics",
+      "Power",
+      "Mainboard"
+    ],
+    "correct_answer": "Graphics",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Tech Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "GPU was paired with Graphics."
+  },
+  {
+    "id": "q_0678",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [Red = 1, Blue = 2, Green = 3, Yellow = 4]. What number was paired with Yellow?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "correct_answer": "4",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Color Codes",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Yellow was paired with 4."
+  },
+  {
+    "id": "q_0679",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Circle = 0 corners, Triangle = 3 corners, Square = 4 corners, Pentagon = 5 corners]. What was paired with Square?",
+    "options": [
+      "0 corners",
+      "3 corners",
+      "4 corners",
+      "5 corners"
+    ],
+    "correct_answer": "4 corners",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Geometry Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Square was paired with 4 corners."
+  },
+  {
+    "id": "q_0680",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [Diamond = Hardest, Talc = Softest, Gold = Malleable, Copper = Ductile]. Which mineral was paired with Softest?",
+    "options": [
+      "Diamond",
+      "Talc",
+      "Gold",
+      "Copper"
+    ],
+    "correct_answer": "Talc",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Science Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Talc was paired with Softest (Mohs scale 1)."
+  },
+  {
+    "id": "q_0681",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Mercury = Closest, Venus = Hottest, Saturn = Rings, Neptune = Coldest]. What planet was paired with Hottest?",
+    "options": [
+      "Mercury",
+      "Venus",
+      "Saturn",
+      "Neptune"
+    ],
+    "correct_answer": "Venus",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Astronomy Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Venus was paired with Hottest."
+  },
+  {
+    "id": "q_0682",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [A = 10, B = 20, C = 30, D = 40]. What letter was paired with 30?",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "correct_answer": "C",
+    "difficulty": "EASY",
+    "category": "Memory & Recall",
+    "subcategory": "Letter Codes",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "C was paired with 30."
+  },
+  {
+    "id": "q_0683",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Sun = Star, Earth = Planet, Moon = Satellite, Halley = Comet]. What was paired with Halley?",
+    "options": [
+      "Star",
+      "Planet",
+      "Satellite",
+      "Comet"
+    ],
+    "correct_answer": "Comet",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Astronomy Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Halley was paired with Comet."
+  },
+  {
+    "id": "q_0684",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [Proton = Positive, Electron = Negative, Neutron = Neutral, Photon = Zero mass]. What charge was paired with Proton?",
+    "options": [
+      "Positive",
+      "Negative",
+      "Neutral",
+      "Zero mass"
+    ],
+    "correct_answer": "Positive",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Physics Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Proton was paired with Positive."
+  },
+  {
+    "id": "q_0685",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Winter = December, Spring = March, Summer = June, Autumn = September]. Which month was paired with Spring?",
+    "options": [
+      "December",
+      "March",
+      "June",
+      "September"
+    ],
+    "correct_answer": "March",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Season Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "March was paired with Spring."
+  },
+  {
+    "id": "q_0686",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [Square = 4 sides, Pentagon = 5 sides, Hexagon = 6 sides, Octagon = 8 sides]. What was paired with Octagon?",
+    "options": [
+      "4 sides",
+      "5 sides",
+      "6 sides",
+      "8 sides"
+    ],
+    "correct_answer": "8 sides",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Geometry Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Octagon was paired with 8 sides."
+  },
+  {
+    "id": "q_0687",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Oxygen = Respiration, Chlorophyll = Photosynthesis, Hemoglobin = Transport, Enzyme = Catalysis]. What process was paired with Chlorophyll?",
+    "options": [
+      "Respiration",
+      "Photosynthesis",
+      "Transport",
+      "Catalysis"
+    ],
+    "correct_answer": "Photosynthesis",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Biology Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Chlorophyll was paired with Photosynthesis."
+  },
+  {
+    "id": "q_0688",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [India = New Delhi, France = Paris, Germany = Berlin, Italy = Rome]. What capital was paired with France?",
+    "options": [
+      "New Delhi",
+      "Paris",
+      "Berlin",
+      "Rome"
+    ],
+    "correct_answer": "Paris",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Geography Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Paris was paired with France."
+  },
+  {
+    "id": "q_0689",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Apple = iOS, Google = Android, Microsoft = Windows, Canonical = Ubuntu]. What was paired with Microsoft?",
+    "options": [
+      "iOS",
+      "Android",
+      "Windows",
+      "Ubuntu"
+    ],
+    "correct_answer": "Windows",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Tech Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Windows was paired with Microsoft."
+  },
+  {
+    "id": "q_0690",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [Newton = Force, Joule = Energy, Watt = Power, Pascal = Pressure]. What unit was paired with Power?",
+    "options": [
+      "Newton",
+      "Joule",
+      "Watt",
+      "Pascal"
+    ],
+    "correct_answer": "Watt",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Physics Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Watt was paired with Power."
+  },
+  {
+    "id": "q_0691",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Meter = Length, Kilogram = Mass, Second = Time, Kelvin = Temperature]. What unit was paired with Temperature?",
+    "options": [
+      "Meter",
+      "Kilogram",
+      "Second",
+      "Kelvin"
+    ],
+    "correct_answer": "Kelvin",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Physics Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Kelvin was paired with Temperature."
+  },
+  {
+    "id": "q_0692",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [Gold = 79, Silver = 47, Copper = 29, Iron = 26]. What atomic number was paired with Gold?",
+    "options": [
+      "79",
+      "47",
+      "29",
+      "26"
+    ],
+    "correct_answer": "79",
+    "difficulty": "MEDIUM",
+    "category": "Memory & Recall",
+    "subcategory": "Chemistry Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Gold was paired with atomic number 79."
+  },
+  {
+    "id": "q_0693",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Mars = Phobos, Earth = Moon, Jupiter = Ganymede, Pluto = Charon]. What moon was paired with Jupiter?",
+    "options": [
+      "Phobos",
+      "Moon",
+      "Ganymede",
+      "Charon"
+    ],
+    "correct_answer": "Ganymede",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Astronomy Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Ganymede was paired with Jupiter."
+  },
+  {
+    "id": "q_0694",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [Water = 100°C, Ethanol = 78°C, Mercury = 357°C, Acetone = 56°C]. What boiling point was paired with Ethanol?",
+    "options": [
+      "100°C",
+      "78°C",
+      "357°C",
+      "56°C"
+    ],
+    "correct_answer": "78°C",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Chemistry Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Ethanol was paired with 78°C."
+  },
+  {
+    "id": "q_0695",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Cricket = 11 players, Football = 11 players, Basketball = 5 players, Volleyball = 6 players]. How many players were paired with Basketball?",
+    "options": [
+      "11 players",
+      "5 players",
+      "6 players",
+      "7 players"
+    ],
+    "correct_answer": "5 players",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Sports Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Basketball was paired with 5 players."
+  },
+  {
+    "id": "q_0696",
+    "round_type": "MEMORY",
+    "prompt": "Study the pairings: [Red = Stop, Green = Go, Yellow = Caution, Blue = Info]. What action was paired with Green?",
+    "options": [
+      "Stop",
+      "Go",
+      "Caution",
+      "Info"
+    ],
+    "correct_answer": "Go",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Signaling Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "Green was paired with Go."
+  },
+  {
+    "id": "q_0697",
+    "round_type": "MEMORY",
+    "prompt": "Memorize the pairings: [Hydrogen = H, Helium = He, Lithium = Li, Beryllium = Be]. What symbol was paired with Helium?",
+    "options": [
+      "H",
+      "He",
+      "Li",
+      "Be"
+    ],
+    "correct_answer": "He",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Chemistry Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "He was paired with Helium."
+  },
+  {
+    "id": "q_0698",
+    "round_type": "MEMORY",
+    "prompt": "Recall the awards: [1st = Gold medal, 2nd = Silver medal, 3rd = Bronze medal, 4th = Certificate]. Which prize was 3rd?",
+    "options": [
+      "Gold medal",
+      "Silver medal",
+      "Bronze medal",
+      "Certificate"
+    ],
+    "correct_answer": "Bronze medal",
+    "difficulty": "HARD",
+    "category": "Memory & Recall",
+    "subcategory": "Award Recall",
+    "pattern_type": "Paired Associations",
+    "time_limit_sec": 25,
+    "explanation": "3rd place was paired with Bronze medal."
+  }
+]
