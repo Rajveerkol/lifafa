@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, Bell, Shield, X, LogIn, LogOut, User, Gift, Wallet, Bot, Home, Gamepad2 } from 'lucide-react';
+import { Menu, Bell, Shield, X, LogIn, LogOut, User, Gift, Wallet, Bot, Home, Building2 } from 'lucide-react';
 import { Logo } from './Logo';
 import { useAuth } from '../../context/AuthContext';
 import { formatCurrency } from '../../lib/utils';
@@ -17,13 +17,13 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenNotifications,
   onOpenAuth,
 }) => {
-  const { user, wallet, isAdmin, unreadNotificationsCount, logout } = useAuth();
+  const { user, wallet, merchant, isMerchant, isAdmin, unreadNotificationsCount, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'lifafa', label: 'Lifafa', icon: Gift },
-    { id: 'games', label: 'Games', icon: Gamepad2 },
+    { id: 'merchant', label: 'Gateway', icon: Building2 },
     { id: 'bots', label: 'Bots', icon: Bot, badge: 'Soon' },
     { id: 'wallet', label: 'Wallet', icon: Wallet },
     { id: 'profile', label: 'Profile', icon: User },
@@ -87,9 +87,29 @@ export const Header: React.FC<HeaderProps> = ({
             })}
           </nav>
 
-          {/* Right: Wallet Balance Pill & Notification Bell */}
+          {/* Right: Wallet / Merchant Identity Pill & Notification Bell */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {user ? (
+            {isMerchant && merchant ? (
+              <>
+                <button
+                  onClick={() => onSelectTab('merchant')}
+                  className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100/80 border border-blue-200/60 px-3 py-1.5 rounded-full text-xs font-bold text-blue-700 transition-colors"
+                >
+                  <Building2 className="w-3.5 h-3.5 text-blue-600" />
+                  <span className="max-w-[120px] truncate">{merchant.business_name}</span>
+                  <span className="bg-blue-600 text-white text-[9px] px-1.5 py-0.2 rounded-full font-black uppercase">
+                    Merchant
+                  </span>
+                </button>
+                <button
+                  onClick={() => logout()}
+                  className="p-2 rounded-xl text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </>
+            ) : user ? (
               <>
                 <button
                   onClick={() => onSelectTab('wallet')}
@@ -99,7 +119,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <span>{formatCurrency(wallet?.available_balance ?? 0)}</span>
                 </button>
 
-                {/* Notification Bell matching screenshot */}
+                {/* Notification Bell */}
                 <button
                   onClick={onOpenNotifications}
                   className="relative p-2 rounded-xl text-slate-700 hover:bg-slate-100 active:scale-95 transition-all"
@@ -141,7 +161,22 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
               </div>
 
-              {user && (
+              {isMerchant && merchant ? (
+                <div className="bg-indigo-50/70 rounded-2xl p-3 mb-4 border border-indigo-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                      {merchant.business_name?.charAt(0) || 'M'}
+                    </div>
+                    <div className="overflow-hidden">
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-bold text-slate-900 truncate">{merchant.business_name || 'Merchant'}</p>
+                        <span className="text-[9px] bg-indigo-100 text-indigo-700 font-bold px-1.5 py-0.5 rounded-full uppercase">Merchant</span>
+                      </div>
+                      <p className="text-xs text-slate-500 truncate">{merchant.mobile_number}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : user ? (
                 <div className="bg-blue-50/60 rounded-2xl p-3 mb-4 border border-blue-100/70">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
@@ -157,7 +192,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <span className="font-bold text-blue-700">{formatCurrency(wallet?.available_balance ?? 0)}</span>
                   </div>
                 </div>
-              )}
+              ) : null}
 
               <div className="space-y-1">
                 {navItems.map((item) => {
@@ -190,7 +225,7 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
 
-            {user ? (
+            {(user || isMerchant) ? (
               <button
                 onClick={() => {
                   logout();

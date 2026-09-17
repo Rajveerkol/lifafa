@@ -33,6 +33,7 @@ import {
   Sparkles,
   Copy,
   Check,
+  Building2,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../context/AuthContext';
@@ -41,6 +42,7 @@ import {
   type PlatformPaymentSettings,
   DEFAULT_PAYMENT_SETTINGS,
 } from '../services/walletService';
+import { AdminMerchantPanel } from '../components/admin/AdminMerchantPanel';
 import type {
   Profile,
   Lifafa,
@@ -54,6 +56,7 @@ import { formatCurrency, formatDate } from '../lib/utils';
 import { supabase } from '../lib/supabase';
 
 type AdminSection =
+  | 'merchant-gateway'
   | 'dashboard'
   | 'deposits'
   | 'users'
@@ -493,6 +496,7 @@ export const AdminPage: React.FC = () => {
           badgeHighlight?: boolean;
         }> = [
           // Finance & Approvals
+          { id: 'merchant-gateway', label: 'Merchant Gateway', icon: Building2, category: 'FINANCE' },
           { id: 'deposits', label: 'Deposits', icon: ArrowDownToLine, category: 'FINANCE', badge: pendingDepositsCount, badgeHighlight: true },
           { id: 'withdrawals', label: 'Withdrawals', icon: ArrowDownToLine, category: 'FINANCE', badge: pendingWithdrawalsCount },
           { id: 'wallets', label: 'Wallets', icon: Wallet, category: 'FINANCE' },
@@ -515,8 +519,8 @@ export const AdminPage: React.FC = () => {
             {/* Category Switcher */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none border-b border-slate-100 pb-2.5">
               {[
-                { id: 'ALL', label: 'All Sections (13)' },
-                { id: 'FINANCE', label: `Financial & Approvals (4)${pendingDepositsCount > 0 ? ` • ${pendingDepositsCount} pending` : ''}` },
+                { id: 'ALL', label: 'All Sections (14)' },
+                { id: 'FINANCE', label: `Financial & Approvals (5)${pendingDepositsCount > 0 ? ` • ${pendingDepositsCount} pending` : ''}` },
                 { id: 'COMMUNITY', label: 'Users & Operations (4)' },
                 { id: 'SYSTEM', label: 'Security & System (5)' },
               ].map((cat) => (
@@ -581,6 +585,8 @@ export const AdminPage: React.FC = () => {
           <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
           <span>Synchronizing admin records...</span>
         </div>
+      ) : section === 'merchant-gateway' ? (
+        <AdminMerchantPanel />
       ) : section === 'dashboard' ? (
         /* 1. Dashboard Metrics Grid */
         <div className="space-y-4">

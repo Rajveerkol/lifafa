@@ -2,6 +2,7 @@ import React from 'react';
 import { Gift, Users, Clock, CheckCircle, ArrowRight, Lock, Sparkles } from 'lucide-react';
 import type { Lifafa } from '../../types/database';
 import { formatCurrency, formatTimeRemaining } from '../../lib/utils';
+import { resolveThemeId } from '../../themes/useThemeResolver';
 
 interface LifafaCardProps {
   lifafa: Lifafa;
@@ -37,7 +38,8 @@ export const LifafaCard: React.FC<LifafaCardProps> = ({
     if (onClaimClick) {
       onClaimClick(lifafa);
     } else {
-      window.history.pushState({}, '', `/claim/${lifafa.code}`);
+      const themeId = (lifafa as any).theme_id || resolveThemeId(window.location.search, lifafa);
+      window.history.pushState({}, '', `/claim/${lifafa.code}?t=${themeId}`);
       window.dispatchEvent(new PopStateEvent('popstate'));
     }
   };

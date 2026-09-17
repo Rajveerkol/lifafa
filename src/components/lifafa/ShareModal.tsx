@@ -3,6 +3,7 @@ import { X, Copy, Check, Share2, Send } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import type { Lifafa } from '../../types/database';
 import { formatCurrency } from '../../lib/utils';
+import { buildClaimUrl, resolveThemeId } from '../../themes/useThemeResolver';
 
 interface ShareModalProps {
   lifafa: Lifafa | null;
@@ -15,7 +16,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({ lifafa, isOpen, onClose 
 
   if (!isOpen || !lifafa) return null;
 
-  const shareUrl = `${window.location.origin}/claim/${lifafa.code}`;
+  const themeId = (lifafa as any).theme_id || resolveThemeId(window.location.search, lifafa);
+  const shareUrl = buildClaimUrl(lifafa.code, themeId);
   const shareText = `🎁 Grab your digital cash reward from "${lifafa.title}" on Lifafa! Claim up to ${formatCurrency(lifafa.total_amount)}: ${shareUrl}`;
 
   const handleCopy = () => {

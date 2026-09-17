@@ -1,11 +1,15 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase, isSupabaseConfigured, signInWithGoogle, signOut } from '../lib/supabase';
 import type { Profile, Wallet, AdminUser } from '../types/database';
+import type { Merchant } from '../types/merchant';
+import { merchantGatewayService } from '../services/merchantGatewayService';
 
 interface AuthContextType {
   user: Profile | null;
   wallet: Wallet | null;
   adminUser: AdminUser | null;
+  merchant: Merchant | null;
+  isMerchant: boolean;
   isAdmin: boolean;
   isLoading: boolean;
   isSupabaseConnected: boolean;
@@ -14,6 +18,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   refreshWallet: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  refreshMerchant: () => Promise<void>;
   refreshNotificationsCount: () => Promise<void>;
   // Strict Dev Simulator toggle (ONLY active in development mode when Supabase credentials are not yet entered)
   isDevMode: boolean;
@@ -55,6 +60,8 @@ const DEV_DEMO_ADMIN: AdminUser = {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<Profile | null>(null);
   const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [merchant, setMerchant] = useState<Merchant | null>(null);
+  const [isMerchant, setIsMerchant] = useState<boolean>(false);
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(3);
@@ -71,11 +78,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return OWNER_EMAILS.includes(email.toLowerCase().trim());
   };
 
-  const fetchUserData = useCallback(async (userId: string, authEmail?: string) => {
+  const fetchUserData = useCallback(async (userId: string, authEmail?: string, userMeta?: any) => {
     if (!isSupabaseConfigured || !supabase) return;
 
     try {
-      // 1. Fetch profile
+      const isMchAccount = userMeta?.account_type === 'MERCHANT' || authEmail?.includes('@merchant.lifafa.internal');
+
+      if (isMchAccount) {
+        // Isolation: Merchant accounts never enter consumer profile/wallet flow
+        const mchData = await merchantGatewayService.getMerchantProfile(userId);
+        setMerchant(mchData);
+        setIsMerchant(Boolean(mchData));
+        setUser(null);
+        setWallet(null);
+        setAdminUser(null);
+        return;
+      }
+
+      setMerchant(null);
+      setIsMerchant(false);
+
+      // 1. Fetch profile (Consumer)
       const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
@@ -88,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const effectiveEmail = profileData?.email || authEmail || sessionEmail;
 
-      // 2. Fetch wallet
+      // 2. Fetch wallet (Consumer)
       const { data: walletData } = await supabase
         .from('wallets')
         .select('*')
@@ -128,6 +151,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUnreadCount(count ?? 0);
     } catch (err) {
       console.error('Error loading user data:', err);
+    }
+  }, []);
+
+  const refreshMerchant = useCallback(async () => {
+    if (!isSupabaseConfigured || !supabase) return;
+    try {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (authUser) {
+        const mchData = await merchantGatewayService.getMerchantProfile(authUser.id);
+        setMerchant(mchData);
+        setIsMerchant(Boolean(mchData));
+      }
+    } catch (err) {
+      console.error('Error refreshing merchant profile:', err);
     }
   }, []);
 
@@ -195,7 +232,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             created_at: new Date().toISOString(),
           });
         }
-        fetchUserData(session.user.id, email || undefined).finally(() => setIsLoading(false));
+        fetchUserData(session.user.id, email || undefined, session.user.user_metadata).finally(() => setIsLoading(false));
       } else {
         setIsLoading(false);
       }
@@ -214,10 +251,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             created_at: new Date().toISOString(),
           });
         }
-        fetchUserData(session.user.id, email || undefined);
+        fetchUserData(session.user.id, email || undefined, session.user.user_metadata);
       } else {
         setUser(null);
         setWallet(null);
+        setMerchant(null);
+        setIsMerchant(false);
         setAdminUser(null);
         setSessionEmail(null);
       }
@@ -246,13 +285,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsDevDemoActive(false);
       setUser(null);
       setWallet(null);
+      setMerchant(null);
+      setIsMerchant(false);
       setAdminUser(null);
       return;
     }
     await signOut();
     setUser(null);
     setWallet(null);
+    setMerchant(null);
+    setIsMerchant(false);
     setAdminUser(null);
+    setSessionEmail(null);
   };
 
   const activateDevDemo = () => {
@@ -276,6 +320,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user,
         wallet,
+        merchant,
+        isMerchant,
         adminUser,
         isAdmin: isUserAdmin,
         isLoading,
@@ -285,6 +331,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout: handleLogout,
         refreshWallet,
         refreshProfile,
+        refreshMerchant,
         refreshNotificationsCount,
         isDevMode,
         activateDevDemo,

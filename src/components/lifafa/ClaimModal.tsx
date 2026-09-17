@@ -21,6 +21,9 @@ import { fraudService } from '../../services/fraudService';
 import { TaskCard } from './TaskCard';
 import { DigitalEnvelope } from './DigitalEnvelope';
 import { formatCurrency, formatTimeRemaining } from '../../lib/utils';
+import { ThemeProvider } from '../../themes/ThemeContext';
+import { getTheme } from '../../themes/registry';
+import { resolveThemeId } from '../../themes/useThemeResolver';
 
 interface ClaimModalProps {
   lifafa: Lifafa | null;
@@ -129,7 +132,12 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
 
   if (!isOpen || !lifafa) return null;
 
-  const { isExpired } = formatTimeRemaining(lifafa.expires_at);
+  const resolvedThemeId = resolveThemeId(typeof window !== 'undefined' ? window.location.search : '', lifafa);
+  const theme = getTheme(resolvedThemeId);
+  const { isExpired, formatted: timeLeft } = formatTimeRemaining(lifafa.expires_at);
+  const isCompleted = Boolean(
+    lifafa.status === 'COMPLETED' || lifafa.claimed_count >= lifafa.winner_count
+  );
   const requiredTasks = tasks.filter((t) => t.is_required && t.is_enabled);
   const allRequiredDone = requiredTasks.every((t) => completedTaskIds.has(t.id));
 
@@ -230,262 +238,101 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
       }}
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in overflow-y-auto"
     >
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden my-4 max-h-[92vh] flex flex-col">
-        {/* Top Header Bar */}
-        <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/70">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center">
-              <Gift className="w-4 h-4" />
+      <ThemeProvider themeId={resolvedThemeId}>
+        <div className={`relative w-full max-w-md ${theme.colors.cardBackground} rounded-3xl shadow-2xl border ${theme.colors.cardBorder} overflow-hidden my-4 max-h-[92vh] flex flex-col`}>
+          {/* Top Header Bar */}
+          <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/70">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5" style={{ fontFamily: 'var(--font-theme-heading)' }}>
+                <span>{theme.badge}</span>
+                <span>•</span>
+                <span>{claimResult ? 'Reward Claimed!' : 'Open Digital Lifafa'}</span>
+              </span>
             </div>
-            <span className="text-xs font-bold text-slate-800">
-              {claimResult ? 'Reward Claimed!' : 'Open Digital Lifafa'}
-            </span>
+
+            <button
+              onClick={onClose}
+              className="w-7 h-7 rounded-full bg-slate-200/70 hover:bg-slate-300 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
 
-          <button
-            onClick={onClose}
-            className="w-7 h-7 rounded-full bg-slate-200/70 hover:bg-slate-300 text-slate-600 flex items-center justify-center transition-colors"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
+          {/* Scrollable Modal Body */}
+          <div className="p-4 sm:p-5 overflow-y-auto space-y-4">
+            {/* Themed Envelope Visual Experience */}
+            <theme.components.Envelope
+              lifafa={lifafa}
+              isEnvelopeOpened={isEnvelopeOpened || Boolean(claimResult)}
+              onUnsealEnvelope={() => setIsEnvelopeOpened(true)}
+              claimedAmount={claimResult?.amount}
+              timeLeft={timeLeft}
+              isExpired={isExpired}
+            />
 
-        {/* Scrollable Modal Body */}
-        <div className="p-4 sm:p-5 overflow-y-auto space-y-4">
-          {/* Digital Envelope Visual Experience */}
-          <DigitalEnvelope
-            lifafa={lifafa}
-            isEnvelopeOpened={isEnvelopeOpened || Boolean(claimResult)}
-            onUnsealEnvelope={() => setIsEnvelopeOpened(true)}
-            claimedAmount={claimResult?.amount}
-          />
-
-          {claimResult ? (
-            /* Celebration Action State */
-            <div className="text-center space-y-3 pt-2">
-              {claimResult.payoutMode === 'UPI_BANK' ? (
-                <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-800 space-y-1.5 text-center">
-                  <div className="flex items-center justify-center gap-2 text-emerald-700">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                    <span className="text-sm font-black">Payout Initiated!</span>
-                  </div>
-                  <p className="text-[11px] text-emerald-800 font-semibold">
-                    {formatCurrency(claimResult.amount)} payout request submitted. Status:{' '}
-                    <span className="font-bold text-amber-700 bg-amber-100/70 px-1.5 py-0.5 rounded border border-amber-200">
-                      Pending Processing
-                    </span>
-                  </p>
-                  <p className="text-[10px] text-slate-500 font-normal">
-                    Your reward will be transferred directly to your bank/UPI account. You can track progress in your Wallet under Withdrawals.
-                  </p>
-                </div>
-              ) : (
-                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-800 font-bold flex items-center justify-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Credited {formatCurrency(claimResult.amount)} directly to your CreatLifafa Wallet!</span>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                {onOpenShare && (
-                  <button
-                    onClick={() => {
-                      onClose();
-                      onOpenShare(lifafa);
-                    }}
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl text-xs shadow-md shadow-blue-500/25 active:scale-98 transition-all"
-                  >
-                    <Share2 className="w-4 h-4" />
-                    <span>Share This Lifafa with Friends</span>
-                  </button>
-                )}
-
+            {claimResult ? (
+              <theme.components.RewardReveal
+                amount={claimResult.amount}
+                code={claimResult.code}
+                payoutMode={claimResult.payoutMode || lifafa.payout_mode || 'WALLET'}
+                lifafa={lifafa}
+                onOpenShare={onOpenShare}
+                onClose={onClose}
+              />
+            ) : isCompleted ? (
+              <theme.components.FullyClaimedView
+                lifafa={lifafa}
+                onNavigateHome={onClose}
+              />
+            ) : isExpired ? (
+              <theme.components.ExpiredView
+                lifafa={lifafa}
+                onNavigateHome={onClose}
+              />
+            ) : isEnvelopeOpened ? (
+              <theme.components.ClaimSection
+                lifafa={lifafa}
+                user={user}
+                isEnvelopeOpened={isEnvelopeOpened}
+                pinCode={pinCode}
+                setPinCode={setPinCode}
+                requiresPin={Boolean(lifafa.pin_code)}
+                accountHolderName={accountHolderName}
+                setAccountHolderName={setAccountHolderName}
+                bankAccountNumber={bankAccountNumber}
+                setBankAccountNumber={setBankAccountNumber}
+                ifscCode={ifscCode}
+                setIfscCode={setIfscCode}
+                upiId={upiId}
+                setUpiId={setUpiId}
+                tasks={tasks}
+                completedTaskIds={completedTaskIds}
+                allRequiredDone={allRequiredDone}
+                onTaskDone={handleTaskDone}
+                onOpenAuth={onOpenAuth || (() => {})}
+                onClaim={handleClaim}
+                claiming={claiming}
+                errorMsg={errorMsg}
+              />
+            ) : (
+              <div className="text-center pt-2">
                 <button
-                  onClick={onClose}
-                  className="w-full py-2.5 text-slate-600 hover:text-slate-900 text-xs font-bold"
+                  type="button"
+                  onClick={() => setIsEnvelopeOpened(true)}
+                  className="w-full py-3.5 px-4 text-white font-bold rounded-2xl text-xs shadow-lg active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-2"
+                  style={{
+                    backgroundColor: theme.colors.envelopePrimary,
+                    fontFamily: 'var(--font-theme-heading)',
+                  }}
                 >
-                  Done
+                  <Gift className="w-4 h-4" />
+                  <span>Tap Envelope or Click Here to Open</span>
                 </button>
               </div>
-            </div>
-          ) : isEnvelopeOpened ? (
-            /* Pre-claim Tasks & Verification */
-            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              {errorMsg && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-2 text-xs text-red-700">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{errorMsg}</span>
-                </div>
-              )}
-
-              {/* Login required prompt if not authenticated */}
-              {!user && (
-                <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl space-y-2 text-xs text-amber-900">
-                  <div className="flex items-center gap-2 font-bold">
-                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                    <span>
-                      {lifafa.payout_mode === 'UPI_BANK'
-                        ? 'Login required to claim reward and receive payout'
-                        : 'Login required to receive reward in your CreatLifafa Wallet'}
-                    </span>
-                  </div>
-                  {onOpenAuth && (
-                    <button
-                      type="button"
-                      onClick={onOpenAuth}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors cursor-pointer"
-                    >
-                      Sign In with Google
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* PIN Code Input if configured */}
-              {lifafa.pin_code && (
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
-                    <Lock className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Enter Secret PIN Code *</span>
-                  </label>
-                  <input
-                    type="password"
-                    maxLength={6}
-                    value={pinCode}
-                    onChange={(e) => setPinCode(e.target.value)}
-                    placeholder="Enter 4-6 digit PIN"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-center tracking-widest focus:outline-hidden focus:border-blue-500"
-                  />
-                </div>
-              )}
-
-              {/* Tasks Checklist */}
-              {tasks.length > 0 && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-800">
-                      Required Tasks ({completedTaskIds.size}/{requiredTasks.length})
-                    </span>
-                    {allRequiredDone && (
-                      <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> All Required Tasks Complete
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="space-y-3">
-                    {tasks.map((task) => (
-                      <TaskCard
-                        key={task.id}
-                        task={task}
-                        isCompleted={completedTaskIds.has(task.id)}
-                        onCompleted={handleTaskDone}
-                        onOpenAuth={onOpenAuth}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* UPI / Bank Details Input for UPI_BANK Payout Mode */}
-              {lifafa.payout_mode === 'UPI_BANK' && (
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                    <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                      <Landmark className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Payout Details (Bank / UPI)</span>
-                    </span>
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                      Direct Payout
-                    </span>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                      Account Holder Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={accountHolderName}
-                      onChange={(e) => setAccountHolderName(e.target.value)}
-                      placeholder="Name as per bank account"
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-hidden focus:border-blue-500"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                        Bank Account Number
-                      </label>
-                      <input
-                        type="text"
-                        value={bankAccountNumber}
-                        onChange={(e) => setBankAccountNumber(e.target.value)}
-                        placeholder="e.g. 123456789012"
-                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono focus:outline-hidden focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                        IFSC Code
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={11}
-                        value={ifscCode}
-                        onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
-                        placeholder="e.g. SBIN0001234"
-                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono uppercase focus:outline-hidden focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                      UPI ID
-                    </label>
-                    <input
-                      type="text"
-                      value={upiId}
-                      onChange={(e) => setUpiId(e.target.value)}
-                      placeholder="e.g. yourname@okhdfcbank"
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono focus:outline-hidden focus:border-blue-500"
-                    />
-                  </div>
-                  <p className="text-[10px] text-slate-500 leading-tight">
-                    * Provide either Bank Account Number + IFSC, or your active UPI ID.
-                  </p>
-                </div>
-              )}
-
-              {/* Main Action: Claim Lifafa Button */}
-              <button
-                onClick={handleClaim}
-                disabled={claiming || isExpired || !allRequiredDone}
-                className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/25 active:scale-98 transition-all text-sm flex items-center justify-center gap-2 cursor-pointer"
-              >
-                {claiming ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Claiming Lifafa...</span>
-                  </>
-                ) : isExpired ? (
-                  <span>Lifafa Has Expired</span>
-                ) : !allRequiredDone ? (
-                  <span>Complete Required Tasks to Claim</span>
-                ) : (
-                  <>
-                    <Sparkles className="w-5 h-5 text-amber-300" />
-                    <span>Claim Lifafa</span>
-                  </>
-                )}
-              </button>
-            </div>
-          ) : null}
+            )}
+          </div>
         </div>
-      </div>
+      </ThemeProvider>
     </div>
   );
 };

@@ -7,7 +7,7 @@ import { CreateLifafaPage } from './pages/CreateLifafaPage';
 import { WalletPage } from './pages/WalletPage';
 import { BotsPage } from './pages/BotsPage';
 import { ProfilePage } from './pages/ProfilePage';
-import { GamesPage } from './pages/GamesPage';
+import { MerchantPortalPage } from './pages/MerchantPortalPage';
 import { AdminPage } from './pages/AdminPage';
 import { AccountSecurityPage } from './pages/AccountSecurityPage';
 import { HelpSupportPage } from './pages/HelpSupportPage';
@@ -25,9 +25,10 @@ import { NotificationDrawer } from './components/common/NotificationDrawer';
 import { useAuth } from './context/AuthContext';
 import { lifafaService } from './services/lifafaService';
 import type { Lifafa } from './types/database';
+import { resolveThemeId } from './themes/useThemeResolver';
 
 export function App() {
-  const { user } = useAuth();
+  const { user, isMerchant } = useAuth();
 
   const parseClaimCodeFromPath = () => {
     const path = window.location.pathname;
@@ -40,11 +41,15 @@ export function App() {
 
   const getInitialTab = () => {
     const raw = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+    if (raw === 'games') {
+      return 'merchant';
+    }
     if (
       [
         'home',
         'lifafa',
-        'games',
+        'merchant',
+        'gateway',
         'bots',
         'wallet',
         'profile',
@@ -55,7 +60,7 @@ export function App() {
         'privacy',
       ].includes(raw)
     ) {
-      return raw;
+      return raw === 'gateway' ? 'merchant' : raw;
     }
     return 'home';
   };
@@ -63,6 +68,13 @@ export function App() {
   const [currentTab, setCurrentTab] = useState<string>(getInitialTab);
   const [claimRouteCode, setClaimRouteCode] = useState<string | null>(parseClaimCodeFromPath);
   const [isCreatingLifafa, setIsCreatingLifafa] = useState(false);
+
+  useEffect(() => {
+    if (isMerchant && (currentTab === 'wallet' || currentTab === 'profile')) {
+      setCurrentTab('merchant');
+      window.history.replaceState({}, '', '/merchant');
+    }
+  }, [isMerchant, currentTab]);
 
   // Modals
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -100,11 +112,14 @@ export function App() {
       setClaimRouteCode(null);
 
       const raw = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
-      if (
+      if (raw === 'games') {
+        setCurrentTab('merchant');
+      } else if (
         [
           'home',
           'lifafa',
-          'games',
+          'merchant',
+          'gateway',
           'bots',
           'wallet',
           'profile',
@@ -115,7 +130,7 @@ export function App() {
           'privacy',
         ].includes(raw)
       ) {
-        setCurrentTab(raw);
+        setCurrentTab(raw === 'gateway' ? 'merchant' : raw);
       } else {
         setCurrentTab('home');
       }
@@ -130,8 +145,10 @@ export function App() {
     const queryCode = params.get('claim');
     if (queryCode) {
       const clean = queryCode.trim();
+      const themeParam = params.get('t') || params.get('theme');
       clearClaimQueryParam();
-      window.history.replaceState({}, '', `/claim/${clean}`);
+      const targetPath = `/claim/${clean}${themeParam ? `?t=${themeParam}` : ''}`;
+      window.history.replaceState({}, '', targetPath);
       setClaimRouteCode(clean);
     }
   }, []);
@@ -161,7 +178,8 @@ export function App() {
   };
 
   const handleClaimLifafa = (lifafa: Lifafa) => {
-    window.history.pushState({}, '', `/claim/${lifafa.code}`);
+    const themeId = (lifafa as any).theme_id || resolveThemeId(window.location.search, lifafa);
+    window.history.pushState({}, '', `/claim/${lifafa.code}?t=${themeId}`);
     setClaimRouteCode(lifafa.code);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -176,6 +194,9 @@ export function App() {
     // Open share screen for the newly created Lifafa
     lifafaService.getLifafaByCode(result.code).then((found) => {
       if (found) {
+        if (result.theme_id) {
+          (found as any).theme_id = result.theme_id;
+        }
         setSelectedShareLifafa(found);
       }
     });
@@ -244,7 +265,7 @@ export function App() {
             />
           ))}
 
-        {currentTab === 'games' && <GamesPage />}
+        {(currentTab === 'merchant' || currentTab === 'gateway') && <MerchantPortalPage />}
 
         {currentTab === 'bots' && <BotsPage onOpenAuth={() => setAuthModalOpen(true)} />}
 

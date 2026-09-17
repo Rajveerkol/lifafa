@@ -23,6 +23,9 @@ import { lifafaService } from '../services/lifafaService';
 import type { DistributionType, TaskType, Lifafa, PayoutMode } from '../types/database';
 import { formatCurrency } from '../lib/utils';
 import { TelegramTaskBuilder, type VerifiedTelegramChannel } from '../components/lifafa/TelegramTaskBuilder';
+import { ThemeSelector } from '../components/lifafa/ThemeSelector';
+import { inferThemeFromContent } from '../themes/useThemeResolver';
+import type { LifafaThemeId } from '../themes/types';
 
 interface CreateLifafaPageProps {
   onSuccessCreated: (createdLifafa: any) => void;
@@ -38,6 +41,8 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
   // Basic Form State
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
+  const [selectedTheme, setSelectedTheme] = useState<LifafaThemeId>('rewards');
+  const [isThemeManuallySelected, setIsThemeManuallySelected] = useState(false);
   const [totalAmount, setTotalAmount] = useState('');
   const [winnerCount, setWinnerCount] = useState('');
   const [distributionType, setDistributionType] = useState<DistributionType>('EQUAL');
@@ -80,6 +85,27 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
 
   // Perpetual non-expiring date (Year 9999) satisfies database NOT NULL constraint without enforcing visible expiration
   const computeExpiryDate = (): string => '9999-12-31T23:59:59.999Z';
+
+  const handleTitleChange = (val: string) => {
+    setTitle(val);
+    if (!isThemeManuallySelected) {
+      const inferred = inferThemeFromContent(val, message);
+      setSelectedTheme(inferred);
+    }
+  };
+
+  const handleMessageChange = (val: string) => {
+    setMessage(val);
+    if (!isThemeManuallySelected) {
+      const inferred = inferThemeFromContent(title, val);
+      setSelectedTheme(inferred);
+    }
+  };
+
+  const handleThemeSelect = (themeId: LifafaThemeId) => {
+    setSelectedTheme(themeId);
+    setIsThemeManuallySelected(true);
+  };
 
   const handleTelegramChannelVerified = (channel: VerifiedTelegramChannel) => {
     setTasks([
@@ -211,7 +237,7 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
       );
 
       await refreshWallet();
-      onSuccessCreated(res);
+      onSuccessCreated({ ...res, theme_id: selectedTheme });
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to create Lifafa');
     } finally {
@@ -259,7 +285,7 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
             <input
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => handleTitleChange(e.target.value)}
               placeholder="e.g. Telegram Channel Launch Celebration 🎉"
               className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-hidden focus:border-blue-500 focus:bg-white"
               required
@@ -273,9 +299,17 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
             <textarea
               rows={2}
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={(e) => handleMessageChange(e.target.value)}
               placeholder="Add warm wishes, celebratory note, or instructions for claimants..."
               className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-hidden focus:border-blue-500 focus:bg-white"
+            />
+          </div>
+
+          {/* Theme & Occasion Selector */}
+          <div className="pt-2 border-t border-slate-100">
+            <ThemeSelector
+              selectedTheme={selectedTheme}
+              onSelectTheme={handleThemeSelect}
             />
           </div>
         </div>

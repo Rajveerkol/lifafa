@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Gift, Gamepad2, Bot, Wallet, User } from 'lucide-react';
+import { Home, Gift, Building2, Bot, Wallet, User } from 'lucide-react';
 
 interface BottomNavProps {
   currentTab: string;
@@ -7,11 +7,11 @@ interface BottomNavProps {
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onSelectTab }) => {
-  // Primary navigation strictly: Home | Lifafa | Games | Bots | Wallet | Profile
+  // Primary navigation strictly: Home | Lifafa | Gateway | Bots | Wallet | Profile
   const items = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'lifafa', label: 'Lifafa', icon: Gift },
-    { id: 'games', label: 'Games', icon: Gamepad2 },
+    { id: 'merchant', label: 'Gateway', icon: Building2 },
     { id: 'bots', label: 'Bots', icon: Bot, isSoon: true },
     { id: 'wallet', label: 'Wallet', icon: Wallet },
     { id: 'profile', label: 'Profile', icon: User },
