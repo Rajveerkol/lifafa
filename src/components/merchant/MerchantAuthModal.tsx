@@ -97,23 +97,8 @@ export const MerchantAuthModal: React.FC<MerchantAuthModalProps> = ({
           }
         }
 
-        // The PostgreSQL trigger handle_new_merchant() automatically and atomically creates
-        // the public.merchants and public.merchant_wallets records with status ACTIVE.
-        // Now call the dedicated authenticated server-side API key generation RPC:
-        const merchant = await merchantGatewayService.getMerchantProfile(userId);
-        if (merchant) {
-          try {
-            const keyPair = await merchantGatewayService.generateApiKey({
-              merchantId: merchant.id,
-              keyName: 'Default API Key',
-            });
-            setOnboardingKey(keyPair);
-            return; // Display initial credential screen to merchant
-          } catch (keyErr) {
-            console.error('Initial API key generation error:', keyErr);
-          }
-        }
-
+        // Account created with status: PENDING_APPROVAL and setup_fee_status: PAYMENT_REQUIRED
+        // Directly proceed to merchant portal where the ₹999 Gateway Activation screen is presented
         onSuccess();
         onClose();
       } else {

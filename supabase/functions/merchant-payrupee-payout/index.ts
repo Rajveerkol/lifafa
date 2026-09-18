@@ -85,6 +85,22 @@ serve(async (req: Request) => {
 
       merchantId = keyRecord.merchant_id;
 
+      // Verify merchant is ACTIVE and has PAID setup fee
+      const { data: mchAuthRecord } = await adminClient
+        .from('merchants')
+        .select('id, status, setup_fee_status')
+        .eq('id', merchantId)
+        .maybeSingle();
+
+      if (!mchAuthRecord || mchAuthRecord.status !== 'ACTIVE' || mchAuthRecord.setup_fee_status !== 'PAID') {
+        return new Response(
+          JSON.stringify({
+            error: 'Merchant Gateway is not active. Account must be approved with PAID setup fee prior to API dispatch.',
+          }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       // IP Whitelist Check (if merchant has configured whitelist entries)
       const { data: whitelist } = await adminClient
         .from('merchant_ip_whitelist')
@@ -121,13 +137,15 @@ serve(async (req: Request) => {
 
       const { data: merchantRecord } = await adminClient
         .from('merchants')
-        .select('id, status')
+        .select('id, status, setup_fee_status')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (!merchantRecord || merchantRecord.status !== 'ACTIVE') {
+      if (!merchantRecord || merchantRecord.status !== 'ACTIVE' || merchantRecord.setup_fee_status !== 'PAID') {
         return new Response(
-          JSON.stringify({ error: 'No active merchant account associated with this session' }),
+          JSON.stringify({
+            error: 'No active approved merchant account associated with this session. Setup fee must be PAID and account approved by admin.',
+          }),
           { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }

@@ -67,6 +67,11 @@ export const AdminMerchantPanel: React.FC = () => {
   // Review Modals
   const [approvingDeposit, setApprovingDeposit] = useState<MerchantDeposit | null>(null);
   const [rejectingDeposit, setRejectingDeposit] = useState<MerchantDeposit | null>(null);
+  const [approvingMerchant, setApprovingMerchant] = useState<Merchant | null>(null);
+  const [editingFeeMerchant, setEditingFeeMerchant] = useState<Merchant | null>(null);
+  const [feeStatusInput, setFeeStatusInput] = useState<'PAYMENT_REQUIRED' | 'PAYMENT_PENDING' | 'PAID' | 'FAILED'>('PAID');
+  const [feeRefInput, setFeeRefInput] = useState('');
+  const [feeMethodInput, setFeeMethodInput] = useState('UPI_DIRECT');
   const [adminNotes, setAdminNotes] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -147,6 +152,51 @@ export const AdminMerchantPanel: React.FC = () => {
     }
   };
 
+  const handleApproveMerchant = async () => {
+    if (!approvingMerchant) return;
+    if (approvingMerchant.setup_fee_status !== 'PAID') {
+      setActionError('Cannot approve merchant: ₹999 setup fee must be PAID before activating gateway.');
+      return;
+    }
+
+    setActionLoading(true);
+    setActionError(null);
+    try {
+      await merchantGatewayService.adminApproveMerchant(approvingMerchant.id, adminNotes);
+      setActionSuccess(`Merchant "${approvingMerchant.business_name}" activated successfully! Float operations & API unlocked.`);
+      setApprovingMerchant(null);
+      setAdminNotes('');
+      await loadData();
+      setTimeout(() => setActionSuccess(null), 4000);
+    } catch (err: any) {
+      setActionError(err.message || 'Failed to approve merchant');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleUpdateSetupFee = async () => {
+    if (!editingFeeMerchant) return;
+    setActionLoading(true);
+    setActionError(null);
+    try {
+      await merchantGatewayService.adminRecordSetupFee(
+        editingFeeMerchant.id,
+        feeStatusInput,
+        feeRefInput.trim() || undefined,
+        feeMethodInput.trim() || undefined
+      );
+      setActionSuccess(`Setup fee status for "${editingFeeMerchant.business_name}" updated to ${feeStatusInput}.`);
+      setEditingFeeMerchant(null);
+      await loadData();
+      setTimeout(() => setActionSuccess(null), 4000);
+    } catch (err: any) {
+      setActionError(err.message || 'Failed to update setup fee');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   // Metrics Calculations
   const totalFloatDeposited = deposits
     .filter((d) => d.status === 'APPROVED')
@@ -161,34 +211,39 @@ export const AdminMerchantPanel: React.FC = () => {
     .filter((p) => p.status === 'SUCCESS')
     .reduce((sum, p) => sum + Number(p.fee_amount), 0);
   const pendingDepositsCount = deposits.filter((d) => d.status === 'PENDING').length;
+  const pendingMerchantsCount = merchants.filter((m) => m.status === 'PENDING_APPROVAL').length;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'SUCCESS':
       case 'APPROVED':
       case 'ACTIVE':
+      case 'PAID':
         return (
           <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase border border-emerald-200">
             <CheckCircle2 className="w-3 h-3" />
-            <span>{status}</span>
+            <span>{status === 'PAID' ? '₹999 PAID' : status}</span>
           </span>
         );
       case 'PROCESSING':
       case 'PENDING':
+      case 'PENDING_APPROVAL':
+      case 'PAYMENT_PENDING':
         return (
           <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase border border-amber-200">
             <Clock className="w-3 h-3" />
-            <span>{status}</span>
+            <span>{status === 'PENDING_APPROVAL' ? 'PENDING APPROVAL' : status === 'PAYMENT_PENDING' ? 'FEE PENDING' : status}</span>
           </span>
         );
       case 'FAILED':
       case 'REJECTED':
       case 'REVERSED':
       case 'SUSPENDED':
+      case 'PAYMENT_REQUIRED':
         return (
           <span className="inline-flex items-center gap-1 bg-red-50 text-red-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase border border-red-200">
             <XCircle className="w-3 h-3" />
-            <span>{status}</span>
+            <span>{status === 'PAYMENT_REQUIRED' ? 'PAYMENT REQUIRED' : status}</span>
           </span>
         );
       default:
@@ -203,7 +258,7 @@ export const AdminMerchantPanel: React.FC = () => {
   const navTabs: { id: MerchantAdminTab; label: string; icon: any; count?: number }[] = [
     { id: 'deposits', label: 'Deposits', icon: ArrowDownToLine, count: pendingDepositsCount },
     { id: 'payouts', label: 'Payouts', icon: Send, count: payouts.length },
-    { id: 'merchants', label: 'Merchants', icon: Building2, count: merchants.length },
+    { id: 'merchants', label: 'Merchants', icon: Building2, count: pendingMerchantsCount > 0 ? pendingMerchantsCount : undefined },
     { id: 'wallets', label: 'Wallets', icon: Wallet },
     { id: 'ledger', label: 'Audit Ledger', icon: FileText },
     { id: 'fees', label: 'Fee Rules', icon: DollarSign },
@@ -526,29 +581,100 @@ export const AdminMerchantPanel: React.FC = () => {
         <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-2xs divide-y divide-slate-100">
           {merchants.map((m) => {
             const wallet = wallets.find((w) => w.merchant_id === m.id);
+            const isPaid = m.setup_fee_status === 'PAID';
+            const isActive = m.status === 'ACTIVE';
+
             return (
-              <div key={m.id} className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-900">{m.business_name}</span>
+              <div key={m.id} className="p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+                {/* 1. Identity & Status */}
+                <div className="space-y-1.5 min-w-[240px]">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-black text-slate-900">{m.business_name}</span>
                     {getStatusBadge(m.status)}
+                    {getStatusBadge(m.setup_fee_status || 'PAYMENT_REQUIRED')}
                   </div>
                   <div className="text-xs text-slate-500 font-mono flex items-center gap-2">
-                    <span>Code: {m.merchant_code}</span>
+                    <span>Code: <strong className="text-slate-700">{m.merchant_code}</strong></span>
                     <span>•</span>
                     <span>Mobile: {m.mobile_number}</span>
                   </div>
-                  <div className="text-[11px] text-slate-400">Registered: {formatDate(m.created_at)}</div>
+                  <div className="text-[11px] text-slate-400">
+                    Registered: {formatDate(m.created_at)}
+                  </div>
                 </div>
 
-                <div className="text-left sm:text-right">
+                {/* 2. Setup Fee Audit Details */}
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-1 min-w-[240px]">
+                  <div className="flex items-center justify-between text-[11px] text-slate-500">
+                    <span>Setup Fee Amount:</span>
+                    <strong className="text-slate-800">₹{m.setup_fee_amount ?? 999}.00</strong>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-slate-500">Payment Ref:</span>
+                    <span className="font-mono text-slate-800 truncate max-w-[140px]" title={m.setup_fee_reference || 'N/A'}>
+                      {m.setup_fee_reference || 'None'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-slate-500">Paid Date:</span>
+                    <span className="text-slate-700">
+                      {m.setup_fee_paid_at ? formatDate(m.setup_fee_paid_at) : 'Not Paid'}
+                    </span>
+                  </div>
+                  {m.setup_fee_payment_method && (
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                      <span>Method:</span>
+                      <span>{m.setup_fee_payment_method}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. Float Balances */}
+                <div className="text-left lg:text-right min-w-[160px]">
                   <div className="text-xs text-slate-500">Available Float</div>
-                  <div className="text-sm font-black text-emerald-700">
+                  <div className="text-base font-black text-emerald-700">
                     {formatCurrency(wallet?.available_balance ?? 0)}
                   </div>
-                  <div className="text-[10px] text-slate-400">
-                    Locked: {formatCurrency(wallet?.locked_payout_balance ?? 0)} | Total Paid: {formatCurrency(wallet?.total_paid_out ?? 0)}
+                  <div className="text-[11px] text-slate-400 font-mono">
+                    Locked: {formatCurrency(wallet?.locked_payout_balance ?? 0)}
                   </div>
+                </div>
+
+                {/* 4. Administrative Actions */}
+                <div className="flex items-center gap-2 w-full lg:w-auto justify-end">
+                  <button
+                    onClick={() => {
+                      setEditingFeeMerchant(m);
+                      setFeeStatusInput(m.setup_fee_status || 'PAID');
+                      setFeeRefInput(m.setup_fee_reference || '');
+                      setFeeMethodInput(m.setup_fee_payment_method || 'ADMIN_OVERRIDE');
+                    }}
+                    className="px-3 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all cursor-pointer"
+                    title="Override or Record Setup Fee"
+                  >
+                    Manage Fee
+                  </button>
+
+                  {isActive ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-black text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl">
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Active</span>
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => setApprovingMerchant(m)}
+                      disabled={!isPaid}
+                      className={`flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl transition-all ${
+                        isPaid
+                          ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/30 cursor-pointer active:scale-98'
+                          : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+                      }`}
+                      title={isPaid ? 'Approve Gateway Access' : 'Cannot approve: Setup fee is not PAID'}
+                    >
+                      <Check className="w-4 h-4" />
+                      <span>{isPaid ? 'Approve Gateway' : 'Requires ₹999 Fee'}</span>
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -862,6 +988,154 @@ export const AdminMerchantPanel: React.FC = () => {
             >
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Merchant Approval Modal */}
+      {approvingMerchant && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white rounded-3xl p-6 space-y-4 shadow-2xl border border-slate-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <h4 className="text-sm font-black text-slate-900">Approve Merchant Gateway</h4>
+              </div>
+              <button onClick={() => setApprovingMerchant(null)} className="p-1 rounded-full text-slate-400 hover:bg-slate-100 cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="bg-slate-50 p-3.5 rounded-2xl text-xs space-y-1.5 border border-slate-200">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Business Name:</span>
+                <strong className="text-slate-900">{approvingMerchant.business_name}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Merchant Code:</span>
+                <span className="font-mono text-slate-700">{approvingMerchant.merchant_code}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Setup Fee:</span>
+                <span className="font-bold text-emerald-700">₹{approvingMerchant.setup_fee_amount ?? 999} (PAID)</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Payment Ref:</span>
+                <span className="font-mono text-slate-700">{approvingMerchant.setup_fee_reference || 'N/A'}</span>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Approving this merchant sets their status to <strong>ACTIVE</strong> and unlocks live float deposit, instant PayRupee payout dispatch, and server-side API key generation.
+            </p>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Administrative Notes (Optional)</label>
+              <input
+                type="text"
+                placeholder="e.g. Verified payment ref ACT-XXXX; approved for production"
+                value={adminNotes}
+                onChange={(e) => setAdminNotes(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setApprovingMerchant(null)}
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleApproveMerchant}
+                disabled={actionLoading}
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/30 transition-all cursor-pointer active:scale-98"
+              >
+                {actionLoading ? 'Activating...' : 'Confirm Activation'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Setup Fee Modal */}
+      {editingFeeMerchant && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white rounded-3xl p-6 space-y-4 shadow-2xl border border-slate-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                  <DollarSign className="w-5 h-5" />
+                </div>
+                <h4 className="text-sm font-black text-slate-900">Manage Setup Fee Status</h4>
+              </div>
+              <button onClick={() => setEditingFeeMerchant(null)} className="p-1 rounded-full text-slate-400 hover:bg-slate-100 cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="bg-slate-50 p-3 rounded-2xl text-xs border border-slate-200">
+              <span className="text-slate-500">Merchant: </span>
+              <strong className="text-slate-900">{editingFeeMerchant.business_name}</strong>
+              <span className="text-slate-400 font-mono text-[11px] ml-2">({editingFeeMerchant.merchant_code})</span>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Setup Fee Status</label>
+                <select
+                  value={feeStatusInput}
+                  onChange={(e: any) => setFeeStatusInput(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                >
+                  <option value="PAID">PAID (₹999 Verified)</option>
+                  <option value="PAYMENT_PENDING">PAYMENT_PENDING (Verification in Progress)</option>
+                  <option value="PAYMENT_REQUIRED">PAYMENT_REQUIRED (Awaiting Payment)</option>
+                  <option value="FAILED">FAILED (Payment Failed / Rejected)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Payment Reference / UTR</label>
+                <input
+                  type="text"
+                  placeholder="e.g. UPI-UTR-12345678 or ACT-999-REF"
+                  value={feeRefInput}
+                  onChange={(e) => setFeeRefInput(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Payment Method</label>
+                <input
+                  type="text"
+                  placeholder="e.g. UPI_DIRECT, BANK_TRANSFER, ADMIN_MANUAL"
+                  value={feeMethodInput}
+                  onChange={(e) => setFeeMethodInput(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => setEditingFeeMerchant(null)}
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateSetupFee}
+                disabled={actionLoading}
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/30 transition-all cursor-pointer active:scale-98"
+              >
+                {actionLoading ? 'Saving...' : 'Save Fee Status'}
+              </button>
+            </div>
           </div>
         </div>
       )}

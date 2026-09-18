@@ -382,4 +382,114 @@ export const merchantGatewayService = {
     }
     return data;
   },
+
+  // Submit ₹999 Setup Fee Payment Reference for Verification (Provider-Agnostic)
+  // Strictly transitions status to PAYMENT_PENDING awaiting administrative/provider verification
+  async submitSetupFeePayment(
+    merchantId: string,
+    reference?: string,
+    method?: string
+  ): Promise<{ success: boolean; setup_fee_status: string; status: string; message: string }> {
+    if (!isSupabaseConfigured || !supabase) throw new Error('Database not configured');
+
+    const cleanRef = reference?.trim();
+    if (!cleanRef) {
+      throw new Error('A valid payment reference or transaction UTR is required');
+    }
+    const paymentMethod = method || 'DIRECT_CLAIM';
+
+    const { data, error } = await supabase.rpc('merchant_submit_setup_fee_payment_rpc', {
+      p_merchant_id: merchantId,
+      p_payment_reference: cleanRef,
+      p_payment_method: paymentMethod,
+    });
+
+    if (error || !data?.success) {
+      throw new Error(error?.message || data?.message || 'Failed to submit payment reference for verification');
+    }
+
+    return data;
+  },
+
+  // Admin Approve Merchant Gateway (Strictly checks setup_fee_status = PAID)
+  async adminApproveMerchant(
+    merchantId: string,
+    adminNotes?: string
+  ): Promise<{ success: boolean; message: string; status: string }> {
+    if (!isSupabaseConfigured || !supabase) throw new Error('Database not configured');
+
+    const { data, error } = await supabase.rpc('admin_approve_merchant_rpc', {
+      p_merchant_id: merchantId,
+      p_admin_notes: adminNotes || null,
+    });
+
+    if (error) {
+      console.warn('RPC admin_approve_merchant_rpc failed, attempting admin update fallback:', error);
+      // Query setup fee status first to strictly enforce PAID check
+      const { data: mch, error: mchErr } = await supabase
+        .from('merchants')
+        .select('setup_fee_status')
+        .eq('id', merchantId)
+        .single();
+
+      if (mchErr || !mch) {
+        throw new Error('Merchant record not found');
+      }
+
+      if (mch.setup_fee_status !== 'PAID') {
+        throw new Error(`Cannot approve merchant: ₹999 setup fee is not PAID (current status: ${mch.setup_fee_status})`);
+      }
+
+      const { error: updateErr } = await supabase
+        .from('merchants')
+        .update({ status: 'ACTIVE' })
+        .eq('id', merchantId);
+
+      if (updateErr) {
+        throw new Error(updateErr.message || 'Failed to approve merchant');
+      }
+
+      return { success: true, message: 'Merchant gateway activated successfully', status: 'ACTIVE' };
+    }
+
+    return data;
+  },
+
+  // Admin Override / Record Setup Fee Status
+  async adminRecordSetupFee(
+    merchantId: string,
+    status: 'PAYMENT_REQUIRED' | 'PAYMENT_PENDING' | 'PAID' | 'FAILED',
+    reference?: string,
+    method?: string
+  ): Promise<{ success: boolean; setup_fee_status: string }> {
+    if (!isSupabaseConfigured || !supabase) throw new Error('Database not configured');
+
+    const { data, error } = await supabase.rpc('admin_record_merchant_setup_fee_rpc', {
+      p_merchant_id: merchantId,
+      p_setup_fee_status: status,
+      p_payment_reference: reference || null,
+      p_payment_method: method || 'ADMIN_OVERRIDE',
+    });
+
+    if (error) {
+      console.warn('RPC admin_record_merchant_setup_fee_rpc failed, attempting direct update fallback:', error);
+      const updatePayload: any = {
+        setup_fee_status: status,
+        setup_fee_payment_method: method || 'ADMIN_OVERRIDE',
+      };
+      if (status === 'PAID') {
+        updatePayload.setup_fee_reference = reference || `ADMIN-REF-${Date.now().toString().slice(-6)}`;
+        updatePayload.setup_fee_paid_at = new Date().toISOString();
+      }
+      const { error: updateErr } = await supabase
+        .from('merchants')
+        .update(updatePayload)
+        .eq('id', merchantId);
+
+      if (updateErr) throw new Error(updateErr.message);
+      return { success: true, setup_fee_status: status };
+    }
+
+    return data;
+  },
 };

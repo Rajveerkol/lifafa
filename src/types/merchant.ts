@@ -1,4 +1,6 @@
-export type MerchantStatus = 'ACTIVE' | 'SUSPENDED';
+export type MerchantStatus = 'PENDING_APPROVAL' | 'ACTIVE' | 'SUSPENDED';
+
+export type SetupFeeStatus = 'PAYMENT_REQUIRED' | 'PAYMENT_PENDING' | 'PAID' | 'FAILED';
 
 export type MerchantPayoutStatus = 'PENDING' | 'PROCESSING' | 'SUCCESS' | 'FAILED' | 'REVERSED';
 
@@ -22,6 +24,11 @@ export interface Merchant {
   business_name: string;
   mobile_number: string;
   status: MerchantStatus;
+  setup_fee_status?: SetupFeeStatus;
+  setup_fee_amount?: number;
+  setup_fee_reference?: string | null;
+  setup_fee_paid_at?: string | null;
+  setup_fee_payment_method?: string | null;
   created_at: string;
   updated_at: string;
 }
