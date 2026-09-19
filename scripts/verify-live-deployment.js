@@ -1,11 +1,11 @@
-// Live Production Verification Script for https://createlifafa.com
+// Live Production Verification Script for https://createlifafa.in
 // Tests all 13 deployment verification items using Puppeteer and direct bundle inspection.
 // Strictly READ-ONLY: Does NOT submit conversions or perform real-money transactions.
 
 import puppeteer from 'puppeteer-core';
 import https from 'node:https';
 
-const TARGET_URL = 'https://createlifafa.com';
+const TARGET_URL = 'https://createlifafa.in';
 const BROWSER_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const EXPECTED_COMMIT = 'f5c3a5719e154b7738392d40cdc8fc05923b1c9d';
 

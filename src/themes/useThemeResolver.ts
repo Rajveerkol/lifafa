@@ -79,7 +79,7 @@ export function resolveThemeId(search: string, lifafa?: Lifafa | null): LifafaTh
  */
 export function buildClaimUrl(code: string, themeId: LifafaThemeId): string {
   const cleanCode = (code || '').toUpperCase().trim();
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://createlifafa.com';
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://createlifafa.in';
   return `${origin}/claim/${cleanCode}?t=${themeId}`;
 }
 

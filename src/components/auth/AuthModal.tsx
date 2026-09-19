@@ -226,7 +226,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
           <TrustBadges className="mb-3" />
 
           <p className="text-[10px] text-center text-slate-400">
-            © 2026 Creatlifafa.com. All rights reserved.
+            © 2026 Creatlifafa.in. All rights reserved.
           </p>
         </div>
       </div>

@@ -29,7 +29,7 @@ function recordAudit(item, category, status, details, recommendation = 'None') {
 async function runAudit() {
   console.log('===============================================================');
   console.log('STARTING FINAL DUEL EARN UI/UX AUDIT — REVIEW ONLY');
-  console.log('Target Frontend: http://localhost:4173/ & https://createlifafa.com/');
+  console.log('Target Frontend: http://localhost:4173/ & https://createlifafa.in/');
   console.log('===============================================================\n');
 
   // Authenticate Player Alpha to inspect live user experience

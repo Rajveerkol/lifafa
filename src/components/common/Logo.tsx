@@ -97,7 +97,7 @@ export const Logo: React.FC<LogoProps> = ({
             lifafa
           </span>
           <span className="ml-1 bg-red-600 text-white text-[10px] sm:text-xs font-black px-1.5 py-0.5 rounded-md tracking-normal shadow-sm">
-            .com
+            .in
           </span>
         </div>
 

@@ -4,7 +4,7 @@ const { createClient } = require(path.join(process.cwd(), 'node_modules', '@supa
 const https = require('https');
 const fs = require('fs');
 
-const TARGET_URL = 'https://createlifafa.com';
+const TARGET_URL = 'https://createlifafa.in';
 const BROWSER_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const SUPABASE_URL = 'https://pxqyeonymwlpiklfyjbb.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4cXllb255bXdscGlrbGZ5amJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5MTc2NzAsImV4cCI6MjEwNDQ5MzY3MH0.Oo5y8zsMbS4uq3HuZmWUbkk_VGkvRW0_J-jCGQkhTlg';
@@ -114,10 +114,10 @@ async function run() {
   await new Promise(r => setTimeout(r, 1500));
 
   if (homeRes.status() === 200 && homeTitle.includes('Lifafa')) {
-    check(4, 'Production URL https://createlifafa.com loads successfully', 'PASS',
+    check(4, 'Production URL https://createlifafa.in loads successfully', 'PASS',
       `HTTP Status: 200, Title: "${homeTitle}"`);
   } else {
-    check(4, 'Production URL https://createlifafa.com loads successfully', 'FAIL',
+    check(4, 'Production URL https://createlifafa.in loads successfully', 'FAIL',
       `HTTP Status: ${homeRes.status()}, Title: "${homeTitle}"`);
   }
 
@@ -205,7 +205,7 @@ async function run() {
   const localhostRequests = networkRequests.filter(u => u.includes('localhost') || u.includes('127.0.0.1'));
   if (localhostRequests.length === 0) {
     check(9, 'Zero network requests made to localhost or internal dev servers', 'PASS',
-      'All live traffic routed exclusively to createlifafa.com and Supabase production.');
+      'All live traffic routed exclusively to createlifafa.in and Supabase production.');
   } else {
     check(9, 'Zero network requests made to localhost or internal dev servers', 'FAIL',
       `Found localhost requests: ${localhostRequests.join(', ')}`);
