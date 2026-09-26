@@ -27,6 +27,7 @@ interface TaskCardProps {
   isCompleted: boolean;
   onCompleted: (taskId: string) => void;
   onOpenAuth?: () => void;
+  taskNumber?: number;
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({
@@ -34,6 +35,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   isCompleted,
   onCompleted,
   onOpenAuth,
+  taskNumber,
 }) => {
   const { user } = useAuth();
   const [genericLoading, setGenericLoading] = useState(false);
@@ -285,30 +287,35 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     // State 4: Membership Verified (Success)
     if (isCompleted) {
       return (
-        <div className="p-4 rounded-2xl bg-emerald-50/90 border border-emerald-200 shadow-2xs transition-all animate-in fade-in">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm shadow-emerald-600/20">
-              <CheckCircle2 className="w-5 h-5" />
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-emerald-50/90 border border-emerald-200 shadow-2xs transition-all animate-in fade-in flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            {taskNumber !== undefined && (
+              <div className="w-6 h-6 rounded-full bg-emerald-200/80 text-emerald-800 text-xs font-black flex items-center justify-center shrink-0">
+                {taskNumber}
+              </div>
+            )}
+            <div className="w-9 h-9 rounded-full bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-xs shadow-sky-500/20">
+              <Send className="w-4 h-4 -rotate-12" />
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-black text-emerald-900">
-                  ✓ Telegram membership verified
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-xs font-black text-slate-900 truncate">
+                  {task.title || 'Telegram Channel'}
                 </span>
                 {channelUsername && (
-                  <span className="text-[10px] font-mono text-emerald-700 font-bold bg-emerald-100/70 px-1.5 py-0.5 rounded-md">
+                  <span className="text-[10px] font-mono text-sky-700 font-bold bg-sky-50 px-1.5 py-0.5 rounded-md">
                     @{channelUsername}
                   </span>
                 )}
               </div>
               <p className="text-[11px] font-bold text-emerald-700 mt-0.5">
-                Task completed
+                Telegram Membership Verified ✓
               </p>
             </div>
-            <span className="text-[10px] font-bold text-emerald-800 bg-emerald-200/80 px-2.5 py-1 rounded-full shrink-0">
-              Membership Verified ✓
-            </span>
           </div>
+          <span className="text-xs font-black text-emerald-800 bg-emerald-200/90 px-3 py-1.5 rounded-full shrink-0 flex items-center gap-1">
+            ✓ Joined
+          </span>
         </div>
       );
     }
@@ -319,11 +326,16 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         {/* Card Header */}
         <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-xs shadow-sky-500/20">
+            {taskNumber !== undefined && (
+              <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-800 text-xs font-black flex items-center justify-center shrink-0">
+                {taskNumber}
+              </div>
+            )}
+            <div className="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-xs shadow-sky-500/20">
               <Send className="w-4 h-4 -rotate-12" />
             </div>
             <div>
-              <h5 className="text-xs font-black text-slate-900">Telegram Task</h5>
+              <h5 className="text-xs font-black text-slate-900">{task.title || 'Telegram Task'}</h5>
               <p className="text-[11px] text-slate-500">
                 Join channel &amp; verify membership
               </p>
@@ -634,13 +646,24 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     <div
       className={`p-3.5 rounded-2xl border transition-all ${
         isCompleted
-          ? 'bg-emerald-50/70 border-emerald-200'
-          : 'bg-white border-slate-200/80 hover:border-blue-200 shadow-2xs'
+          ? 'bg-emerald-50/70 border-emerald-200 shadow-2xs'
+          : 'bg-white border-slate-200/80 hover:border-blue-200 shadow-xs'
       }`}
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+          {taskNumber !== undefined && (
+            <div
+              className={`w-6 h-6 rounded-full text-xs font-black flex items-center justify-center shrink-0 ${
+                isCompleted
+                  ? 'bg-emerald-200/80 text-emerald-800'
+                  : 'bg-blue-100 text-blue-800'
+              }`}
+            >
+              {taskNumber}
+            </div>
+          )}
+          <div className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
             {getTaskIcon()}
           </div>
           <div className="min-w-0">
@@ -660,23 +683,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
         <div>
           {isCompleted ? (
-            <div className="flex items-center gap-1 text-emerald-600 font-bold text-xs px-3 py-1.5 bg-emerald-100/60 rounded-xl shrink-0">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>
-                {task.task_type === 'VISIT_WEBSITE'
-                  ? 'Visit Confirmed ✓'
-                  : task.task_type === 'INSTAGRAM_FOLLOW' || task.task_type === 'INSTAGRAM_LIKE'
-                  ? 'Follow Confirmed ✓'
-                  : task.task_type === 'YOUTUBE_SUB'
-                  ? 'Subscription Confirmed ✓'
-                  : 'Action Confirmed ✓'}
-              </span>
+            <div className="flex items-center gap-1 text-emerald-800 font-black text-xs px-3 py-1.5 bg-emerald-100 rounded-full shrink-0">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>✓ Joined</span>
             </div>
           ) : (
             <button
               onClick={handleGenericAction}
               disabled={genericLoading}
-              className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-xs active:scale-95 transition-all shrink-0 cursor-pointer"
+              className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-black text-xs px-4 py-2 rounded-full shadow-xs active:scale-95 transition-all shrink-0 cursor-pointer"
             >
               {genericLoading ? (
                 <Loader2 className="w-3 h-3 animate-spin" />

@@ -97,8 +97,7 @@ export const MerchantAuthModal: React.FC<MerchantAuthModalProps> = ({
           }
         }
 
-        // Account created with status: PENDING_APPROVAL and setup_fee_status: PAYMENT_REQUIRED
-        // Directly proceed to merchant portal where the ₹999 Gateway Activation screen is presented
+        // Account created - proceed to merchant portal
         onSuccess();
         onClose();
       } else {

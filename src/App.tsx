@@ -15,6 +15,7 @@ import { TermsPage } from './pages/TermsPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { ClaimPage } from './pages/ClaimPage';
 
+import { ProfileOnboardingModal } from './components/auth/ProfileOnboardingModal';
 import { AuthModal } from './components/auth/AuthModal';
 import { WithdrawModal } from './components/wallet/WithdrawModal';
 import { AddMoneyModal } from './components/wallet/AddMoneyModal';
@@ -69,12 +70,7 @@ export function App() {
   const [claimRouteCode, setClaimRouteCode] = useState<string | null>(parseClaimCodeFromPath);
   const [isCreatingLifafa, setIsCreatingLifafa] = useState(false);
 
-  useEffect(() => {
-    if (isMerchant && (currentTab === 'wallet' || currentTab === 'profile')) {
-      setCurrentTab('merchant');
-      window.history.replaceState({}, '', '/merchant');
-    }
-  }, [isMerchant, currentTab]);
+
 
   // Modals
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -309,6 +305,8 @@ export function App() {
       <BottomNav currentTab={currentTab} onSelectTab={handleTabChange} />
 
       {/* Modals & Drawers */}
+      <ProfileOnboardingModal />
+
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}

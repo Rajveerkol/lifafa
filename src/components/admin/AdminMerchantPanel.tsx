@@ -155,7 +155,7 @@ export const AdminMerchantPanel: React.FC = () => {
   const handleApproveMerchant = async () => {
     if (!approvingMerchant) return;
     if (approvingMerchant.setup_fee_status !== 'PAID') {
-      setActionError('Cannot approve merchant: ₹999 setup fee must be PAID before activating gateway.');
+      setActionError('Cannot approve merchant: setup fee must be PAID or FREE before activating gateway.');
       return;
     }
 
@@ -222,7 +222,7 @@ export const AdminMerchantPanel: React.FC = () => {
         return (
           <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase border border-emerald-200">
             <CheckCircle2 className="w-3 h-3" />
-            <span>{status === 'PAID' ? '₹999 PAID' : status}</span>
+            <span>{status === 'PAID' ? 'Free Activated' : status}</span>
           </span>
         );
       case 'PROCESSING':
@@ -607,7 +607,7 @@ export const AdminMerchantPanel: React.FC = () => {
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-1 min-w-[240px]">
                   <div className="flex items-center justify-between text-[11px] text-slate-500">
                     <span>Setup Fee Amount:</span>
-                    <strong className="text-slate-800">₹{m.setup_fee_amount ?? 999}.00</strong>
+                    <strong className="text-slate-800">₹{m.setup_fee_amount ?? 0}.00</strong>
                   </div>
                   <div className="flex items-center justify-between text-[11px]">
                     <span className="text-slate-500">Payment Ref:</span>
@@ -672,7 +672,7 @@ export const AdminMerchantPanel: React.FC = () => {
                       title={isPaid ? 'Approve Gateway Access' : 'Cannot approve: Setup fee is not PAID'}
                     >
                       <Check className="w-4 h-4" />
-                      <span>{isPaid ? 'Approve Gateway' : 'Requires ₹999 Fee'}</span>
+                      <span>{isPaid ? 'Approve Gateway' : 'Free Gateway'}</span>
                     </button>
                   )}
                 </div>
@@ -851,8 +851,8 @@ export const AdminMerchantPanel: React.FC = () => {
 
           <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 text-xs text-slate-700">
             <div className="flex justify-between py-1 border-b border-slate-200">
-              <span className="font-bold">One-Time Setup Fee (₹999):</span>
-              <span className="text-amber-700 font-bold">Pending final provider decision</span>
+              <span className="font-bold">Gateway Setup Fee:</span>
+              <span className="text-emerald-700 font-bold">₹0.00 (Free Activation Model)</span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-200">
               <span className="font-bold">Provider Integration:</span>
@@ -1019,7 +1019,7 @@ export const AdminMerchantPanel: React.FC = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Setup Fee:</span>
-                <span className="font-bold text-emerald-700">₹{approvingMerchant.setup_fee_amount ?? 999} (PAID)</span>
+                <span className="font-bold text-emerald-700">₹{approvingMerchant.setup_fee_amount ?? 0} (PAID / FREE)</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Payment Ref:</span>
@@ -1091,7 +1091,7 @@ export const AdminMerchantPanel: React.FC = () => {
                   onChange={(e: any) => setFeeStatusInput(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                 >
-                  <option value="PAID">PAID (₹999 Verified)</option>
+                  <option value="PAID">PAID (Free / Verified)</option>
                   <option value="PAYMENT_PENDING">PAYMENT_PENDING (Verification in Progress)</option>
                   <option value="PAYMENT_REQUIRED">PAYMENT_REQUIRED (Awaiting Payment)</option>
                   <option value="FAILED">FAILED (Payment Failed / Rejected)</option>
@@ -1102,7 +1102,7 @@ export const AdminMerchantPanel: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-700 mb-1">Payment Reference / UTR</label>
                 <input
                   type="text"
-                  placeholder="e.g. UPI-UTR-12345678 or ACT-999-REF"
+                  placeholder="e.g. UPI-UTR-12345678 or FREE-ACTIVATION"
                   value={feeRefInput}
                   onChange={(e) => setFeeRefInput(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono focus:ring-2 focus:ring-blue-500 focus:outline-hidden"

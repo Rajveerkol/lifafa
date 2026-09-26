@@ -44,7 +44,8 @@ import type {
   MerchantIpWhitelist,
 } from '../types/merchant';
 import { formatCurrency, formatDate } from '../lib/utils';
-import { MerchantAuthModal } from '../components/merchant/MerchantAuthModal';
+import { MerchantOnboardingCard } from '../components/merchant/MerchantOnboardingCard';
+import { AuthModal } from '../components/auth/AuthModal';
 import { MerchantTopUpModal } from '../components/merchant/MerchantTopUpModal';
 import { MerchantNewPayoutModal } from '../components/merchant/MerchantNewPayoutModal';
 import { MerchantApiKeysManager } from '../components/merchant/MerchantApiKeysManager';
@@ -65,7 +66,7 @@ type MerchantNavSection =
   | 'help-support';
 
 export const MerchantPortalPage: React.FC = () => {
-  const { merchant: contextMerchant, isMerchant, logout, refreshMerchant } = useAuth();
+  const { user, merchant: contextMerchant, isMerchant, logout, refreshMerchant } = useAuth();
 
   const [merchant, setMerchant] = useState<Merchant | null>(contextMerchant);
   const [wallet, setWallet] = useState<MerchantWallet | null>(null);
@@ -112,39 +113,8 @@ export const MerchantPortalPage: React.FC = () => {
   // API Docs copy state
   const [copiedCurl, setCopiedCurl] = useState<boolean>(false);
 
-  // ₹999 Gateway Activation Flow State
-  const [activationModalOpen, setActivationModalOpen] = useState<boolean>(false);
-  const [activationRef, setActivationRef] = useState<string>('');
-  const [submittingActivation, setSubmittingActivation] = useState<boolean>(false);
-  const [activationError, setActivationError] = useState<string | null>(null);
-
   const platformUpi = 'createlifafa@upi';
   const payeeName = 'CreatLifafa Payout Gateway';
-
-  const handleSubmitPaymentVerification = async () => {
-    if (!merchant) return;
-    if (!activationRef.trim()) {
-      setActivationError('Please enter a valid payment reference or transaction UTR');
-      return;
-    }
-    setSubmittingActivation(true);
-    setActivationError(null);
-    try {
-      await merchantGatewayService.submitSetupFeePayment(
-        merchant.id,
-        activationRef.trim(),
-        'DIRECT_CLAIM'
-      );
-      setActivationModalOpen(false);
-      await refreshMerchant();
-      await loadMerchantData();
-    } catch (err: any) {
-      console.error('Setup fee submission error:', err);
-      setActivationError(err.message || 'Failed to submit payment reference for verification');
-    } finally {
-      setSubmittingActivation(false);
-    }
-  };
 
   const loadMerchantData = useCallback(async () => {
     try {
@@ -309,7 +279,7 @@ export const MerchantPortalPage: React.FC = () => {
         return (
           <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase border border-emerald-200">
             <CheckCircle2 className="w-3 h-3" />
-            <span>{status === 'PAID' ? '₹999 PAID' : status}</span>
+            <span>{status === 'PAID' ? 'ACTIVE' : status}</span>
           </span>
         );
       case 'PROCESSING':
@@ -360,8 +330,7 @@ export const MerchantPortalPage: React.FC = () => {
   const { fee: liveDepositFee, netCredited: liveNetCredited } = merchantGatewayService.calculateDepositFee(numDepositAmt);
   const dynamicUpiUri = `upi://pay?pa=${platformUpi}&pn=${encodeURIComponent(payeeName)}&am=${numDepositAmt}&cu=INR`;
 
-  const isFullyActive = merchant?.status === 'ACTIVE' && merchant?.setup_fee_status === 'PAID';
-  const setupFeeStatus = merchant?.setup_fee_status || 'PAYMENT_REQUIRED';
+  const isFullyActive = merchant?.status === 'ACTIVE';
 
   // 12 Merchant Navigation Items
   const navItems: { id: MerchantNavSection; label: string; icon: any; count?: number }[] = [
@@ -390,62 +359,65 @@ export const MerchantPortalPage: React.FC = () => {
 
   // Not logged in as merchant view
   if (!merchant) {
-    return (
-      <div className="max-w-3xl mx-auto py-12 px-4 space-y-8">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-8 sm:p-12 text-white shadow-2xl border border-blue-900/40 text-center">
-          <div className="w-16 h-16 rounded-3xl bg-blue-600/30 border border-blue-400/40 text-blue-400 mx-auto flex items-center justify-center mb-5 shadow-lg">
-            <Building2 className="w-8 h-8" />
+    if (!user) {
+      return (
+        <div className="max-w-3xl mx-auto py-12 px-4 space-y-8">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-8 sm:p-12 text-white shadow-2xl border border-blue-900/40 text-center">
+            <div className="w-16 h-16 rounded-3xl bg-blue-600/30 border border-blue-400/40 text-blue-400 mx-auto flex items-center justify-center mb-5 shadow-lg">
+              <Building2 className="w-8 h-8" />
+            </div>
+
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-500/20 border border-blue-400/30 text-blue-300 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+              B2B Payout Infrastructure
+            </span>
+
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white max-w-xl mx-auto">
+              Multi-Merchant <span className="text-blue-400">Payout Gateway</span>
+            </h1>
+
+            <p className="text-sm text-slate-300 mt-3 max-w-md mx-auto leading-relaxed">
+              Automate instant disbursements directly to beneficiary bank accounts with isolated float accounts, PayRupee rails, and developer APIs.
+            </p>
+
+            <div className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={() => setAuthModalOpen(true)}
+                className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold px-8 py-3.5 rounded-2xl text-xs shadow-lg shadow-blue-600/30 active:scale-98 transition-all cursor-pointer"
+              >
+                Sign In with Google to Continue
+              </button>
+            </div>
+
+            {/* Fee Schedule & KYC Banner */}
+            <div className="mt-10 pt-8 border-t border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
+              <div>
+                <div className="text-xs text-slate-400">Setup Fee</div>
+                <div className="text-lg font-black text-emerald-400 mt-0.5">₹0 (Free)</div>
+              </div>
+              <div>
+                <div className="text-xs text-slate-400">Payout Fee (&le; ₹100)</div>
+                <div className="text-lg font-black text-white mt-0.5">₹3.70</div>
+              </div>
+              <div>
+                <div className="text-xs text-slate-400">Payout Fee (&gt; ₹100)</div>
+                <div className="text-lg font-black text-white mt-0.5">₹3.80</div>
+              </div>
+              <div>
+                <div className="text-xs text-slate-400">KYC Requirement</div>
+                <div className="text-lg font-black text-emerald-400 mt-0.5">Zero (No Docs)</div>
+              </div>
+            </div>
           </div>
 
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-500/20 border border-blue-400/30 text-blue-300 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
-            B2B Payout Infrastructure
-          </span>
-
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white max-w-xl mx-auto">
-            Multi-Merchant <span className="text-blue-400">Payout Gateway</span>
-          </h1>
-
-          <p className="text-sm text-slate-300 mt-3 max-w-md mx-auto leading-relaxed">
-            Automate instant disbursements directly to beneficiary bank accounts with isolated float accounts, PayRupee rails, and developer APIs.
-          </p>
-
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button
-              onClick={() => setAuthModalOpen(true)}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-extrabold px-8 py-3.5 rounded-2xl text-xs shadow-lg shadow-blue-600/30 active:scale-98 transition-all cursor-pointer"
-            >
-              Sign In / Register Merchant
-            </button>
-          </div>
-
-          {/* Fee Schedule & KYC Banner */}
-          <div className="mt-10 pt-8 border-t border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
-            <div>
-              <div className="text-xs text-slate-400">Deposit Fee</div>
-              <div className="text-lg font-black text-white mt-0.5">2.0%</div>
-            </div>
-            <div>
-              <div className="text-xs text-slate-400">Payout Fee (&le; ₹100)</div>
-              <div className="text-lg font-black text-white mt-0.5">₹3.70</div>
-            </div>
-            <div>
-              <div className="text-xs text-slate-400">Payout Fee (&gt; ₹100)</div>
-              <div className="text-lg font-black text-white mt-0.5">₹3.80</div>
-            </div>
-            <div>
-              <div className="text-xs text-slate-400">KYC Requirement</div>
-              <div className="text-lg font-black text-emerald-400 mt-0.5">Zero (No Docs)</div>
-            </div>
-          </div>
+          <AuthModal
+            isOpen={authModalOpen}
+            onClose={() => setAuthModalOpen(false)}
+          />
         </div>
+      );
+    }
 
-        <MerchantAuthModal
-          isOpen={authModalOpen}
-          onClose={() => setAuthModalOpen(false)}
-          onSuccess={loadMerchantData}
-        />
-      </div>
-    );
+    return <MerchantOnboardingCard onSuccess={loadMerchantData} />;
   }
 
   return (
@@ -460,8 +432,7 @@ export const MerchantPortalPage: React.FC = () => {
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-lg sm:text-xl font-black tracking-tight">{merchant?.business_name}</h2>
-                {getStatusBadge(merchant?.status || 'PENDING_APPROVAL')}
-                {getStatusBadge(setupFeeStatus)}
+                {getStatusBadge(merchant?.status || 'ACTIVE')}
               </div>
               <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300 mt-0.5 font-mono">
                 <span>Code: {merchant?.merchant_code}</span>
@@ -481,39 +452,19 @@ export const MerchantPortalPage: React.FC = () => {
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             </button>
             <button
-              onClick={() => {
-                if (!isFullyActive) {
-                  setActivationModalOpen(true);
-                  return;
-                }
-                setActiveSection('add-money');
-              }}
-              className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 rounded-xl transition-all cursor-pointer ${
-                isFullyActive
-                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/30 active:scale-98'
-                  : 'bg-white/10 hover:bg-white/20 text-slate-300 border border-white/15'
-              }`}
-              title={!isFullyActive ? 'Requires active account with paid setup fee' : 'Add Money'}
+              onClick={() => setActiveSection('add-money')}
+              className="flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/30 active:scale-98 transition-all cursor-pointer"
+              title="Add Money"
             >
-              {!isFullyActive ? <Lock className="w-4 h-4 text-amber-400" /> : <ArrowDownToLine className="w-4 h-4" />}
+              <ArrowDownToLine className="w-4 h-4" />
               <span>Add Money</span>
             </button>
             <button
-              onClick={() => {
-                if (!isFullyActive) {
-                  setActivationModalOpen(true);
-                  return;
-                }
-                setActiveSection('make-payout');
-              }}
-              className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 rounded-xl transition-all cursor-pointer ${
-                isFullyActive
-                  ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/30 active:scale-98'
-                  : 'bg-white/10 hover:bg-white/20 text-slate-300 border border-white/15'
-              }`}
-              title={!isFullyActive ? 'Requires active account with paid setup fee' : 'Make Payout'}
+              onClick={() => setActiveSection('make-payout')}
+              className="flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/30 active:scale-98 transition-all cursor-pointer"
+              title="Make Payout"
             >
-              {!isFullyActive ? <Lock className="w-4 h-4 text-amber-400" /> : <Send className="w-4 h-4" />}
+              <Send className="w-4 h-4" />
               <span>Make Payout</span>
             </button>
           </div>
@@ -556,148 +507,6 @@ export const MerchantPortalPage: React.FC = () => {
             </span>
           </div>
         </div>
-
-        {/* Dedicated ₹999 Gateway Activation Card */}
-        {!isFullyActive && (
-          <div className="mt-6 overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-850 to-blue-950 border border-blue-500/30 p-6 shadow-xl text-white">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="bg-blue-500/20 text-blue-300 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase border border-blue-400/30 tracking-wider">
-                    Gateway Activation
-                  </span>
-                  {setupFeeStatus === 'PAID' ? (
-                    <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase border border-emerald-500/30 flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" />
-                      ₹999 PAID
-                    </span>
-                  ) : (
-                    <span className="bg-red-500/20 text-red-300 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase border border-red-500/30 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {setupFeeStatus === 'PAYMENT_PENDING' ? 'PAYMENT PENDING' : 'PAYMENT REQUIRED'}
-                    </span>
-                  )}
-                  {merchant?.status === 'PENDING_APPROVAL' && (
-                    <span className="bg-amber-500/20 text-amber-300 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase border border-amber-500/30 flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      PENDING ADMIN APPROVAL
-                    </span>
-                  )}
-                </div>
-
-                {setupFeeStatus === 'PAID' ? (
-                  <div>
-                    <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-                      <span>Setup fee received. Your Gateway account is pending admin approval.</span>
-                    </h3>
-                    <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                      Our administrator reviews newly activated accounts. Once approved, your live float account, instant PayRupee payout dispatch, and API key provisioning will be fully unlocked.
-                    </p>
-                    <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-slate-400 font-mono">
-                      <span>Ref: <strong className="text-white">{merchant?.setup_fee_reference || 'N/A'}</strong></span>
-                      <span>•</span>
-                      <span>Paid: <strong className="text-white">{merchant?.setup_fee_paid_at ? formatDate(merchant?.setup_fee_paid_at) : 'Verified'}</strong></span>
-                      <span>•</span>
-                      <span>Amount: <strong className="text-emerald-400">₹{merchant?.setup_fee_amount ?? 999}.00</strong></span>
-                    </div>
-                  </div>
-                ) : setupFeeStatus === 'PAYMENT_PENDING' ? (
-                  <div>
-                    <h3 className="text-base sm:text-lg font-black text-amber-300 flex items-center gap-2">
-                      <Clock className="w-5 h-5 text-amber-400 shrink-0" />
-                      <span>Payment submitted for verification. An administrator will verify the payment before activation.</span>
-                    </h3>
-                    <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                      Your payment claim has been submitted. Our administrator will verify the transaction reference against bank records before marking the fee as PAID and activating your Gateway account.
-                    </p>
-                    <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-slate-400 font-mono">
-                      <span>Submitted Ref: <strong className="text-white">{merchant?.setup_fee_reference || 'N/A'}</strong></span>
-                      <span>•</span>
-                      <span>Status: <strong className="text-amber-400">PAYMENT PENDING</strong></span>
-                      <span>•</span>
-                      <span>Amount: <strong className="text-white">₹{merchant?.setup_fee_amount ?? 999}.00</strong></span>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="flex items-baseline gap-2">
-                      <h3 className="text-base sm:text-lg font-black text-white">One-Time Gateway Setup Fee:</h3>
-                      <span className="text-xl sm:text-2xl font-black text-emerald-400">₹999</span>
-                    </div>
-                    <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                      Complete the one-time activation fee to provision your isolated merchant float account, configure tiered payout rails (₹3.70 / ₹3.80), and obtain production API credentials.
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto shrink-0">
-                {setupFeeStatus === 'PAID' ? (
-                  <button
-                    onClick={handleManualRefresh}
-                    disabled={refreshing}
-                    className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-5 py-3 rounded-2xl border border-white/20 transition-all cursor-pointer"
-                  >
-                    <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                    <span>Check Approval Status</span>
-                  </button>
-                ) : setupFeeStatus === 'PAYMENT_PENDING' ? (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleManualRefresh}
-                      disabled={refreshing}
-                      className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-3 rounded-2xl border border-white/20 transition-all cursor-pointer"
-                    >
-                      <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                      <span>Refresh Status</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setActivationRef(merchant?.setup_fee_reference || '');
-                        setActivationModalOpen(true);
-                      }}
-                      className="flex items-center justify-center gap-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-bold px-4 py-3 rounded-2xl border border-amber-500/30 transition-all cursor-pointer"
-                    >
-                      <span>Update Ref</span>
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setActivationRef('');
-                      setActivationModalOpen(true);
-                    }}
-                    className="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black px-6 py-3.5 rounded-2xl shadow-lg shadow-emerald-500/25 active:scale-98 transition-all cursor-pointer"
-                  >
-                    <span>Pay ₹999 &amp; Continue</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Feature Checklist */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-5 border-t border-white/10 text-xs text-slate-300">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Dedicated Float Account</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Instant Bank Payouts</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>API Keys &amp; Webhooks</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Zero KYC Documentation</span>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* 2. Full 12-Section Merchant Navigation Bar */}
@@ -732,52 +541,13 @@ export const MerchantPortalPage: React.FC = () => {
       </div>
 
       {/* 3. Navigation Section Contents */}
-
-      {/* Feature Locked Screen for Inactive/Unpaid Operations */}
-      {!isFullyActive && activeSection !== 'dashboard' && activeSection !== 'profile' && activeSection !== 'help-support' && activeSection !== 'notifications' ? (
-        <div className="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 text-center space-y-5 shadow-2xs max-w-lg mx-auto my-8">
-          <div className="w-16 h-16 rounded-3xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto border border-amber-200/60 shadow-sm">
-            <Lock className="w-8 h-8" />
-          </div>
-
-          <div>
-            <h3 className="text-lg font-black text-slate-900">Gateway Feature Locked</h3>
-            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
-              {setupFeeStatus !== 'PAID'
-                ? 'Disbursement rails, float top-ups, and developer API credentials require completing the one-time ₹999 Gateway setup fee.'
-                : 'Setup fee has been received and verified. Your Gateway account is currently awaiting administrator review and activation.'}
-            </p>
-          </div>
-
-          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-            {setupFeeStatus !== 'PAID' ? (
-              <button
-                onClick={() => setActivationModalOpen(true)}
-                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-6 py-3 rounded-2xl shadow-md shadow-emerald-600/30 cursor-pointer active:scale-98 transition-all"
-              >
-                Pay ₹999 &amp; Continue
-              </button>
-            ) : (
-              <button
-                onClick={handleManualRefresh}
-                disabled={refreshing}
-                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-6 py-3 rounded-2xl shadow-md shadow-blue-600/30 cursor-pointer active:scale-98 transition-all flex items-center justify-center gap-2"
-              >
-                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                <span>Check Approval Status</span>
-              </button>
-            )}
-            <button
-              onClick={() => setActiveSection('dashboard')}
-              className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-5 py-3 rounded-2xl transition-all cursor-pointer"
-            >
-              Return to Dashboard
-            </button>
-          </div>
+      {merchant?.status === 'SUSPENDED' && (
+        <div className="bg-red-50 border border-red-200 rounded-3xl p-6 text-center text-red-800 text-sm font-bold my-4">
+          Your merchant account is currently suspended. Please contact platform support.
         </div>
-      ) : (
-        <>
-          {/* SECTION 1: DASHBOARD */}
+      )}
+
+      {/* SECTION 1: DASHBOARD */}
           {activeSection === 'dashboard' && (
         <div className="space-y-6">
           {/* Quick Action Cards */}
@@ -791,10 +561,10 @@ export const MerchantPortalPage: React.FC = () => {
                 Deposit funds via UPI with live 2% fee calculation. Status remains PENDING until administrator review.
               </p>
               <button
-                onClick={() => isFullyActive ? setActiveSection('add-money') : setActivationModalOpen(true)}
+                onClick={() => setActiveSection('add-money')}
                 className="flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 cursor-pointer"
               >
-                <span>{isFullyActive ? 'Add Money Now' : 'Unlock Float (₹999 Setup Fee)'}</span>
+                <span>Add Money Now</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -808,10 +578,10 @@ export const MerchantPortalPage: React.FC = () => {
                 Transfer directly to beneficiary bank account. Exact tiered fee (₹3.70 / ₹3.80) deducted server-side.
               </p>
               <button
-                onClick={() => isFullyActive ? setActiveSection('make-payout') : setActivationModalOpen(true)}
+                onClick={() => setActiveSection('make-payout')}
                 className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 cursor-pointer"
               >
-                <span>{isFullyActive ? 'Initiate Transfer' : 'Unlock Payouts (₹999 Setup Fee)'}</span>
+                <span>Initiate Transfer</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -1671,8 +1441,6 @@ export const MerchantPortalPage: React.FC = () => {
           </div>
         </div>
       )}
-        </>
-      )}
 
       {/* Floating Action Modals */}
       <MerchantTopUpModal
@@ -1689,94 +1457,6 @@ export const MerchantPortalPage: React.FC = () => {
         onClose={() => setNewPayoutModalOpen(false)}
         onSuccess={loadMerchantData}
       />
-
-      {/* ₹999 Setup Fee Activation Modal */}
-      {activationModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-          <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
-            <div className="h-1.5 w-full bg-gradient-to-r from-emerald-500 via-blue-600 to-indigo-600" />
-            
-            <button
-              onClick={() => setActivationModalOpen(false)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <div className="p-6 sm:p-8 space-y-5">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-                  <ShieldCheck className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-black text-slate-900">Gateway Activation</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">One-time account provisioning fee</p>
-                </div>
-              </div>
-
-              {activationError && (
-                <div className="p-3.5 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-2 text-xs text-red-800">
-                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
-                  <span>{activationError}</span>
-                </div>
-              )}
-
-              {/* Fee Breakdown */}
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-600">Merchant Account:</span>
-                  <span className="font-bold text-slate-900">{merchant.business_name} ({merchant.merchant_code})</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-600">Gateway Setup Fee:</span>
-                  <span className="font-black text-emerald-700 text-base">₹999.00</span>
-                </div>
-                <div className="flex justify-between items-center text-[11px] text-slate-400 pt-2 border-t border-slate-200">
-                  <span>Frequency:</span>
-                  <span>One-Time (No Recurring Subscription)</span>
-                </div>
-              </div>
-
-              {/* Payment Reference Claim Input */}
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Payment Reference / Bank Transaction UTR <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={activationRef}
-                    onChange={(e) => setActivationRef(e.target.value)}
-                    placeholder="e.g. UTR429810238491 or IMPS reference"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
-                  />
-                  <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
-                    Enter the transaction reference or UTR of your ₹999 payment. Once submitted, your status will become <strong>PAYMENT PENDING</strong> while an administrator verifies the receipt before activating your gateway.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setActivationModalOpen(false)}
-                  className="flex-1 py-3 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSubmitPaymentVerification}
-                  disabled={submittingActivation || !activationRef.trim()}
-                  className="flex-1 py-3 rounded-2xl text-xs font-black bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/30 transition-all cursor-pointer active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {submittingActivation ? 'Submitting...' : 'Submit Payment for Verification'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -20,6 +20,9 @@ interface AuthContextType {
   refreshProfile: () => Promise<void>;
   refreshMerchant: () => Promise<void>;
   refreshNotificationsCount: () => Promise<void>;
+  onboardMerchant: (businessName: string, mobileNumber: string) => Promise<void>;
+  needsProfileCompletion: boolean;
+  updateProfileInfo: (fullName: string, phoneNumber: string) => Promise<void>;
   // Strict Dev Simulator toggle (ONLY active in development mode when Supabase credentials are not yet entered)
   isDevMode: boolean;
   activateDevDemo: () => void;
@@ -78,32 +81,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return OWNER_EMAILS.includes(email.toLowerCase().trim());
   };
 
-  const fetchUserData = useCallback(async (userId: string, authEmail?: string, userMeta?: any) => {
+  const fetchUserData = useCallback(async (userId: string, authEmail?: string, _userMeta?: any) => {
     if (!isSupabaseConfigured || !supabase) return;
 
     try {
-      const isMchAccount = userMeta?.account_type === 'MERCHANT' || authEmail?.includes('@merchant.lifafa.internal');
-
-      if (isMchAccount) {
-        // Isolation: Merchant accounts never enter consumer profile/wallet flow
-        const mchData = await merchantGatewayService.getMerchantProfile(userId);
-        setMerchant(mchData);
-        setIsMerchant(Boolean(mchData));
-        setUser(null);
-        setWallet(null);
-        setAdminUser(null);
-        return;
-      }
-
-      setMerchant(null);
-      setIsMerchant(false);
-
-      // 1. Fetch profile (Consumer)
+      // 1. Fetch consumer profile
       const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (profileData) {
         setUser(profileData as Profile);
@@ -111,18 +98,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const effectiveEmail = profileData?.email || authEmail || sessionEmail;
 
-      // 2. Fetch wallet (Consumer)
+      // 2. Fetch consumer wallet
       const { data: walletData } = await supabase
         .from('wallets')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (walletData) {
         setWallet(walletData as Wallet);
       }
 
-      // 3. Fetch admin status
+      // 3. Fetch merchant profile concurrently for this SAME user_id (One Login Architecture)
+      const mchData = await merchantGatewayService.getMerchantProfile(userId);
+      setMerchant(mchData);
+      setIsMerchant(Boolean(mchData));
+
+      // 4. Fetch admin status
       const { data: adminData } = await supabase
         .from('admin_users')
         .select('*')
@@ -141,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAdminUser(null);
       }
 
-      // 4. Fetch unread notifications count
+      // 5. Fetch unread notifications count
       const { count } = await supabase
         .from('notifications')
         .select('*', { count: 'exact', head: true })
@@ -152,7 +144,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err) {
       console.error('Error loading user data:', err);
     }
-  }, []);
+  }, [sessionEmail]);
 
   const refreshMerchant = useCallback(async () => {
     if (!isSupabaseConfigured || !supabase) return;
@@ -308,6 +300,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsDevDemoActive(true);
   };
 
+  const needsProfileCompletion = Boolean(
+    user && (!user.full_name || user.full_name === 'Lifafa User' || !user.phone_number)
+  );
+
+  const handleUpdateProfileInfo = async (fullName: string, phoneNumber: string) => {
+    if (!user || !isSupabaseConfigured || !supabase) return;
+    const cleanPhone = phoneNumber.replace(/\D/g, '');
+    const cleanName = fullName.trim();
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({
+        full_name: cleanName,
+        phone_number: cleanPhone,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message || 'Failed to update profile');
+    }
+    if (data) {
+      setUser(data as Profile);
+    }
+  };
+
+  const handleOnboardMerchant = async (businessName: string, mobileNumber: string) => {
+    const res = await merchantGatewayService.onboardMerchant(businessName, mobileNumber);
+    if (res?.merchant) {
+      setMerchant(res.merchant);
+      setIsMerchant(true);
+    }
+  };
+
   const isUserAdmin = Boolean(
     (adminUser && ['SUPER_ADMIN', 'ADMIN'].includes(adminUser.role)) ||
     isOwnerEmail(user?.email) ||
@@ -333,6 +361,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         refreshProfile,
         refreshMerchant,
         refreshNotificationsCount,
+        onboardMerchant: handleOnboardMerchant,
+        needsProfileCompletion,
+        updateProfileInfo: handleUpdateProfileInfo,
         isDevMode,
         activateDevDemo,
       }}

@@ -383,35 +383,54 @@ export const merchantGatewayService = {
     return data;
   },
 
-  // Submit ₹999 Setup Fee Payment Reference for Verification (Provider-Agnostic)
-  // Strictly transitions status to PAYMENT_PENDING awaiting administrative/provider verification
-  async submitSetupFeePayment(
-    merchantId: string,
-    reference?: string,
-    method?: string
-  ): Promise<{ success: boolean; setup_fee_status: string; status: string; message: string }> {
+  // Server-side Onboard Merchant via SECURITY DEFINER RPC (Zero Setup Fee, Instant Active)
+  async onboardMerchant(
+    businessName: string,
+    mobileNumber: string
+  ): Promise<{ success: boolean; is_existing: boolean; merchant: Merchant; wallet: MerchantWallet }> {
     if (!isSupabaseConfigured || !supabase) throw new Error('Database not configured');
 
-    const cleanRef = reference?.trim();
-    if (!cleanRef) {
-      throw new Error('A valid payment reference or transaction UTR is required');
-    }
-    const paymentMethod = method || 'DIRECT_CLAIM';
+    const cleanName = (businessName || '').trim();
+    const cleanMobile = (mobileNumber || '').replace(/\D/g, '');
 
-    const { data, error } = await supabase.rpc('merchant_submit_setup_fee_payment_rpc', {
-      p_merchant_id: merchantId,
-      p_payment_reference: cleanRef,
-      p_payment_method: paymentMethod,
+    if (cleanName.length < 2) {
+      throw new Error('Business name must be at least 2 characters');
+    }
+    if (cleanMobile.length !== 10) {
+      throw new Error('Please enter a valid 10-digit Indian mobile number');
+    }
+
+    const { data, error } = await supabase.rpc('merchant_onboard_user_rpc', {
+      p_business_name: cleanName,
+      p_mobile_number: cleanMobile,
     });
 
-    if (error || !data?.success) {
-      throw new Error(error?.message || data?.message || 'Failed to submit payment reference for verification');
+    if (error) {
+      throw new Error(error.message || 'Failed to onboard merchant');
+    }
+
+    if (!data?.success || !data?.merchant) {
+      throw new Error(data?.message || 'Merchant onboarding failed');
     }
 
     return data;
   },
 
-  // Admin Approve Merchant Gateway (Strictly checks setup_fee_status = PAID)
+  // Submit Setup Fee Payment (Legacy no-op / backward compatibility)
+  async submitSetupFeePayment(
+    merchantId: string,
+    reference?: string,
+    method?: string
+  ): Promise<{ success: boolean; setup_fee_status: string; status: string; message: string }> {
+    return {
+      success: true,
+      setup_fee_status: 'PAID',
+      status: 'ACTIVE',
+      message: 'Setup fee is ₹0 under updated platform policy',
+    };
+  },
+
+  // Admin Approve Merchant Gateway (Zero fee required)
   async adminApproveMerchant(
     merchantId: string,
     adminNotes?: string
@@ -424,25 +443,10 @@ export const merchantGatewayService = {
     });
 
     if (error) {
-      console.warn('RPC admin_approve_merchant_rpc failed, attempting admin update fallback:', error);
-      // Query setup fee status first to strictly enforce PAID check
-      const { data: mch, error: mchErr } = await supabase
-        .from('merchants')
-        .select('setup_fee_status')
-        .eq('id', merchantId)
-        .single();
-
-      if (mchErr || !mch) {
-        throw new Error('Merchant record not found');
-      }
-
-      if (mch.setup_fee_status !== 'PAID') {
-        throw new Error(`Cannot approve merchant: ₹999 setup fee is not PAID (current status: ${mch.setup_fee_status})`);
-      }
-
+      console.warn('RPC admin_approve_merchant_rpc notice, attempting direct admin update:', error);
       const { error: updateErr } = await supabase
         .from('merchants')
-        .update({ status: 'ACTIVE' })
+        .update({ status: 'ACTIVE', setup_fee_status: 'PAID', setup_fee_amount: 0.00 })
         .eq('id', merchantId);
 
       if (updateErr) {
