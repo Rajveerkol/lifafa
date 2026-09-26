@@ -224,6 +224,19 @@ export function App() {
     );
   }
 
+  // Dedicated Standalone Merchant Gateway Portal View (suppresses consumer Header, BottomNav, and container constraints)
+  if (currentTab === 'merchant' || currentTab === 'gateway') {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-600 selection:text-white">
+        <MerchantPortalPage onNavigateHome={() => handleTabChange('home')} />
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f8faff] text-slate-900 flex flex-col selection:bg-blue-600 selection:text-white">
       {/* Top Header */}
@@ -260,8 +273,6 @@ export function App() {
               onShareClick={handleShareLifafa}
             />
           ))}
-
-        {(currentTab === 'merchant' || currentTab === 'gateway') && <MerchantPortalPage />}
 
         {currentTab === 'bots' && <BotsPage onOpenAuth={() => setAuthModalOpen(true)} />}
 

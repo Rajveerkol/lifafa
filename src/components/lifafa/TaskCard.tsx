@@ -4,7 +4,7 @@ import {
   Youtube,
   Instagram,
   Globe,
-  UserPlus,
+  Users,
   CheckCircle2,
   ExternalLink,
   Loader2,
@@ -16,7 +16,6 @@ import type { LifafaTask } from '../../types/database';
 import { taskService } from '../../services/taskService';
 import { telegramService } from '../../services/telegramService';
 import { useAuth } from '../../context/AuthContext';
-import { supabase } from '../../lib/supabase';
 
 interface TaskCardProps {
   task: LifafaTask & {
@@ -46,6 +45,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     task.task_type === 'TELEGRAM_JOIN' || task.task_type === 'TELEGRAM_BOT';
 
   const [hasJoined, setHasJoined] = useState(false);
+  const [showTgHelper, setShowTgHelper] = useState(false);
   const [tgBinding, setTgBinding] = useState<{
     isBound: boolean;
     telegramUsername: string | null;
@@ -111,12 +111,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   // 2. Auto-polling and window focus listener when awaiting Telegram bot binding
   useEffect(() => {
     if (awaitingBotStart && user) {
-      // Poll every 2.5 seconds
       pollIntervalRef.current = setInterval(() => {
         checkBindingStatus(true);
       }, 2500);
 
-      // Check immediately when user switches back to this browser window
       const handleWindowFocus = () => {
         checkBindingStatus(true);
       };
@@ -136,10 +134,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   const handleJoinTelegram = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setHasJoined(true);
+    setShowTgHelper(true);
     try {
       window.open(channelUrl, '_blank', 'noopener,noreferrer');
     } catch {
-      // Fallback handled by direct anchor href
+      // Fallback handled by direct link
     }
   };
 
@@ -160,7 +159,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       setBotDeepLink(deepLink);
       setAwaitingBotStart(true);
 
-      // Attempt to trigger opening deep link in new tab or external app
       try {
         const a = document.createElement('a');
         a.href = deepLink;
@@ -193,6 +191,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
     if (!tgBinding?.isBound || !tgBinding.telegramUserId) {
       setVerificationError('Please connect your Telegram account first.');
+      setShowTgHelper(true);
       return;
     }
 
@@ -212,6 +211,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
       if (result.verified) {
         onCompleted(task.id);
+        setShowTgHelper(false);
       } else {
         setVerificationError(
           result.error ||
@@ -261,461 +261,301 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     }
   };
 
-  const getTaskIcon = () => {
-    switch (task.task_type) {
-      case 'TELEGRAM_JOIN':
-      case 'TELEGRAM_BOT':
-        return <Send className="w-4 h-4 text-sky-500" />;
-      case 'YOUTUBE_SUB':
-        return <Youtube className="w-4 h-4 text-red-500" />;
-      case 'INSTAGRAM_FOLLOW':
-      case 'INSTAGRAM_LIKE':
-        return <Instagram className="w-4 h-4 text-pink-500" />;
-      case 'REFERRAL':
-        return <UserPlus className="w-4 h-4 text-emerald-500" />;
-      case 'VISIT_WEBSITE':
-      case 'CUSTOM':
-      default:
-        return <Globe className="w-4 h-4 text-blue-500" />;
-    }
-  };
+  // Helpers for platform visuals
+  const isYoutube = task.task_type === 'YOUTUBE_SUB';
+  const isInstagram = task.task_type === 'INSTAGRAM_FOLLOW' || task.task_type === 'INSTAGRAM_LIKE';
+  const isCommunity = task.task_type === 'REFERRAL' || task.task_type === 'CUSTOM';
 
-  // ==========================================
-  // RENDER: TELEGRAM TASK (Simple 3-Step Flow)
-  // ==========================================
-  if (isTelegramTask) {
-    // State 4: Membership Verified (Success)
-    if (isCompleted) {
+  const getPlatformAvatar = () => {
+    if (isTelegramTask) {
       return (
-        <div className="p-3.5 sm:p-4 rounded-2xl bg-emerald-50/90 border border-emerald-200 shadow-2xs transition-all animate-in fade-in flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            {taskNumber !== undefined && (
-              <div className="w-6 h-6 rounded-full bg-emerald-200/80 text-emerald-800 text-xs font-black flex items-center justify-center shrink-0">
-                {taskNumber}
-              </div>
-            )}
-            <div className="w-9 h-9 rounded-full bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-xs shadow-sky-500/20">
-              <Send className="w-4 h-4 -rotate-12" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-xs font-black text-slate-900 truncate">
-                  {task.title || 'Telegram Channel'}
-                </span>
-                {channelUsername && (
-                  <span className="text-[10px] font-mono text-sky-700 font-bold bg-sky-50 px-1.5 py-0.5 rounded-md">
-                    @{channelUsername}
-                  </span>
-                )}
-              </div>
-              <p className="text-[11px] font-bold text-emerald-700 mt-0.5">
-                Telegram Membership Verified ✓
-              </p>
-            </div>
-          </div>
-          <span className="text-xs font-black text-emerald-800 bg-emerald-200/90 px-3 py-1.5 rounded-full shrink-0 flex items-center gap-1">
-            ✓ Joined
-          </span>
+        <div className="w-10 h-10 rounded-full bg-[#0088cc] text-white flex items-center justify-center shrink-0 shadow-xs shadow-[#0088cc]/30">
+          <Send className="w-5 h-5 -rotate-12" />
         </div>
       );
     }
-
-    // State 1-3: Claimant Step-by-Step Telegram Card
-    return (
-      <div className="p-4 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-4 transition-all">
-        {/* Card Header */}
-        <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
-          <div className="flex items-center gap-2.5">
-            {taskNumber !== undefined && (
-              <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-800 text-xs font-black flex items-center justify-center shrink-0">
-                {taskNumber}
-              </div>
-            )}
-            <div className="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-xs shadow-sky-500/20">
-              <Send className="w-4 h-4 -rotate-12" />
-            </div>
-            <div>
-              <h5 className="text-xs font-black text-slate-900">{task.title || 'Telegram Task'}</h5>
-              <p className="text-[11px] text-slate-500">
-                Join channel &amp; verify membership
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            {task.is_required && (
-              <span className="text-[9px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                Required
-              </span>
-            )}
-            {channelUsername && (
-              <span className="text-[10px] font-mono font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded-md">
-                @{channelUsername}
-              </span>
-            )}
-          </div>
+    if (isYoutube) {
+      return (
+        <div className="w-10 h-10 rounded-full bg-[#FF0000] text-white flex items-center justify-center shrink-0 shadow-xs shadow-red-500/30">
+          <Youtube className="w-5 h-5" />
         </div>
+      );
+    }
+    if (isInstagram) {
+      return (
+        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white flex items-center justify-center shrink-0 shadow-xs shadow-rose-500/30">
+          <Instagram className="w-5 h-5" />
+        </div>
+      );
+    }
+    if (isCommunity) {
+      return (
+        <div className="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-xs shadow-purple-600/30">
+          <Users className="w-5 h-5" />
+        </div>
+      );
+    }
+    return (
+      <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs shadow-blue-600/30">
+        <Globe className="w-5 h-5" />
+      </div>
+    );
+  };
 
-        {/* Not Logged In Banner */}
-        {!user && (
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between gap-2 text-xs text-blue-800">
-            <span>Please sign in with Google to complete tasks.</span>
-            {onOpenAuth && (
-              <button
-                type="button"
-                onClick={onOpenAuth}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg shrink-0 cursor-pointer transition-colors"
-              >
-                Sign In
-              </button>
-            )}
-          </div>
-        )}
+  const getTargetLink = () => {
+    if (isTelegramTask) return channelUrl;
+    return task.target_url || '#';
+  };
 
-        {/* ---------------------------------------------------- */}
-        {/* Step 1: Join the Telegram channel                   */}
-        {/* ---------------------------------------------------- */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div
-                className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${
-                  hasJoined || tgBinding?.isBound
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-sky-100 text-sky-700'
-                }`}
-              >
-                {hasJoined || tgBinding?.isBound ? (
-                  <Check className="w-3 h-3 stroke-[3]" />
-                ) : (
-                  '1'
-                )}
-              </div>
-              <span className="text-xs font-bold text-slate-800">
-                Step 1: Join the Telegram channel
-              </span>
-            </div>
-            {channelUsername && (
-              <span className="text-[11px] font-mono font-bold text-sky-700">
-                @{channelUsername}
-              </span>
-            )}
-          </div>
-
-          {!hasJoined && !tgBinding?.isBound ? (
-            <a
-              href={channelUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => {
-                e.stopPropagation();
-                setHasJoined(true);
-              }}
-              className="w-full bg-sky-500 hover:bg-sky-600 active:scale-98 text-white font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer text-center no-underline"
-            >
-              <span>Join Telegram</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          ) : (
-            <div className="flex items-center justify-between px-3 py-2 bg-emerald-50/60 border border-emerald-100 rounded-xl text-xs">
-              <span className="text-emerald-800 font-semibold flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Channel opened</span>
-              </span>
-              <a
-                href={channelUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="text-[11px] text-sky-600 hover:text-sky-800 font-bold flex items-center gap-1 underline cursor-pointer"
-              >
-                <span>Re-open</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
+  return (
+    <div
+      className={`rounded-2xl border transition-all ${
+        isCompleted
+          ? 'bg-white border-slate-100 shadow-xs'
+          : 'bg-white border-slate-100/90 hover:border-slate-200 shadow-xs'
+      } p-3 sm:p-3.5 space-y-3`}
+    >
+      {/* Main Single-Row Task Header matching Client Reference Screenshot */}
+      <div className="flex items-center justify-between gap-3">
+        {/* Left Side: Number Pill + Avatar + Info */}
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          {taskNumber !== undefined && (
+            <div className="w-7 h-7 rounded-full bg-blue-100/70 text-blue-700 font-extrabold text-xs flex items-center justify-center shrink-0">
+              {taskNumber}
             </div>
           )}
+
+          {getPlatformAvatar()}
+
+          <div className="min-w-0">
+            <h4 className="text-sm font-bold text-slate-900 truncate tracking-tight">
+              {task.title || (isTelegramTask ? 'Telegram Channel' : 'Required Task')}
+            </h4>
+            <p className="text-[11px] sm:text-xs text-slate-500 truncate mt-0.5">
+              {task.description ||
+                (isTelegramTask
+                  ? channelUsername
+                    ? `Join @${channelUsername}`
+                    : 'Join channel for latest updates'
+                  : 'Complete this step to unlock reward')}
+            </p>
+          </div>
         </div>
 
-        {/* ---------------------------------------------------- */}
-        {/* Step 2: Connect your Telegram account               */}
-        {/* ---------------------------------------------------- */}
-        <div className="space-y-2 border-t border-slate-100 pt-3">
-          <div className="flex items-center gap-2">
-            <div
-              className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${
-                tgBinding?.isBound
-                  ? 'bg-emerald-100 text-emerald-700'
-                  : 'bg-indigo-100 text-indigo-700'
-              }`}
+        {/* Right Side: Action Button or Joined Status + External Link Icon */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {isCompleted ? (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-xs font-bold shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Joined</span>
+            </div>
+          ) : isTelegramTask ? (
+            <button
+              type="button"
+              onClick={handleJoinTelegram}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#0088cc] hover:bg-[#0077b5] text-white text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer"
             >
-              {tgBinding?.isBound ? (
-                <Check className="w-3 h-3 stroke-[3]" />
+              <Send className="w-3.5 h-3.5 -rotate-12" />
+              <span>Join Now</span>
+            </button>
+          ) : isYoutube ? (
+            <button
+              type="button"
+              onClick={handleGenericAction}
+              disabled={genericLoading}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#FF0000] hover:bg-[#e60000] disabled:opacity-50 text-white text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer"
+            >
+              {genericLoading ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
-                '2'
+                <Youtube className="w-3.5 h-3.5" />
+              )}
+              <span>Join Now</span>
+            </button>
+          ) : isCommunity ? (
+            <button
+              type="button"
+              onClick={handleGenericAction}
+              disabled={genericLoading}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer"
+            >
+              {genericLoading ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Users className="w-3.5 h-3.5" />
+              )}
+              <span>Join Now</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleGenericAction}
+              disabled={genericLoading}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer"
+            >
+              {genericLoading ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Globe className="w-3.5 h-3.5" />
+              )}
+              <span>Join Now</span>
+            </button>
+          )}
+
+          {/* External Open Link Button ↗ */}
+          <a
+            href={getTargetLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
+            title="Open channel link"
+          >
+            <ExternalLink className="w-4 h-4" />
+          </a>
+        </div>
+      </div>
+
+      {/* Telegram Verification Inline Drawer - shown only when user taps Join Now or interacts */}
+      {isTelegramTask && !isCompleted && (showTgHelper || hasJoined) && (
+        <div className="mt-2 pt-2.5 border-t border-slate-100 space-y-2.5 text-xs animate-in fade-in">
+          {/* User not logged in */}
+          {!user && (
+            <div className="p-3 bg-blue-50/70 border border-blue-200/80 rounded-xl flex items-center justify-between gap-2 text-blue-900">
+              <span className="text-[11px] font-medium">
+                Sign in with Google to verify channel membership
+              </span>
+              {onOpenAuth && (
+                <button
+                  type="button"
+                  onClick={onOpenAuth}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg shrink-0 cursor-pointer shadow-xs transition-colors"
+                >
+                  Sign In
+                </button>
               )}
             </div>
-            <span className="text-xs font-bold text-slate-800">
-              Step 2: Connect your Telegram account
-            </span>
-          </div>
-
-          <p className="text-[11px] text-slate-500 pl-7 leading-relaxed">
-            Connect Telegram so we can securely verify that you joined this channel.
-          </p>
-
-          {/* Error display in Step 2 */}
-          {verificationError && !tgBinding?.isBound && (
-            <div className="ml-7 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2 text-xs text-red-700 animate-in fade-in">
-              <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-              <div className="flex-1 space-y-1.5">
-                <p>{verificationError}</p>
-                {!user && onOpenAuth && (
-                  <button
-                    type="button"
-                    onClick={onOpenAuth}
-                    className="bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] px-2.5 py-1 rounded-lg cursor-pointer transition-colors"
-                  >
-                    Sign In Now
-                  </button>
-                )}
-              </div>
-            </div>
           )}
 
-          {tgBinding?.isBound ? (
-            <div className="ml-7 p-2.5 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-2 text-xs text-emerald-800 font-semibold">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>
-                Telegram account connected
-                {tgBinding.telegramUsername ? ` (@${tgBinding.telegramUsername})` : ''}
-              </span>
-            </div>
-          ) : (
-            <div className="ml-7 space-y-2">
+          {/* User logged in but Telegram not connected */}
+          {user && !tgBinding?.isBound && (
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                  <Send className="w-3.5 h-3.5 text-[#0088cc]" />
+                  <span>Connect Telegram account to verify</span>
+                </span>
+                <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/60">
+                  Required Once
+                </span>
+              </div>
+
               {awaitingBotStart ? (
-                <div className="p-3 bg-sky-50 border border-sky-200 rounded-xl space-y-2.5 animate-in fade-in">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-sky-900">
-                    <Loader2 className="w-4 h-4 animate-spin text-sky-600 shrink-0" />
-                    <span>Waiting for bot connection... Tap START in Telegram</span>
-                  </div>
-                  <p className="text-[10px] text-sky-700">
-                    Tap below if the bot didn't open automatically, then tap START:
+                <div className="space-y-2">
+                  <p className="text-[11px] text-slate-600">
+                    Open our bot and tap <strong>START</strong>:
                   </p>
-                  {botDeepLink && (
-                    <a
-                      href={botDeepLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="w-full bg-sky-500 hover:bg-sky-600 active:scale-98 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer no-underline text-center"
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    {botDeepLink && (
+                      <a
+                        href={botDeepLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 bg-[#0088cc] hover:bg-[#0077b5] text-white font-bold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all text-center"
+                      >
+                        <Send className="w-3.5 h-3.5 -rotate-12" />
+                        <span>Open @{telegramService.BOT_USERNAME}</span>
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => checkBindingStatus(false)}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-all"
                     >
-                      <Send className="w-3.5 h-3.5 -rotate-12" />
-                      <span>Open @{telegramService.BOT_USERNAME}</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  )}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      checkBindingStatus(false);
-                    }}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-all"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    <span>Check Connection Status</span>
-                  </button>
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>Check Status</span>
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <button
                   type="button"
                   onClick={handleConnectTelegram}
                   disabled={isConnectingTg}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 active:scale-98 text-white font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+                  className="w-full bg-[#0088cc] hover:bg-[#0077b5] disabled:opacity-50 text-white font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer"
                 >
                   {isConnectingTg ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Connecting Telegram...</span>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Opening Bot...</span>
                     </>
                   ) : (
                     <>
                       <Send className="w-3.5 h-3.5 -rotate-12" />
-                      <span>Connect Telegram</span>
+                      <span>Connect @{telegramService.BOT_USERNAME}</span>
                     </>
                   )}
                 </button>
               )}
             </div>
           )}
-        </div>
 
-        {/* ---------------------------------------------------- */}
-        {/* Step 3: Verify membership                           */}
-        {/* ---------------------------------------------------- */}
-        <div className="space-y-2 border-t border-slate-100 pt-3">
-          <div className="flex items-center gap-2">
-            <div
-              className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${
-                tgBinding?.isBound
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-slate-100 text-slate-400'
-              }`}
-            >
-              3
+          {/* User logged in and Telegram bound -> 1-Click Verify */}
+          {user && tgBinding?.isBound && (
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={handleVerifyMembership}
+                disabled={isVerifyingMembership}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+              >
+                {isVerifyingMembership ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Verifying Channel Membership...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Confirm &amp; Verify Membership</span>
+                  </>
+                )}
+              </button>
             </div>
-            <span
-              className={`text-xs font-bold ${
-                tgBinding?.isBound ? 'text-slate-800' : 'text-slate-400'
-              }`}
-            >
-              Step 3: Verify membership
-            </span>
-          </div>
+          )}
 
-          {tgBinding?.isBound ? (
-            <div className="ml-7 space-y-2.5">
-              {verificationError && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-2 text-xs text-amber-900 animate-in fade-in">
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                    <span className="leading-snug">{verificationError}</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={(e) => handleVerifyMembership(e)}
-                      disabled={isVerifyingMembership}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs active:scale-98 transition-all cursor-pointer"
-                    >
-                      {isVerifyingMembership ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <RefreshCw className="w-3.5 h-3.5" />
-                      )}
-                      <span>Try Again</span>
-                    </button>
-                    <a
-                      href={channelUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="bg-white hover:bg-slate-50 text-slate-700 font-bold py-2.5 px-3 rounded-xl border border-slate-200 text-xs flex items-center justify-center gap-1 transition-colors cursor-pointer no-underline"
-                    >
-                      <span>Open Channel</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
+          {/* Verification Error Feedback */}
+          {verificationError && (
+            <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2 text-[11px] text-amber-900">
+              <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <span>{verificationError}</span>
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleVerifyMembership}
+                    className="font-bold underline text-amber-900 cursor-pointer"
+                  >
+                    Retry Verification
+                  </button>
+                  <a
+                    href={channelUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold underline text-blue-600 cursor-pointer"
+                  >
+                    Re-open Channel
+                  </a>
                 </div>
-              )}
-
-              {!verificationError && (
-                <button
-                  type="button"
-                  onClick={(e) => handleVerifyMembership(e)}
-                  disabled={isVerifyingMembership}
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 active:scale-98 text-white font-black py-3.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 transition-all cursor-pointer"
-                >
-                  {isVerifyingMembership ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Verifying Membership...</span>
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>Verify Membership</span>
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
-          ) : (
-            <p className="text-[11px] text-slate-400 pl-7">
-              Complete Step 2 above to verify your channel membership.
-            </p>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // ==========================================
-  // RENDER: GENERIC (NON-TELEGRAM) TASKS
-  // ==========================================
-  return (
-    <div
-      className={`p-3.5 rounded-2xl border transition-all ${
-        isCompleted
-          ? 'bg-emerald-50/70 border-emerald-200 shadow-2xs'
-          : 'bg-white border-slate-200/80 hover:border-blue-200 shadow-xs'
-      }`}
-    >
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          {taskNumber !== undefined && (
-            <div
-              className={`w-6 h-6 rounded-full text-xs font-black flex items-center justify-center shrink-0 ${
-                isCompleted
-                  ? 'bg-emerald-200/80 text-emerald-800'
-                  : 'bg-blue-100 text-blue-800'
-              }`}
-            >
-              {taskNumber}
+              </div>
             </div>
           )}
-          <div className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
-            {getTaskIcon()}
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <h5 className="text-xs font-bold text-slate-900 truncate">{task.title}</h5>
-              {task.is_required && (
-                <span className="text-[9px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-sm uppercase">
-                  Required
-                </span>
-              )}
-            </div>
-            {task.description && (
-              <p className="text-[11px] text-slate-500 truncate mt-0.5">{task.description}</p>
-            )}
-          </div>
         </div>
+      )}
 
-        <div>
-          {isCompleted ? (
-            <div className="flex items-center gap-1 text-emerald-800 font-black text-xs px-3 py-1.5 bg-emerald-100 rounded-full shrink-0">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>✓ Joined</span>
-            </div>
-          ) : (
-            <button
-              onClick={handleGenericAction}
-              disabled={genericLoading}
-              className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-black text-xs px-4 py-2 rounded-full shadow-xs active:scale-95 transition-all shrink-0 cursor-pointer"
-            >
-              {genericLoading ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
-              ) : (
-                <>
-                  <span>
-                    {task.task_type === 'VISIT_WEBSITE'
-                      ? 'Visit Website'
-                      : task.task_type === 'INSTAGRAM_FOLLOW'
-                      ? 'Follow on Instagram'
-                      : task.task_type === 'YOUTUBE_SUB'
-                      ? 'Subscribe on YouTube'
-                      : 'Complete'}
-                  </span>
-                  <ExternalLink className="w-3 h-3" />
-                </>
-              )}
-            </button>
-          )}
-        </div>
-      </div>
-
+      {/* Generic Error Feedback */}
       {genericError && (
-        <div className="mt-2 p-2 bg-red-50 border border-red-100 rounded-xl flex items-start gap-1.5 text-[11px] text-red-700">
+        <div className="p-2 bg-red-50 border border-red-100 rounded-xl flex items-start gap-1.5 text-[11px] text-red-700">
           <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>{genericError}</span>
         </div>

@@ -107,6 +107,38 @@ export interface ThemeDecorationsProps {
   className?: string;
 }
 
+export interface ThemeVisualConfig {
+  id: LifafaThemeId;
+  name: string;
+  tagline: string;
+  badge: string;
+  emoji: string;
+  description: string;
+  previewGradient: string;
+  pageBackground: string;
+  heroGradient: string;
+  heroTagLabel: string;
+  heroTagStyle?: string;
+  heroArtwork: string;
+  statsCardBackground?: string;
+  statsIconUsersColor?: string;
+  statsIconPerUserColor?: string;
+  statsIconClaimedColor?: string;
+  statsIconRemainingColor?: string;
+  progressBarTrack?: string;
+  progressBarFill: string;
+  channelHeaderIconBg: string;
+  channelHeaderBadgeBg: string;
+  accentColor: string;
+  ctaGradient: string;
+  ctaShadow: string;
+  ambientTextLeft: string;
+  ambientTextRight: string;
+  ambientTextRotated?: string;
+  ambientTextColor?: string;
+  isDark?: boolean;
+}
+
 export interface LifafaTheme {
   id: LifafaThemeId;
   name: string;
@@ -116,6 +148,7 @@ export interface LifafaTheme {
   previewGradient: string;
   typography: ThemeTypographyConfig;
   colors: ThemeColorsConfig;
+  visualConfig: ThemeVisualConfig;
   components: {
     Envelope: React.FC<ThemeEnvelopeProps>;
     ClaimSection: React.FC<ThemeClaimSectionProps>;

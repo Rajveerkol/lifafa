@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Gift,
   Sparkles,
   Clock,
   Users,
-  CheckCircle2,
   AlertCircle,
   Loader2,
   Share2,
@@ -13,7 +12,11 @@ import {
   Landmark,
   Copy,
   Check,
-  Compass,
+  Send,
+  HelpCircle,
+  X,
+  ShieldCheck,
+  CheckCircle2,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { Lifafa, LifafaTask, PayoutMode } from '../types/database';
@@ -21,9 +24,7 @@ import { lifafaService } from '../services/lifafaService';
 import { taskService } from '../services/taskService';
 import { fraudService } from '../services/fraudService';
 import { useAuth } from '../context/AuthContext';
-import { DigitalEnvelope } from '../components/lifafa/DigitalEnvelope';
 import { TaskCard } from '../components/lifafa/TaskCard';
-import { Logo } from '../components/common/Logo';
 import { formatCurrency, formatTimeRemaining } from '../lib/utils';
 import { ThemeProvider } from '../themes/ThemeContext';
 import { getTheme } from '../themes/registry';
@@ -54,10 +55,14 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
   const [loadingTasks, setLoadingTasks] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [claimResult, setClaimResult] = useState<{ amount: number; code: string; payoutMode?: PayoutMode } | null>(null);
-  const [isEnvelopeOpened, setIsEnvelopeOpened] = useState(false);
+  const [claimResult, setClaimResult] = useState<{
+    amount: number;
+    code: string;
+    payoutMode?: PayoutMode;
+  } | null>(null);
   const [alreadyClaimed, setAlreadyClaimed] = useState<number | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
 
   // UPI / Bank Payout Details State
   const [accountHolderName, setAccountHolderName] = useState('');
@@ -67,6 +72,8 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
 
   const resolvedThemeId = useResolvedTheme(lifafa);
   const theme = getTheme(resolvedThemeId);
+  const v = theme.visualConfig;
+  const isDark = Boolean(v?.isDark);
 
   const lifafaId = lifafa?.id;
   const userId = user?.id;
@@ -130,7 +137,6 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                 code: lifafa?.code || code,
                 payoutMode: existingClaim.payout_mode || lifafa?.payout_mode || 'WALLET',
               });
-              setIsEnvelopeOpened(true);
             }
           });
 
@@ -166,7 +172,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
   );
 
   const requiredTasks = tasks.filter((t) => t.is_required && t.is_enabled);
-  const allRequiredDone = requiredTasks.every((t) => completedTaskIds.has(t.id));
+  const allRequiredDone = requiredTasks.length === 0 || requiredTasks.every((t) => completedTaskIds.has(t.id));
 
   const handleTaskDone = (taskId: string) => {
     setCompletedTaskIds((prev) => new Set([...prev, taskId]));
@@ -193,7 +199,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
     }
 
     if (!allRequiredDone) {
-      setErrorMsg('Please complete and verify all required tasks above before claiming.');
+      setErrorMsg('Please complete and verify all required channels above before claiming.');
       return;
     }
 
@@ -269,12 +275,12 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
   // State A: Loading Lifafa
   if (loadingLifafa) {
     return (
-      <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col items-center justify-center p-4">
-        <div className="w-16 h-16 rounded-3xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center mb-4 text-blue-400 animate-pulse">
-          <Gift className="w-8 h-8 animate-bounce" />
+      <div className={`min-h-screen ${v?.pageBackground || 'bg-gradient-to-b from-[#F0F6FF] via-[#E8F1FD] to-[#F3F8FF]'} ${isDark ? 'text-white' : 'text-slate-800'} flex flex-col items-center justify-center p-4`}>
+        <div className="w-16 h-16 rounded-3xl bg-white/80 border border-slate-200/80 flex items-center justify-center mb-4 animate-pulse shadow-sm">
+          <Gift className="w-8 h-8 animate-bounce" style={{ color: v?.accentColor || '#2563eb' }} />
         </div>
-        <p className="text-sm font-semibold text-slate-300">Retrieving Digital Lifafa...</p>
-        <span className="text-xs font-mono text-blue-400 mt-1">{code.toUpperCase()}</span>
+        <p className={`text-sm font-bold ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Opening Digital Lifafa...</p>
+        <span className="text-xs font-mono mt-1 font-bold" style={{ color: v?.accentColor || '#2563eb' }}>{code.toUpperCase()}</span>
       </div>
     );
   }
@@ -282,23 +288,23 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
   // State B: Not Found / Invalid Code
   if (notFound || !lifafa) {
     return (
-      <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-sm bg-slate-800/80 backdrop-blur-md rounded-3xl p-8 border border-slate-700/60 shadow-2xl text-center space-y-4">
-          <div className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 mx-auto flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-[#F0F6FF] via-[#E8F1FD] to-[#F3F8FF] text-slate-800 flex flex-col items-center justify-center p-4">
+        <div className="w-full max-w-sm bg-white rounded-3xl p-8 border border-slate-200 shadow-xl text-center space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-200 text-rose-500 mx-auto flex items-center justify-center">
             <AlertCircle className="w-7 h-7" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">Lifafa Not Found</h3>
-            <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
+            <h3 className="text-lg font-extrabold text-slate-900">Lifafa Not Found</h3>
+            <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
               We couldn't locate any active digital Lifafa with code{' '}
-              <span className="font-mono text-rose-400 font-bold">{code.toUpperCase()}</span>.
-              Please verify the link and try again.
+              <span className="font-mono text-rose-600 font-bold">{code.toUpperCase()}</span>.
+              Please check the link and try again.
             </p>
           </div>
           {onNavigateHome && (
             <button
               onClick={onNavigateHome}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer"
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer shadow-sm"
             >
               Go to CreatLifafa Home
             </button>
@@ -308,310 +314,551 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
     );
   }
 
+  // Calculate dynamic stats
+  const perUserAmount = (lifafa.total_amount / (lifafa.winner_count || 1)).toFixed(
+    lifafa.total_amount % (lifafa.winner_count || 1) === 0 ? 0 : 2
+  );
+  const remainingWinners = Math.max(0, (lifafa.winner_count || 0) - (lifafa.claimed_count || 0));
+  const progressPct = Math.min(
+    100,
+    Math.max(4, Math.round((lifafa.claimed_count / (lifafa.winner_count || 1)) * 100))
+  );
+
   return (
     <ThemeProvider themeId={resolvedThemeId}>
-      <div
-        className={`min-h-screen relative overflow-x-hidden ${theme.colors.pageBackground} flex flex-col items-center justify-between p-3 sm:p-6 selection:bg-blue-500 selection:text-white`}
-      >
-        {/* Ambient Theme Background Animations & Particle Decorations */}
-        <theme.components.Decorations />
+      <div className={`min-h-screen relative overflow-x-hidden ${v.pageBackground} flex flex-col items-center justify-between p-3 sm:p-5 selection:bg-blue-500 selection:text-white`}>
+        {/* Subtle Ambient Decorative Watermark Texts - Matching Reference Style */}
+        <div className="pointer-events-none select-none fixed inset-0 overflow-hidden z-0">
+          <span className={`absolute bottom-6 left-4 ${v.ambientTextColor || 'text-slate-400/40'} text-xs font-bold tracking-wider`}>
+            {v.ambientTextLeft}
+          </span>
+          <span className={`absolute bottom-6 right-4 ${v.ambientTextColor || 'text-slate-400/40'} text-xs font-bold tracking-wider`}>
+            {v.ambientTextRight}
+          </span>
+          {v.ambientTextRotated && (
+            <span className={`absolute top-1/2 right-3 -translate-y-1/2 rotate-90 ${v.ambientTextColor || 'text-slate-400/30'} text-[11px] font-semibold tracking-widest hidden md:inline-block`}>
+              {v.ambientTextRotated}
+            </span>
+          )}
+        </div>
 
-        {/* 1. Subtle Standalone Header */}
-        <header className="relative z-10 w-full max-w-md flex items-center justify-between py-2 pt-3">
-          <div className="w-20 flex items-center justify-start">
-            {onNavigateHome && (
+        {/* 1. Header matching Reference: Back Button (<) | Join & Claim 🎁 | How it works? */}
+        <header className="relative z-10 w-full max-w-md flex items-center justify-between py-2 pt-1">
+          {/* Circular Back Button */}
+          <div className="w-12 flex items-center justify-start">
+            {onNavigateHome ? (
               <button
+                type="button"
                 onClick={onNavigateHome}
-                className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 transition-colors cursor-pointer group"
+                className={`w-10 h-10 rounded-full ${isDark ? 'bg-slate-800/90 text-white border-slate-700 hover:bg-slate-700' : 'bg-white text-slate-700 border-slate-200/80 hover:bg-slate-50'} shadow-xs border flex items-center justify-center transition-all cursor-pointer`}
+                title="Back to home"
               >
-                <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
-                <span className="font-medium">Home</span>
+                <ArrowLeft className="w-4 h-4" />
               </button>
+            ) : (
+              <div className="w-10 h-10" />
             )}
           </div>
 
-          <div className="flex items-center justify-center">
-            <Logo size="sm" showTagline={false} />
+          {/* Centered Title & Subtitle */}
+          <div className="text-center px-1">
+            <h1 className={`text-base sm:text-lg font-black ${isDark ? 'text-white' : 'text-slate-900'} tracking-tight flex items-center justify-center gap-1.5`}>
+              <span>Join &amp;</span>
+              <span style={{ color: v.accentColor }}>Claim</span>
+              <span>{v.emoji}</span>
+            </h1>
+            <p className={`text-[11px] ${isDark ? 'text-slate-300' : 'text-slate-500'} font-medium`}>
+              Complete all steps to unlock your Lifafa
+            </p>
           </div>
 
-          <div className="w-20 flex items-center justify-end">
-            <span className="text-[11px] font-mono text-slate-500 bg-white/70 backdrop-blur-xs px-2 py-0.5 rounded-md border border-slate-200/80 whitespace-nowrap shadow-xs">
-              {lifafa.code}
-            </span>
+          {/* Right: How It Works Pill Button */}
+          <div className="w-auto flex items-center justify-end">
+            <button
+              type="button"
+              onClick={() => setShowHowItWorks(true)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ${isDark ? 'bg-slate-800/90 text-white border-slate-700 hover:bg-slate-700' : 'bg-white/90 text-slate-700 border-slate-200/90 hover:bg-white'} border text-xs font-semibold shadow-2xs transition-all cursor-pointer`}
+            >
+              <HelpCircle className="w-3.5 h-3.5" style={{ color: v.accentColor }} />
+              <span className="hidden sm:inline">How it works?</span>
+              <span className="sm:hidden">Help</span>
+            </button>
           </div>
         </header>
 
         {/* 2. Main Centered Lifafa Experience Card */}
-        <main className="relative z-10 w-full max-w-md my-auto py-4">
-          <div
-            className={`${theme.colors.cardBackground} backdrop-blur-xl border ${theme.colors.cardBorder} rounded-3xl shadow-2xl overflow-hidden p-4 sm:p-6 space-y-5 transition-all`}
-          >
-            {/* 4-Stat Metric & 3D Gift Box Hero Card - Matching Reference Screenshot 5 */}
-            <div className="bg-gradient-to-br from-[#1E40AF] via-[#1D4ED8] to-[#2563EB] rounded-3xl p-5 text-white shadow-xl space-y-4">
-              <div className="text-center space-y-1">
-                <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/15 text-blue-100 border border-white/20">
-                  <Sparkles className="w-3 h-3 text-amber-300" />
-                  <span>Join &amp; Claim Lifafa</span>
-                </span>
-                <h1 className="text-lg sm:text-xl font-black text-white tracking-tight">
-                  {lifafa.title}
-                </h1>
-                {lifafa.message && (
-                  <p className="text-xs text-blue-100/90 leading-relaxed max-w-xs mx-auto italic">
-                    "{lifafa.message}"
-                  </p>
-                )}
-              </div>
-
-              {/* Central 3D White & Gold Gift Box Illustration */}
-              <div className="relative mx-auto w-28 h-28 sm:w-32 sm:h-32 my-1">
+        <main className="relative z-10 w-full max-w-md my-auto py-2 space-y-4">
+          {/* Flow Branch 1: Claimed Success State with Themed Reward Reveal */}
+          {claimResult ? (
+            <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 text-center space-y-5 animate-in zoom-in-95 duration-300">
+              <div className="relative mx-auto w-28 h-28">
                 <img
-                  src="/images/claim_hero_gift.jpg"
-                  alt="Claim Gift Box"
-                  className="w-full h-full object-contain rounded-2xl drop-shadow-2xl animate-in zoom-in-95 duration-300"
+                  src={v.heroArtwork}
+                  alt="Reward Unlocked"
+                  className="w-full h-full object-contain drop-shadow-xl"
                 />
               </div>
 
-              {/* 4-Stat Metric Grid */}
-              <div className="grid grid-cols-4 gap-2 pt-1 border-t border-white/15 text-center">
-                <div className="bg-white/10 rounded-xl p-2">
-                  <span className="text-[9px] uppercase tracking-wider text-blue-200 font-bold block">Total Users</span>
-                  <span className="text-xs sm:text-sm font-black text-white">{lifafa.winner_count}</span>
-                </div>
-                <div className="bg-white/10 rounded-xl p-2">
-                  <span className="text-[9px] uppercase tracking-wider text-blue-200 font-bold block">Per User</span>
-                  <span className="text-xs sm:text-sm font-black text-amber-300">
-                    ₹{(lifafa.total_amount / (lifafa.winner_count || 1)).toFixed(2)}
-                  </span>
-                </div>
-                <div className="bg-white/10 rounded-xl p-2">
-                  <span className="text-[9px] uppercase tracking-wider text-blue-200 font-bold block">Claimed</span>
-                  <span className="text-xs sm:text-sm font-black text-emerald-300">{lifafa.claimed_count}</span>
-                </div>
-                <div className="bg-white/10 rounded-xl p-2">
-                  <span className="text-[9px] uppercase tracking-wider text-blue-200 font-bold block">Remaining</span>
-                  <span className="text-xs sm:text-sm font-black text-cyan-200">
-                    {Math.max(0, (lifafa.winner_count || 0) - (lifafa.claimed_count || 0))}
-                  </span>
-                </div>
+              <div className="space-y-1">
+                <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Reward Claimed Successfully!</span>
+                </span>
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight pt-1">
+                  Congratulations!
+                </h3>
+                <p className="text-xs text-slate-500">{lifafa.title}</p>
               </div>
 
-              {/* Cyan Claim Progress Bar */}
-              <div className="space-y-1 pt-0.5">
-                <div className="flex justify-between text-[10px] font-bold text-blue-200">
-                  <span>Claim Progress</span>
+              {/* Amount Display */}
+              <div className="p-4 bg-gradient-to-br from-slate-50 to-slate-100/70 rounded-2xl border border-slate-200/80">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest block">
+                  Reward Amount
+                </span>
+                <span className="text-4xl sm:text-5xl font-black tracking-tight" style={{ color: v.accentColor }}>
+                  {formatCurrency(claimResult.amount)}
+                </span>
+                <p className="text-xs font-semibold text-emerald-600 mt-1 flex items-center justify-center gap-1">
+                  <Check className="w-3.5 h-3.5" />
                   <span>
-                    {lifafa.claimed_count} / {lifafa.winner_count} Claimed (
-                    {Math.round((lifafa.claimed_count / (lifafa.winner_count || 1)) * 100)}%)
+                    {claimResult.payoutMode === 'UPI_BANK'
+                      ? 'Dispatched directly to Bank Account!'
+                      : 'Credited instantly to your CreatLifafa Wallet!'}
                   </span>
-                </div>
-                <div className="w-full h-2.5 bg-white/20 rounded-full overflow-hidden p-0.5">
-                  <div
-                    className="h-full bg-cyan-400 rounded-full transition-all duration-500 shadow-sm shadow-cyan-400/50"
-                    style={{
-                      width: `${Math.min(100, Math.max(3, (lifafa.claimed_count / (lifafa.winner_count || 1)) * 100))}%`,
-                    }}
-                  />
-                </div>
+                </p>
               </div>
-            </div>
 
-            {/* Flow Branch 1: Claimed Success State with Themed Reward Reveal */}
-            {claimResult ? (
-              <theme.components.RewardReveal
-                amount={claimResult.amount}
-                code={claimResult.code}
-                payoutMode={claimResult.payoutMode || lifafa.payout_mode || 'WALLET'}
-                lifafa={lifafa}
-                onOpenShare={onOpenShare || (() => handleCopyShareUrl())}
-                onClose={onNavigateHome}
-              />
-            ) : isCompleted ? (
-              /* Flow Branch 2: Fully Claimed (Out of claims) */
-              <theme.components.FullyClaimedView
-                lifafa={lifafa}
-                onNavigateHome={onNavigateHome}
-              />
-            ) : isExpired ? (
-              /* Flow Branch 3: Expired Lifafa */
-              <theme.components.ExpiredView
-                lifafa={lifafa}
-                onNavigateHome={onNavigateHome}
-              />
-            ) : (
-              /* Flow Branch 4: Active Claim View with Tasks, PIN, and CTA */
-              <div className="space-y-4 pt-1">
-                {errorMsg && (
-                  <div className="p-3.5 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-2.5 text-xs text-red-700 animate-in fade-in">
-                    <AlertCircle className="w-4 h-4 shrink-0" />
-                    <span>{errorMsg}</span>
-                  </div>
+              {/* Share & Home Actions */}
+              <div className="space-y-2 pt-1">
+                {onOpenShare ? (
+                  <button
+                    type="button"
+                    onClick={() => onOpenShare(lifafa)}
+                    className={`w-full py-3.5 ${v.ctaGradient} text-white font-bold rounded-2xl text-xs shadow-md ${v.ctaShadow} flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer`}
+                  >
+                    <Share2 className="w-4 h-4" />
+                    <span>Share This Lifafa With Friends</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleCopyShareUrl}
+                    className={`w-full py-3.5 ${v.ctaGradient} text-white font-bold rounded-2xl text-xs shadow-md ${v.ctaShadow} flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer`}
+                  >
+                    {copiedLink ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    <span>{copiedLink ? 'Link Copied!' : 'Copy Lifafa Share Link'}</span>
+                  </button>
                 )}
 
-                {/* Dedicated Theme Envelope Visual */}
-                <div className="py-1">
-                  <theme.components.Envelope
-                    lifafa={lifafa}
-                    isEnvelopeOpened={isEnvelopeOpened}
-                    onUnsealEnvelope={() => setIsEnvelopeOpened(true)}
-                    claimedAmount={alreadyClaimed ?? undefined}
-                    timeLeft={timeLeft}
-                    isExpired={isExpired}
-                  />
+                {onNavigateHome && (
+                  <button
+                    type="button"
+                    onClick={onNavigateHome}
+                    className="w-full py-2.5 text-slate-500 hover:text-slate-800 text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    Back to Home
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : isCompleted ? (
+            /* Flow Branch 2: Fully Claimed */
+            <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 text-center space-y-4">
+              <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 mx-auto flex items-center justify-center">
+                <Gift className="w-7 h-7" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900">All Rewards Claimed</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                All {lifafa.winner_count} spots for this Lifafa have already been claimed. Explore more
+                gifts on CreatLifafa!
+              </p>
+              {onNavigateHome && (
+                <button
+                  type="button"
+                  onClick={onNavigateHome}
+                  className={`w-full py-3 ${v.ctaGradient} text-white font-bold rounded-xl text-xs cursor-pointer shadow-sm`}
+                >
+                  Explore More Lifafas
+                </button>
+              )}
+            </div>
+          ) : isExpired ? (
+            /* Flow Branch 3: Expired Lifafa */
+            <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 text-center space-y-4">
+              <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-500 border border-slate-200 mx-auto flex items-center justify-center">
+                <Clock className="w-7 h-7" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900">Lifafa Expired</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                The time window to claim this digital gift has ended.
+              </p>
+              {onNavigateHome && (
+                <button
+                  type="button"
+                  onClick={onNavigateHome}
+                  className={`w-full py-3 ${v.ctaGradient} text-white font-bold rounded-xl text-xs cursor-pointer shadow-sm`}
+                >
+                  Explore Active Lifafas
+                </button>
+              )}
+            </div>
+          ) : (
+            /* Flow Branch 4: Primary Claim Page - Matching Reference Screenshot 5 */
+            <div className="space-y-4">
+              {/* PRIMARY THEMED HERO CARD */}
+              <div className={`${v.heroGradient} rounded-3xl p-4 sm:p-5 text-white shadow-xl relative overflow-hidden space-y-4`}>
+                {/* Top Half: Left Title/Message + Right 3D Theme Gift Artwork */}
+                <div className="flex items-start justify-between gap-3 pt-1">
+                  <div className="space-y-1 min-w-0 flex-1">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-white/80 block">
+                      {v.heroTagLabel}
+                    </span>
+                    <h2 className="text-lg sm:text-xl font-black text-white tracking-tight leading-snug truncate">
+                      {lifafa.title}
+                    </h2>
+                    {lifafa.message && (
+                      <p className="text-xs text-white/90 italic font-medium leading-relaxed line-clamp-2 mt-0.5">
+                        "{lifafa.message}"
+                      </p>
+                    )}
+                  </div>
+
+                  {/* 3D Theme Gift Artwork */}
+                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0">
+                    <img
+                      src={v.heroArtwork}
+                      alt={lifafa.title}
+                      className="w-full h-full object-contain rounded-2xl drop-shadow-2xl"
+                    />
+                  </div>
                 </div>
 
-                {/* Numbered Pill Task Cards Section - Reference Screenshot 5 */}
-                {tasks.length > 0 && (
-                  <div className="space-y-3 pt-2">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                        <span>Channel Tasks</span>
-                      </h3>
-                      <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-                        {completedTaskIds.size} / {requiredTasks.length} Completed
+                {/* Bottom Half: 4-Stat Metric Box + Dual Progress Bar */}
+                <div className="bg-white text-slate-800 rounded-2xl p-3 shadow-md">
+                  <div className="grid grid-cols-4 gap-2 text-center divide-x divide-slate-100">
+                    {/* Stat 1: Total Users */}
+                    <div className="space-y-0.5">
+                      <div className="flex items-center justify-center gap-1 text-[10px] font-semibold text-slate-500">
+                        <Users className="w-3 h-3" style={{ color: v.accentColor }} />
+                        <span>Total Users</span>
+                      </div>
+                      <span className="text-sm sm:text-base font-black text-slate-900 block">
+                        {lifafa.winner_count}
                       </span>
                     </div>
 
-                    <div className="space-y-2.5">
-                      {tasks.map((t, idx) => (
-                        <TaskCard
-                          key={t.id}
-                          task={t}
-                          isCompleted={completedTaskIds.has(t.id)}
-                          onCompleted={handleTaskDone}
-                          onOpenAuth={onOpenAuth}
-                          taskNumber={idx + 1}
-                        />
-                      ))}
+                    {/* Stat 2: Per User */}
+                    <div className="space-y-0.5 pl-1">
+                      <div className="flex items-center justify-center gap-1 text-[10px] font-semibold text-slate-500">
+                        <span className="text-xs font-bold text-emerald-600">₹</span>
+                        <span>Per User</span>
+                      </div>
+                      <span className="text-sm sm:text-base font-black text-emerald-600 block">
+                        ₹{perUserAmount}
+                      </span>
+                    </div>
+
+                    {/* Stat 3: Claimed */}
+                    <div className="space-y-0.5 pl-1">
+                      <div className="flex items-center justify-center gap-1 text-[10px] font-semibold text-slate-500">
+                        <Gift className="w-3 h-3 text-purple-500" />
+                        <span>Claimed</span>
+                      </div>
+                      <span className="text-sm sm:text-base font-black text-purple-600 block">
+                        {lifafa.claimed_count}
+                      </span>
+                    </div>
+
+                    {/* Stat 4: Remaining */}
+                    <div className="space-y-0.5 pl-1">
+                      <div className="flex items-center justify-center gap-1 text-[10px] font-semibold text-slate-500">
+                        <Clock className="w-3 h-3 text-amber-500" />
+                        <span>Remaining</span>
+                      </div>
+                      <span className="text-sm sm:text-base font-black text-amber-600 block">
+                        {remainingWinners}
+                      </span>
                     </div>
                   </div>
-                )}
 
-                {/* PIN Code Verification if Required */}
-                {Boolean(lifafa.pin_code) && (
-                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 text-center">
-                    <div className="flex items-center justify-center gap-1.5 text-xs font-black text-slate-800">
-                      <Lock className="w-3.5 h-3.5 text-blue-600" />
-                      <span>Security PIN Required</span>
-                    </div>
-                    <input
-                      type="password"
-                      maxLength={6}
-                      value={pinCode}
-                      onChange={(e) => setPinCode(e.target.value)}
-                      placeholder="Enter 4-6 digit PIN"
-                      className="w-full max-w-xs mx-auto px-4 py-2 bg-white border border-slate-200 rounded-xl text-center text-sm font-mono tracking-widest text-slate-800 focus:outline-hidden focus:border-blue-500"
-                    />
-                  </div>
-                )}
-
-                {/* Direct Bank Settlement Form if lifafa is UPI_BANK */}
-                {lifafa.payout_mode === 'UPI_BANK' && (
-                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
-                    <div className="flex items-center gap-1.5 text-xs font-black text-slate-800 border-b border-slate-200 pb-2">
-                      <Landmark className="w-4 h-4 text-blue-600" />
-                      <span>Direct Bank Settlement Details</span>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                        Account Holder Name *
-                      </label>
-                      <input
-                        type="text"
-                        value={accountHolderName}
-                        onChange={(e) => setAccountHolderName(e.target.value)}
-                        placeholder="Enter Account Holder Name"
-                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-hidden focus:border-blue-500"
+                  {/* Dual Progress Bar */}
+                  <div className="mt-3 pt-2.5 border-t border-slate-100">
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${v.progressBarFill} rounded-full transition-all duration-500 shadow-xs`}
+                        style={{ width: `${progressPct}%` }}
                       />
                     </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                          Bank Account Number
-                        </label>
-                        <input
-                          type="text"
-                          value={bankAccountNumber}
-                          onChange={(e) => setBankAccountNumber(e.target.value)}
-                          placeholder="Account Number"
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono focus:outline-hidden focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                          IFSC Code
-                        </label>
-                        <input
-                          type="text"
-                          maxLength={11}
-                          value={ifscCode}
-                          onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
-                          placeholder="e.g. HDFC0001234"
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono uppercase focus:outline-hidden focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                        UPI ID (Optional fallback)
-                      </label>
-                      <input
-                        type="text"
-                        value={upiId}
-                        onChange={(e) => setUpiId(e.target.value)}
-                        placeholder="username@bank"
-                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-hidden focus:border-blue-500"
-                      />
+                    <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 mt-1.5">
+                      <span>
+                        {lifafa.claimed_count}/{lifafa.winner_count} Claimed
+                      </span>
+                      <span>{remainingWinners} Left</span>
                     </div>
                   </div>
-                )}
-
-                {/* Floating / Sticky Verify & Claim Lifafa CTA - Reference Screenshot 5 */}
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    onClick={handleClaim}
-                    disabled={claiming || (!allRequiredDone && user !== null)}
-                    className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-black text-sm rounded-2xl shadow-xl shadow-blue-500/25 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    {claiming ? (
-                      <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        <span>Verifying &amp; Claiming...</span>
-                      </>
-                    ) : !user ? (
-                      <>
-                        <Lock className="w-4 h-4" />
-                        <span>Sign In with Google to Claim</span>
-                      </>
-                    ) : !allRequiredDone ? (
-                      <>
-                        <Lock className="w-4 h-4" />
-                        <span>Complete All Required Tasks to Unlock</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>🔒 Verify &amp; Claim Lifafa →</span>
-                      </>
-                    )}
-                  </button>
                 </div>
               </div>
-            )}
-          </div>
+
+              {/* Error Message Banner */}
+              {errorMsg && (
+                <div className="p-3.5 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-2.5 text-xs text-red-700 animate-in fade-in">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+
+              {/* SECTION: Join Required Channels Header matching Reference */}
+              <div className="space-y-3 pt-1">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-7 h-7 rounded-xl ${v.channelHeaderIconBg} flex items-center justify-center shrink-0 shadow-xs`}>
+                      <Send className="w-4 h-4 -rotate-12" />
+                    </div>
+                    <div>
+                      <h3 className={`text-sm sm:text-base font-extrabold ${isDark ? 'text-white' : 'text-slate-900'} leading-tight`}>
+                        Join Required Channels
+                      </h3>
+                      <p className={`text-[11px] ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>
+                        Join all channels below to unlock the claim button
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Theme Badge: Complete All Steps */}
+                  <div className="shrink-0">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${v.channelHeaderBadgeBg} text-[11px] font-bold shadow-2xs`}>
+                      <span>{v.emoji}</span>
+                      <span>Complete All Steps</span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Numbered Task Cards */}
+                <div className="space-y-2.5">
+                  {tasks.length > 0 ? (
+                    tasks.map((t, idx) => (
+                      <TaskCard
+                        key={t.id}
+                        task={t}
+                        isCompleted={completedTaskIds.has(t.id)}
+                        onCompleted={handleTaskDone}
+                        onOpenAuth={onOpenAuth}
+                        taskNumber={idx + 1}
+                      />
+                    ))
+                  ) : (
+                    <div className="p-4 bg-white border border-slate-100 rounded-2xl text-center text-xs text-slate-500">
+                      No mandatory tasks required for this Lifafa. You can claim directly below!
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Security PIN Code Input if required */}
+              {Boolean(lifafa.pin_code) && (
+                <div className="p-4 bg-white border border-slate-200 rounded-2xl space-y-2 text-center shadow-xs">
+                  <div className="flex items-center justify-center gap-1.5 text-xs font-black text-slate-800">
+                    <Lock className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Security PIN Required</span>
+                  </div>
+                  <input
+                    type="password"
+                    maxLength={6}
+                    value={pinCode}
+                    onChange={(e) => setPinCode(e.target.value)}
+                    placeholder="Enter 4-6 digit PIN"
+                    className="w-full max-w-xs mx-auto px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-center text-sm font-mono tracking-widest text-slate-800 focus:outline-hidden focus:border-blue-500 focus:bg-white transition-all"
+                  />
+                </div>
+              )}
+
+              {/* Direct Bank Settlement Form if lifafa payout_mode is UPI_BANK */}
+              {lifafa.payout_mode === 'UPI_BANK' && (
+                <div className="p-4 bg-white border border-slate-200 rounded-2xl space-y-3 shadow-xs">
+                  <div className="flex items-center gap-1.5 text-xs font-black text-slate-800 border-b border-slate-100 pb-2">
+                    <Landmark className="w-4 h-4 text-blue-600" />
+                    <span>Direct Bank Settlement Details</span>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Account Holder Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={accountHolderName}
+                      onChange={(e) => setAccountHolderName(e.target.value)}
+                      placeholder="Account holder name as per bank"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-hidden focus:border-blue-500 focus:bg-white transition-all"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        Bank Account Number
+                      </label>
+                      <input
+                        type="text"
+                        value={bankAccountNumber}
+                        onChange={(e) => setBankAccountNumber(e.target.value)}
+                        placeholder="Account Number"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-hidden focus:border-blue-500 focus:bg-white transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        IFSC Code
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={11}
+                        value={ifscCode}
+                        onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
+                        placeholder="e.g. SBIN0001234"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono uppercase focus:outline-hidden focus:border-blue-500 focus:bg-white transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      UPI ID (Optional fallback)
+                    </label>
+                    <input
+                      type="text"
+                      value={upiId}
+                      onChange={(e) => setUpiId(e.target.value)}
+                      placeholder="username@bank"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-hidden focus:border-blue-500 focus:bg-white transition-all"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* STICKY / FLOATING CTA SECTION MATCHING REFERENCE */}
+              <div className="pt-2 sticky bottom-3 z-30 pb-1">
+                <button
+                  type="button"
+                  onClick={handleClaim}
+                  disabled={claiming}
+                  className={`w-full py-4 px-6 ${v.ctaGradient} active:scale-[0.99] text-white font-black text-sm sm:text-base rounded-2xl shadow-xl ${v.ctaShadow} transition-all flex items-center justify-center gap-2 cursor-pointer`}
+                >
+                  {claiming ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Verifying &amp; Claiming...</span>
+                    </>
+                  ) : !allRequiredDone ? (
+                    <>
+                      <Lock className="w-4 h-4" />
+                      <span>Complete Required Tasks</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-4 h-4" />
+                      <span>Verify &amp; Claim Lifafa →</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Trust and Safety Notice below button matching Reference */}
+                <div className={`flex items-center justify-center gap-1.5 text-[11px] ${isDark ? 'text-slate-300' : 'text-slate-500'} text-center mt-2.5`}>
+                  <ShieldCheck className="w-3.5 h-3.5 shrink-0" style={{ color: v.accentColor }} />
+                  <span>We check if you have joined all channels. Don't worry, it's 100% safe!</span>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
 
         {/* 3. Subtle Standalone Footer */}
-        <footer className="relative z-10 w-full max-w-md text-center py-3 text-[11px] text-slate-500 flex items-center justify-between">
+        <footer className={`relative z-10 w-full max-w-md text-center py-3 text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'} flex items-center justify-between`}>
           <span>© {new Date().getFullYear()} CreatLifafa</span>
           <span className="flex items-center gap-1 text-slate-400">
             <Sparkles className="w-3 h-3 text-amber-400" />
             <span>India's Modern Digital Gifting</span>
           </span>
         </footer>
+
+        {/* How It Works Modal Dialog */}
+        {showHowItWorks && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
+            <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{v.emoji}</span>
+                  <h3 className="text-base font-black text-slate-900">How to Claim Lifafa</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowHowItWorks(false)}
+                  className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-slate-200 transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-3 text-xs text-slate-600">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center shrink-0">
+                    1
+                  </div>
+                  <div>
+                    <h5 className="font-bold text-slate-900">Join Required Channels</h5>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Tap "Join Now" for each channel listed in the tasks.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center shrink-0">
+                    2
+                  </div>
+                  <div>
+                    <h5 className="font-bold text-slate-900">Verify Your Membership</h5>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Connect your Telegram account once to automatically verify channel membership.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center shrink-0">
+                    3
+                  </div>
+                  <div>
+                    <h5 className="font-bold text-slate-900">Verify &amp; Claim Lifafa</h5>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Tap the "Verify &amp; Claim Lifafa" button at the bottom.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center shrink-0">
+                    ✓
+                  </div>
+                  <div>
+                    <h5 className="font-bold text-slate-900">Instant Cash Reward</h5>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Your reward is credited immediately to your CreatLifafa wallet or bank account!
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowHowItWorks(false)}
+                className={`w-full py-3 ${v.ctaGradient} text-white font-bold rounded-xl text-xs transition-colors cursor-pointer shadow-sm`}
+              >
+                Got It, Let's Claim!
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </ThemeProvider>
   );

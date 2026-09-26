@@ -54,16 +54,16 @@ export const MerchantIpWhitelistManager: React.FC<MerchantIpWhitelistManagerProp
 
   return (
     <div className="space-y-4">
-      <div>
-        <h4 className="text-sm font-black text-slate-900">IP Whitelist Security</h4>
+      <div className="pb-2 border-b border-slate-200">
+        <h4 className="text-sm font-semibold text-slate-900">IP Whitelist Security</h4>
         <p className="text-xs text-slate-500 mt-0.5">
           Restricts API payout calls to only originating from authorized servers or IP addresses
         </p>
       </div>
 
       {errorMsg && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0" />
+        <div className="p-3 bg-red-50 border border-red-200 rounded-md text-xs text-red-700 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
           <span>{errorMsg}</span>
         </div>
       )}
@@ -76,19 +76,19 @@ export const MerchantIpWhitelistManager: React.FC<MerchantIpWhitelistManagerProp
           placeholder="e.g. 192.168.1.1 or 35.180.20.10"
           value={ipAddress}
           onChange={(e) => setIpAddress(e.target.value)}
-          className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+          className="flex-1 px-3 py-1.5 rounded-md border border-slate-300 text-xs font-mono focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden"
         />
         <input
           type="text"
           placeholder="Server label (optional)"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="sm:w-48 px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+          className="sm:w-48 px-3 py-1.5 rounded-md border border-slate-300 text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden"
         />
         <button
           type="submit"
           disabled={loading}
-          className="flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-black text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition-all cursor-pointer disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium px-4 py-1.5 rounded-md shadow-xs transition-colors cursor-pointer disabled:opacity-50"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Add IP</span>
@@ -97,22 +97,22 @@ export const MerchantIpWhitelistManager: React.FC<MerchantIpWhitelistManagerProp
 
       {/* Whitelist items */}
       {whitelist.length === 0 ? (
-        <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 text-[11px] text-amber-800">
+        <div className="bg-amber-50 border border-amber-200 rounded-md p-3.5 text-xs text-amber-900">
           <strong>Notice:</strong> No IP whitelist configured. For production security, restrict API requests to your production server IP addresses.
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {whitelist.map((item) => (
             <div
               key={item.id}
-              className="bg-white border border-slate-200/80 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-2xs"
+              className="bg-white border border-slate-200 rounded-md p-3 flex items-center justify-between gap-3 shadow-xs"
             >
               <div className="flex items-center gap-2.5">
                 <Globe className="w-4 h-4 text-blue-600 shrink-0" />
                 <div>
-                  <span className="text-xs font-mono font-bold text-slate-800">{item.ip_address}</span>
+                  <span className="text-xs font-mono font-medium text-slate-800">{item.ip_address}</span>
                   {item.description && (
-                    <span className="text-[11px] text-slate-400 ml-2 font-normal">
+                    <span className="text-[11px] text-slate-500 ml-2 font-normal">
                       ({item.description})
                     </span>
                   )}
@@ -121,7 +121,7 @@ export const MerchantIpWhitelistManager: React.FC<MerchantIpWhitelistManagerProp
 
               <button
                 onClick={() => handleDelete(item.id)}
-                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
                 title="Remove IP"
               >
                 <Trash2 className="w-3.5 h-3.5" />
