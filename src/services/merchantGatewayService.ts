@@ -9,6 +9,23 @@ import type {
   MerchantIpWhitelist,
 } from '../types/merchant';
 
+export interface MerchantUpiSettings {
+  payeeName: string;
+  upiId: string;
+  qrImageUrl: string;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export const DEFAULT_MERCHANT_UPI_SETTINGS: MerchantUpiSettings = {
+  payeeName: 'CreateLifafa Payout Gateway',
+  upiId: 'createlifafa@upi',
+  qrImageUrl: '',
+  status: 'ACTIVE',
+};
+
+export const MERCHANT_UPI_SETTINGS_STORAGE_KEY = 'lifafa_merchant_upi_settings';
+export const MERCHANT_UPI_SETTINGS_EVENT = 'lifafa_merchant_upi_settings_updated';
+
 export const merchantGatewayService = {
   // Payout Fee Calculation: exact server-aligned rules
   calculatePayoutFee(amount: number): { fee: number; totalDeducted: number } {
@@ -28,6 +45,24 @@ export const merchantGatewayService = {
 
   // Fetch Merchant profile for current authenticated user
   async getMerchantProfile(userId: string): Promise<Merchant | null> {
+    if (userId === 'dev-demo-user-001') {
+      return {
+        id: 'dev-demo-merchant-001',
+        user_id: 'dev-demo-user-001',
+        merchant_code: 'MCH-DEMO88',
+        business_name: 'Alpha Apex Technologies',
+        mobile_number: '9876543210',
+        status: 'ACTIVE',
+        setup_fee_status: 'PAID',
+        setup_fee_amount: 0,
+        setup_fee_payment_method: 'FREE_ACTIVATION',
+        setup_fee_paid_at: new Date().toISOString(),
+        setup_fee_reference: 'FREE_ACTIVATION_MCH-DEMO88',
+        created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+    }
+
     if (!isSupabaseConfigured || !supabase) return null;
     const { data, error } = await supabase
       .from('merchants')
@@ -44,6 +79,20 @@ export const merchantGatewayService = {
 
   // Fetch Merchant float wallet
   async getMerchantWallet(merchantId: string): Promise<MerchantWallet | null> {
+    if (merchantId === 'dev-demo-merchant-001') {
+      return {
+        id: 'dev-demo-wallet-001',
+        merchant_id: 'dev-demo-merchant-001',
+        available_balance: 48500.00,
+        locked_payout_balance: 1500.00,
+        total_deposited: 125000.00,
+        total_paid_out: 75000.00,
+        total_fees_paid: 3070.00,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+    }
+
     if (!isSupabaseConfigured || !supabase) return null;
     const { data, error } = await supabase
       .from('merchant_wallets')
@@ -495,5 +544,145 @@ export const merchantGatewayService = {
     }
 
     return data;
+  },
+
+  // Get active Merchant Gateway UPI Collection settings with local cache & fallback
+  async getMerchantUpiSettings(): Promise<MerchantUpiSettings> {
+    let cached: MerchantUpiSettings = { ...DEFAULT_MERCHANT_UPI_SETTINGS };
+    try {
+      const item = localStorage.getItem(MERCHANT_UPI_SETTINGS_STORAGE_KEY);
+      if (item) {
+        cached = { ...DEFAULT_MERCHANT_UPI_SETTINGS, ...JSON.parse(item) };
+      }
+    } catch (e) {
+      // Ignore localStorage read errors
+    }
+
+    if (!isSupabaseConfigured || !supabase) {
+      return cached;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('platform_settings')
+        .select('key, value')
+        .in('key', [
+          'MERCHANT_UPI_PAYEE_NAME',
+          'MERCHANT_UPI_ID',
+          'MERCHANT_UPI_QR_IMAGE_URL',
+          'MERCHANT_UPI_STATUS',
+        ]);
+
+      if (error || !data || data.length === 0) {
+        return cached;
+      }
+
+      const map = new Map<string, string>();
+      for (const row of data) {
+        if (row.key && row.value !== null && row.value !== undefined) {
+          map.set(row.key, row.value);
+        }
+      }
+
+      const settings: MerchantUpiSettings = {
+        payeeName: map.get('MERCHANT_UPI_PAYEE_NAME') || cached.payeeName || DEFAULT_MERCHANT_UPI_SETTINGS.payeeName,
+        upiId: map.get('MERCHANT_UPI_ID') || cached.upiId || DEFAULT_MERCHANT_UPI_SETTINGS.upiId,
+        qrImageUrl: map.has('MERCHANT_UPI_QR_IMAGE_URL') ? (map.get('MERCHANT_UPI_QR_IMAGE_URL') || '') : (cached.qrImageUrl || ''),
+        status: map.has('MERCHANT_UPI_STATUS')
+          ? (map.get('MERCHANT_UPI_STATUS') === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE')
+          : (cached.status || DEFAULT_MERCHANT_UPI_SETTINGS.status),
+      };
+
+      try {
+        localStorage.setItem(MERCHANT_UPI_SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+      } catch (e) {}
+
+      return settings;
+    } catch (err) {
+      console.warn('Non-blocking error reading merchant UPI settings from database:', err);
+      return cached;
+    }
+  },
+
+  // Save Merchant Gateway UPI Collection settings with multi-key persistence, local cache, and audit log
+  async updateMerchantUpiSettings(newSettings: MerchantUpiSettings): Promise<MerchantUpiSettings> {
+    const cleanSettings: MerchantUpiSettings = {
+      payeeName: newSettings.payeeName.trim() || DEFAULT_MERCHANT_UPI_SETTINGS.payeeName,
+      upiId: newSettings.upiId.trim() || DEFAULT_MERCHANT_UPI_SETTINGS.upiId,
+      qrImageUrl: newSettings.qrImageUrl?.trim() || '',
+      status: newSettings.status === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE',
+    };
+
+    // 1. Update localStorage cache immediately
+    try {
+      localStorage.setItem(MERCHANT_UPI_SETTINGS_STORAGE_KEY, JSON.stringify(cleanSettings));
+    } catch (e) {
+      console.warn('Failed to cache merchant upi settings in localStorage:', e);
+    }
+
+    // 2. Broadcast event to open components and tabs
+    try {
+      window.dispatchEvent(
+        new CustomEvent(MERCHANT_UPI_SETTINGS_EVENT, { detail: cleanSettings })
+      );
+    } catch {}
+
+    // 3. Persist to Supabase platform_settings if configured
+    if (isSupabaseConfigured && supabase) {
+      const updates = [
+        { key: 'MERCHANT_UPI_PAYEE_NAME', value: cleanSettings.payeeName, desc: 'Merchant Gateway UPI Payee Display Name' },
+        { key: 'MERCHANT_UPI_ID', value: cleanSettings.upiId, desc: 'Merchant Gateway UPI Virtual Payment Address (VPA)' },
+        { key: 'MERCHANT_UPI_QR_IMAGE_URL', value: cleanSettings.qrImageUrl, desc: 'Merchant Gateway Custom QR Code Image URL or Data URI' },
+        { key: 'MERCHANT_UPI_STATUS', value: cleanSettings.status, desc: 'Merchant Gateway UPI Collection Status (ACTIVE/INACTIVE)' },
+      ];
+
+      await Promise.all(
+        updates.map(async (item) => {
+          // Attempt via RPC first
+          const { error: rpcErr } = await supabase.rpc('admin_update_platform_setting_rpc', {
+            p_key: item.key,
+            p_value: item.value,
+            p_description: item.desc,
+          });
+
+          if (rpcErr) {
+            // Fallback to direct upsert
+            const { error: upsertErr } = await supabase
+              .from('platform_settings')
+              .upsert(
+                { key: item.key, value: item.value, description: item.desc, updated_at: new Date().toISOString() },
+                { onConflict: 'key' }
+              );
+            if (upsertErr) {
+              console.warn(`Upsert fallback error for ${item.key}:`, upsertErr);
+            }
+          }
+        })
+      );
+
+      // 4. Record audit log in admin_audit_logs if supported
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from('admin_audit_logs').insert({
+            admin_id: user.id,
+            action: 'UPDATE_MERCHANT_UPI_SETTINGS',
+            target_type: 'PLATFORM_SETTINGS',
+            target_id: 'MERCHANT_UPI_COLLECTION',
+            details: {
+              payee_name: cleanSettings.payeeName,
+              upi_id: cleanSettings.upiId,
+              status: cleanSettings.status,
+              has_custom_qr: Boolean(cleanSettings.qrImageUrl),
+            },
+            created_at: new Date().toISOString(),
+          });
+        }
+      } catch (auditErr) {
+        console.warn('Non-blocking audit log record failed:', auditErr);
+      }
+    }
+
+    return cleanSettings;
   },
 };

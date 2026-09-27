@@ -36,7 +36,12 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../context/AuthContext';
-import { merchantGatewayService } from '../services/merchantGatewayService';
+import {
+  merchantGatewayService,
+  type MerchantUpiSettings,
+  DEFAULT_MERCHANT_UPI_SETTINGS,
+  MERCHANT_UPI_SETTINGS_EVENT,
+} from '../services/merchantGatewayService';
 import type {
   Merchant,
   MerchantWallet,
@@ -196,8 +201,24 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
   const [webhookUrl, setWebhookUrl] = useState<string>('https://api.yourdomain.com/webhooks/lifafa');
   const [webhookSaved, setWebhookSaved] = useState<boolean>(false);
 
-  const platformUpi = 'createlifafa@upi';
-  const payeeName = 'CreatLifafa Payout Gateway';
+  // Admin-configured UPI collection settings
+  const [upiSettings, setUpiSettings] = useState<MerchantUpiSettings>(() => {
+    try {
+      const item = localStorage.getItem('lifafa_merchant_upi_settings');
+      if (item) return { ...DEFAULT_MERCHANT_UPI_SETTINGS, ...JSON.parse(item) };
+    } catch (e) {}
+    return DEFAULT_MERCHANT_UPI_SETTINGS;
+  });
+  const [upiQrImageError, setUpiQrImageError] = useState<boolean>(false);
+
+  const loadUpiSettings = useCallback(async () => {
+    try {
+      const s = await merchantGatewayService.getMerchantUpiSettings();
+      setUpiSettings(s);
+    } catch (err) {
+      console.warn('Error loading merchant UPI settings:', err);
+    }
+  }, []);
 
   const loadMerchantData = useCallback(async () => {
     try {
@@ -233,15 +254,31 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
 
   useEffect(() => {
     loadMerchantData();
-  }, [loadMerchantData]);
+    loadUpiSettings();
+
+    const handleUpiUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<MerchantUpiSettings>;
+      if (customEvent.detail) {
+        setUpiSettings(customEvent.detail);
+        setUpiQrImageError(false);
+      }
+    };
+
+    window.addEventListener(MERCHANT_UPI_SETTINGS_EVENT, handleUpiUpdate);
+    return () => {
+      window.removeEventListener(MERCHANT_UPI_SETTINGS_EVENT, handleUpiUpdate);
+    };
+  }, [loadMerchantData, loadUpiSettings]);
 
   const handleManualRefresh = () => {
     setRefreshing(true);
     loadMerchantData();
+    loadUpiSettings();
   };
 
   const handleCopyUpi = () => {
-    navigator.clipboard.writeText(platformUpi);
+    if (!upiSettings.upiId) return;
+    navigator.clipboard.writeText(upiSettings.upiId);
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 2000);
   };
@@ -272,6 +309,11 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
     if (!merchant) return;
     setDepositErrorMsg(null);
     setDepositSuccessMsg(null);
+
+    if (upiSettings.status === 'INACTIVE') {
+      setDepositErrorMsg('UPI collection is temporarily unavailable.');
+      return;
+    }
 
     const grossNum = parseFloat(depositAmount) || 0;
     if (grossNum < 100) {
@@ -391,7 +433,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
   // Live Deposit fee calculation
   const numDepositAmt = parseFloat(depositAmount) || 0;
   const { fee: liveDepositFee, netCredited: liveNetCredited } = merchantGatewayService.calculateDepositFee(numDepositAmt);
-  const dynamicUpiUri = `upi://pay?pa=${platformUpi}&pn=${encodeURIComponent(payeeName)}&am=${numDepositAmt}&cu=INR`;
+  const dynamicUpiUri = `upi://pay?pa=${encodeURIComponent(upiSettings.upiId || 'createlifafa@upi')}&pn=${encodeURIComponent(upiSettings.payeeName || 'CreatLifafa Payout Gateway')}&am=${numDepositAmt}&cu=INR`;
 
   // Real Metric Calculations (NO FAKE DATA)
   const metrics = useMemo(() => {
@@ -1240,29 +1282,50 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                     </div>
                   </div>
 
-                  {/* Dynamic UPI QR Code */}
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-md flex items-center gap-4">
-                    <div className="p-1.5 bg-white rounded border border-slate-200 shadow-2xs shrink-0">
-                      <QRCodeSVG value={dynamicUpiUri} size={90} />
+                  {/* Admin-Configured UPI QR Code / Inactive Fallback */}
+                  {upiSettings.status === 'INACTIVE' ? (
+                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-md text-amber-900 space-y-1.5">
+                      <div className="flex items-center gap-2 font-bold text-xs text-amber-800">
+                        <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                        <span>UPI collection is temporarily unavailable.</span>
+                      </div>
+                      <p className="text-[11px] text-amber-700 leading-relaxed pl-6">
+                        Float deposits via UPI are temporarily paused by platform administrators. Please try again later or contact support.
+                      </p>
                     </div>
-                    <div className="space-y-1 text-xs">
-                      <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
-                        Payee UPI Identifier
-                      </span>
-                      <div className="font-medium text-slate-800">{payeeName}</div>
-                      <div className="flex items-center gap-1.5 font-mono text-slate-600 text-[11px]">
-                        <span>{platformUpi}</span>
-                        <button
-                          type="button"
-                          onClick={handleCopyUpi}
-                          className="p-0.5 text-blue-600 hover:text-blue-800 cursor-pointer"
-                          title="Copy UPI ID"
-                        >
-                          {copiedUpi ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                        </button>
+                  ) : (
+                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-md flex items-center gap-4">
+                      <div className="p-1.5 bg-white rounded border border-slate-200 shadow-2xs shrink-0 flex items-center justify-center">
+                        {upiSettings.qrImageUrl && !upiQrImageError ? (
+                          <img
+                            src={upiSettings.qrImageUrl}
+                            alt="Merchant Float UPI QR"
+                            onError={() => setUpiQrImageError(true)}
+                            className="w-24 h-24 sm:w-28 sm:h-28 object-contain rounded"
+                          />
+                        ) : (
+                          <QRCodeSVG value={dynamicUpiUri} size={90} />
+                        )}
+                      </div>
+                      <div className="space-y-1 text-xs">
+                        <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+                          Payee UPI Identifier
+                        </span>
+                        <div className="font-medium text-slate-800">{upiSettings.payeeName}</div>
+                        <div className="flex items-center gap-1.5 font-mono text-slate-600 text-[11px]">
+                          <span>{upiSettings.upiId}</span>
+                          <button
+                            type="button"
+                            onClick={handleCopyUpi}
+                            className="p-0.5 text-blue-600 hover:text-blue-800 cursor-pointer"
+                            title="Copy UPI ID"
+                          >
+                            {copiedUpi ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Right Column: UTR Submission Form */}
@@ -1288,6 +1351,13 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                     </div>
                   )}
 
+                  {upiSettings.status === 'INACTIVE' && (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-md text-xs text-amber-800 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span className="font-semibold">UPI collection is temporarily unavailable. Submission disabled.</span>
+                    </div>
+                  )}
+
                   <form onSubmit={handleInlineDepositSubmit} className="space-y-4">
                     <div>
                       <label className="block text-xs font-medium text-slate-700 mb-1.5">
@@ -1296,10 +1366,11 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                       <input
                         type="text"
                         required
+                        disabled={upiSettings.status === 'INACTIVE'}
                         placeholder="e.g. 423512345678"
                         value={depositUtr}
                         onChange={(e) => setDepositUtr(e.target.value.toUpperCase())}
-                        className="w-full px-3 py-2 rounded-md border border-slate-300 text-xs font-mono font-semibold uppercase focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden"
+                        className="w-full px-3 py-2 rounded-md border border-slate-300 text-xs font-mono font-semibold uppercase focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                       />
                     </div>
 
@@ -1312,10 +1383,14 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
 
                     <button
                       type="submit"
-                      disabled={submittingDeposit}
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-4 rounded-md text-xs shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                      disabled={submittingDeposit || upiSettings.status === 'INACTIVE'}
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-4 rounded-md text-xs shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {submittingDeposit ? 'Submitting Reference...' : 'Submit Deposit for Verification'}
+                      {upiSettings.status === 'INACTIVE'
+                        ? 'UPI Collection Unavailable'
+                        : submittingDeposit
+                        ? 'Submitting Reference...'
+                        : 'Submit Deposit for Verification'}
                     </button>
                   </form>
                 </div>

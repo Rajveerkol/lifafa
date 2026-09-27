@@ -30,3 +30,7 @@ dist-ssr
 # Supabase temp
 .temp
 supabase/.temp/
+
+# Scratch & test scripts
+scratch/
+

@@ -34,6 +34,7 @@ import type {
   MerchantPayoutEvent,
 } from '../../types/merchant';
 import { formatCurrency, formatDate } from '../../lib/utils';
+import { MerchantUpiSettingsCard } from './MerchantUpiSettingsCard';
 
 type MerchantAdminTab =
   | 'merchants'
@@ -843,28 +844,32 @@ export const AdminMerchantPanel: React.FC = () => {
 
       {/* I. Gateway Settings */}
       {activeTab === 'settings' && (
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-4 shadow-2xs">
-          <div>
-            <h3 className="text-sm font-black text-slate-900">Gateway Platform Configuration</h3>
-            <p className="text-xs text-slate-500 mt-0.5">Platform isolation parameters</p>
-          </div>
+        <div className="space-y-6">
+          <MerchantUpiSettingsCard />
 
-          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 text-xs text-slate-700">
-            <div className="flex justify-between py-1 border-b border-slate-200">
-              <span className="font-bold">Gateway Setup Fee:</span>
-              <span className="text-emerald-700 font-bold">₹0.00 (Free Activation Model)</span>
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-4 shadow-2xs">
+            <div>
+              <h3 className="text-sm font-black text-slate-900">Gateway Platform Configuration</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Platform isolation parameters</p>
             </div>
-            <div className="flex justify-between py-1 border-b border-slate-200">
-              <span className="font-bold">Provider Integration:</span>
-              <span className="font-mono text-blue-700">PayRupee (https://payrupee.tech/v1/payouts/)</span>
-            </div>
-            <div className="flex justify-between py-1 border-b border-slate-200">
-              <span className="font-bold">Webhook Signature Algorithm:</span>
-              <span className="font-mono text-slate-900">HMAC SHA-256 (X-PAYRUPEE-SIGNATURE)</span>
-            </div>
-            <div className="flex justify-between py-1">
-              <span className="font-bold">Max Payout per Transaction:</span>
-              <span className="font-mono text-slate-900">₹1,000.00</span>
+
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 text-xs text-slate-700">
+              <div className="flex justify-between py-1 border-b border-slate-200">
+                <span className="font-bold">Gateway Setup Fee:</span>
+                <span className="text-emerald-700 font-bold">₹0.00 (Free Activation Model)</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-slate-200">
+                <span className="font-bold">Provider Integration:</span>
+                <span className="font-mono text-blue-700">PayRupee (https://payrupee.tech/v1/payouts/)</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-slate-200">
+                <span className="font-bold">Webhook Signature Algorithm:</span>
+                <span className="font-mono text-slate-900">HMAC SHA-256 (X-PAYRUPEE-SIGNATURE)</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span className="font-bold">Max Payout per Transaction:</span>
+                <span className="font-mono text-slate-900">₹1,000.00</span>
+              </div>
             </div>
           </div>
         </div>

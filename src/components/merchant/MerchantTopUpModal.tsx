@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, ArrowDownToLine, Copy, Check, AlertCircle } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
-import { merchantGatewayService } from '../../services/merchantGatewayService';
+import {
+  merchantGatewayService,
+  type MerchantUpiSettings,
+  DEFAULT_MERCHANT_UPI_SETTINGS,
+  MERCHANT_UPI_SETTINGS_EVENT,
+} from '../../services/merchantGatewayService';
 import { formatCurrency } from '../../lib/utils';
 
 interface MerchantTopUpModalProps {
@@ -22,17 +27,53 @@ export const MerchantTopUpModal: React.FC<MerchantTopUpModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [upiSettings, setUpiSettings] = useState<MerchantUpiSettings>(() => {
+    try {
+      const item = localStorage.getItem('lifafa_merchant_upi_settings');
+      if (item) return { ...DEFAULT_MERCHANT_UPI_SETTINGS, ...JSON.parse(item) };
+    } catch (e) {}
+    return DEFAULT_MERCHANT_UPI_SETTINGS;
+  });
+  const [qrImgError, setQrImgError] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let isMounted = true;
+    const loadSettings = async () => {
+      try {
+        const s = await merchantGatewayService.getMerchantUpiSettings();
+        if (isMounted) setUpiSettings(s);
+      } catch (err) {
+        console.warn('Error loading merchant upi settings in modal:', err);
+      }
+    };
+
+    loadSettings();
+
+    const handleUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<MerchantUpiSettings>;
+      if (customEvent.detail && isMounted) {
+        setUpiSettings(customEvent.detail);
+        setQrImgError(false);
+      }
+    };
+
+    window.addEventListener(MERCHANT_UPI_SETTINGS_EVENT, handleUpdate);
+    return () => {
+      isMounted = false;
+      window.removeEventListener(MERCHANT_UPI_SETTINGS_EVENT, handleUpdate);
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
-
-  const platformUpi = 'createlifafa@upi';
-  const payeeName = 'CreatLifafa Payout Gateway';
 
   const numAmount = parseFloat(grossAmount) || 0;
   const { fee, netCredited } = merchantGatewayService.calculateDepositFee(numAmount);
 
   const handleCopyUpi = () => {
-    navigator.clipboard.writeText(platformUpi);
+    if (!upiSettings.upiId) return;
+    navigator.clipboard.writeText(upiSettings.upiId);
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 2000);
   };
@@ -40,6 +81,11 @@ export const MerchantTopUpModal: React.FC<MerchantTopUpModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
+
+    if (upiSettings.status === 'INACTIVE') {
+      setErrorMsg('UPI collection is temporarily unavailable.');
+      return;
+    }
 
     if (numAmount < 100) {
       setErrorMsg('Minimum float top-up amount is ₹100.00');
@@ -68,7 +114,7 @@ export const MerchantTopUpModal: React.FC<MerchantTopUpModalProps> = ({
     }
   };
 
-  const dynamicUpiUri = `upi://pay?pa=${platformUpi}&pn=${encodeURIComponent(payeeName)}&am=${numAmount}&cu=INR`;
+  const dynamicUpiUri = `upi://pay?pa=${encodeURIComponent(upiSettings.upiId || 'createlifafa@upi')}&pn=${encodeURIComponent(upiSettings.payeeName || 'CreatLifafa Payout Gateway')}&am=${numAmount}&cu=INR`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in">
@@ -110,10 +156,11 @@ export const MerchantTopUpModal: React.FC<MerchantTopUpModalProps> = ({
                 min="100"
                 step="100"
                 required
+                disabled={upiSettings.status === 'INACTIVE'}
                 value={grossAmount}
                 onChange={(e) => setGrossAmount(e.target.value)}
                 placeholder="e.g. 5000"
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-hidden"
+                className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-hidden disabled:bg-slate-100 disabled:text-slate-400"
               />
             </div>
 
@@ -133,28 +180,50 @@ export const MerchantTopUpModal: React.FC<MerchantTopUpModalProps> = ({
               </div>
             </div>
 
-            {/* UPI QR & Details */}
-            <div className="bg-slate-50 border border-slate-200/80 rounded-lg p-3.5 flex flex-col sm:flex-row items-center gap-4">
-              <div className="p-2 bg-white rounded-md border border-slate-200 shadow-2xs shrink-0">
-                <QRCodeSVG value={dynamicUpiUri} size={96} />
+            {/* UPI QR & Details / Inactive Fallback */}
+            {upiSettings.status === 'INACTIVE' ? (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-1 text-xs text-amber-900">
+                <div className="flex items-center gap-1.5 font-bold text-amber-800">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>UPI collection is temporarily unavailable.</span>
+                </div>
+                <p className="text-[11px] text-amber-700 leading-relaxed pl-5.5">
+                  Direct float top-ups are currently paused by platform administrators.
+                </p>
               </div>
-              <div className="space-y-1 text-center sm:text-left flex-1">
-                <span className="text-[10px] uppercase font-semibold text-slate-500">
-                  Scan via any UPI App
-                </span>
-                <div className="text-xs font-bold text-slate-900">{payeeName}</div>
-                <div className="flex items-center justify-center sm:justify-start gap-1 text-xs text-slate-600 font-mono">
-                  <span>{platformUpi}</span>
-                  <button
-                    type="button"
-                    onClick={handleCopyUpi}
-                    className="p-0.5 text-blue-600 hover:text-blue-800 cursor-pointer"
-                  >
-                    {copiedUpi ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                  </button>
+            ) : (
+              <div className="bg-slate-50 border border-slate-200/80 rounded-lg p-3.5 flex flex-col sm:flex-row items-center gap-4">
+                <div className="p-2 bg-white rounded-md border border-slate-200 shadow-2xs shrink-0 flex items-center justify-center">
+                  {upiSettings.qrImageUrl && !qrImgError ? (
+                    <img
+                      src={upiSettings.qrImageUrl}
+                      alt="Merchant Float UPI QR"
+                      onError={() => setQrImgError(true)}
+                      className="w-24 h-24 object-contain rounded"
+                    />
+                  ) : (
+                    <QRCodeSVG value={dynamicUpiUri} size={96} />
+                  )}
+                </div>
+                <div className="space-y-1 text-center sm:text-left flex-1">
+                  <span className="text-[10px] uppercase font-semibold text-slate-500">
+                    Scan via any UPI App
+                  </span>
+                  <div className="text-xs font-bold text-slate-900">{upiSettings.payeeName}</div>
+                  <div className="flex items-center justify-center sm:justify-start gap-1 text-xs text-slate-600 font-mono">
+                    <span>{upiSettings.upiId}</span>
+                    <button
+                      type="button"
+                      onClick={handleCopyUpi}
+                      className="p-0.5 text-blue-600 hover:text-blue-800 cursor-pointer"
+                      title="Copy UPI ID"
+                    >
+                      {copiedUpi ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* UTR Input */}
             <div>
@@ -164,10 +233,11 @@ export const MerchantTopUpModal: React.FC<MerchantTopUpModalProps> = ({
               <input
                 type="text"
                 required
+                disabled={upiSettings.status === 'INACTIVE'}
                 placeholder="12-digit UTR from your banking application"
                 value={utrNumber}
                 onChange={(e) => setUtrNumber(e.target.value.toUpperCase())}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs font-mono font-bold uppercase focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-hidden"
+                className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs font-mono font-bold uppercase focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-hidden disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
               />
               <p className="text-[11px] text-slate-400 mt-1">
                 Your balance will be credited after admin verification.
@@ -184,10 +254,14 @@ export const MerchantTopUpModal: React.FC<MerchantTopUpModalProps> = ({
               </button>
               <button
                 type="submit"
-                disabled={loading}
-                className="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                disabled={loading || upiSettings.status === 'INACTIVE'}
+                className="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Submitting Deposit...' : 'Submit Deposit'}
+                {upiSettings.status === 'INACTIVE'
+                  ? 'UPI Collection Unavailable'
+                  : loading
+                  ? 'Submitting Deposit...'
+                  : 'Submit Deposit'}
               </button>
             </div>
           </form>

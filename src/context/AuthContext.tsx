@@ -33,14 +33,30 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Demo profile matching the screenshot "DemoAccount" for local offline preview
 const DEV_DEMO_PROFILE: Profile = {
   id: 'dev-demo-user-001',
-  full_name: 'Demo Account',
-  email: 'demoaccount@gmail.com',
+  full_name: 'Rajveer (Admin)',
+  email: 'kolrajveer33@gmail.com',
   avatar_url: null,
-  phone_number: null,
+  phone_number: '9876543210',
   is_suspended: false,
   created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
   updated_at: new Date().toISOString(),
   last_login_at: new Date().toISOString(),
+};
+
+const DEV_DEMO_MERCHANT: Merchant = {
+  id: 'dev-demo-merchant-001',
+  user_id: 'dev-demo-user-001',
+  merchant_code: 'MCH-DEMO88',
+  business_name: 'Alpha Apex Technologies',
+  mobile_number: '9876543210',
+  status: 'ACTIVE',
+  setup_fee_status: 'PAID',
+  setup_fee_amount: 0,
+  setup_fee_payment_method: 'FREE_ACTIVATION',
+  setup_fee_paid_at: new Date().toISOString(),
+  setup_fee_reference: 'FREE_ACTIVATION_MCH-DEMO88',
+  created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+  updated_at: new Date().toISOString(),
 };
 
 const DEV_DEMO_WALLET: Wallet = {
@@ -202,6 +218,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(DEV_DEMO_PROFILE);
       setWallet(DEV_DEMO_WALLET);
       setAdminUser(DEV_DEMO_ADMIN);
+      setMerchant(DEV_DEMO_MERCHANT);
+      setIsMerchant(true);
       setIsDevDemoActive(true);
       setIsLoading(false);
       return;
@@ -297,6 +315,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(DEV_DEMO_PROFILE);
     setWallet(DEV_DEMO_WALLET);
     setAdminUser(DEV_DEMO_ADMIN);
+    setMerchant(DEV_DEMO_MERCHANT);
+    setIsMerchant(true);
     setIsDevDemoActive(true);
   };
 

@@ -43,6 +43,7 @@ import {
   DEFAULT_PAYMENT_SETTINGS,
 } from '../services/walletService';
 import { AdminMerchantPanel } from '../components/admin/AdminMerchantPanel';
+import { MerchantUpiSettingsCard } from '../components/admin/MerchantUpiSettingsCard';
 import type {
   Profile,
   Lifafa,
@@ -124,6 +125,7 @@ export const AdminPage: React.FC = () => {
   const [previewAmount, setPreviewAmount] = useState<number>(100);
   const [copiedPreviewUpi, setCopiedPreviewUpi] = useState(false);
   const [qrImageError, setQrImageError] = useState(false);
+  const [systemSettingsTab, setSystemSettingsTab] = useState<'merchant-upi' | 'system-security'>('merchant-upi');
 
   // Lifafa Withdrawal Block / Unblock Modal state
   const [lifafaWithdrawalModalItem, setLifafaWithdrawalModalItem] = useState<Lifafa | null>(null);
@@ -1619,22 +1621,66 @@ export const AdminPage: React.FC = () => {
         </div>
       ) : section === 'settings' ? (
         /* 9. System Settings */
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-2xs p-5 space-y-4">
-          <h4 className="text-sm font-bold text-slate-900">System &amp; Security Settings</h4>
-          <div className="space-y-2 text-xs text-slate-600">
-            <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
-              <span>PostgreSQL Financial Locks</span>
-              <strong className="text-emerald-700">Active (FOR UPDATE)</strong>
+        <div className="space-y-6">
+          {/* Breadcrumb / Sub-Nav for System Settings */}
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-100 shadow-2xs">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="font-bold text-slate-400">Admin Panel</span>
+              <span className="text-slate-300">/</span>
+              <span className="font-bold text-slate-600">System Settings</span>
+              <span className="text-slate-300">/</span>
+              <span className="font-bold text-blue-600">Merchant Gateway</span>
+              <span className="text-slate-300">/</span>
+              <span className="font-bold text-slate-900">UPI Collection Settings</span>
             </div>
-            <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
-              <span>Row Level Security (RLS)</span>
-              <strong className="text-emerald-700">Enforced on all 16 Tables</strong>
-            </div>
-            <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
-              <span>Telegram Bot Verification</span>
-              <strong className="text-sky-700">Server-side via Edge Functions</strong>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setSystemSettingsTab('merchant-upi')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  systemSettingsTab === 'merchant-upi'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/60'
+                }`}
+              >
+                Merchant Gateway UPI
+              </button>
+              <button
+                type="button"
+                onClick={() => setSystemSettingsTab('system-security')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  systemSettingsTab === 'system-security'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/60'
+                }`}
+              >
+                System Security &amp; Locks
+              </button>
             </div>
           </div>
+
+          {systemSettingsTab === 'merchant-upi' ? (
+            <MerchantUpiSettingsCard />
+          ) : (
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-2xs p-5 space-y-4">
+              <h4 className="text-sm font-bold text-slate-900">System &amp; Security Settings</h4>
+              <div className="space-y-2 text-xs text-slate-600">
+                <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
+                  <span>PostgreSQL Financial Locks</span>
+                  <strong className="text-emerald-700">Active (FOR UPDATE)</strong>
+                </div>
+                <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
+                  <span>Row Level Security (RLS)</span>
+                  <strong className="text-emerald-700">Enforced on all 16 Tables</strong>
+                </div>
+                <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
+                  <span>Telegram Bot Verification</span>
+                  <strong className="text-sky-700">Server-side via Edge Functions</strong>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         /* 10. Audit Logs */
