@@ -176,7 +176,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
               <div>
                 <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
-                  Creat Lifafa
+                  Create Lifafa
                 </h4>
                 <p className="text-[11px] text-slate-400 mt-0.5">Gift money with tasks</p>
               </div>

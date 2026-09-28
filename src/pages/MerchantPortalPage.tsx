@@ -619,7 +619,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                 B2B Payout Infrastructure
               </span>
               <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-                CreatLifafa Merchant Gateway
+                Createlifafa.xyz Merchant Gateway
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 mt-2 max-w-md mx-auto">
                 Automated bank account disbursements via instant IMPS rails with isolated merchant float wallets and developer APIs.
@@ -741,7 +741,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                 <Building2 className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-xs font-bold tracking-tight text-slate-900 block leading-tight">CreatLifafa</span>
+                <span className="text-xs font-bold tracking-tight text-slate-900 block leading-tight">Createlifafa.xyz</span>
                 <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider block">Payout Gateway</span>
               </div>
             </div>
@@ -791,7 +791,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
               className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5 text-slate-400" />
-              <span>Back to CreatLifafa</span>
+              <span>Back to Createlifafa.xyz</span>
             </button>
           )}
 
@@ -824,7 +824,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                   <Building2 className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="text-xs font-bold text-slate-900 block">CreatLifafa Merchant</span>
+                  <span className="text-xs font-bold text-slate-900 block">Createlifafa.xyz Merchant</span>
                   <span className="text-[10px] text-slate-500 font-mono">Code: {merchant.merchant_code}</span>
                 </div>
               </div>
@@ -856,7 +856,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                   className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium text-slate-700 hover:bg-slate-100"
                 >
                   <ArrowLeft className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Back to CreatLifafa</span>
+                  <span>Back to Createlifafa.xyz</span>
                 </button>
               )}
               <button

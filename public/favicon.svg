@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <linearGradient id="env-grad" x1="6" y1="12" x2="42" y2="38" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1e40af" />
+      <stop offset="1" stop-color="#3b82f6" />
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="12" fill="#2563eb" />
+  <path d="M8 17C8 14.79 9.79 13 12 13H36C38.21 13 40 14.79 40 17V33C40 35.21 38.21 37 36 37H12C9.79 37 8 35.21 8 33V17Z" fill="url(#env-grad)" />
+  <path d="M8 17L24 28L40 17" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <rect x="18" y="10" width="12" height="11" rx="1.5" fill="#ffffff" />
+  <rect x="22.5" y="10" width="3" height="11" fill="#3b82f6" />
+  <circle cx="34" cy="31" r="5.5" fill="#fbbf24" stroke="#d97706" stroke-width="1.2" />
+  <text x="34" y="33.5" font-size="6.5" font-weight="bold" fill="#78350f" text-anchor="middle" font-family="sans-serif">₹</text>
+</svg>

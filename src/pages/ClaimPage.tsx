@@ -306,7 +306,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
               onClick={onNavigateHome}
               className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer shadow-sm"
             >
-              Go to CreatLifafa Home
+              Go to Createlifafa.xyz Home
             </button>
           )}
         </div>
@@ -470,7 +470,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
               <h3 className="text-lg font-black text-slate-900">All Rewards Claimed</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
                 All {lifafa.winner_count} spots for this Lifafa have already been claimed. Explore more
-                gifts on CreatLifafa!
+                gifts on Createlifafa.xyz!
               </p>
               {onNavigateHome && (
                 <button
@@ -774,7 +774,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
 
         {/* 3. Subtle Standalone Footer */}
         <footer className={`relative z-10 w-full max-w-md text-center py-3 text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'} flex items-center justify-between`}>
-          <span>© {new Date().getFullYear()} CreatLifafa</span>
+          <span>© {new Date().getFullYear()} Createlifafa.xyz</span>
           <span className="flex items-center gap-1 text-slate-400">
             <Sparkles className="w-3 h-3 text-amber-400" />
             <span>India's Modern Digital Gifting</span>

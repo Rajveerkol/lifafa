@@ -187,7 +187,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
           <div className="text-center text-xs text-slate-500 mb-4">
             {mode === 'signin' ? (
               <p>
-                New to CreatLifafa?{' '}
+                New to Createlifafa.xyz?{' '}
                 <button
                   type="button"
                   onClick={() => {

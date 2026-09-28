@@ -485,7 +485,7 @@ export function createThemeComponents(config: ThemeVisualConfig) {
       <h3 className="text-lg font-black text-slate-900">All Rewards Claimed</h3>
       <p className="text-xs text-slate-500 leading-relaxed">
         All {lifafa.winner_count} spots for this Lifafa have already been claimed. Explore more
-        gifts on CreatLifafa!
+        gifts on Createlifafa.xyz!
       </p>
       {onNavigateHome && (
         <button
