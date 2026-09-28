@@ -36,7 +36,7 @@ export async function signInWithGoogle() {
   const { data, error } = await client.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/`,
+      redirectTo: `${typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'https://createlifafa.xyz'}/`,
       queryParams: {
         access_type: 'offline',
         prompt: 'consent',

@@ -149,7 +149,7 @@ async function runAllThemesQA() {
           id: userId,
           aud: 'authenticated',
           role: 'authenticated',
-          email: 'qauser@createlifafa.in',
+          email: 'qauser@createlifafa.xyz',
           user_metadata: { full_name: 'Vinod QA User' },
           created_at: new Date().toISOString(),
         },
@@ -184,7 +184,7 @@ async function runAllThemesQA() {
           contentType: 'application/json',
           headers: { 'Access-Control-Allow-Origin': '*' },
           body: JSON.stringify([
-            { id: MOCK_USER_ID, full_name: 'Vinod QA User', email: 'qauser@createlifafa.in', avatar_url: null },
+            { id: MOCK_USER_ID, full_name: 'Vinod QA User', email: 'qauser@createlifafa.xyz', avatar_url: null },
           ]),
         });
         return;

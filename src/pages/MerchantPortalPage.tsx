@@ -2363,7 +2363,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                   <div className="p-4 rounded-md bg-slate-50 border border-slate-200 space-y-1">
                     <h4 className="font-semibold text-slate-900">Direct Support Channels</h4>
                     <p className="text-slate-600 leading-relaxed text-[11px]">
-                      Contact our dedicated B2B gateway desk at <strong className="text-slate-900">support@createlifafa.com</strong> or reach out on Telegram.
+                      Contact our dedicated B2B gateway desk at <strong className="text-slate-900">support@createlifafa.xyz</strong> or reach out on Telegram.
                     </p>
                   </div>
                 </div>
