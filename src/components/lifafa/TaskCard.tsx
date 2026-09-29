@@ -58,19 +58,30 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   const [verificationError, setVerificationError] = useState<string | null>(null);
 
   const pollIntervalRef = useRef<any>(null);
+  const isVerifyingRef = useRef(false);
+  const initialCheckAttemptedRef = useRef(false);
+  const [waitingForChannelReturn, setWaitingForChannelReturn] = useState(false);
 
   // Channel username & URL normalization
   const rawTarget = (task.target_url || '').trim();
   const cleanTarget = rawTarget.replace(/\/+$/, '');
-  const extractedUsername = (
-    task.telegram_channel_username ||
-    cleanTarget.split('/').pop() ||
-    cleanTarget
-  )
-    .replace(/^@/, '')
-    .trim();
+  
+  // Extract potential username from URL or task prop
+  let extractedUsername = (task.telegram_channel_username || '').replace(/^@/, '').trim();
+  if (!extractedUsername && cleanTarget) {
+    const urlParts = cleanTarget.split('/');
+    const lastPart = urlParts[urlParts.length - 1]?.replace(/^@/, '').trim() || '';
+    if (!lastPart.startsWith('http') && !lastPart.includes('?') && !lastPart.startsWith('+')) {
+      extractedUsername = lastPart;
+    }
+  }
 
-  const channelUsername = extractedUsername.startsWith('http') ? '' : extractedUsername;
+  const channelUsername = extractedUsername;
+  const isChannelConfigured = Boolean(
+    channelUsername ||
+    task.telegram_channel_id ||
+    (cleanTarget && cleanTarget !== 'https://t.me' && cleanTarget !== 'http://t.me')
+  );
 
   const channelUrl = cleanTarget.startsWith('http')
     ? cleanTarget
@@ -80,17 +91,67 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     ? `https://t.me/${channelUsername}`
     : 'https://t.me';
 
-  // 1. Initial check of user's Telegram binding status
-  const checkBindingStatus = async (silent = false) => {
-    if (!user) return;
+  // Authoritative server-side verification of channel membership
+  const verifyCurrentMembership = async (
+    targetUserId: number | string,
+    targetUsername?: string | null,
+    silent = false
+  ) => {
+    if (isCompleted || isVerifyingRef.current || !isChannelConfigured) return;
+
+    try {
+      isVerifyingRef.current = true;
+      setIsVerifyingMembership(true);
+      if (!silent) setVerificationError(null);
+
+      const targetIdentifier = channelUsername || task.telegram_channel_username || '';
+      const result = await telegramService.verifyMembership(
+        targetIdentifier,
+        task.telegram_channel_id,
+        targetUserId,
+        task.id,
+        targetUsername
+      );
+
+      if (result.verified) {
+        onCompleted(task.id);
+        setShowTgHelper(false);
+        setVerificationError(null);
+        setWaitingForChannelReturn(false);
+      } else if (!silent) {
+        setVerificationError(
+          result.error ||
+            "We couldn't verify your membership yet. Please make sure you joined the channel, then try again."
+        );
+      }
+    } catch (err: any) {
+      if (!silent) {
+        setVerificationError(
+          err.message ||
+            "We couldn't verify your membership yet. Please make sure you joined the channel, then try again."
+        );
+      }
+    } finally {
+      setIsVerifyingMembership(false);
+      isVerifyingRef.current = false;
+    }
+  };
+
+  // 1. Initial check of user's Telegram binding status AND immediate membership check if bound
+  const checkBindingStatus = async (silent = false, triggerMembershipCheck = false) => {
+    if (!user || isCompleted) return;
     try {
       const status = await telegramService.getUserTelegramBinding(user.id);
       setTgBinding(status);
-      if (status.isBound) {
+      if (status.isBound && status.telegramUserId) {
         setAwaitingBotStart(false);
         if (pollIntervalRef.current) {
           clearInterval(pollIntervalRef.current);
           pollIntervalRef.current = null;
+        }
+
+        if (triggerMembershipCheck && isChannelConfigured) {
+          await verifyCurrentMembership(status.telegramUserId, status.telegramUsername, silent);
         }
       } else if (!silent) {
         setVerificationError(
@@ -102,21 +163,23 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     }
   };
 
+  // Run membership check automatically on load if user is logged in
   useEffect(() => {
-    if (isTelegramTask && user) {
-      checkBindingStatus(true);
+    if (isTelegramTask && user && !isCompleted && !initialCheckAttemptedRef.current) {
+      initialCheckAttemptedRef.current = true;
+      checkBindingStatus(true, true);
     }
-  }, [isTelegramTask, user]);
+  }, [isTelegramTask, user, isCompleted]);
 
-  // 2. Auto-polling and window focus listener when awaiting Telegram bot binding
+  // 2. Auto-polling when awaiting Telegram bot binding
   useEffect(() => {
     if (awaitingBotStart && user) {
       pollIntervalRef.current = setInterval(() => {
-        checkBindingStatus(true);
+        checkBindingStatus(true, true);
       }, 2500);
 
       const handleWindowFocus = () => {
-        checkBindingStatus(true);
+        checkBindingStatus(true, true);
       };
       window.addEventListener('focus', handleWindowFocus);
 
@@ -130,11 +193,39 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     }
   }, [awaitingBotStart, user]);
 
+  // 3. Window Focus / Tab Visibility Change Listener: re-verifies automatically when user returns from Telegram
+  useEffect(() => {
+    if (!isTelegramTask || isCompleted || !user) return;
+
+    const handleWindowFocusOrReturn = () => {
+      if (tgBinding?.isBound && tgBinding.telegramUserId && (waitingForChannelReturn || hasJoined)) {
+        verifyCurrentMembership(tgBinding.telegramUserId, tgBinding.telegramUsername, false);
+      } else if (awaitingBotStart) {
+        checkBindingStatus(true, true);
+      }
+    };
+
+    window.addEventListener('focus', handleWindowFocusOrReturn);
+    const handleVisChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleWindowFocusOrReturn();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisChange);
+
+    return () => {
+      window.removeEventListener('focus', handleWindowFocusOrReturn);
+      document.removeEventListener('visibilitychange', handleVisChange);
+    };
+  }, [isTelegramTask, isCompleted, user, tgBinding, waitingForChannelReturn, hasJoined, awaitingBotStart]);
+
   // Step 1: Open Telegram Channel
   const handleJoinTelegram = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setHasJoined(true);
     setShowTgHelper(true);
+    setWaitingForChannelReturn(true);
+    setVerificationError(null);
     try {
       window.open(channelUrl, '_blank', 'noopener,noreferrer');
     } catch {
@@ -195,36 +286,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       return;
     }
 
-    try {
-      setIsVerifyingMembership(true);
-      setVerificationError(null);
-
-      const targetIdentifier = channelUsername || task.telegram_channel_username || '';
-
-      const result = await telegramService.verifyMembership(
-        targetIdentifier,
-        task.telegram_channel_id,
-        tgBinding.telegramUserId,
-        task.id,
-        tgBinding.telegramUsername
-      );
-
-      if (result.verified) {
-        onCompleted(task.id);
-        setShowTgHelper(false);
-      } else {
-        setVerificationError(
-          result.error ||
-          "We couldn't verify your membership yet. Please make sure you joined the channel, then try again."
-        );
-      }
-    } catch {
-      setVerificationError(
-        "We couldn't verify your membership yet. Please make sure you joined the channel, then try again."
-      );
-    } finally {
-      setIsVerifyingMembership(false);
-    }
+    await verifyCurrentMembership(tgBinding.telegramUserId, tgBinding.telegramUsername, false);
   };
 
   // Non-Telegram Tasks Handler
@@ -350,14 +412,25 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               <span>Joined</span>
             </div>
           ) : isTelegramTask ? (
-            <button
-              type="button"
-              onClick={handleJoinTelegram}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#0088cc] hover:bg-[#0077b5] text-white text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer"
-            >
-              <Send className="w-3.5 h-3.5 -rotate-12" />
-              <span>Join Now</span>
-            </button>
+            isVerifyingMembership ? (
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold shadow-2xs">
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Verifying...</span>
+              </div>
+            ) : !isChannelConfigured ? (
+              <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold">
+                Unconfigured
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={handleJoinTelegram}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#0088cc] hover:bg-[#0077b5] text-white text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer"
+              >
+                <Send className="w-3.5 h-3.5 -rotate-12" />
+                <span>Join Now</span>
+              </button>
+            )
           ) : isYoutube ? (
             <button
               type="button"
@@ -550,6 +623,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Unconfigured Channel State Warning */}
+      {isTelegramTask && !isChannelConfigured && (
+        <div className="p-2.5 bg-amber-50 border border-amber-200/80 rounded-xl flex items-center gap-2 text-[11px] text-amber-800">
+          <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+          <span>Telegram channel information is not configured properly for this task.</span>
         </div>
       )}
 

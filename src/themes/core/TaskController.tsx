@@ -62,19 +62,28 @@ export function useTaskLogic(
   const [verificationError, setVerificationError] = useState<string | null>(null);
 
   const pollIntervalRef = useRef<any>(null);
+  const isVerifyingRef = useRef(false);
+  const initialCheckAttemptedRef = useRef(false);
+  const [waitingForChannelReturn, setWaitingForChannelReturn] = useState(false);
 
   // Normalization
   const rawTarget = (task.target_url || '').trim();
   const cleanTarget = rawTarget.replace(/\/+$/, '');
-  const extractedUsername = (
-    task.telegram_channel_username ||
-    cleanTarget.split('/').pop() ||
-    cleanTarget
-  )
-    .replace(/^@/, '')
-    .trim();
+  let extractedUsername = (task.telegram_channel_username || '').replace(/^@/, '').trim();
+  if (!extractedUsername && cleanTarget) {
+    const urlParts = cleanTarget.split('/');
+    const lastPart = urlParts[urlParts.length - 1]?.replace(/^@/, '').trim() || '';
+    if (!lastPart.startsWith('http') && !lastPart.includes('?') && !lastPart.startsWith('+')) {
+      extractedUsername = lastPart;
+    }
+  }
 
-  const channelUsername = extractedUsername.startsWith('http') ? '' : extractedUsername;
+  const channelUsername = extractedUsername;
+  const isChannelConfigured = Boolean(
+    channelUsername ||
+    task.telegram_channel_id ||
+    (cleanTarget && cleanTarget !== 'https://t.me' && cleanTarget !== 'http://t.me')
+  );
 
   const channelUrl = cleanTarget.startsWith('http')
     ? cleanTarget
@@ -84,16 +93,64 @@ export function useTaskLogic(
     ? `https://t.me/${channelUsername}`
     : 'https://t.me';
 
-  const checkBindingStatus = async (silent = false) => {
-    if (!user) return;
+  const verifyCurrentMembership = async (
+    targetUserId: number | string,
+    targetUsername?: string | null,
+    silent = false
+  ) => {
+    if (isCompleted || isVerifyingRef.current || !isChannelConfigured) return;
+
+    try {
+      isVerifyingRef.current = true;
+      setIsVerifyingMembership(true);
+      if (!silent) setVerificationError(null);
+
+      const targetIdentifier = channelUsername || task.telegram_channel_username || '';
+      const result = await telegramService.verifyMembership(
+        targetIdentifier,
+        task.telegram_channel_id,
+        targetUserId,
+        task.id,
+        targetUsername
+      );
+
+      if (result.verified) {
+        onCompleted(task.id);
+        setVerificationError(null);
+        setWaitingForChannelReturn(false);
+      } else if (!silent) {
+        setVerificationError(
+          result.error ||
+            "We couldn't verify your membership yet. Please make sure you joined the channel, then try again."
+        );
+      }
+    } catch (err: any) {
+      if (!silent) {
+        setVerificationError(
+          err.message ||
+            "We couldn't verify your membership yet. Please make sure you joined the channel, then try again."
+        );
+      }
+    } finally {
+      setIsVerifyingMembership(false);
+      isVerifyingRef.current = false;
+    }
+  };
+
+  const checkBindingStatus = async (silent = false, triggerMembershipCheck = false) => {
+    if (!user || isCompleted) return;
     try {
       const status = await telegramService.getUserTelegramBinding(user.id);
       setTgBinding(status);
-      if (status.isBound) {
+      if (status.isBound && status.telegramUserId) {
         setAwaitingBotStart(false);
         if (pollIntervalRef.current) {
           clearInterval(pollIntervalRef.current);
           pollIntervalRef.current = null;
+        }
+
+        if (triggerMembershipCheck && isChannelConfigured) {
+          await verifyCurrentMembership(status.telegramUserId, status.telegramUsername, silent);
         }
       } else if (!silent) {
         setVerificationError(
@@ -106,19 +163,20 @@ export function useTaskLogic(
   };
 
   useEffect(() => {
-    if (isTelegramTask && user) {
-      checkBindingStatus(true);
+    if (isTelegramTask && user && !isCompleted && !initialCheckAttemptedRef.current) {
+      initialCheckAttemptedRef.current = true;
+      checkBindingStatus(true, true);
     }
-  }, [isTelegramTask, user]);
+  }, [isTelegramTask, user, isCompleted]);
 
   useEffect(() => {
     if (awaitingBotStart && user) {
       pollIntervalRef.current = setInterval(() => {
-        checkBindingStatus(true);
+        checkBindingStatus(true, true);
       }, 2500);
 
       const handleWindowFocus = () => {
-        checkBindingStatus(true);
+        checkBindingStatus(true, true);
       };
       window.addEventListener('focus', handleWindowFocus);
 
@@ -132,9 +190,36 @@ export function useTaskLogic(
     }
   }, [awaitingBotStart, user]);
 
+  useEffect(() => {
+    if (!isTelegramTask || isCompleted || !user) return;
+
+    const handleWindowFocusOrReturn = () => {
+      if (tgBinding?.isBound && tgBinding.telegramUserId && (waitingForChannelReturn || hasJoined)) {
+        verifyCurrentMembership(tgBinding.telegramUserId, tgBinding.telegramUsername, false);
+      } else if (awaitingBotStart) {
+        checkBindingStatus(true, true);
+      }
+    };
+
+    window.addEventListener('focus', handleWindowFocusOrReturn);
+    const handleVisChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleWindowFocusOrReturn();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisChange);
+
+    return () => {
+      window.removeEventListener('focus', handleWindowFocusOrReturn);
+      document.removeEventListener('visibilitychange', handleVisChange);
+    };
+  }, [isTelegramTask, isCompleted, user, tgBinding, waitingForChannelReturn, hasJoined, awaitingBotStart]);
+
   const handleJoinTelegram = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setHasJoined(true);
+    setWaitingForChannelReturn(true);
+    setVerificationError(null);
     try {
       window.open(channelUrl, '_blank', 'noopener,noreferrer');
     } catch {}

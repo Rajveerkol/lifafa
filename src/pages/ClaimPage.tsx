@@ -17,6 +17,8 @@ import {
   X,
   ShieldCheck,
   CheckCircle2,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { Lifafa, LifafaTask, PayoutMode } from '../types/database';
@@ -50,6 +52,10 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
   const [notFound, setNotFound] = useState(false);
 
   const [pinCode, setPinCode] = useState('');
+  const [showClaimantPin, setShowClaimantPin] = useState(false);
+  const [pinVerifiedLifafas, setPinVerifiedLifafas] = useState<Record<string, boolean>>({});
+  const [verifyingPin, setVerifyingPin] = useState(false);
+  const [pinError, setPinError] = useState<string | null>(null);
   const [tasks, setTasks] = useState<LifafaTask[]>([]);
   const [completedTaskIds, setCompletedTaskIds] = useState<Set<string>>(new Set());
   const [loadingTasks, setLoadingTasks] = useState(false);
@@ -77,6 +83,46 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
 
   const lifafaId = lifafa?.id;
   const userId = user?.id;
+
+  const isPinRequired = Boolean(lifafa?.pin_code);
+  const isPinUnlocked = !isPinRequired || Boolean(lifafaId && pinVerifiedLifafas[lifafaId]);
+
+  // Reset PIN input & error when navigating between different Lifafas
+  useEffect(() => {
+    setPinCode('');
+    setShowClaimantPin(false);
+    setPinError(null);
+  }, [code]);
+
+  // Unlock Lifafa with secure server-side PIN verification
+  const handleUnlockLifafa = async () => {
+    if (!lifafa) return;
+    if (!user) {
+      onOpenAuth();
+      return;
+    }
+    const cleanPin = pinCode.trim();
+    if (!cleanPin) {
+      setPinError('Please enter the security PIN.');
+      return;
+    }
+
+    try {
+      setVerifyingPin(true);
+      setPinError(null);
+      const res = await lifafaService.verifyLifafaPin(lifafa.code, cleanPin);
+      if (res.valid) {
+        setPinVerifiedLifafas((prev) => ({ ...prev, [lifafa.id]: true }));
+        setPinError(null);
+      } else {
+        setPinError(res.message || 'Incorrect PIN code entered. Please try again.');
+      }
+    } catch (err: any) {
+      setPinError(err.message || 'Verification failed. Please try again.');
+    } finally {
+      setVerifyingPin(false);
+    }
+  };
 
   // 1. Fetch Lifafa by Code
   useEffect(() => {
@@ -193,8 +239,8 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
 
     if (!lifafa) return;
 
-    if (lifafa.pin_code && !pinCode.trim()) {
-      setErrorMsg('PIN code is required to claim this Lifafa.');
+    if (isPinRequired && !isPinUnlocked) {
+      setErrorMsg('This Lifafa is PIN protected. Please enter the security PIN and unlock it before claiming.');
       return;
     }
 
@@ -654,21 +700,105 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                 </div>
               </div>
 
-              {/* Security PIN Code Input if required */}
-              {Boolean(lifafa.pin_code) && (
-                <div className="p-4 bg-white border border-slate-200 rounded-2xl space-y-2 text-center shadow-xs">
-                  <div className="flex items-center justify-center gap-1.5 text-xs font-black text-slate-800">
-                    <Lock className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Security PIN Required</span>
+              {/* Security PIN Code Section if required */}
+              {isPinRequired && (
+                <div className="p-4 sm:p-5 bg-white border border-slate-200 rounded-2xl space-y-3 shadow-xs">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                    <div className="flex items-center gap-2.5 text-left">
+                      <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <Lock className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
+                          This Lifafa is PIN protected
+                        </h4>
+                        <p className="text-[11px] text-slate-500">
+                          Enter the 4-6 digit passcode provided by the creator
+                        </p>
+                      </div>
+                    </div>
+                    {isPinUnlocked ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 shrink-0">
+                        <Check className="w-3 h-3 text-emerald-600" />
+                        <span>Unlocked</span>
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200/60 shrink-0">
+                        PIN Required
+                      </span>
+                    )}
                   </div>
-                  <input
-                    type="password"
-                    maxLength={6}
-                    value={pinCode}
-                    onChange={(e) => setPinCode(e.target.value)}
-                    placeholder="Enter 4-6 digit PIN"
-                    className="w-full max-w-xs mx-auto px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-center text-sm font-mono tracking-widest text-slate-800 focus:outline-hidden focus:border-blue-500 focus:bg-white transition-all"
-                  />
+
+                  {isPinUnlocked ? (
+                    <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-center justify-between text-xs text-emerald-800">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="font-semibold">Lifafa Unlocked Successfully</span>
+                      </div>
+                      <span className="text-[10px] font-mono text-emerald-600 font-bold">READY TO CLAIM</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5">
+                      <div className="text-left">
+                        <label htmlFor="claimant-pin-input" className="block text-xs font-bold text-slate-700 mb-1">
+                          PIN
+                        </label>
+                        <div className="relative flex items-center">
+                          <input
+                            id="claimant-pin-input"
+                            type={showClaimantPin ? 'text' : 'password'}
+                            maxLength={6}
+                            value={pinCode}
+                            onChange={(e) => {
+                              setPinCode(e.target.value.replace(/\D/g, ''));
+                              if (pinError) setPinError(null);
+                            }}
+                            placeholder="Enter PIN"
+                            className="w-full pl-4 pr-11 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-center text-sm font-mono font-bold tracking-widest text-slate-900 placeholder:text-slate-400 placeholder:tracking-normal caret-slate-900 focus:outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all [color-scheme:light]"
+                          />
+                          <button
+                            type="button"
+                            tabIndex={0}
+                            onClick={() => setShowClaimantPin(!showClaimantPin)}
+                            aria-label={showClaimantPin ? 'Hide PIN' : 'Reveal PIN'}
+                            className="absolute right-3 p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/50 transition-colors cursor-pointer"
+                          >
+                            {showClaimantPin ? (
+                              <EyeOff className="w-4 h-4" />
+                            ) : (
+                              <Eye className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {pinError && (
+                        <div className="p-2.5 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-[11px] text-red-700 animate-in fade-in">
+                          <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+                          <span>{pinError}</span>
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={handleUnlockLifafa}
+                        disabled={verifyingPin || !pinCode.trim()}
+                        className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-xl text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        {verifyingPin ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Verifying PIN...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="w-4 h-4" />
+                            <span>Unlock Lifafa</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -689,7 +819,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                       value={accountHolderName}
                       onChange={(e) => setAccountHolderName(e.target.value)}
                       placeholder="Account holder name as per bank"
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-hidden focus:border-blue-500 focus:bg-white transition-all"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 caret-slate-900 focus:outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all [color-scheme:light]"
                     />
                   </div>
 
@@ -703,7 +833,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                         value={bankAccountNumber}
                         onChange={(e) => setBankAccountNumber(e.target.value)}
                         placeholder="Account Number"
-                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-hidden focus:border-blue-500 focus:bg-white transition-all"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 placeholder:text-slate-400 caret-slate-900 focus:outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all [color-scheme:light]"
                       />
                     </div>
                     <div>
@@ -716,7 +846,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                         value={ifscCode}
                         onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
                         placeholder="e.g. SBIN0001234"
-                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono uppercase focus:outline-hidden focus:border-blue-500 focus:bg-white transition-all"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold uppercase text-slate-900 placeholder:text-slate-400 caret-slate-900 focus:outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all [color-scheme:light]"
                       />
                     </div>
                   </div>
@@ -730,7 +860,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                       value={upiId}
                       onChange={(e) => setUpiId(e.target.value)}
                       placeholder="username@bank"
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-hidden focus:border-blue-500 focus:bg-white transition-all"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 caret-slate-900 focus:outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all [color-scheme:light]"
                     />
                   </div>
                 </div>
@@ -748,6 +878,11 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
                       <span>Verifying &amp; Claiming...</span>
+                    </>
+                  ) : isPinRequired && !isPinUnlocked ? (
+                    <>
+                      <Lock className="w-4 h-4" />
+                      <span>Enter &amp; Unlock PIN First</span>
                     </>
                   ) : !allRequiredDone ? (
                     <>

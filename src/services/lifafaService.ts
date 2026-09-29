@@ -104,6 +104,43 @@ export const lifafaService = {
     return data;
   },
 
+  // Authoritative server-side PIN code verification for a specific Lifafa
+  async verifyLifafaPin(code: string, pinCode: string): Promise<{ valid: boolean; message?: string }> {
+    if (!isSupabaseConfigured || !supabase) {
+      return { valid: true };
+    }
+
+    const cleanPin = pinCode.trim();
+    if (!cleanPin) {
+      return { valid: false, message: 'Please enter the security PIN.' };
+    }
+
+    const { data, error } = await supabase.rpc('verify_lifafa_pin_rpc', {
+      p_lifafa_code: code.trim(),
+      p_pin_code: cleanPin,
+    });
+
+    if (error) {
+      // If RPC doesn't exist yet or raised an exception
+      if (error.message?.toLowerCase().includes('incorrect pin')) {
+        return { valid: false, message: 'Incorrect PIN code entered. Please try again.' };
+      }
+      return { valid: false, message: error.message || 'Incorrect PIN code entered.' };
+    }
+
+    if (typeof data === 'boolean') {
+      return { valid: data, message: data ? undefined : 'Incorrect PIN code entered. Please try again.' };
+    }
+    if (data && typeof data === 'object') {
+      return {
+        valid: Boolean(data.valid),
+        message: data.message || (data.valid ? undefined : 'Incorrect PIN code entered. Please try again.'),
+      };
+    }
+
+    return { valid: Boolean(data), message: data ? undefined : 'Incorrect PIN code entered. Please try again.' };
+  },
+
   // Fetch public active Lifafas for the explore feed
   async getPublicLifafas(): Promise<Lifafa[]> {
     if (!isSupabaseConfigured || !supabase) {

@@ -22,6 +22,8 @@ import {
   Settings,
   Layers,
   HelpCircle,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { lifafaService } from '../services/lifafaService';
@@ -85,6 +87,7 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
   // Step 4: Settings
   const [isPublic, setIsPublic] = useState(true);
   const [pinCode, setPinCode] = useState('');
+  const [showPinCode, setShowPinCode] = useState(false);
   const [allowCancel, setAllowCancel] = useState(true);
   const [showRemaining, setShowRemaining] = useState(true);
   const [creatorNote, setCreatorNote] = useState('');
@@ -834,17 +837,43 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
 
             {/* PIN Code */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Claim Protection PIN (Optional)
-              </label>
-              <input
-                type="password"
-                maxLength={6}
-                value={pinCode}
-                onChange={(e) => setPinCode(e.target.value)}
-                placeholder="4-6 digit passcode required to claim"
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono"
-              />
+              <div className="flex items-center justify-between mb-1">
+                <label htmlFor="creator-pin-code" className="block text-xs font-bold text-slate-700">
+                  Claim Protection PIN (Optional)
+                </label>
+                {pinCode && (
+                  <span className="text-[10px] font-semibold text-slate-500">
+                    {showPinCode ? 'PIN Visible' : 'PIN Hidden'}
+                  </span>
+                )}
+              </div>
+              <div className="relative flex items-center">
+                <input
+                  id="creator-pin-code"
+                  type={showPinCode ? 'text' : 'password'}
+                  maxLength={6}
+                  value={pinCode}
+                  onChange={(e) => setPinCode(e.target.value.replace(/\D/g, ''))}
+                  placeholder="4-6 digit passcode required to claim"
+                  className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold tracking-widest text-slate-900 placeholder:text-slate-400 placeholder:tracking-normal caret-slate-900 focus:outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all [color-scheme:light]"
+                />
+                <button
+                  type="button"
+                  tabIndex={0}
+                  onClick={() => setShowPinCode(!showPinCode)}
+                  aria-label={showPinCode ? 'Hide PIN' : 'Reveal PIN'}
+                  className="absolute right-2.5 p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/50 transition-colors cursor-pointer"
+                >
+                  {showPinCode ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+              <p className="text-[10px] text-slate-500 mt-1">
+                If configured, claimants must enter this exact PIN to unlock and claim the Lifafa.
+              </p>
             </div>
 
             {/* Public vs Private */}

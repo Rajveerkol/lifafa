@@ -1568,7 +1568,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                       value={ifscCode}
                       onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
                       placeholder="e.g. HDFC0001234"
-                      className="w-full px-3 py-2 rounded-md border border-slate-300 text-xs font-mono font-semibold uppercase focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden"
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white text-xs font-mono font-semibold uppercase text-slate-900 placeholder:text-slate-400 caret-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden [color-scheme:light]"
                     />
                   </div>
 

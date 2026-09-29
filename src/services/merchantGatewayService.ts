@@ -239,7 +239,17 @@ export const merchantGatewayService = {
     });
 
     if (error) {
-      const errMsg = data?.error || data?.message || error.message || 'Payout request failed';
+      let serverMsg: string | undefined;
+      const ctx = (error as any)?.context;
+      if (ctx && typeof ctx.json === 'function') {
+        try {
+          const errBody = await ctx.json();
+          serverMsg = errBody?.error || errBody?.message;
+        } catch {
+          // Stream read fallback
+        }
+      }
+      const errMsg = serverMsg || data?.error || data?.message || error.message || 'Payout request failed';
       throw new Error(errMsg);
     }
 

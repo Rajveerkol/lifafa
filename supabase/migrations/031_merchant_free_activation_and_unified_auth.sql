@@ -221,8 +221,9 @@ DECLARE
     v_merchant_code TEXT;
     v_business_name TEXT;
     v_mobile TEXT;
-BEGIN
-    IF (NEW.raw_user_meta_data->>'account_type') <> 'MERCHANT' THEN
+    -- Strict Isolation Guard: ONLY execute for users registered explicitly with account_type = 'MERCHANT'
+    -- Coalesce ensures NULL metadata from Google OAuth or standard user signups is safely treated as non-merchant
+    IF COALESCE(NEW.raw_user_meta_data->>'account_type', '') <> 'MERCHANT' THEN
         RETURN NEW;
     END IF;
 
@@ -235,7 +236,7 @@ BEGIN
         NEW.raw_user_meta_data->>'mobile_number',
         NEW.phone,
         SUBSTRING(NEW.email FROM '^([0-9]+)@'),
-        '0000000000'
+        'MCH_' || SUBSTRING(REPLACE(NEW.id::text, '-', ''), 1, 10)
     );
     v_merchant_code := 'MCH-' || UPPER(SUBSTRING(REPLACE(gen_random_uuid()::text, '-', ''), 1, 8));
 

@@ -327,7 +327,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
                   value={accountHolder}
                   onChange={(e) => setAccountHolder(e.target.value)}
                   placeholder="Enter account holder name"
-                  className="w-full pl-11 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-hidden focus:border-blue-500 focus:bg-white transition-all"
+                  className="w-full pl-11 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 caret-slate-900 focus:outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all [color-scheme:light]"
                   required
                 />
               </div>
@@ -366,7 +366,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
                   value={accountNumber}
                   onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ''))}
                   placeholder="Enter bank account number"
-                  className="w-full pl-11 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-hidden focus:border-blue-500 focus:bg-white transition-all"
+                  className="w-full pl-11 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 placeholder:text-slate-400 caret-slate-900 focus:outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all [color-scheme:light]"
                   required
                 />
               </div>
@@ -391,7 +391,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
                   value={confirmAccountNumber}
                   onChange={(e) => setConfirmAccountNumber(e.target.value.replace(/\D/g, ''))}
                   placeholder="Re-enter bank account number"
-                  className="w-full pl-11 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-hidden focus:border-blue-500 focus:bg-white transition-all"
+                  className="w-full pl-11 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 placeholder:text-slate-400 caret-slate-900 focus:outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all [color-scheme:light]"
                   required
                 />
               </div>
@@ -412,7 +412,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
                   onChange={(e) => setIfsc(e.target.value.toUpperCase())}
                   placeholder="e.g. HDFC0001234"
                   maxLength={11}
-                  className="w-full pl-11 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono uppercase focus:outline-hidden focus:border-blue-500 focus:bg-white transition-all"
+                  className="w-full pl-11 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold uppercase text-slate-900 placeholder:text-slate-400 caret-slate-900 focus:outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all [color-scheme:light]"
                   required
                 />
               </div>
