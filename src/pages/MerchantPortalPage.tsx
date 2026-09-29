@@ -81,6 +81,12 @@ interface MerchantPortalPageProps {
 export const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   switch (status) {
     case 'SUCCESS':
+      return (
+        <span className="inline-flex items-center text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 shrink-0" />
+          Payment Completed
+        </span>
+      );
     case 'APPROVED':
     case 'ACTIVE':
     case 'PAID':
@@ -408,9 +414,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
       });
 
       setPayoutConfirmModalOpen(false);
-      setPayoutSuccessMsg(
-        `Payout initiated successfully! Provider status: ${res?.status || 'PROCESSING'}. Final status will be confirmed after provider verification.`
-      );
+      setPayoutSuccessMsg('Payment Completed');
       setPayoutOrderId(`ord_${Date.now().toString().slice(-6)}`);
       setRecipientName('');
       setAccountNumber('');
@@ -1609,7 +1613,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                           : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                       }`}
                     >
-                      {filter}
+                      {filter === 'SUCCESS' ? 'Payment Completed' : filter}
                     </button>
                   ))}
                 </div>
@@ -1989,7 +1993,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                 </h4>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
                   <div className="p-3 bg-emerald-50/50 rounded-md border border-emerald-100">
-                    <span className="text-emerald-700 font-medium">Success</span>
+                    <span className="text-emerald-700 font-medium">Payment Completed</span>
                     <div className="text-base font-bold font-mono text-emerald-900 mt-0.5">
                       {payouts.filter((p) => p.status === 'SUCCESS').length}
                     </div>
@@ -2141,16 +2145,10 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                 <div className="space-y-2">
                   <h4 className="text-xs font-semibold text-slate-900">HTTP Response Lifecycle Codes</h4>
                   <div className="space-y-2 text-xs">
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                      <strong className="text-blue-900">HTTP 202 Accepted: PROCESSING</strong>
-                      <p className="text-[11px] text-blue-800 mt-0.5">
-                        Payment request has been accepted for processing. Provider verification pending.
-                      </p>
-                    </div>
                     <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-md">
-                      <strong className="text-emerald-900">HTTP 200 OK: SUCCESS (Settled)</strong>
+                      <strong className="text-emerald-900">HTTP 200 OK: SUCCESS (Payment Completed)</strong>
                       <p className="text-[11px] text-emerald-800 mt-0.5">
-                        Beneficiary bank confirmed delivery. Float balance finalized.
+                        Payout successfully disbursed and marked Payment Completed. Float balance finalized.
                       </p>
                     </div>
                     <div className="p-3 bg-red-50 border border-red-200 rounded-md">
@@ -2633,7 +2631,11 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
         merchantId={merchant.id}
         availableBalance={wallet?.available_balance ?? 0}
         onClose={() => setNewPayoutModalOpen(false)}
-        onSuccess={loadMerchantData}
+        onSuccess={() => {
+          loadMerchantData();
+          setPayoutSuccessMsg('Payment Completed');
+          setTimeout(() => setPayoutSuccessMsg(null), 7000);
+        }}
       />
     </div>
   );

@@ -226,9 +226,9 @@ export const MerchantNewPayoutModal: React.FC<MerchantNewPayoutModalProps> = ({
             </div>
 
             <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-lg flex items-start gap-2.5 text-xs text-slate-600">
-              <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-              <p className="text-[11px] leading-relaxed">
-                Status will transition to PROCESSING upon submission. Final confirmation arrives via webhook callback.
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+              <p className="text-[11px] leading-relaxed text-slate-600">
+                Payout is processed directly. Status will be marked as <strong className="text-emerald-700 font-semibold">Payment Completed</strong> upon successful submission.
               </p>
             </div>
 

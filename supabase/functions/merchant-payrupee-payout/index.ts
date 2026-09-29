@@ -5,12 +5,12 @@
 // 3. Invokes merchant_initiate_payout_rpc for atomic float deduction & tiered fee calculation.
 // 4. Retrieves Vault-decrypted bank account via service-role-only RPC.
 // 5. Dispatches HTTP POST to PayRupee API (https://payrupee.tech/v1/payouts/).
-// 6. STRICT ERROR CLASSIFICATION RULES:
-//    a. HTTP 2xx/202: PENDING -> PROCESSING. Stores provider reference. NEVER marked SUCCESS. NEVER refund.
-//    b. Network timeout: PENDING -> PROCESSING. Ambiguous. DO NOT refund. DO NOT auto-retry. Awaits webhook.
-//    c. HTTP 5xx: Treat as AMBIGUOUS. PENDING -> PROCESSING. Upstream error != rejection. DO NOT refund.
-//    d. Definitive HTTP 4xx: Request definitively rejected client-side. Calls failure RPC (FAILED + auto-refund).
-//    e. Final SUCCESS can ONLY be produced by verified inbound PayRupee webhook.
+// 6. DIRECT PAYMENT COMPLETED FLOW:
+//    a. HTTP 2xx (No Error): Immediately finalized as SUCCESS / Payment Completed. Float confirmed.
+//    b. Network timeout / request error: FAILED with auto-refund of float & fee.
+//    c. HTTP 5xx: Provider error -> FAILED with auto-refund of float & fee.
+//    d. Definitive HTTP 4xx: Provider rejection -> FAILED with auto-refund of float & fee.
+//    e. Webhook: Idempotent confirmation preserves SUCCESS without duplicate transactions.
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
@@ -285,86 +285,77 @@ serve(async (req: Request) => {
     } catch (netErr: any) {
       clearTimeout(timeoutId);
 
-      // Network Timeout: Payout was dispatched over the wire. Transition status PENDING -> PROCESSING.
-      // Do NOT auto-refund. Awaits provider webhook or reconciliation.
-      await adminClient
-        .from('merchant_payouts')
-        .update({ status: 'PROCESSING', updated_at: new Date().toISOString() })
-        .eq('id', payoutId);
+      // Network / Request failure -> Mark FAILED and auto-refund float & fee
+      const failureReason = `Network request failure: ${netErr.message || 'Timeout contacting provider'}`;
+
+      await adminClient.rpc('merchant_finalize_payout_failure_rpc', {
+        p_provider_order_id: providerOrderId,
+        p_rejection_reason: failureReason,
+        p_provider_event_id: `disp_net_err_${Date.now()}`,
+        p_raw_payload: { error: netErr.message },
+      });
 
       return new Response(
         JSON.stringify({
-          success: true,
-          status: 'PROCESSING',
+          success: false,
+          status: 'FAILED',
           order_id: orderId,
           provider_order_id: providerOrderId,
-          amount: amount,
-          fee: feeAmount,
-          message: 'Dispatch timed out. Payout transitioned to PROCESSING awaiting provider webhook confirmation.',
+          error: failureReason,
+          message: 'Network failure contacting payment provider. Float balance and fee have been refunded.',
         }),
-        { status: 202, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // 7. Process Provider Response with Strict Error Classification
+    // 7. Process Provider Response
     if (payrupeeRes.ok) {
-      // Case 1: HTTP 2xx / 202 -> Accepted by provider.
-      // Transition: PENDING -> PROCESSING.
-      // Provider 2xx DOES NOT mean SUCCESS. Never refund.
-      const providerRefId = payrupeeData.reference_id || payrupeeData.payout_id || null;
+      // Payout request was successfully sent to PayRupee with NO error.
+      // Immediately finalize payout as SUCCESS (Payment Completed) via atomic service-role RPC.
+      const providerRefId = payrupeeData.reference_id || payrupeeData.payout_id || payrupeeData.utr || null;
+      const eventId = `disp_succ_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
 
-      await adminClient
-        .from('merchant_payouts')
-        .update({
-          status: 'PROCESSING',
-          provider_reference_id: providerRefId,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', payoutId);
+      await adminClient.rpc('merchant_finalize_payout_success_rpc', {
+        p_provider_order_id: providerOrderId,
+        p_provider_reference_id: providerRefId,
+        p_provider_event_id: eventId,
+        p_raw_payload: payrupeeData,
+      });
 
       return new Response(
         JSON.stringify({
           success: true,
-          status: 'PROCESSING',
+          status: 'SUCCESS',
           order_id: orderId,
           provider_order_id: providerOrderId,
           provider_reference_id: providerRefId,
           amount: amount,
           fee: feeAmount,
-          message: 'Payout accepted by provider and is currently PROCESSING.',
+          message: 'Payment Completed',
         }),
-        { status: 202, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } else if (payrupeeRes.status >= 500) {
-      // Case 2: HTTP 5xx Server Error -> AMBIGUOUS RESPONSE.
-      // Upstream server error is NOT proof that the request was rejected. The provider may have
-      // partially or fully processed the transaction.
-      // Transition: PENDING -> PROCESSING.
-      // DO NOT refund automatically. DO NOT mark FAILED.
-      // Awaits verified inbound webhook or manual reconciliation.
-      const providerRefId = payrupeeData.reference_id || payrupeeData.payout_id || null;
+      // Upstream Provider API Error (HTTP 5xx) -> Definitively failed dispatch
+      const rejectionReason = payrupeeData.message || payrupeeData.error || `Provider API error (HTTP ${payrupeeRes.status})`;
 
-      await adminClient
-        .from('merchant_payouts')
-        .update({
-          status: 'PROCESSING',
-          provider_reference_id: providerRefId,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', payoutId);
+      await adminClient.rpc('merchant_finalize_payout_failure_rpc', {
+        p_provider_order_id: providerOrderId,
+        p_rejection_reason: rejectionReason,
+        p_provider_event_id: `disp_5xx_${Date.now()}`,
+        p_raw_payload: payrupeeData,
+      });
 
       return new Response(
         JSON.stringify({
-          success: true,
-          status: 'PROCESSING',
+          success: false,
+          status: 'FAILED',
           order_id: orderId,
           provider_order_id: providerOrderId,
-          provider_reference_id: providerRefId,
-          amount: amount,
-          fee: feeAmount,
-          message: `Provider returned HTTP ${payrupeeRes.status} (Server Error). Payout transitioned to PROCESSING awaiting webhook confirmation. Float is retained.`,
+          error: rejectionReason,
+          message: 'Payout failed at provider. Float balance and fee have been refunded.',
         }),
-        { status: 202, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } else {
       // Case 3: Definitive HTTP 4xx Client Error -> Provider definitively rejected the request upfront.
