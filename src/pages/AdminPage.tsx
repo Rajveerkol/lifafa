@@ -739,7 +739,7 @@ export const AdminPage: React.FC = () => {
                     onChange={(e) =>
                       setPaymentSettings((prev) => ({ ...prev, payeeName: e.target.value }))
                     }
-                    placeholder="e.g. CreatLifafa Platform"
+                    placeholder="e.g. Createlifafa Platform"
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-hidden focus:border-blue-500 focus:bg-white"
                     required
                   />
@@ -905,7 +905,7 @@ export const AdminPage: React.FC = () => {
                   <div className="mt-3 bg-white p-4 rounded-2xl border border-slate-200 text-center space-y-3 shadow-2xs">
                     <div>
                       <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Payee / Merchant</span>
-                      <h4 className="text-sm font-bold text-slate-900">{paymentSettings.payeeName || 'CreatLifafa'}</h4>
+                      <h4 className="text-sm font-bold text-slate-900">{paymentSettings.payeeName || 'Createlifafa'}</h4>
                     </div>
 
                     {/* QR Code Container */}
@@ -922,7 +922,7 @@ export const AdminPage: React.FC = () => {
                       ) : (
                         <div className="p-3 bg-white rounded-2xl border border-slate-200 shadow-2xs inline-block">
                           <QRCodeSVG
-                            value={`upi://pay?pa=${encodeURIComponent(paymentSettings.upiId || 'createlifafa@upi')}&pn=${encodeURIComponent(paymentSettings.payeeName || 'CreatLifafa')}&am=${previewAmount}&cu=INR`}
+                            value={`upi://pay?pa=${encodeURIComponent(paymentSettings.upiId || 'createlifafa@upi')}&pn=${encodeURIComponent(paymentSettings.payeeName || 'Createlifafa')}&am=${previewAmount}&cu=INR`}
                             size={140}
                             level="M"
                             includeMargin={false}

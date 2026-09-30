@@ -499,7 +499,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                       <span>
                         {isDirectBank
                           ? 'Dispatched directly to Bank Account!'
-                          : 'Credited instantly to your CreatLifafa Wallet!'}
+                          : 'Credited instantly to your Createlifafa Wallet!'}
                       </span>
                     </p>
                     {claimResult.referenceId && (
@@ -579,7 +579,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                     </span>
                   </div>
                   <p className="text-xs text-amber-800 leading-relaxed">
-                    Don't worry — your reward was successfully claimed. Because direct bank dispatch could not be completed, the funds have been credited to your CreatLifafa wallet balance.
+                    Don't worry — your reward was successfully claimed. Because direct bank dispatch could not be completed, the funds have been credited to your Createlifafa wallet balance.
                   </p>
                 </div>
 
@@ -591,7 +591,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                       onClick={onNavigateHome}
                       className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl text-xs shadow-md transition-all cursor-pointer"
                     >
-                      View in CreatLifafa Wallet
+                      View in Createlifafa Wallet
                     </button>
                   )}
                 </div>
@@ -1068,7 +1068,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                   <div>
                     <h5 className="font-bold text-slate-900">Instant Cash Reward</h5>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Your reward is credited immediately to your CreatLifafa wallet or bank account!
+                      Your reward is credited immediately to your Createlifafa wallet or bank account!
                     </p>
                   </div>
                 </div>

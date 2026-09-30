@@ -543,7 +543,7 @@ export function createThemeComponents(config: ThemeVisualConfig) {
             <p className="text-xs font-semibold mt-1 text-emerald-600">
               {isDirectBank
                 ? 'Dispatched directly to Bank Account!'
-                : 'Credited instantly to your CreatLifafa Wallet!'}
+                : 'Credited instantly to your Createlifafa Wallet!'}
             </p>
             {payoutReferenceId && (
               <p className="text-[10px] text-slate-400 font-mono mt-1">
@@ -612,7 +612,7 @@ export function createThemeComponents(config: ThemeVisualConfig) {
             </span>
           </div>
           <p className="text-xs text-amber-800 leading-relaxed">
-            Don't worry — your reward was successfully claimed. Because direct bank dispatch could not be completed, the funds have been credited to your CreatLifafa wallet balance.
+            Don't worry — your reward was successfully claimed. Because direct bank dispatch could not be completed, the funds have been credited to your Createlifafa wallet balance.
           </p>
         </div>
 
@@ -624,7 +624,7 @@ export function createThemeComponents(config: ThemeVisualConfig) {
               onClick={onClose}
               className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl text-xs shadow-md transition-all cursor-pointer"
             >
-              View in CreatLifafa Wallet
+              View in Createlifafa Wallet
             </button>
           )}
         </div>

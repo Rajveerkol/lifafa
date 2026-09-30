@@ -706,7 +706,7 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                      <span className="text-xs font-bold text-slate-900">CreatLifafa Wallet</span>
+                      <span className="text-xs font-bold text-slate-900">Createlifafa Wallet</span>
                     </div>
                     {payoutMode === 'WALLET' && <CheckCircle2 className="w-4 h-4 text-blue-600" />}
                   </div>
@@ -967,7 +967,7 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
               </div>
               <div className="flex items-center justify-between pb-2 border-b border-slate-200/80">
                 <span className="text-xs font-bold text-slate-500">Reward Destination</span>
-                <span className="text-xs font-bold text-slate-800">{payoutMode === 'UPI_BANK' ? 'Direct UPI / Bank' : 'CreatLifafa Wallet'}</span>
+                <span className="text-xs font-bold text-slate-800">{payoutMode === 'UPI_BANK' ? 'Direct UPI / Bank' : 'Createlifafa Wallet'}</span>
               </div>
               <div className="flex items-center justify-between pb-2 border-b border-slate-200/80">
                 <span className="text-xs font-bold text-slate-500">Tasks Required</span>

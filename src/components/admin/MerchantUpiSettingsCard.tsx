@@ -157,7 +157,7 @@ export const MerchantUpiSettingsCard: React.FC<MerchantUpiSettingsCardProps> = (
     }
   };
 
-  const dynamicUri = `upi://pay?pa=${encodeURIComponent(settings.upiId || 'createlifafa@upi')}&pn=${encodeURIComponent(settings.payeeName || 'CreateLifafa Payout Gateway')}&am=${previewAmount}&cu=INR`;
+  const dynamicUri = `upi://pay?pa=${encodeURIComponent(settings.upiId || 'createlifafa@upi')}&pn=${encodeURIComponent(settings.payeeName || 'Createlifafa Payout Gateway')}&am=${previewAmount}&cu=INR`;
 
   if (loading) {
     return (
@@ -232,11 +232,11 @@ export const MerchantUpiSettingsCard: React.FC<MerchantUpiSettingsCardProps> = (
               required
               value={settings.payeeName}
               onChange={(e) => setSettings((prev) => ({ ...prev, payeeName: e.target.value }))}
-              placeholder="e.g. CreateLifafa Payout Gateway"
+              placeholder="e.g. Createlifafa Payout Gateway"
               className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-hidden transition-all"
             />
             <p className="text-[11px] text-slate-400 mt-1">
-              Example: <code className="font-mono text-slate-600">CreateLifafa Payout Gateway</code>. Shown on the deposit receipt and UPI intent.
+              Example: <code className="font-mono text-slate-600">Createlifafa Payout Gateway</code>. Shown on the deposit receipt and UPI intent.
             </p>
           </div>
 
@@ -414,7 +414,7 @@ export const MerchantUpiSettingsCard: React.FC<MerchantUpiSettingsCardProps> = (
                       Payee Display Name
                     </span>
                     <h4 className="text-sm font-bold text-slate-900 mt-0.5">
-                      {settings.payeeName || 'CreateLifafa Payout Gateway'}
+                      {settings.payeeName || 'Createlifafa Payout Gateway'}
                     </h4>
                   </div>
 

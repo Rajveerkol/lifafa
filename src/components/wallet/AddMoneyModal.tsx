@@ -193,7 +193,7 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
 
   // UPI payment intent link with configured payee name and UPI ID
   const activeUpiId = paymentSettings.upiId || depositUpiId || 'createlifafa@upi';
-  const activePayeeName = paymentSettings.payeeName || 'CreatLifafa';
+  const activePayeeName = paymentSettings.payeeName || 'Createlifafa';
   const upiPayUrl = `upi://pay?pa=${encodeURIComponent(activeUpiId)}&pn=${encodeURIComponent(activePayeeName)}&am=${amount}&cu=INR`;
 
   return (

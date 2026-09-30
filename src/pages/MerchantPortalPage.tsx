@@ -437,7 +437,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
   // Live Deposit fee calculation
   const numDepositAmt = parseFloat(depositAmount) || 0;
   const { fee: liveDepositFee, netCredited: liveNetCredited } = merchantGatewayService.calculateDepositFee(numDepositAmt);
-  const dynamicUpiUri = `upi://pay?pa=${encodeURIComponent(upiSettings.upiId || 'createlifafa@upi')}&pn=${encodeURIComponent(upiSettings.payeeName || 'CreatLifafa Payout Gateway')}&am=${numDepositAmt}&cu=INR`;
+  const dynamicUpiUri = `upi://pay?pa=${encodeURIComponent(upiSettings.upiId || 'createlifafa@upi')}&pn=${encodeURIComponent(upiSettings.payeeName || 'Createlifafa Payout Gateway')}&am=${numDepositAmt}&cu=INR`;
 
   // Real Metric Calculations (NO FAKE DATA)
   const metrics = useMemo(() => {

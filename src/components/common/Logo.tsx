@@ -91,7 +91,7 @@ export const Logo: React.FC<LogoProps> = ({
       <div className="flex flex-col">
         <div className="flex items-center tracking-tight">
           <span className={`font-black text-slate-900 drop-shadow-sm ${textSizes[size]}`}>
-            Creat
+            Create
           </span>
           <span className={`font-black text-blue-600 drop-shadow-sm ${textSizes[size]}`}>
             lifafa

@@ -17,7 +17,7 @@ export interface MerchantUpiSettings {
 }
 
 export const DEFAULT_MERCHANT_UPI_SETTINGS: MerchantUpiSettings = {
-  payeeName: 'CreateLifafa Payout Gateway',
+  payeeName: 'Createlifafa Payout Gateway',
   upiId: 'createlifafa@upi',
   qrImageUrl: '',
   status: 'ACTIVE',

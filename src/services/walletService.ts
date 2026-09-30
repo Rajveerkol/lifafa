@@ -18,7 +18,7 @@ export interface PlatformPaymentSettings {
 
 export const DEFAULT_PAYMENT_SETTINGS: PlatformPaymentSettings = {
   upiId: 'createlifafa@upi',
-  payeeName: 'CreatLifafa',
+  payeeName: 'Createlifafa',
   qrImageUrl: '',
   qrMode: 'DYNAMIC',
 };

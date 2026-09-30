@@ -114,7 +114,7 @@ export const MerchantTopUpModal: React.FC<MerchantTopUpModalProps> = ({
     }
   };
 
-  const dynamicUpiUri = `upi://pay?pa=${encodeURIComponent(upiSettings.upiId || 'createlifafa@upi')}&pn=${encodeURIComponent(upiSettings.payeeName || 'CreatLifafa Payout Gateway')}&am=${numAmount}&cu=INR`;
+  const dynamicUpiUri = `upi://pay?pa=${encodeURIComponent(upiSettings.upiId || 'createlifafa@upi')}&pn=${encodeURIComponent(upiSettings.payeeName || 'Createlifafa Payout Gateway')}&am=${numAmount}&cu=INR`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in">
