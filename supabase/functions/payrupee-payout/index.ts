@@ -366,7 +366,13 @@ serve(async (req: Request) => {
     // 9. Handle HTTP response status
     if (payrupeeResponse.ok) {
       // Business Rule: PayRupee HTTP 2xx Accepted = Immediate Local Withdrawal SUCCESS
-      const providerReferenceId = payrupeeData.reference_id || payrupeeData.payout_id || deterministicOrderId;
+      const providerReferenceId =
+        payrupeeData.data?.payout_id ||
+        payrupeeData.data?.reference ||
+        payrupeeData.data?.transaction_id ||
+        payrupeeData.reference_id ||
+        payrupeeData.payout_id ||
+        deterministicOrderId;
 
       // Update withdrawal to SUCCESS via admin_update_withdrawal_rpc
       // adminClient provides service_role authorization permitted by Migration 020

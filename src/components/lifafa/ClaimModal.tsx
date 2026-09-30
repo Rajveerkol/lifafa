@@ -171,20 +171,26 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
 
     // Validate UPI / Bank details if Lifafa is in UPI_BANK mode
     if (lifafa.payout_mode === 'UPI_BANK') {
-      if (!accountHolderName.trim() || accountHolderName.trim().length < 2) {
+      const cleanName = accountHolderName.trim();
+      const cleanAcc = bankAccountNumber.trim();
+      const cleanIfsc = ifscCode.trim().toUpperCase();
+      const cleanUpi = upiId.trim();
+
+      if (!cleanName || cleanName.length < 2) {
         setErrorMsg('Please enter account holder name as per bank records.');
         return;
       }
-      if (!bankAccountNumber.trim() || bankAccountNumber.trim().length < 6) {
-        setErrorMsg('Please enter a valid Bank Account Number (minimum 6 digits).');
+      if (!cleanAcc || !/^\d{6,20}$/.test(cleanAcc)) {
+        setErrorMsg('Please enter a valid bank account number.');
         return;
       }
-      if (!ifscCode.trim() || !/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/.test(ifscCode.trim())) {
-        setErrorMsg('Please enter a valid 11-character IFSC code (e.g. SBIN0001234).');
+      if (!cleanIfsc || !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(cleanIfsc)) {
+        setErrorMsg('Please enter a valid IFSC code.');
         return;
       }
-      if (upiId.trim() && !/^[\w.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(upiId.trim())) {
-        setErrorMsg('Invalid UPI ID format (e.g. yourname@okhdfcbank).');
+      // Optional UPI ID fallback: empty is allowed, but if provided, must be valid
+      if (cleanUpi && !/^[a-zA-Z0-9._-]{2,100}@[a-zA-Z]{2,64}$/.test(cleanUpi)) {
+        setErrorMsg('Please enter a valid UPI ID.');
         return;
       }
     }
@@ -213,8 +219,13 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
           : undefined
       );
 
-      // Confetti celebration if payout succeeded or claimed to wallet
-      if (res.payout_dispatched !== false) {
+      const isDirectBank = (res.payout_mode || lifafa.payout_mode) === 'UPI_BANK';
+      const isFullySuccessful = isDirectBank
+        ? res.payout_dispatched === true && res.withdrawal_status === 'SUCCESS'
+        : true;
+
+      // Confetti celebration ONLY if fully successful
+      if (isFullySuccessful) {
         confetti({
           particleCount: 140,
           spread: 90,
@@ -236,7 +247,11 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
       await refreshWallet();
       if (onSuccessClaim) onSuccessClaim();
     } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to claim Lifafa');
+      let rawMsg = err.message || 'Failed to claim Lifafa';
+      if (rawMsg.toLowerCase().includes('regular expression') || rawMsg.toLowerCase().includes('repetition count')) {
+        rawMsg = 'Please enter a valid IFSC code or Bank Account.';
+      }
+      setErrorMsg(rawMsg);
     } finally {
       setClaiming(false);
     }

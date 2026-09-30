@@ -67,16 +67,26 @@ export function useClaimLogic(
 
     // Payout details validation if in UPI_BANK mode
     if (lifafa.payout_mode === 'UPI_BANK') {
-      if (!accountHolderName.trim() || accountHolderName.trim().length < 2) {
+      const cleanName = accountHolderName.trim();
+      const cleanAcc = bankAccountNumber.trim();
+      const cleanIfsc = ifscCode.trim().toUpperCase();
+      const cleanUpi = upiId.trim();
+
+      if (!cleanName || cleanName.length < 2) {
         setErrorMsg('Please enter your full registered bank account holder name.');
         return;
       }
-      if (!bankAccountNumber.trim() || bankAccountNumber.trim().length < 6) {
-        setErrorMsg('Please enter a valid Bank Account Number (minimum 6 digits).');
+      if (!cleanAcc || !/^\d{6,20}$/.test(cleanAcc)) {
+        setErrorMsg('Please enter a valid bank account number.');
         return;
       }
-      if (!ifscCode.trim() || !/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/.test(ifscCode.trim())) {
-        setErrorMsg('Please enter a valid 11-character IFSC code (e.g. SBIN0001234).');
+      if (!cleanIfsc || !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(cleanIfsc)) {
+        setErrorMsg('Please enter a valid IFSC code.');
+        return;
+      }
+      // Optional UPI ID fallback: empty is allowed, but if provided, must be valid
+      if (cleanUpi && !/^[a-zA-Z0-9._-]{2,100}@[a-zA-Z]{2,64}$/.test(cleanUpi)) {
+        setErrorMsg('Please enter a valid UPI ID.');
         return;
       }
     }
@@ -121,7 +131,11 @@ export function useClaimLogic(
       }
     } catch (err: any) {
       console.error('Claim error:', err);
-      setErrorMsg(err.message || 'Failed to claim Lifafa. Please verify tasks and try again.');
+      let rawMsg = err.message || 'Failed to claim Lifafa. Please verify tasks and try again.';
+      if (rawMsg.toLowerCase().includes('regular expression') || rawMsg.toLowerCase().includes('repetition count')) {
+        rawMsg = 'Please enter a valid IFSC code or Bank Account.';
+      }
+      setErrorMsg(rawMsg);
     } finally {
       setClaiming(false);
     }

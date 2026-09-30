@@ -255,20 +255,26 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
 
     // Validate UPI / Bank details if Lifafa is in UPI_BANK mode
     if (lifafa.payout_mode === 'UPI_BANK') {
-      if (!accountHolderName.trim() || accountHolderName.trim().length < 2) {
+      const cleanName = accountHolderName.trim();
+      const cleanAcc = bankAccountNumber.trim();
+      const cleanIfsc = ifscCode.trim().toUpperCase();
+      const cleanUpi = upiId.trim();
+
+      if (!cleanName || cleanName.length < 2) {
         setErrorMsg('Please enter account holder name as per bank records.');
         return;
       }
-      if (!bankAccountNumber.trim() || bankAccountNumber.trim().length < 6) {
-        setErrorMsg('Please enter a valid Bank Account Number (minimum 6 digits).');
+      if (!cleanAcc || !/^\d{6,20}$/.test(cleanAcc)) {
+        setErrorMsg('Please enter a valid bank account number.');
         return;
       }
-      if (!ifscCode.trim() || !/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/.test(ifscCode.trim())) {
-        setErrorMsg('Please enter a valid 11-character IFSC code (e.g. SBIN0001234).');
+      if (!cleanIfsc || !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(cleanIfsc)) {
+        setErrorMsg('Please enter a valid IFSC code.');
         return;
       }
-      if (upiId.trim() && !/^[\w.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(upiId.trim())) {
-        setErrorMsg('Invalid UPI ID format (e.g. yourname@okhdfcbank).');
+      // Optional UPI ID fallback: empty is allowed, but if provided, must be valid
+      if (cleanUpi && !/^[a-zA-Z0-9._-]{2,100}@[a-zA-Z]{2,64}$/.test(cleanUpi)) {
+        setErrorMsg('Please enter a valid UPI ID.');
         return;
       }
     }
@@ -297,8 +303,13 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
           : undefined
       );
 
-      // Confetti celebration if payout succeeded or claimed to wallet
-      if (res.payout_dispatched !== false) {
+      const isDirectBank = (res.payout_mode || lifafa.payout_mode) === 'UPI_BANK';
+      const isFullySuccessful = isDirectBank
+        ? res.payout_dispatched === true && res.withdrawal_status === 'SUCCESS'
+        : true;
+
+      // Confetti celebration ONLY if fully successful
+      if (isFullySuccessful) {
         confetti({
           particleCount: 160,
           spread: 100,
@@ -319,7 +330,11 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
 
       await refreshWallet();
     } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to claim Lifafa');
+      let rawMsg = err.message || 'Failed to claim Lifafa';
+      if (rawMsg.toLowerCase().includes('regular expression') || rawMsg.toLowerCase().includes('repetition count')) {
+        rawMsg = 'Please enter a valid IFSC code or Bank Account.';
+      }
+      setErrorMsg(rawMsg);
     } finally {
       setClaiming(false);
     }
@@ -441,106 +456,148 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
 
         {/* 2. Main Centered Lifafa Experience Card */}
         <main className="relative z-10 w-full max-w-md my-auto py-2 space-y-4">
-          {/* Flow Branch 1: Claimed Success State with Themed Reward Reveal */}
-          {claimResult ? (
-            <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 text-center space-y-5 animate-in zoom-in-95 duration-300">
-              <div className="relative mx-auto w-28 h-28">
-                <img
-                  src={v.heroArtwork}
-                  alt="Reward Unlocked"
-                  className="w-full h-full object-contain drop-shadow-xl"
-                />
-              </div>
+          {/* Flow Branch 1: Claim Result (Success or Bank Dispatch Failure) */}
+          {claimResult ? (() => {
+            const isDirectBank = claimResult.payoutMode === 'UPI_BANK';
+            const isBankSuccess = isDirectBank && claimResult.payoutDispatched === true && claimResult.withdrawalStatus === 'SUCCESS';
+            const isWalletSuccess = !isDirectBank;
+            const isFullySuccessful = isBankSuccess || isWalletSuccess;
 
-              <div className="space-y-1">
-                <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Reward Claimed Successfully!</span>
-                </span>
-                <h3 className="text-2xl font-black text-slate-900 tracking-tight pt-1">
-                  Congratulations!
-                </h3>
-                <p className="text-xs text-slate-500">{lifafa.title}</p>
-              </div>
+            if (isFullySuccessful) {
+              return (
+                <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 text-center space-y-5 animate-in zoom-in-95 duration-300">
+                  <div className="relative mx-auto w-28 h-28">
+                    <img
+                      src={v.heroArtwork}
+                      alt="Reward Unlocked"
+                      className="w-full h-full object-contain drop-shadow-xl"
+                    />
+                  </div>
 
-              {/* Amount Display */}
-              <div className="p-4 bg-gradient-to-br from-slate-50 to-slate-100/70 rounded-2xl border border-slate-200/80">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest block">
-                  Reward Amount
-                </span>
-                <span className="text-4xl sm:text-5xl font-black tracking-tight" style={{ color: v.accentColor }}>
-                  {formatCurrency(claimResult.amount)}
-                </span>
-                <p className={`text-xs font-semibold mt-1 flex items-center justify-center gap-1 ${
-                  claimResult.payoutMode === 'UPI_BANK' && claimResult.payoutDispatched === false
-                    ? 'text-amber-700 bg-amber-50 p-2 rounded-xl border border-amber-200 text-center'
-                    : 'text-emerald-600'
-                }`}>
-                  {claimResult.payoutMode === 'UPI_BANK' ? (
-                    claimResult.withdrawalStatus === 'PROCESSING' ? (
-                      <>
-                        <Clock className="w-3.5 h-3.5 text-amber-600 animate-spin" />
-                        <span>Payout initiated! Processing with bank...</span>
-                      </>
-                    ) : claimResult.payoutDispatched && (claimResult.withdrawalStatus === 'SUCCESS' || !claimResult.withdrawalStatus) ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Dispatched directly to Bank Account!</span>
-                      </>
+                  <div className="space-y-1">
+                    <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Reward Claimed Successfully!</span>
+                    </span>
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight pt-1">
+                      Congratulations!
+                    </h3>
+                    <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Payment Completed</p>
+                    <p className="text-xs text-slate-500">{lifafa.title}</p>
+                  </div>
+
+                  {/* Amount Display */}
+                  <div className="p-4 bg-gradient-to-br from-slate-50 to-slate-100/70 rounded-2xl border border-slate-200/80">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest block">
+                      Reward Amount
+                    </span>
+                    <span className="text-4xl sm:text-5xl font-black tracking-tight" style={{ color: v.accentColor }}>
+                      {formatCurrency(claimResult.amount)}
+                    </span>
+                    <p className="text-xs font-semibold text-emerald-600 mt-1 flex items-center justify-center gap-1">
+                      <Check className="w-3.5 h-3.5" />
+                      <span>
+                        {isDirectBank
+                          ? 'Dispatched directly to Bank Account!'
+                          : 'Credited instantly to your CreatLifafa Wallet!'}
+                      </span>
+                    </p>
+                    {claimResult.referenceId && (
+                      <p className="text-[10px] text-slate-400 font-mono mt-1">
+                        Ref: {claimResult.referenceId}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Share & Home Actions */}
+                  <div className="space-y-2 pt-1">
+                    {onOpenShare ? (
+                      <button
+                        type="button"
+                        onClick={() => onOpenShare(lifafa)}
+                        className={`w-full py-3.5 ${v.ctaGradient} text-white font-bold rounded-2xl text-xs shadow-md ${v.ctaShadow} flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer`}
+                      >
+                        <Share2 className="w-4 h-4" />
+                        <span>Share This Lifafa With Friends</span>
+                      </button>
                     ) : (
-                      <>
-                        <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                        <span>Reward credited to wallet (Bank dispatch failed: {claimResult.payoutError || 'Transfer rejected'})</span>
-                      </>
-                    )
-                  ) : (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Credited instantly to your CreatLifafa Wallet!</span>
-                    </>
-                  )}
-                </p>
-                {claimResult.referenceId && (
-                  <p className="text-[10px] text-slate-400 font-mono mt-1">
-                    Ref: {claimResult.referenceId}
+                      <button
+                        type="button"
+                        onClick={handleCopyShareUrl}
+                        className={`w-full py-3.5 ${v.ctaGradient} text-white font-bold rounded-2xl text-xs shadow-md ${v.ctaShadow} flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer`}
+                      >
+                        {copiedLink ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                        <span>{copiedLink ? 'Link Copied!' : 'Copy Lifafa Share Link'}</span>
+                      </button>
+                    )}
+
+                    {onNavigateHome && (
+                      <button
+                        type="button"
+                        onClick={onNavigateHome}
+                        className="w-full py-2.5 text-slate-500 hover:text-slate-800 text-xs font-bold transition-colors cursor-pointer"
+                      >
+                        Back to Home
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            }
+
+            // PAYOUT FAILURE STATE: Reward claimed/allocated, but bank payout dispatch failed
+            return (
+              <div className="bg-white rounded-3xl p-6 shadow-xl border border-rose-100 text-center space-y-5 animate-in zoom-in-95 duration-300">
+                <div className="w-16 h-16 rounded-3xl bg-rose-50 border border-rose-200 text-rose-500 mx-auto flex items-center justify-center shadow-xs">
+                  <AlertCircle className="w-8 h-8 text-rose-600" />
+                </div>
+
+                <div className="space-y-1">
+                  <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
+                    <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
+                    <span>Payout Dispatch Issue</span>
+                  </span>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight pt-1">
+                    Reward Claimed — Bank Transfer Pending
+                  </h3>
+                  <p className="text-xs text-rose-600 font-semibold pt-1">
+                    Reward claimed, but bank payout could not be initiated.
                   </p>
-                )}
-              </div>
+                  <p className="text-xs text-slate-500 pt-0.5">
+                    {claimResult.payoutError || 'The direct bank payout request could not be completed.'}
+                  </p>
+                </div>
 
-              {/* Share & Home Actions */}
-              <div className="space-y-2 pt-1">
-                {onOpenShare ? (
-                  <button
-                    type="button"
-                    onClick={() => onOpenShare(lifafa)}
-                    className={`w-full py-3.5 ${v.ctaGradient} text-white font-bold rounded-2xl text-xs shadow-md ${v.ctaShadow} flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer`}
-                  >
-                    <Share2 className="w-4 h-4" />
-                    <span>Share This Lifafa With Friends</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleCopyShareUrl}
-                    className={`w-full py-3.5 ${v.ctaGradient} text-white font-bold rounded-2xl text-xs shadow-md ${v.ctaShadow} flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer`}
-                  >
-                    {copiedLink ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    <span>{copiedLink ? 'Link Copied!' : 'Copy Lifafa Share Link'}</span>
-                  </button>
-                )}
+                {/* Amount & Safe Fallback Notice */}
+                <div className="p-4 bg-amber-50/80 rounded-2xl border border-amber-200 text-left space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-amber-800 uppercase tracking-widest">
+                      Allocated Reward
+                    </span>
+                    <span className="text-lg font-black text-amber-900">
+                      {formatCurrency(claimResult.amount)}
+                    </span>
+                  </div>
+                  <p className="text-xs text-amber-800 leading-relaxed">
+                    Don't worry — your reward was successfully claimed. Because direct bank dispatch could not be completed, the funds have been credited to your CreatLifafa wallet balance.
+                  </p>
+                </div>
 
-                {onNavigateHome && (
-                  <button
-                    type="button"
-                    onClick={onNavigateHome}
-                    className="w-full py-2.5 text-slate-500 hover:text-slate-800 text-xs font-bold transition-colors cursor-pointer"
-                  >
-                    Back to Home
-                  </button>
-                )}
+                {/* Actions */}
+                <div className="space-y-2 pt-1">
+                  {onNavigateHome && (
+                    <button
+                      type="button"
+                      onClick={onNavigateHome}
+                      className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl text-xs shadow-md transition-all cursor-pointer"
+                    >
+                      View in CreatLifafa Wallet
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          ) : isCompleted ? (
+            );
+          })() : isCompleted ? (
             /* Flow Branch 2: Fully Claimed */
             <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 text-center space-y-4">
               <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 mx-auto flex items-center justify-center">

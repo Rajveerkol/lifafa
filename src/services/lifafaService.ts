@@ -106,61 +106,141 @@ export const lifafaService = {
       p_device_fingerprint: deviceFingerprint || null,
       p_ip_address: ipAddress || null,
       p_idempotency_key: idempotencyKey || null,
-      p_account_holder_name: payoutDetails?.accountHolderName || null,
-      p_bank_account_number: payoutDetails?.bankAccountNumber || null,
-      p_ifsc_code: payoutDetails?.ifscCode || null,
-      p_upi_id: payoutDetails?.upiId || null,
+      p_account_holder_name: payoutDetails?.accountHolderName?.trim() || null,
+      p_bank_account_number: payoutDetails?.bankAccountNumber?.trim() || null,
+      p_ifsc_code: payoutDetails?.ifscCode?.trim()?.toUpperCase() || null,
+      p_upi_id: payoutDetails?.bankAccountNumber?.trim() ? null : (payoutDetails?.upiId?.trim() || null),
     });
 
     if (error) {
-      throw new Error(error.message || 'Failed to claim Lifafa');
+      let friendlyMsg = error.message || 'Failed to claim Lifafa';
+      if (friendlyMsg.toLowerCase().includes('regular expression') || friendlyMsg.toLowerCase().includes('repetition count')) {
+        friendlyMsg = 'Please enter a valid IFSC code or Bank Account.';
+      }
+      throw new Error(friendlyMsg);
     }
 
-    // Direct bank payout flow: If payout_mode is UPI_BANK and withdrawal record exists, dispatch to PayRupee
-    if (data?.payout_mode === 'UPI_BANK' && data?.withdrawal_id) {
+    // Direct bank payout flow: If payout_mode is UPI_BANK, dispatch to PayRupee and verify from database
+    if (data?.payout_mode === 'UPI_BANK') {
+      if (!data?.withdrawal_id) {
+        return {
+          ...data,
+          payout_dispatched: false,
+          withdrawal_status: 'FAILED',
+          payout_error: 'Bank payout record was not created.',
+        };
+      }
+
+      // 1. Invoke PayRupee Edge Function dispatch
+      let payoutRes: any = null;
       try {
-        const { data: payoutRes, error: payoutErr } = await supabase.functions.invoke('payrupee-payout', {
+        const invokeResult = await supabase.functions.invoke('payrupee-payout', {
           body: {
             withdrawal_id: data.withdrawal_id,
           },
         });
-
-        if (payoutErr) {
-          console.error('PayRupee payout dispatch error:', payoutErr);
-          return {
-            ...data,
-            payout_dispatched: false,
-            payout_error: payoutRes?.error || payoutErr.message || 'Failed to dispatch payout to bank',
-            withdrawal_status: payoutRes?.status || 'PENDING',
-          };
+        payoutRes = invokeResult.data;
+        if (invokeResult.error) {
+          console.error('PayRupee invoke error:', invokeResult.error);
         }
+      } catch (invokeErr: any) {
+        console.error('PayRupee invoke exception:', invokeErr);
+      }
 
-        const isSuccess = payoutRes?.success && payoutRes?.status === 'SUCCESS';
-        const isProcessing = payoutRes?.status === 'PROCESSING';
+      // 2. CRITICAL CHECK: Authoritatively verify the payout state from the database.
+      // Do NOT rely only on claim_lifafa_rpc or edge function return value.
+      // Must explicitly verify the actual withdrawal record in PostgreSQL.
+      const currentUserId = (await supabase.auth.getUser())?.data?.user?.id;
+      const verifiedCheck = await lifafaService.verifyClaimBankPayout(
+        data.withdrawal_id,
+        currentUserId || '',
+        data.amount
+      );
 
+      if (verifiedCheck.verified && verifiedCheck.status === 'SUCCESS') {
         return {
           ...data,
-          payout_dispatched: isSuccess || isProcessing,
-          payout_reference_id: payoutRes?.reference_id,
-          payout_order_id: payoutRes?.order_id,
-          withdrawal_status: payoutRes?.status || 'PENDING',
-          payout_error: !payoutRes?.success ? payoutRes?.error : undefined,
-        };
-      } catch (dispatchErr: any) {
-        console.error('PayRupee dispatch network exception:', dispatchErr);
-        return {
-          ...data,
-          payout_dispatched: false,
-          payout_error: dispatchErr.message || 'Network exception during bank payout dispatch',
-          withdrawal_status: 'PENDING',
+          payout_dispatched: true, // ONLY true when confirmed SUCCESS in database with provider audit
+          withdrawal_status: 'SUCCESS',
+          payout_reference_id: verifiedCheck.payout_reference_id || payoutRes?.reference_id,
+          payout_order_id: verifiedCheck.order_id || payoutRes?.order_id,
         };
       }
+
+      // If payout dispatch failed or was not confirmed:
+      return {
+        ...data,
+        payout_dispatched: false, // EXPLICITLY FALSE
+        withdrawal_status: verifiedCheck.status || payoutRes?.status || 'FAILED',
+        payout_error: verifiedCheck.error || payoutRes?.error || 'Reward claimed, but bank payout could not be initiated.',
+        payout_order_id: verifiedCheck.order_id || payoutRes?.order_id,
+      };
     }
 
     return {
       ...data,
       payout_dispatched: true, // WALLET mode is immediately credited to wallet balance
     };
+  },
+
+  // Authoritatively verify confirmed bank payout dispatch state from the database
+  async verifyClaimBankPayout(withdrawalId: string, expectedUserId: string, expectedAmount: number): Promise<{
+    verified: boolean;
+    status: string;
+    payout_reference_id?: string;
+    order_id?: string;
+    error?: string;
+  }> {
+    if (!isSupabaseConfigured || !supabase) {
+      return { verified: false, status: 'UNKNOWN', error: 'Database not configured' };
+    }
+
+    try {
+      // 1. Explicitly query withdrawal record directly from database
+      const { data: wth, error: wthErr } = await supabase
+        .from('withdrawals')
+        .select('id, user_id, amount, status, payout_provider, payout_reference_id, provider_order_id, rejection_reason')
+        .eq('id', withdrawalId)
+        .maybeSingle();
+
+      if (wthErr || !wth) {
+        return { verified: false, status: 'NOT_FOUND', error: 'Bank payout record does not exist.' };
+      }
+
+      // 2. Validate ownership & amount integrity
+      if (wth.user_id !== expectedUserId) {
+        return { verified: false, status: 'UNAUTHORIZED', error: 'Payout claimant mismatch.' };
+      }
+      if (Math.abs(Number(wth.amount) - Number(expectedAmount)) > 0.01) {
+        return { verified: false, status: 'AMOUNT_MISMATCH', error: 'Payout amount mismatch.' };
+      }
+
+      // 3. Check for confirmed provider audit entry in payout_transactions
+      const { data: tx } = await supabase
+        .from('payout_transactions')
+        .select('id, status, provider_reference_id')
+        .eq('withdrawal_id', withdrawalId)
+        .maybeSingle();
+
+      // Condition: withdrawal status MUST be confirmed SUCCESS and provider transaction/reference exists
+      if (wth.status === 'SUCCESS' && (wth.payout_reference_id || tx)) {
+        return {
+          verified: true,
+          status: 'SUCCESS',
+          payout_reference_id: wth.payout_reference_id || tx?.provider_reference_id,
+          order_id: wth.provider_order_id,
+        };
+      }
+
+      return {
+        verified: false,
+        status: wth.status,
+        order_id: wth.provider_order_id,
+        error: wth.rejection_reason || (wth.status === 'PROCESSING' ? 'Bank payout is still processing with provider.' : 'Bank payout dispatch was not confirmed.'),
+      };
+    } catch (err: any) {
+      return { verified: false, status: 'ERROR', error: err.message || 'Verification query failed' };
+    }
   },
 
   // Authoritative server-side PIN code verification for a specific Lifafa
