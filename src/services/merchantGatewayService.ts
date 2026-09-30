@@ -245,6 +245,71 @@ export const merchantGatewayService = {
     return session.access_token;
   },
 
+  // Helper to extract sanitized, detailed error from Supabase Edge Function invocation
+  async parseEdgeFunctionError(
+    error: any,
+    response?: Response,
+    data?: any
+  ): Promise<string> {
+    // 1. Data-level error returned by function
+    if (data?.error) {
+      return typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
+    }
+    if (data?.message && !data?.success) {
+      return String(data.message);
+    }
+
+    // 2. HTTP response extraction (from response or error.context)
+    const resp: Response | undefined =
+      response || (error?.context instanceof Response ? error.context : undefined);
+    const status = resp?.status;
+
+    let serverBodyMsg: string | undefined;
+    if (resp) {
+      try {
+        const cloned = typeof resp.clone === 'function' ? resp.clone() : resp;
+        const text = await cloned.text();
+        if (text) {
+          try {
+            const json = JSON.parse(text);
+            serverBodyMsg = json?.error || json?.message || json?.details;
+          } catch {
+            serverBodyMsg = text.length > 250 ? text.slice(0, 250) + '...' : text;
+          }
+        }
+      } catch {
+        // Stream read fallback
+      }
+    }
+
+    if (serverBodyMsg) {
+      return status ? `[HTTP ${status}] ${serverBodyMsg}` : serverBodyMsg;
+    }
+
+    // 3. Client network/CORS error (FunctionsFetchError)
+    if (error?.name === 'FunctionsFetchError' || error?.message?.includes('Failed to send a request')) {
+      const innerContext = error?.context;
+      const innerMsg =
+        innerContext?.message ||
+        innerContext?.name ||
+        (typeof innerContext === 'string' ? innerContext : '');
+      const detailStr = innerMsg ? ` (${innerMsg})` : '';
+      return `Failed to reach Edge Function: Network or CORS connection issue${detailStr}. Please verify connection and retry.`;
+    }
+
+    // 4. Relay Error (FunctionsRelayError)
+    if (error?.name === 'FunctionsRelayError') {
+      return `Edge Gateway Relay error: ${error.message || 'Unable to route request'}`;
+    }
+
+    // 5. Http error fallback (FunctionsHttpError)
+    if (status) {
+      return `Edge Function error [HTTP ${status}]: ${error?.message || 'Request failed'}`;
+    }
+
+    return error?.message || 'Payout request failed';
+  },
+
   // Request payout via dedicated merchant-payrupee-payout Edge Function
   async createPayout(params: {
     orderId: string;
@@ -271,38 +336,84 @@ export const merchantGatewayService = {
       headers['x-idempotency-key'] = params.idempotencyKey;
     }
 
-    // 3. Invoke Edge Function with explicit fresh Bearer token
-    const { data, error } = await supabase.functions.invoke('merchant-payrupee-payout', {
-      headers,
-      body: {
-        order_id: params.orderId,
-        amount: params.amount,
-        recipient: {
-          name: params.recipient.name.trim(),
-          account_number: params.recipient.account_number.trim(),
-          ifsc: params.recipient.ifsc.trim().toUpperCase(),
-        },
-        idempotency_key: params.idempotencyKey || null,
+    const payload = {
+      order_id: params.orderId,
+      amount: params.amount,
+      recipient: {
+        name: params.recipient.name.trim(),
+        account_number: params.recipient.account_number.trim(),
+        ifsc: params.recipient.ifsc.trim().toUpperCase(),
       },
+      idempotency_key: params.idempotencyKey || null,
+    };
+
+    // 3. Invoke Edge Function with explicit fresh Bearer token
+    let { data, error, response } = await supabase.functions.invoke('merchant-payrupee-payout', {
+      headers,
+      body: payload,
     });
 
-    if (error) {
-      let serverMsg: string | undefined;
-      const ctx = (error as any)?.context;
-      if (ctx && typeof ctx.json === 'function') {
+    // 4. If FunctionsFetchError occurred, attempt direct fetch fallback
+    if (error && (error.name === 'FunctionsFetchError' || error.message?.includes('Failed to send a request'))) {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+      if (supabaseUrl && typeof window !== 'undefined' && typeof window.fetch === 'function') {
         try {
-          const errBody = await ctx.json();
-          serverMsg = errBody?.error || errBody?.message;
-        } catch {
-          // Stream read fallback
+          const directHeaders: Record<string, string> = {
+            'Content-Type': 'application/json',
+            apikey: supabaseAnonKey || '',
+            Authorization: `Bearer ${token}`,
+          };
+          if (params.idempotencyKey) {
+            directHeaders['x-idempotency-key'] = params.idempotencyKey;
+          }
+
+          const directResp = await window.fetch(
+            `${supabaseUrl}/functions/v1/merchant-payrupee-payout`,
+            {
+              method: 'POST',
+              headers: directHeaders,
+              body: JSON.stringify(payload),
+            }
+          );
+
+          response = directResp;
+          const directText = await directResp.text();
+          let directJson: any = null;
+          try {
+            directJson = JSON.parse(directText);
+          } catch {
+            directJson = null;
+          }
+
+          if (directResp.ok && directJson) {
+            data = directJson;
+            error = null;
+          } else {
+            const directErrMsg =
+              directJson?.error ||
+              directJson?.message ||
+              `[HTTP ${directResp.status}] ${directText.slice(0, 250) || 'Direct request failed'}`;
+            throw new Error(directErrMsg);
+          }
+        } catch (fetchFallbackErr: any) {
+          const msg = await this.parseEdgeFunctionError(error, response, data);
+          throw new Error(
+            fetchFallbackErr.message && !fetchFallbackErr.message.includes('Failed to fetch')
+              ? fetchFallbackErr.message
+              : msg
+          );
         }
       }
-      const errMsg = serverMsg || data?.error || data?.message || error.message || 'Payout request failed';
+    }
+
+    if (error) {
+      const errMsg = await this.parseEdgeFunctionError(error, response, data);
       throw new Error(errMsg);
     }
 
     if (data?.error) {
-      throw new Error(data.error);
+      throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
     }
 
     return data;

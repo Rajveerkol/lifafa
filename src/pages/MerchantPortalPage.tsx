@@ -424,7 +424,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
       setTimeout(() => setPayoutSuccessMsg(null), 7000);
     } catch (err: any) {
       setPayoutConfirmModalOpen(false);
-      setPayoutErrorMsg(err.message || 'Failed to dispatch payout');
+      setPayoutErrorMsg(err.message || 'Unable to initiate payout. Please try again.');
     } finally {
       setSubmittingPayout(false);
     }
