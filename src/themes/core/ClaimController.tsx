@@ -26,7 +26,15 @@ export function useClaimLogic(
   code: string,
   allRequiredDone: boolean,
   onOpenAuth?: () => void,
-  onClaimSuccess?: (claimResult: { amount: number; code: string; payoutMode: string }) => void
+  onClaimSuccess?: (claimResult: {
+    amount: number;
+    code: string;
+    payoutMode: string;
+    payoutDispatched?: boolean;
+    withdrawalStatus?: string;
+    payoutError?: string;
+    referenceId?: string;
+  }) => void
 ): UseClaimLogicResult {
   const { user, refreshWallet } = useAuth();
   const [pinCode, setPinCode] = useState('');
@@ -59,14 +67,16 @@ export function useClaimLogic(
 
     // Payout details validation if in UPI_BANK mode
     if (lifafa.payout_mode === 'UPI_BANK') {
-      if (!accountHolderName.trim()) {
+      if (!accountHolderName.trim() || accountHolderName.trim().length < 2) {
         setErrorMsg('Please enter your full registered bank account holder name.');
         return;
       }
-      const hasBank = bankAccountNumber.trim() && ifscCode.trim();
-      const hasUpi = upiId.trim();
-      if (!hasBank && !hasUpi) {
-        setErrorMsg('Please provide either Bank Account + IFSC or a valid UPI ID for direct payout.');
+      if (!bankAccountNumber.trim() || bankAccountNumber.trim().length < 6) {
+        setErrorMsg('Please enter a valid Bank Account Number (minimum 6 digits).');
+        return;
+      }
+      if (!ifscCode.trim() || !/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/.test(ifscCode.trim())) {
+        setErrorMsg('Please enter a valid 11-character IFSC code (e.g. SBIN0001234).');
         return;
       }
     }
@@ -103,6 +113,10 @@ export function useClaimLogic(
           amount: res.amount,
           code: lifafa.code || code,
           payoutMode: res.payout_mode || lifafa.payout_mode || 'WALLET',
+          payoutDispatched: res.payout_dispatched,
+          withdrawalStatus: res.withdrawal_status,
+          payoutError: res.payout_error,
+          referenceId: res.payout_reference_id,
         });
       }
     } catch (err: any) {

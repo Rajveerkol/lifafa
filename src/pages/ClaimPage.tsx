@@ -65,6 +65,10 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
     amount: number;
     code: string;
     payoutMode?: PayoutMode;
+    payoutDispatched?: boolean;
+    withdrawalStatus?: string;
+    payoutError?: string;
+    referenceId?: string;
   } | null>(null);
   const [alreadyClaimed, setAlreadyClaimed] = useState<number | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -255,15 +259,12 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
         setErrorMsg('Please enter account holder name as per bank records.');
         return;
       }
-      if (
-        (!bankAccountNumber.trim() || bankAccountNumber.trim().length < 6) &&
-        (!upiId.trim() || upiId.trim().length < 3)
-      ) {
-        setErrorMsg('Please provide a valid Bank Account Number or UPI ID.');
+      if (!bankAccountNumber.trim() || bankAccountNumber.trim().length < 6) {
+        setErrorMsg('Please enter a valid Bank Account Number (minimum 6 digits).');
         return;
       }
-      if (ifscCode.trim() && !/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/.test(ifscCode.trim())) {
-        setErrorMsg('Invalid IFSC code format (expected 11 alphanumeric characters e.g. SBIN0001234).');
+      if (!ifscCode.trim() || !/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/.test(ifscCode.trim())) {
+        setErrorMsg('Please enter a valid 11-character IFSC code (e.g. SBIN0001234).');
         return;
       }
       if (upiId.trim() && !/^[\w.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(upiId.trim())) {
@@ -279,7 +280,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
       const deviceFp = fraudService.getDeviceFingerprint();
       const idempotencyKey = `claim_${lifafa.id}_${user.id}_${Date.now()}`;
 
-      // Authoritative atomic server RPC claim
+      // Authoritative atomic server RPC claim & payout dispatch
       const res = await lifafaService.claimLifafa(
         lifafa.code,
         pinCode.trim() || undefined,
@@ -296,18 +297,24 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
           : undefined
       );
 
-      // Confetti celebration
-      confetti({
-        particleCount: 160,
-        spread: 100,
-        origin: { y: 0.55 },
-        colors: ['#2563eb', '#fbbf24', '#e11d48', '#10b981', '#6366f1'],
-      });
+      // Confetti celebration if payout succeeded or claimed to wallet
+      if (res.payout_dispatched !== false) {
+        confetti({
+          particleCount: 160,
+          spread: 100,
+          origin: { y: 0.55 },
+          colors: ['#2563eb', '#fbbf24', '#e11d48', '#10b981', '#6366f1'],
+        });
+      }
 
       setClaimResult({
         amount: res.amount,
         code: lifafa.code,
         payoutMode: res.payout_mode || lifafa.payout_mode || 'WALLET',
+        payoutDispatched: res.payout_dispatched,
+        withdrawalStatus: res.withdrawal_status,
+        payoutError: res.payout_error,
+        referenceId: res.payout_reference_id,
       });
 
       await refreshWallet();
@@ -464,14 +471,40 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                 <span className="text-4xl sm:text-5xl font-black tracking-tight" style={{ color: v.accentColor }}>
                   {formatCurrency(claimResult.amount)}
                 </span>
-                <p className="text-xs font-semibold text-emerald-600 mt-1 flex items-center justify-center gap-1">
-                  <Check className="w-3.5 h-3.5" />
-                  <span>
-                    {claimResult.payoutMode === 'UPI_BANK'
-                      ? 'Dispatched directly to Bank Account!'
-                      : 'Credited instantly to your CreatLifafa Wallet!'}
-                  </span>
+                <p className={`text-xs font-semibold mt-1 flex items-center justify-center gap-1 ${
+                  claimResult.payoutMode === 'UPI_BANK' && claimResult.payoutDispatched === false
+                    ? 'text-amber-700 bg-amber-50 p-2 rounded-xl border border-amber-200 text-center'
+                    : 'text-emerald-600'
+                }`}>
+                  {claimResult.payoutMode === 'UPI_BANK' ? (
+                    claimResult.withdrawalStatus === 'PROCESSING' ? (
+                      <>
+                        <Clock className="w-3.5 h-3.5 text-amber-600 animate-spin" />
+                        <span>Payout initiated! Processing with bank...</span>
+                      </>
+                    ) : claimResult.payoutDispatched && (claimResult.withdrawalStatus === 'SUCCESS' || !claimResult.withdrawalStatus) ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Dispatched directly to Bank Account!</span>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        <span>Reward credited to wallet (Bank dispatch failed: {claimResult.payoutError || 'Transfer rejected'})</span>
+                      </>
+                    )
+                  ) : (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Credited instantly to your CreatLifafa Wallet!</span>
+                    </>
+                  )}
                 </p>
+                {claimResult.referenceId && (
+                  <p className="text-[10px] text-slate-400 font-mono mt-1">
+                    Ref: {claimResult.referenceId}
+                  </p>
+                )}
               </div>
 
               {/* Share & Home Actions */}

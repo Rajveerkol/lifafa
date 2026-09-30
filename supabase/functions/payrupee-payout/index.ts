@@ -128,20 +128,74 @@ serve(async (req: Request) => {
     }
 
     // Authorization check for dispatching existing withdrawal
-    if (!isAdmin && body?.action !== 'request_and_dispatch') {
-      // Caller must own the withdrawal if not admin
-      const { data: existingWth } = await adminClient
-        .from('withdrawals')
-        .select('user_id')
-        .eq('id', withdrawal_id)
-        .maybeSingle();
+    const { data: existingWth } = await adminClient
+      .from('withdrawals')
+      .select('id, user_id, status, provider_order_id, payout_reference_id, rejection_reason')
+      .eq('id', withdrawal_id)
+      .maybeSingle();
 
-      if (!existingWth || existingWth.user_id !== user.id) {
-        return new Response(JSON.stringify({ error: 'Forbidden: Access denied to this withdrawal' }), {
-          status: 403,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
+    if (!existingWth) {
+      return new Response(JSON.stringify({ error: 'Withdrawal not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!isAdmin && body?.action !== 'request_and_dispatch' && existingWth.user_id !== user.id) {
+      return new Response(JSON.stringify({ error: 'Forbidden: Access denied to this withdrawal' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Idempotency: if already completed or processing, return existing status without duplicating request
+    if (existingWth.status === 'SUCCESS') {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          status: 'SUCCESS',
+          order_id: existingWth.provider_order_id || `ORD_${withdrawal_id}`,
+          reference_id: existingWth.payout_reference_id,
+          message: 'Payout already completed.',
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (existingWth.status === 'PROCESSING') {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          status: 'PROCESSING',
+          order_id: existingWth.provider_order_id || `ORD_${withdrawal_id}`,
+          message: 'Payout is currently being processed.',
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (existingWth.status === 'FAILED') {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          status: 'FAILED',
+          order_id: existingWth.provider_order_id || `ORD_${withdrawal_id}`,
+          error: existingWth.rejection_reason || 'Payout previously failed.',
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (existingWth.status === 'REVERSED') {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          status: 'REVERSED',
+          order_id: existingWth.provider_order_id || `ORD_${withdrawal_id}`,
+          error: existingWth.rejection_reason || 'Payout was reversed.',
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // 4. Concurrently lock withdrawal from PENDING -> PROCESSING with deterministic ORD_<withdrawal_id>
@@ -160,6 +214,38 @@ serve(async (req: Request) => {
       .select('id, user_id, amount, fee_amount, net_amount, account_holder_name, ifsc_code, bank_account_number_masked, upi_id, status');
 
     if (lockErr || !lockedRows || lockedRows.length === 0) {
+      // Re-fetch to return existing status cleanly if locked by concurrent request
+      const { data: rechecked } = await adminClient
+        .from('withdrawals')
+        .select('status, provider_order_id, payout_reference_id, rejection_reason')
+        .eq('id', withdrawal_id)
+        .maybeSingle();
+
+      if (rechecked?.status === 'SUCCESS') {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            status: 'SUCCESS',
+            order_id: rechecked.provider_order_id,
+            reference_id: rechecked.payout_reference_id,
+            message: 'Payout already completed.',
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (rechecked?.status === 'PROCESSING') {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            status: 'PROCESSING',
+            order_id: rechecked.provider_order_id,
+            message: 'Payout is currently being processed.',
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       return new Response(
         JSON.stringify({
           error: 'Withdrawal is not eligible for dispatch. Must be in PENDING status.',

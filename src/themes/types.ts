@@ -95,6 +95,10 @@ export interface ThemeRewardRevealProps {
   lifafa: Lifafa;
   onClose?: () => void;
   onOpenShare?: (lifafa: Lifafa) => void;
+  payoutDispatched?: boolean;
+  withdrawalStatus?: string;
+  payoutError?: string;
+  payoutReferenceId?: string;
 }
 
 export interface ThemeStatusProps {

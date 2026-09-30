@@ -32,6 +32,21 @@ export interface CreateLifafaParams {
   }>;
 }
 
+export interface ClaimLifafaResult {
+  success: boolean;
+  amount: number;
+  lifafa_code: string;
+  is_duplicate?: boolean;
+  payout_mode?: PayoutMode;
+  withdrawal_id?: string | null;
+  withdrawal_status?: string;
+  new_balance?: number;
+  payout_dispatched?: boolean;
+  payout_reference_id?: string;
+  payout_order_id?: string;
+  payout_error?: string;
+}
+
 export const lifafaService = {
   // Create Lifafa via atomic server-side RPC (Zero frontend trust, wallet reservation & allocation generation inside PostgreSQL)
   async createLifafa(params: CreateLifafaParams, idempotencyKey?: string) {
@@ -67,7 +82,7 @@ export const lifafaService = {
     return data;
   },
 
-  // Claim Lifafa via concurrency-safe atomic PostgreSQL RPC
+  // Claim Lifafa via concurrency-safe atomic PostgreSQL RPC and dispatch payout if UPI_BANK
   async claimLifafa(
     code: string,
     pinCode?: string,
@@ -80,7 +95,7 @@ export const lifafaService = {
       ifscCode?: string;
       upiId?: string;
     }
-  ) {
+  ): Promise<ClaimLifafaResult> {
     if (!isSupabaseConfigured || !supabase) {
       throw new Error('Supabase database is not configured.');
     }
@@ -101,7 +116,51 @@ export const lifafaService = {
       throw new Error(error.message || 'Failed to claim Lifafa');
     }
 
-    return data;
+    // Direct bank payout flow: If payout_mode is UPI_BANK and withdrawal record exists, dispatch to PayRupee
+    if (data?.payout_mode === 'UPI_BANK' && data?.withdrawal_id) {
+      try {
+        const { data: payoutRes, error: payoutErr } = await supabase.functions.invoke('payrupee-payout', {
+          body: {
+            withdrawal_id: data.withdrawal_id,
+          },
+        });
+
+        if (payoutErr) {
+          console.error('PayRupee payout dispatch error:', payoutErr);
+          return {
+            ...data,
+            payout_dispatched: false,
+            payout_error: payoutRes?.error || payoutErr.message || 'Failed to dispatch payout to bank',
+            withdrawal_status: payoutRes?.status || 'PENDING',
+          };
+        }
+
+        const isSuccess = payoutRes?.success && payoutRes?.status === 'SUCCESS';
+        const isProcessing = payoutRes?.status === 'PROCESSING';
+
+        return {
+          ...data,
+          payout_dispatched: isSuccess || isProcessing,
+          payout_reference_id: payoutRes?.reference_id,
+          payout_order_id: payoutRes?.order_id,
+          withdrawal_status: payoutRes?.status || 'PENDING',
+          payout_error: !payoutRes?.success ? payoutRes?.error : undefined,
+        };
+      } catch (dispatchErr: any) {
+        console.error('PayRupee dispatch network exception:', dispatchErr);
+        return {
+          ...data,
+          payout_dispatched: false,
+          payout_error: dispatchErr.message || 'Network exception during bank payout dispatch',
+          withdrawal_status: 'PENDING',
+        };
+      }
+    }
+
+    return {
+      ...data,
+      payout_dispatched: true, // WALLET mode is immediately credited to wallet balance
+    };
   },
 
   // Authoritative server-side PIN code verification for a specific Lifafa

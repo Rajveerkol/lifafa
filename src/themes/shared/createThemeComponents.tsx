@@ -501,6 +501,10 @@ export function createThemeComponents(config: ThemeVisualConfig) {
     lifafa,
     onClose,
     onOpenShare,
+    payoutDispatched,
+    withdrawalStatus,
+    payoutError,
+    payoutReferenceId,
   }) => {
     return (
       <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 text-center space-y-5 animate-in zoom-in-95 duration-300">
@@ -530,11 +534,24 @@ export function createThemeComponents(config: ThemeVisualConfig) {
           <span className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight">
             {formatCurrency(amount)}
           </span>
-          <p className="text-xs font-semibold text-emerald-600 mt-1">
+          <p className={`text-xs font-semibold mt-1 ${
+            payoutMode === 'UPI_BANK' && payoutDispatched === false
+              ? 'text-amber-700 bg-amber-50 p-2 rounded-xl border border-amber-200 text-center'
+              : 'text-emerald-600'
+          }`}>
             {payoutMode === 'UPI_BANK'
-              ? 'Dispatched directly to Bank Account!'
+              ? withdrawalStatus === 'PROCESSING'
+                ? 'Payout initiated! Processing with bank...'
+                : payoutDispatched && (withdrawalStatus === 'SUCCESS' || !withdrawalStatus)
+                  ? 'Dispatched directly to Bank Account!'
+                  : `Reward credited to wallet (Bank dispatch failed: ${payoutError || 'Transfer rejected'})`
               : 'Credited instantly to your CreatLifafa Wallet!'}
           </p>
+          {payoutReferenceId && (
+            <p className="text-[10px] text-slate-400 font-mono mt-1">
+              Ref: {payoutReferenceId}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2 pt-1">

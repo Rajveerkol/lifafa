@@ -49,7 +49,15 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
   const [loadingTasks, setLoadingTasks] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [claimResult, setClaimResult] = useState<{ amount: number; code: string; payoutMode?: PayoutMode } | null>(null);
+  const [claimResult, setClaimResult] = useState<{
+    amount: number;
+    code: string;
+    payoutMode?: PayoutMode;
+    payoutDispatched?: boolean;
+    withdrawalStatus?: string;
+    payoutError?: string;
+    referenceId?: string;
+  } | null>(null);
   const [isEnvelopeOpened, setIsEnvelopeOpened] = useState(false);
 
   // UPI / Bank Payout Details State
@@ -167,15 +175,12 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
         setErrorMsg('Please enter account holder name as per bank records.');
         return;
       }
-      if (
-        (!bankAccountNumber.trim() || bankAccountNumber.trim().length < 6) &&
-        (!upiId.trim() || upiId.trim().length < 3)
-      ) {
-        setErrorMsg('Please provide a valid Bank Account Number or UPI ID.');
+      if (!bankAccountNumber.trim() || bankAccountNumber.trim().length < 6) {
+        setErrorMsg('Please enter a valid Bank Account Number (minimum 6 digits).');
         return;
       }
-      if (ifscCode.trim() && !/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/.test(ifscCode.trim())) {
-        setErrorMsg('Invalid IFSC code format (expected 11 alphanumeric characters e.g. SBIN0001234).');
+      if (!ifscCode.trim() || !/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/.test(ifscCode.trim())) {
+        setErrorMsg('Please enter a valid 11-character IFSC code (e.g. SBIN0001234).');
         return;
       }
       if (upiId.trim() && !/^[\w.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(upiId.trim())) {
@@ -191,7 +196,7 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
       const deviceFp = fraudService.getDeviceFingerprint();
       const idempotencyKey = `claim_${lifafa.id}_${user.id}_${Date.now()}`;
 
-      // Authoritative atomic server RPC claim
+      // Authoritative atomic server RPC claim & payout dispatch
       const res = await lifafaService.claimLifafa(
         lifafa.code,
         pinCode.trim() || undefined,
@@ -208,18 +213,24 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
           : undefined
       );
 
-      // Confetti celebration
-      confetti({
-        particleCount: 140,
-        spread: 90,
-        origin: { y: 0.55 },
-        colors: ['#2563eb', '#fbbf24', '#e11d48', '#10b981', '#6366f1'],
-      });
+      // Confetti celebration if payout succeeded or claimed to wallet
+      if (res.payout_dispatched !== false) {
+        confetti({
+          particleCount: 140,
+          spread: 90,
+          origin: { y: 0.55 },
+          colors: ['#2563eb', '#fbbf24', '#e11d48', '#10b981', '#6366f1'],
+        });
+      }
 
       setClaimResult({
         amount: res.amount,
         code: lifafa.code,
         payoutMode: res.payout_mode || lifafa.payout_mode || 'WALLET',
+        payoutDispatched: res.payout_dispatched,
+        withdrawalStatus: res.withdrawal_status,
+        payoutError: res.payout_error,
+        referenceId: res.payout_reference_id,
       });
 
       await refreshWallet();
@@ -278,6 +289,10 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
                 lifafa={lifafa}
                 onOpenShare={onOpenShare}
                 onClose={onClose}
+                payoutDispatched={claimResult.payoutDispatched}
+                withdrawalStatus={claimResult.withdrawalStatus}
+                payoutError={claimResult.payoutError}
+                payoutReferenceId={claimResult.referenceId}
               />
             ) : isCompleted ? (
               <theme.components.FullyClaimedView
