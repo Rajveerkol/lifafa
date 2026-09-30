@@ -58,7 +58,7 @@ serve(async (req: Request) => {
     let merchantId: string | null = null;
     const clientIdHeader = req.headers.get('X-Client-Id') || req.headers.get('x-client-id');
     const clientSecretHeader = req.headers.get('X-Client-Secret') || req.headers.get('x-client-secret');
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
 
     const clientIp = (
       req.headers.get('x-forwarded-for')?.split(',')[0] ||
@@ -123,7 +123,7 @@ serve(async (req: Request) => {
         .update({ last_used_at: new Date().toISOString() })
         .eq('client_id', clientIdHeader.trim());
 
-    } else if (authHeader?.startsWith('Bearer ')) {
+    } else if (authHeader && /^Bearer\s+/i.test(authHeader)) {
       // Browser Bearer JWT Authentication Path
       const token = authHeader.replace(/^Bearer\s+/i, '').trim();
       const { data: { user }, error: userErr } = await adminClient.auth.getUser(token);

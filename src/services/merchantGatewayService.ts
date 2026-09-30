@@ -210,6 +210,41 @@ export const merchantGatewayService = {
     return { success: true };
   },
 
+  // Proactively validate and obtain fresh access token for authenticated merchant session
+  async getValidSessionToken(): Promise<string> {
+    if (!isSupabaseConfigured || !supabase) {
+      throw new Error('Supabase is not configured.');
+    }
+
+    // 1. Get current session
+    let { data: { session }, error: sessionErr } = await supabase.auth.getSession();
+
+    // 2. If no session or error, attempt refresh
+    if (sessionErr || !session) {
+      const { data: refreshData, error: refreshErr } = await supabase.auth.refreshSession();
+      if (refreshErr || !refreshData?.session) {
+        throw new Error('Your session has expired. Please sign in again to initiate payouts.');
+      }
+      session = refreshData.session;
+    }
+
+    // 3. Proactively refresh if token is expired or expiring within 60 seconds
+    const nowSec = Math.floor(Date.now() / 1000);
+    if (!session.expires_at || session.expires_at <= nowSec + 60) {
+      const { data: refreshed, error: refreshErr } = await supabase.auth.refreshSession();
+      if (refreshErr || !refreshed?.session) {
+        throw new Error('Your session has expired. Please sign in again to initiate payouts.');
+      }
+      session = refreshed.session;
+    }
+
+    if (!session?.access_token) {
+      throw new Error('No active authenticated session found. Please sign in again.');
+    }
+
+    return session.access_token;
+  },
+
   // Request payout via dedicated merchant-payrupee-payout Edge Function
   async createPayout(params: {
     orderId: string;
@@ -225,7 +260,20 @@ export const merchantGatewayService = {
       throw new Error('Supabase is not configured.');
     }
 
+    // 1. Validate session and obtain fresh access token
+    const token = await this.getValidSessionToken();
+
+    // 2. Construct explicit headers
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+    };
+    if (params.idempotencyKey) {
+      headers['x-idempotency-key'] = params.idempotencyKey;
+    }
+
+    // 3. Invoke Edge Function with explicit fresh Bearer token
     const { data, error } = await supabase.functions.invoke('merchant-payrupee-payout', {
+      headers,
       body: {
         order_id: params.orderId,
         amount: params.amount,
