@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { supabase, isSupabaseConfigured, getValidAuthToken, extractFunctionError } from '../lib/supabase';
 import type { WalletTransaction, Withdrawal, PlatformFee, WithdrawableBalanceResponse } from '../types/database';
 
 export interface RequestWithdrawalParams {
@@ -53,7 +53,18 @@ export const walletService = {
       throw new Error('Supabase database is not configured.');
     }
 
+    // 1. Proactively obtain fresh valid access token
+    const token = await getValidAuthToken();
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    if (idempotencyKey) {
+      headers['x-idempotency-key'] = idempotencyKey;
+    }
+
     const { data, error } = await supabase.functions.invoke('payrupee-payout', {
+      headers,
       body: {
         action: 'request_and_dispatch',
         amount: params.amount,
@@ -65,11 +76,10 @@ export const walletService = {
     });
 
     if (error) {
-      // If error returned with response data, extract the specific error message
-      const errMsg = data?.error || data?.message || error.message || 'Withdrawal request failed';
       if (data?.status === 'PROCESSING') {
         return data;
       }
+      const errMsg = await extractFunctionError(error, data);
       throw new Error(errMsg);
     }
 

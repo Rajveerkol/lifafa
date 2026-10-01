@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { supabase, isSupabaseConfigured, getValidAuthToken, extractFunctionError } from '../lib/supabase';
 import type { Lifafa, LifafaTask, LifafaClaim, DistributionType, PayoutMode } from '../types/database';
 
 export interface CreateLifafaParams {
@@ -54,7 +54,7 @@ export const lifafaService = {
       throw new Error('Supabase database is not configured. Please connect Supabase.');
     }
 
-    const { data, error } = await supabase.rpc('create_lifafa_rpc', {
+    let { data, error } = await supabase.rpc('create_lifafa_rpc', {
       p_title: params.title,
       p_message: params.message || null,
       p_total_amount: params.totalAmount,
@@ -74,6 +74,46 @@ export const lifafaService = {
       p_device_claim_limit: params.deviceClaimLimit ?? 1,
       p_payout_mode: params.payoutMode || 'WALLET',
     });
+
+    // Resilient Fallback: If remote PostgreSQL enum task_type has not yet been extended via Migration 034,
+    // retry transparently with CUSTOM task_type and [YOUTUBE_WATCH:videoId] metadata tag
+    if (error && error.message?.includes('invalid input value for enum task_type') && params.tasks?.some(t => t.task_type === 'YOUTUBE_WATCH')) {
+      const fallbackTasks = (params.tasks || []).map((t) => {
+        if (t.task_type === 'YOUTUBE_WATCH') {
+          const videoId = (t as any).youtube_video_id || (t.target_url?.match(/v=([a-zA-Z0-9_-]{11})/) || [])[1] || '';
+          return {
+            ...t,
+            task_type: 'CUSTOM',
+            description: `[YOUTUBE_WATCH:${videoId}] ${t.description || 'Watch the complete video to unlock your claim.'}`,
+          };
+        }
+        return t;
+      });
+
+      const retryRes = await supabase.rpc('create_lifafa_rpc', {
+        p_title: params.title,
+        p_message: params.message || null,
+        p_total_amount: params.totalAmount,
+        p_winner_count: params.winnerCount,
+        p_distribution_type: params.distributionType,
+        p_expires_at: params.expiresAt,
+        p_is_public: params.isPublic ?? true,
+        p_pin_code: params.pinCode || null,
+        p_allow_cancel: params.allowCancel ?? true,
+        p_show_remaining: params.showRemaining ?? true,
+        p_creator_note: params.creatorNote || null,
+        p_tasks: fallbackTasks,
+        p_idempotency_key: idempotencyKey || null,
+        p_min_claim_amount: params.minClaimAmount || null,
+        p_max_claim_amount: params.maxClaimAmount || null,
+        p_starts_at: params.startsAt || null,
+        p_device_claim_limit: params.deviceClaimLimit ?? 1,
+        p_payout_mode: params.payoutMode || 'WALLET',
+      });
+
+      data = retryRes.data;
+      error = retryRes.error;
+    }
 
     if (error) {
       throw new Error(error.message || 'Failed to create Lifafa');
@@ -131,23 +171,34 @@ export const lifafaService = {
         };
       }
 
-      // 1. Invoke PayRupee Edge Function dispatch
+      // 1. Obtain fresh access token to avoid 401 Unauthorized
+      const token = await getValidAuthToken();
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      // 2. Invoke PayRupee Edge Function dispatch
       let payoutRes: any = null;
+      let invokeErrorMessage: string | null = null;
       try {
         const invokeResult = await supabase.functions.invoke('payrupee-payout', {
+          headers,
           body: {
             withdrawal_id: data.withdrawal_id,
           },
         });
         payoutRes = invokeResult.data;
         if (invokeResult.error) {
-          console.error('PayRupee invoke error:', invokeResult.error);
+          invokeErrorMessage = await extractFunctionError(invokeResult.error, invokeResult.data);
+          console.error('PayRupee invoke error:', invokeErrorMessage);
         }
       } catch (invokeErr: any) {
+        invokeErrorMessage = invokeErr.message || 'Network exception dispatching bank payout';
         console.error('PayRupee invoke exception:', invokeErr);
       }
 
-      // 2. CRITICAL CHECK: Authoritatively verify the payout state from the database.
+      // 3. CRITICAL CHECK: Authoritatively verify the payout state from the database.
       // Do NOT rely only on claim_lifafa_rpc or edge function return value.
       // Must explicitly verify the actual withdrawal record in PostgreSQL.
       const currentUserId = (await supabase.auth.getUser())?.data?.user?.id;
@@ -172,7 +223,7 @@ export const lifafaService = {
         ...data,
         payout_dispatched: false, // EXPLICITLY FALSE
         withdrawal_status: verifiedCheck.status || payoutRes?.status || 'FAILED',
-        payout_error: verifiedCheck.error || payoutRes?.error || 'Reward claimed, but bank payout could not be initiated.',
+        payout_error: verifiedCheck.error || invokeErrorMessage || payoutRes?.error || 'Reward claimed, but bank payout could not be initiated.',
         payout_order_id: verifiedCheck.order_id || payoutRes?.order_id,
       };
     }

@@ -64,6 +64,9 @@ export const taskService = {
     } else if (taskType === 'YOUTUBE_SUB') {
       verificationMethod = 'USER_CONFIRMED';
       friendlyMessage = 'YouTube subscription confirmed.';
+    } else if (taskType === 'YOUTUBE_WATCH') {
+      verificationMethod = 'USER_CONFIRMED';
+      friendlyMessage = 'YouTube video watch completed.';
     } else if (taskType === 'REFERRAL') {
       verificationMethod = 'USER_CONFIRMED';
       friendlyMessage = 'Referral task confirmed.';

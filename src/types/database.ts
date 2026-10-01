@@ -26,6 +26,7 @@ export type DistributionType = 'EQUAL' | 'RANDOM';
 export type TaskType =
   | 'TELEGRAM_JOIN'
   | 'YOUTUBE_SUB'
+  | 'YOUTUBE_WATCH'
   | 'REFERRAL'
   | 'INSTAGRAM_FOLLOW'
   | 'INSTAGRAM_LIKE'
@@ -163,6 +164,7 @@ export interface LifafaTask {
   title: string;
   description: string | null;
   target_url: string | null;
+  youtube_video_id?: string | null;
   is_required: boolean;
   is_enabled: boolean;
   sort_order: number;

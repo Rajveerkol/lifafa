@@ -16,6 +16,8 @@ import type { LifafaTask } from '../../types/database';
 import { taskService } from '../../services/taskService';
 import { telegramService } from '../../services/telegramService';
 import { useAuth } from '../../context/AuthContext';
+import { YouTubeWatchPlayer } from './YouTubeWatchPlayer';
+import { extractYouTubeVideoId } from '../../utils/youtubeUtils';
 
 interface TaskCardProps {
   task: LifafaTask & {
@@ -39,6 +41,48 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   const { user } = useAuth();
   const [genericLoading, setGenericLoading] = useState(false);
   const [genericError, setGenericError] = useState<string | null>(null);
+
+  // Check if this is a YouTube Watch Video requirement
+  const youtubeVideoId =
+    task.youtube_video_id ||
+    (task.target_url ? extractYouTubeVideoId(task.target_url) : null) ||
+    (task.description ? extractYouTubeVideoId(task.description) : null);
+
+  const isYouTubeWatch =
+    task.task_type === 'YOUTUBE_WATCH' ||
+    Boolean(
+      youtubeVideoId &&
+      (task.title.toLowerCase().includes('watch') ||
+       task.description?.includes('YOUTUBE_WATCH') ||
+       task.task_type === 'CUSTOM')
+    );
+
+  if (isYouTubeWatch && youtubeVideoId) {
+    return (
+      <YouTubeWatchPlayer
+        videoId={youtubeVideoId}
+        taskTitle={task.title || 'Watch YouTube Video'}
+        isCompleted={isCompleted}
+        taskNumber={taskNumber}
+        onCompleted={async () => {
+          if (user) {
+            try {
+              await taskService.verifyAndRecordTask(
+                task.id,
+                task.lifafa_id,
+                user.id,
+                task.task_type,
+                task.target_url
+              );
+            } catch (err) {
+              console.warn('Error recording video watch completion:', err);
+            }
+          }
+          onCompleted(task.id);
+        }}
+      />
+    );
+  }
 
   // Telegram Task Specific State
   const isTelegramTask =

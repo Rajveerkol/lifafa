@@ -59,3 +59,55 @@ export async function signOut() {
     console.error('Error signing out:', error);
   }
 }
+
+// Retrieve fresh valid access token with proactive refresh to prevent Edge Function 401 Unauthorized errors
+export async function getValidAuthToken(): Promise<string | null> {
+  if (!isSupabaseConfigured || !client) return null;
+
+  try {
+    let { data: { session }, error: sessionErr } = await client.auth.getSession();
+    const nowSec = Math.floor(Date.now() / 1000);
+
+    if (sessionErr || !session || !session.expires_at || session.expires_at <= nowSec + 60) {
+      const { data: refreshData, error: refreshErr } = await client.auth.refreshSession();
+      if (!refreshErr && refreshData?.session) {
+        session = refreshData.session;
+      }
+    }
+
+    return session?.access_token || null;
+  } catch (err) {
+    console.warn('Error obtaining valid auth token:', err);
+    return null;
+  }
+}
+
+// Extract clean, descriptive error message from Supabase Edge Function invocation
+export async function extractFunctionError(error: any, data?: any): Promise<string> {
+  if (data?.error) {
+    return typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
+  }
+  if (data?.message && !data?.success) {
+    return String(data.message);
+  }
+
+  const resp: Response | undefined = error?.context instanceof Response ? error.context : undefined;
+  if (resp) {
+    try {
+      const cloned = typeof resp.clone === 'function' ? resp.clone() : resp;
+      const text = await cloned.text();
+      if (text) {
+        try {
+          const json = JSON.parse(text);
+          if (json?.error) return typeof json.error === 'string' ? json.error : JSON.stringify(json.error);
+          if (json?.message) return String(json.message);
+        } catch {
+          return text.slice(0, 200);
+        }
+      }
+    } catch {}
+  }
+
+  return error?.message || 'Operation failed';
+}
+

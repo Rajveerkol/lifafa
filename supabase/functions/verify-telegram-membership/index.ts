@@ -54,21 +54,57 @@ serve(async (req: Request) => {
 
     const { channelUsername, channelId, telegramUserId, taskId, telegramUsername } = await req.json();
 
-    if ((!channelUsername && !channelId) || !telegramUserId) {
+    if (!channelUsername && !channelId) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: 'channelUsername or channelId, and telegramUserId are required',
+          error: 'channelUsername or channelId is required',
         }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    // Authoritative Profile Check: Ensure the claimant has bound their Telegram account
+    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+    const { data: profile, error: profileErr } = await adminClient
+      .from('profiles')
+      .select('telegram_user_id, telegram_username')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (profileErr || !profile || !profile.telegram_user_id) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          verified: false,
+          error: 'Your Telegram account is not linked. Please tap START in @createlifafa_bot to link your Telegram account before verifying membership.',
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const boundTelegramUserId = Number(profile.telegram_user_id);
+    const boundTelegramUsername = profile.telegram_username;
+
+    // Impersonation Prevention: If request payload specified a telegramUserId, it MUST match bound profile
+    if (telegramUserId && Number(telegramUserId) !== boundTelegramUserId) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          verified: false,
+          error: 'Security violation: telegramUserId does not match your linked Telegram account.',
+        }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Always use the server-verified bound Telegram user ID
+    const authoritativeTelegramUserId = boundTelegramUserId;
     const chatTarget = channelId || `@${channelUsername.trim().replace(/^@/, '')}`;
 
     // Call Telegram API getChatMember
     const memberRes = await fetch(
-      `https://api.telegram.org/bot${botToken}/getChatMember?chat_id=${encodeURIComponent(chatTarget)}&user_id=${encodeURIComponent(telegramUserId)}`
+      `https://api.telegram.org/bot${botToken}/getChatMember?chat_id=${encodeURIComponent(chatTarget)}&user_id=${encodeURIComponent(authoritativeTelegramUserId)}`
     );
     const memberData = await memberRes.json();
 
@@ -91,15 +127,13 @@ serve(async (req: Request) => {
 
     // If verified and taskId provided, record authoritative server-side completion
     if (isMember && taskId) {
-      const adminClient = createClient(supabaseUrl, supabaseServiceKey);
-
       const { data: rpcData, error: rpcError } = await adminClient.rpc(
         'record_telegram_member_completion_server_rpc',
         {
           p_task_id: taskId,
           p_user_id: user.id,
-          p_telegram_user_id: Number(telegramUserId),
-          p_telegram_username: telegramUsername || null,
+          p_telegram_user_id: authoritativeTelegramUserId,
+          p_telegram_username: boundTelegramUsername || telegramUsername || null,
           p_member_status: status,
         }
       );

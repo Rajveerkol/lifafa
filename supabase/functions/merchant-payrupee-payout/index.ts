@@ -287,26 +287,38 @@ serve(async (req: Request) => {
     } catch (netErr: any) {
       clearTimeout(timeoutId);
 
-      // Network / Request failure -> Mark FAILED and auto-refund float & fee
-      const failureReason = `Network request failure: ${netErr.message || 'Timeout contacting provider'}`;
+      // Network / Request timeout -> State is UNCERTAIN.
+      // CRITICAL: Do NOT mark FAILED or auto-refund float! The upstream provider may have received and processed the payout.
+      // Retain locked float and update status to PROCESSING awaiting authoritative webhook confirmation.
+      const timeoutReason = `Network dispatch timeout: ${netErr.message || 'Timeout contacting provider'}`;
 
-      await adminClient.rpc('merchant_finalize_payout_failure_rpc', {
-        p_provider_order_id: providerOrderId,
-        p_rejection_reason: failureReason,
-        p_provider_event_id: `disp_net_err_${Date.now()}`,
-        p_raw_payload: { error: netErr.message },
+      await adminClient
+        .from('merchant_payouts')
+        .update({
+          status: 'PROCESSING',
+          rejection_reason: timeoutReason,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('provider_order_id', providerOrderId)
+        .eq('status', 'PENDING');
+
+      await adminClient.from('merchant_payout_events').insert({
+        provider_event_id: `disp_net_err_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        payout_id: payoutId,
+        event_type: 'payout.dispatch_timeout',
+        raw_payload: { error: netErr.message, provider_order_id: providerOrderId },
       });
 
       return new Response(
         JSON.stringify({
           success: false,
-          status: 'FAILED',
+          status: 'PROCESSING',
           order_id: orderId,
           provider_order_id: providerOrderId,
-          error: failureReason,
-          message: 'Network failure contacting payment provider. Float balance and fee have been refunded.',
+          error: timeoutReason,
+          message: 'Dispatch timed out contacting payment provider. Payout held in PROCESSING state awaiting webhook confirmation. Locked float is preserved.',
         }),
-        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 504, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -338,24 +350,35 @@ serve(async (req: Request) => {
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } else if (payrupeeRes.status >= 500) {
-      // Upstream Provider API Error (HTTP 5xx) -> Definitively failed dispatch
+      // Upstream Provider API Error (HTTP 5xx) -> State is UNCERTAIN.
+      // CRITICAL: Do NOT auto-refund on upstream 5xx. Hold in PROCESSING state for reconciliation/webhook.
       const rejectionReason = payrupeeData.message || payrupeeData.error || `Provider API error (HTTP ${payrupeeRes.status})`;
 
-      await adminClient.rpc('merchant_finalize_payout_failure_rpc', {
-        p_provider_order_id: providerOrderId,
-        p_rejection_reason: rejectionReason,
-        p_provider_event_id: `disp_5xx_${Date.now()}`,
-        p_raw_payload: payrupeeData,
+      await adminClient
+        .from('merchant_payouts')
+        .update({
+          status: 'PROCESSING',
+          rejection_reason: rejectionReason,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('provider_order_id', providerOrderId)
+        .eq('status', 'PENDING');
+
+      await adminClient.from('merchant_payout_events').insert({
+        provider_event_id: `disp_5xx_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        payout_id: payoutId,
+        event_type: 'payout.dispatch_upstream_5xx',
+        raw_payload: { status: payrupeeRes.status, body: payrupeeData, provider_order_id: providerOrderId },
       });
 
       return new Response(
         JSON.stringify({
           success: false,
-          status: 'FAILED',
+          status: 'PROCESSING',
           order_id: orderId,
           provider_order_id: providerOrderId,
           error: rejectionReason,
-          message: 'Payout failed at provider. Float balance and fee have been refunded.',
+          message: 'Provider service returned HTTP 5xx. Payout held in PROCESSING state awaiting webhook reconciliation. Locked float is preserved.',
         }),
         { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );

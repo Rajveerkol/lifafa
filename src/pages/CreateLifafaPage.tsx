@@ -13,6 +13,7 @@ import {
   Loader2,
   Send,
   Youtube,
+  Video,
   Instagram,
   Globe,
   UserPlus,
@@ -30,6 +31,8 @@ import { lifafaService } from '../services/lifafaService';
 import type { DistributionType, TaskType, Lifafa, PayoutMode } from '../types/database';
 import { formatCurrency } from '../lib/utils';
 import { TelegramTaskBuilder, type VerifiedTelegramChannel } from '../components/lifafa/TelegramTaskBuilder';
+import { YouTubeTaskBuilder } from '../components/lifafa/YouTubeTaskBuilder';
+import { extractYouTubeVideoId } from '../utils/youtubeUtils';
 import { ThemeSelector } from '../components/lifafa/ThemeSelector';
 import { inferThemeFromContent } from '../themes/useThemeResolver';
 import type { LifafaThemeId } from '../themes/types';
@@ -62,12 +65,14 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
 
   // Step 2: Requirements (Tasks)
   const [showTelegramBuilder, setShowTelegramBuilder] = useState(false);
+  const [showYouTubeBuilder, setShowYouTubeBuilder] = useState(false);
   const [tasks, setTasks] = useState<
     Array<{
       task_type: TaskType;
       title: string;
       description: string;
       target_url: string;
+      youtube_video_id?: string;
       is_required: boolean;
       is_enabled: boolean;
       telegram_channel_username?: string;
@@ -143,9 +148,30 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
     setShowTelegramBuilder(false);
   };
 
+  const handleYouTubeWatchAdded = (data: { videoUrl: string; videoId: string; title: string }) => {
+    setTasks([
+      ...tasks,
+      {
+        task_type: 'YOUTUBE_WATCH',
+        title: data.title || 'Watch YouTube Video',
+        description: `[YOUTUBE_WATCH:${data.videoId}] Watch the complete video to unlock your claim.`,
+        target_url: data.videoUrl,
+        youtube_video_id: data.videoId,
+        is_required: true,
+        is_enabled: true,
+      },
+    ]);
+    setShowYouTubeBuilder(false);
+  };
+
   const handleAddTask = (type: TaskType) => {
     if (type === 'TELEGRAM_JOIN' || type === 'TELEGRAM_BOT') {
       setShowTelegramBuilder(true);
+      return;
+    }
+
+    if (type === 'YOUTUBE_WATCH') {
+      setShowYouTubeBuilder(true);
       return;
     }
 
@@ -153,6 +179,7 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
       TELEGRAM_JOIN: 'Join Telegram Channel',
       TELEGRAM_BOT: 'Start Telegram Bot',
       YOUTUBE_SUB: 'Subscribe YouTube Channel',
+      YOUTUBE_WATCH: 'Watch YouTube Video',
       INSTAGRAM_FOLLOW: 'Follow on Instagram',
       INSTAGRAM_LIKE: 'Like Instagram Post',
       REFERRAL: 'Invite 1 Friend',
@@ -202,6 +229,19 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
         setErrorMsg('All enabled Telegram channels must be verified by adding @createlifafa_bot as administrator.');
         return false;
       }
+
+      // Check invalid YouTube Watch tasks
+      const invalidYt = tasks.find(
+        (t) =>
+          t.task_type === 'YOUTUBE_WATCH' &&
+          t.is_enabled &&
+          (!t.target_url || !extractYouTubeVideoId(t.target_url))
+      );
+      if (invalidYt) {
+        setErrorMsg('Please enter a valid YouTube Video URL for all Watch Video requirements.');
+        return false;
+      }
+
       return true;
     }
 
@@ -529,6 +569,15 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
                   <Plus className="w-3.5 h-3.5" />
                   <span>+ Custom</span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleAddTask('YOUTUBE_WATCH')}
+                  className="flex items-center gap-1.5 py-2 px-3 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold rounded-xl border border-red-200 transition-colors cursor-pointer"
+                >
+                  <Video className="w-3.5 h-3.5 text-red-600" />
+                  <span>🎥 + Watch YouTube Video</span>
+                </button>
               </div>
             </div>
 
@@ -540,6 +589,14 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
               />
             )}
 
+            {/* YouTube Video Watch Requirement Builder */}
+            {showYouTubeBuilder && (
+              <YouTubeTaskBuilder
+                onAdd={handleYouTubeWatchAdded}
+                onCancel={() => setShowYouTubeBuilder(false)}
+              />
+            )}
+
             {/* Configured Tasks List */}
             {tasks.length > 0 ? (
               <div className="space-y-3 pt-2">
@@ -547,18 +604,28 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
                   <div
                     key={idx}
                     className={`p-4 rounded-2xl border space-y-3 ${
-                      t.is_channel_verified ? 'bg-sky-50/50 border-sky-200' : 'bg-slate-50 border-slate-200/80'
+                      t.is_channel_verified
+                        ? 'bg-sky-50/50 border-sky-200'
+                        : t.task_type === 'YOUTUBE_WATCH'
+                        ? 'bg-red-50/30 border-red-200'
+                        : 'bg-slate-50 border-slate-200/80'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-                          Task {idx + 1}: {t.task_type.replace('_', ' ')}
+                          Task {idx + 1}: {t.task_type === 'YOUTUBE_WATCH' ? 'Watch YouTube Video' : t.task_type.replace('_', ' ')}
                         </span>
                         {t.is_channel_verified && (
                           <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                             <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                             Bot Admin Verified
+                          </span>
+                        )}
+                        {t.task_type === 'YOUTUBE_WATCH' && (
+                          <span className="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <Youtube className="w-3 h-3 text-red-600" />
+                            Video Watch
                           </span>
                         )}
                       </div>
@@ -583,12 +650,31 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
                       <input
                         type="url"
                         value={t.target_url}
-                        onChange={(e) => handleUpdateTask(idx, 'target_url', e.target.value)}
-                        placeholder="Target URL (e.g. https://t.me/...)"
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const vid = extractYouTubeVideoId(val);
+                          handleUpdateTask(idx, 'target_url', val);
+                          if (t.task_type === 'YOUTUBE_WATCH' && vid) {
+                            handleUpdateTask(idx, 'youtube_video_id', vid);
+                            handleUpdateTask(idx, 'description', `[YOUTUBE_WATCH:${vid}] Watch complete video to unlock claim.`);
+                          }
+                        }}
+                        placeholder={t.task_type === 'YOUTUBE_WATCH' ? "YouTube Video URL (e.g. https://youtube.com/watch?v=...)" : "Target URL (e.g. https://t.me/...)"}
                         className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium"
                         required
                       />
                     </div>
+
+                    {/* Preview for YouTube Watch Task */}
+                    {t.task_type === 'YOUTUBE_WATCH' && t.target_url && extractYouTubeVideoId(t.target_url) && (
+                      <div className="relative w-full aspect-video max-w-xs rounded-xl overflow-hidden bg-black border border-slate-200 shadow-xs">
+                        <iframe
+                          src={`https://www.youtube-nocookie.com/embed/${extractYouTubeVideoId(t.target_url)}?rel=0`}
+                          title="YouTube Video Preview"
+                          className="w-full h-full border-0 pointer-events-none"
+                        />
+                      </div>
+                    )}
 
                     <div className="flex items-center justify-between text-xs pt-1">
                       <label className="flex items-center gap-2 cursor-pointer">
