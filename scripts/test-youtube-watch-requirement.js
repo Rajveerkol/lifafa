@@ -103,35 +103,41 @@ class SimulatedYouTubeSession {
     this.duration = duration;
     this.currentTime = 0;
     this.maxWatchedTime = 0;
+    this.totalWatchedTime = 0;
     this.playerState = -1; // -1: unstarted, 1: playing, 2: paused, 0: ended
     this.isCompleted = false;
     this.antiSkipTriggered = false;
     this.tabHidden = false;
     this.hasActiveWatchSession = false;
+    this.lastObservedTime = 0;
   }
 
   play() {
     this.playerState = 1;
     this.hasActiveWatchSession = true;
+    this.antiSkipTriggered = false;
   }
 
   pause() {
     this.playerState = 2;
   }
 
-  // Poll tick simulating real-time playback
+  // Poll tick simulating legitimate real-time continuous playback
   advanceTime(seconds) {
     if (this.playerState !== 1) return;
 
     this.currentTime += seconds;
     if (this.currentTime > this.maxWatchedTime) {
+      const delta = this.currentTime - this.maxWatchedTime;
       this.maxWatchedTime = this.currentTime;
+      this.totalWatchedTime += delta;
     }
   }
 
-  // Forward seek attempt
+  // Forward seek attempt with strict tolerance (0.8s)
   seekForward(targetSecond) {
-    if (targetSecond > this.maxWatchedTime + 2.5) {
+    const TOLERANCE = 0.8;
+    if (targetSecond > this.maxWatchedTime + TOLERANCE) {
       // Detected forward skip ahead of legitimate watch position!
       this.antiSkipTriggered = true;
       this.pause();
@@ -143,7 +149,7 @@ class SimulatedYouTubeSession {
     return true;
   }
 
-  // Backward seek attempt (allowed)
+  // Backward seek attempt (allowed, never advances watermark)
   seekBackward(targetSecond) {
     this.currentTime = Math.max(0, targetSecond);
     return true; // allowed
@@ -160,13 +166,16 @@ class SimulatedYouTubeSession {
   // YouTube player trigger on natural end
   onPlayerEnded() {
     this.playerState = 0;
-    // Strict Anti-Skip: natural end requires watching to the end of the duration
-    if (this.duration > 0 && this.maxWatchedTime >= this.duration - 3) {
+    // Strict Anti-Skip: natural end requires reaching end watermark and sufficient total continuous playback time
+    const hasReachedEnd = this.duration > 0 && this.maxWatchedTime >= Math.max(0, this.duration - 1.5);
+    const hasWatchedSufficient = this.duration > 0 && this.totalWatchedTime >= Math.max(0, this.duration - 2.5);
+
+    if (hasReachedEnd && hasWatchedSufficient) {
       this.isCompleted = true;
       this.hasActiveWatchSession = false;
       return true;
     } else {
-      // Premature end
+      // Premature end after forward seek
       this.antiSkipTriggered = true;
       this.currentTime = this.maxWatchedTime;
       return false;
@@ -189,18 +198,24 @@ assert.strictEqual(session1.currentTime, 20);
 assert.strictEqual(session1.maxWatchedTime, 20);
 console.log('[PASS] Test 4 - 7: Normal Play, Pause, and legitimate resume progression verified');
 
-// TEST 8: Anti-Skip: Forward Seek Blocked
+// TEST 8: Anti-Skip: Forward Seek Blocked (large jump from 0:10 to 1:00 & small jump > 0.8s)
 const session2 = new SimulatedYouTubeSession(60);
 session2.play();
-session2.advanceTime(5); // watched 5s
-assert.strictEqual(session2.maxWatchedTime, 5);
+session2.advanceTime(10); // watched 10s legitimately
+assert.strictEqual(session2.maxWatchedTime, 10);
 
-// User attempts to skip to 55s
-const seekAccepted = session2.seekForward(55);
+// User attempts to skip progress bar from 0:10 to 1:00 (60s)
+const seekAccepted = session2.seekForward(60);
 assert.strictEqual(seekAccepted, false, 'Forward seek ahead of watched position must be rejected');
 assert.strictEqual(session2.antiSkipTriggered, true);
 assert.strictEqual(session2.playerState, 2, 'Player must be paused on seek attempt');
-assert.strictEqual(session2.currentTime, 5, 'Position must snap back to legitimate maximum watched second');
+assert.strictEqual(session2.currentTime, 10, 'Position must snap back to legitimate maximum watched second (10s)');
+assert.strictEqual(session2.maxWatchedTime, 10, 'Max watched watermark must NOT advance on seek');
+
+// Try a small seek ahead from 0:10 to 0:12 (2s jump > 0.8s tolerance)
+const smallSeekAccepted = session2.seekForward(12);
+assert.strictEqual(smallSeekAccepted, false, 'Small forward seek (> 0.8s) must also be rejected');
+assert.strictEqual(session2.currentTime, 10, 'Position snaps back to 10s');
 
 // User tries to trigger ENDED event prematurely
 const completedPremature = session2.onPlayerEnded();
@@ -208,7 +223,7 @@ assert.strictEqual(completedPremature, false, 'Premature end after forward seek 
 assert.strictEqual(session2.isCompleted, false);
 console.log('[PASS] Test 8: Anti-skip forward seek blocked; premature completion rejected');
 
-// TEST 9: Backward Seek Allowed
+// TEST 9: Backward Seek Allowed (Preserves watermark without advancing)
 const session3 = new SimulatedYouTubeSession(60);
 session3.play();
 session3.advanceTime(30);
@@ -216,7 +231,10 @@ assert.strictEqual(session3.maxWatchedTime, 30);
 const backSeekOk = session3.seekBackward(10);
 assert.strictEqual(backSeekOk, true, 'Seeking backward within legitimately watched segment is permitted');
 assert.strictEqual(session3.currentTime, 10);
-assert.strictEqual(session3.maxWatchedTime, 30, 'Watermark remains preserved at furthest watched second');
+assert.strictEqual(session3.maxWatchedTime, 30, 'Watermark remains preserved at furthest watched second (30s)');
+session3.advanceTime(10); // user plays from 10 to 20
+assert.strictEqual(session3.currentTime, 20);
+assert.strictEqual(session3.maxWatchedTime, 30, 'Watermark stays at 30s while rewatching');
 console.log('[PASS] Test 9: Backward seek within legitimately watched segment permitted without penalty');
 
 // TEST 10 & 11: Tab Visibility Change (document.hidden)
@@ -254,8 +272,8 @@ console.log('[PASS] Test 12 & 13: Page reload / navigate away resets watch progr
 const session6 = new SimulatedYouTubeSession(40);
 session6.play();
 session6.advanceTime(20);
-session6.advanceTime(18); // watched 38s of 40s (within 3s natural threshold)
-assert.strictEqual(session6.maxWatchedTime, 38);
+session6.advanceTime(19); // watched 39s of 40s (within 1.5s natural threshold)
+assert.strictEqual(session6.maxWatchedTime, 39);
 const endResult = session6.onPlayerEnded();
 assert.strictEqual(endResult, true, 'Natural end after complete watch must succeed');
 assert.strictEqual(session6.isCompleted, true);
