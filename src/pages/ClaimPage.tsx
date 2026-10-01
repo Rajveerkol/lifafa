@@ -243,6 +243,16 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
 
     if (!lifafa) return;
 
+    if (user && lifafa.creator_id === user.id) {
+      setErrorMsg('Creators cannot claim their own Lifafa.');
+      return;
+    }
+
+    if ((lifafa as any).withdrawal_status === 'BLOCKED') {
+      setErrorMsg('This Lifafa has been blocked by platform administration.');
+      return;
+    }
+
     if (isPinRequired && !isPinUnlocked) {
       setErrorMsg('This Lifafa is PIN protected. Please enter the security PIN and unlock it before claiming.');
       return;

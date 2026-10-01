@@ -55,6 +55,16 @@ export function useClaimLogic(
 
     if (!lifafa) return;
 
+    if (user && lifafa.creator_id === user.id) {
+      setErrorMsg('Creators cannot claim their own Lifafa.');
+      return;
+    }
+
+    if ((lifafa as any).withdrawal_status === 'BLOCKED') {
+      setErrorMsg('This Lifafa has been blocked by platform administration.');
+      return;
+    }
+
     if (!allRequiredDone) {
       setErrorMsg('Please complete all required tasks above to claim your reward.');
       return;

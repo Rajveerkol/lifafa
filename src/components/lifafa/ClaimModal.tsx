@@ -159,6 +159,16 @@ export const ClaimModal: React.FC<ClaimModalProps> = ({
       return;
     }
 
+    if (lifafa.creator_id === user.id) {
+      setErrorMsg('Creators cannot claim their own Lifafa.');
+      return;
+    }
+
+    if ((lifafa as any).withdrawal_status === 'BLOCKED') {
+      setErrorMsg('This Lifafa has been blocked by platform administration.');
+      return;
+    }
+
     if (lifafa.pin_code && !pinCode.trim()) {
       setErrorMsg('PIN code is required to claim this Lifafa.');
       return;
