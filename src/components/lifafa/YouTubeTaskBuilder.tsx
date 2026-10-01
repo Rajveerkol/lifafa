@@ -20,8 +20,11 @@ export const YouTubeTaskBuilder: React.FC<YouTubeTaskBuilderProps> = ({ onAdd, o
   const isValid = Boolean(videoId);
   const showError = touched && videoUrl.trim().length > 0 && !isValid;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAddRequirement = (e?: React.MouseEvent | React.KeyboardEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setTouched(true);
 
     if (!isValid || !videoId) return;
@@ -53,7 +56,11 @@ export const YouTubeTaskBuilder: React.FC<YouTubeTaskBuilderProps> = ({ onAdd, o
 
         <button
           type="button"
-          onClick={onCancel}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onCancel();
+          }}
           className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-white/80 transition-colors cursor-pointer"
           aria-label="Close"
         >
@@ -61,7 +68,7 @@ export const YouTubeTaskBuilder: React.FC<YouTubeTaskBuilderProps> = ({ onAdd, o
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-3.5">
+      <div className="space-y-3.5">
         {/* URL Input */}
         <div>
           <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -76,6 +83,15 @@ export const YouTubeTaskBuilder: React.FC<YouTubeTaskBuilderProps> = ({ onAdd, o
                 setTouched(true);
               }}
               onBlur={() => setTouched(true)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (isValid && videoId) {
+                    handleAddRequirement(e);
+                  }
+                }
+              }}
               placeholder="https://youtube.com/watch?v=... or https://youtu.be/..."
               className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 transition-all ${
                 showError
@@ -84,7 +100,6 @@ export const YouTubeTaskBuilder: React.FC<YouTubeTaskBuilderProps> = ({ onAdd, o
                   ? 'border-emerald-300 focus:ring-emerald-100'
                   : 'border-slate-200 focus:ring-red-100 focus:border-red-400'
               }`}
-              required
             />
             {isValid && (
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-600">
@@ -110,6 +125,15 @@ export const YouTubeTaskBuilder: React.FC<YouTubeTaskBuilderProps> = ({ onAdd, o
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
+                if (isValid && videoId) {
+                  handleAddRequirement(e);
+                }
+              }
+            }}
             placeholder="Watch YouTube Video"
             className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-slate-200"
           />
@@ -147,14 +171,19 @@ export const YouTubeTaskBuilder: React.FC<YouTubeTaskBuilderProps> = ({ onAdd, o
         <div className="flex items-center justify-end gap-2 pt-1">
           <button
             type="button"
-            onClick={onCancel}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onCancel();
+            }}
             className="px-3.5 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
           >
             Cancel
           </button>
           <button
-            type="submit"
+            type="button"
             disabled={!isValid}
+            onClick={handleAddRequirement}
             className={`px-4 py-2 text-xs font-black rounded-xl text-white shadow-xs transition-all flex items-center gap-1.5 ${
               isValid
                 ? 'bg-red-600 hover:bg-red-700 cursor-pointer shadow-red-600/20 hover:shadow-red-600/30'
@@ -165,7 +194,7 @@ export const YouTubeTaskBuilder: React.FC<YouTubeTaskBuilderProps> = ({ onAdd, o
             <span>Add Requirement</span>
           </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 };

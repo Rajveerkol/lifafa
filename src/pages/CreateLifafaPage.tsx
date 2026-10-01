@@ -281,6 +281,9 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (currentStep < 5) {
+      return;
+    }
     setErrorMsg(null);
 
     if (!user) {
@@ -356,6 +359,7 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
             className="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-2xl shadow-lg border-2 border-white drop-shadow-md animate-in zoom-in-95 duration-300"
           />
           <button
+            type="button"
             onClick={onCancel}
             className="text-xs font-bold text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded-xl hover:bg-white/80 transition-colors cursor-pointer self-start"
           >
@@ -429,7 +433,15 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (currentStep === 5) {
+            handleSubmit(e);
+          }
+        }}
+        className="space-y-5"
+      >
         {/* STEP 1: DETAILS */}
         {currentStep === 1 && (
           <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-100 shadow-2xs space-y-4 animate-in fade-in">
