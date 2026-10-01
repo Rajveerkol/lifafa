@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Youtube,
-  Play,
   Pause,
   CheckCircle2,
   AlertTriangle,
-  RotateCcw,
   Loader2,
-  Volume2,
 } from 'lucide-react';
 import { loadYouTubeIframeApi } from '../../utils/youtubeUtils';
 
@@ -28,11 +25,11 @@ export const YouTubeWatchPlayer: React.FC<YouTubeWatchPlayerProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
-  const playerId = useRef(`yt_player_${videoId}_${Math.random().toString(36).substring(2, 7)}`);
+  const playerIdRef = useRef(`yt_player_${videoId}_${Math.random().toString(36).substring(2, 8)}`);
 
   // Playback & Watch Session State
   const [isPlayerReady, setIsPlayerReady] = useState(false);
-  const [playerState, setPlayerState] = useState<number>(-1); // -1 = unstarted, 1 = playing, 2 = paused, 0 = ended
+  const [playerState, setPlayerState] = useState<number>(-1); // -1 = unstarted, 1 = playing, 2 = paused, 3 = buffering, 0 = ended
   const [hasStartedWatching, setHasStartedWatching] = useState(false);
   const [antiSkipWarning, setAntiSkipWarning] = useState<string | null>(null);
   const [isTabPaused, setIsTabPaused] = useState(false);
@@ -49,22 +46,30 @@ export const YouTubeWatchPlayer: React.FC<YouTubeWatchPlayerProps> = ({
   const isPlayingRef = useRef<boolean>(false);
   const playerStateRef = useRef<number>(-1);
   const durationRef = useRef<number>(0);
-  const pollTimerRef = useRef<any>(null);
   const isCompletedRef = useRef<boolean>(isCompleted);
+  const onCompletedRef = useRef<() => void>(onCompleted);
+  const lastRenderedSecRef = useRef<number>(-1);
 
   useEffect(() => {
     isCompletedRef.current = isCompleted;
   }, [isCompleted]);
 
-  // 1. Natural Completion Handler
+  useEffect(() => {
+    onCompletedRef.current = onCompleted;
+  }, [onCompleted]);
+
+  // 1. Natural Completion Handler (stable ref-based callback)
   const handleNaturalEnd = useCallback(() => {
     if (isCompletedRef.current) return;
 
-    const currentDuration =
-      (typeof playerRef.current?.getDuration === 'function' ? playerRef.current.getDuration() : 0) ||
-      durationRef.current ||
-      duration ||
-      0;
+    let currentDuration = durationRef.current;
+    try {
+      const dur = playerRef.current?.getDuration?.();
+      if (typeof dur === 'number' && dur > 0) {
+        currentDuration = dur;
+      }
+    } catch {}
+
     const maxWatched = maxWatchedTimeRef.current;
     const totalWatched = totalWatchedSecondsRef.current;
 
@@ -79,7 +84,7 @@ export const YouTubeWatchPlayer: React.FC<YouTubeWatchPlayerProps> = ({
       setAntiSkipWarning(null);
       setIsTabPaused(false);
       isCompletedRef.current = true;
-      onCompleted();
+      onCompletedRef.current();
     } else {
       // Premature end attempt / jumped to end without watching
       setAntiSkipWarning('Please watch the video completely without skipping.');
@@ -91,157 +96,164 @@ export const YouTubeWatchPlayer: React.FC<YouTubeWatchPlayerProps> = ({
           playerRef.current.seekTo(maxWatchedTimeRef.current, true);
         }
       } catch {}
-      setCurrentTime(maxWatchedTimeRef.current);
-    }
-  }, [duration, onCompleted]);
 
-  // 2. Strict Anti-Skip Engine: Verifies playback time against legitimate watermark
-  const checkAndEnforceAntiSkip = useCallback(
-    (current: number, state?: number) => {
-      if (isCompletedRef.current || !playerRef.current) return;
-
-      const dur =
-        (typeof playerRef.current?.getDuration === 'function' ? playerRef.current.getDuration() : 0) ||
-        durationRef.current ||
-        0;
-      if (dur > 0 && durationRef.current !== dur) {
-        durationRef.current = dur;
-        setDuration(dur);
-      }
-
-      // If snap-back seek is in progress, wait until the player lands near maxWatchedTime
-      if (isSeekingRef.current) {
-        if (Math.abs(current - maxWatchedTimeRef.current) <= 0.6) {
-          isSeekingRef.current = false;
-          lastObservedTimeRef.current = current;
-          lastObservedRealTimeRef.current = Date.now();
-        }
-        return;
-      }
-
-      const maxWatched = maxWatchedTimeRef.current;
-      const TOLERANCE = 0.8; // Strict threshold for forward seek detection
-
-      // A. FORWARD SEEK ATTEMPT:
-      // If currentTime jumped forward beyond the maximum legitimately watched point plus tolerance
-      if (current > maxWatched + TOLERANCE) {
-        isSeekingRef.current = true;
-        try {
-          if (typeof playerRef.current.pauseVideo === 'function') {
-            playerRef.current.pauseVideo();
-          }
-          if (typeof playerRef.current.seekTo === 'function') {
-            playerRef.current.seekTo(maxWatched, true);
-          }
-        } catch {}
-
-        setCurrentTime(maxWatched);
-        setAntiSkipWarning('Please watch the video completely without skipping.');
-        lastObservedTimeRef.current = maxWatched;
-        lastObservedRealTimeRef.current = Date.now();
-        // CRITICAL: Stop immediately and NEVER advance maxWatchedTime on a seek!
-        return;
-      }
-
-      // B. BACKWARD POSITION:
-      // User rewound or is replaying an earlier segment. Permitted, but never increases maxWatchedTime.
-      if (current <= maxWatched) {
-        setCurrentTime(current);
-        lastObservedTimeRef.current = current;
-        lastObservedRealTimeRef.current = Date.now();
-        return;
-      }
-
-      // C. LEGITIMATE CONTINUOUS FORWARD PLAYBACK:
-      // Current is slightly ahead of maxWatched (within 0.8s tolerance).
-      // Advance maxWatched strictly proportional to elapsed real wall-clock time!
-      const activeState = state !== undefined ? state : playerStateRef.current;
-      if (activeState === 1) {
-        const now = Date.now();
-        const elapsedRealSec = (now - lastObservedRealTimeRef.current) / 1000;
-        const rate =
-          (typeof playerRef.current?.getPlaybackRate === 'function' ? playerRef.current.getPlaybackRate() : 1) || 1;
-        const maxLegitimateAdvance = elapsedRealSec * rate + 0.15;
-        const requestedAdvance = current - maxWatched;
-
-        const advance = Math.min(requestedAdvance, maxLegitimateAdvance);
-        if (advance > 0) {
-          maxWatchedTimeRef.current = maxWatched + advance;
-          totalWatchedSecondsRef.current += advance;
-          if (antiSkipWarning) {
-            setAntiSkipWarning(null);
-          }
-        }
-
-        lastObservedRealTimeRef.current = now;
-        lastObservedTimeRef.current = current;
-        setCurrentTime(maxWatchedTimeRef.current);
-      }
-    },
-    [antiSkipWarning]
-  );
-
-  // 3. High-Resolution Playback Polling (polls every 100ms continuously)
-  const startProgressPolling = useCallback(() => {
-    if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-
-    pollTimerRef.current = setInterval(() => {
-      if (!playerRef.current || isCompletedRef.current) return;
-
-      try {
-        const current = playerRef.current.getCurrentTime() || 0;
-        checkAndEnforceAntiSkip(current);
-      } catch {
-        // Player may be unmounting
-      }
-    }, 100);
-  }, [checkAndEnforceAntiSkip]);
-
-  const stopProgressPolling = useCallback(() => {
-    if (pollTimerRef.current) {
-      clearInterval(pollTimerRef.current);
-      pollTimerRef.current = null;
+      const intMax = Math.floor(maxWatchedTimeRef.current);
+      setCurrentTime(intMax);
+      lastRenderedSecRef.current = intMax;
     }
   }, []);
 
-  // 4. Initialize Official YouTube IFrame Player API
+  // 2. Strict Anti-Skip Engine: Verifies playback time against legitimate watermark
+  const checkAndEnforceAntiSkip = useCallback((current: number, state?: number) => {
+    if (isCompletedRef.current || !playerRef.current) return;
+
+    // Auto-capture duration if not yet populated
+    try {
+      const dur = playerRef.current?.getDuration?.();
+      if (typeof dur === 'number' && dur > 0 && durationRef.current !== dur) {
+        durationRef.current = dur;
+        setDuration(dur);
+      }
+    } catch {}
+
+    // If snap-back seek is in progress, wait until the player lands near maxWatchedTime
+    if (isSeekingRef.current) {
+      if (Math.abs(current - maxWatchedTimeRef.current) <= 0.6) {
+        isSeekingRef.current = false;
+        lastObservedTimeRef.current = current;
+        lastObservedRealTimeRef.current = Date.now();
+      }
+      return;
+    }
+
+    const maxWatched = maxWatchedTimeRef.current;
+    const TOLERANCE = 0.8; // Strict threshold for forward seek detection
+
+    // A. FORWARD SEEK ATTEMPT:
+    // If currentTime jumped forward beyond the maximum legitimately watched point plus tolerance
+    if (current > maxWatched + TOLERANCE) {
+      isSeekingRef.current = true;
+      try {
+        if (typeof playerRef.current.pauseVideo === 'function') {
+          playerRef.current.pauseVideo();
+        }
+        if (typeof playerRef.current.seekTo === 'function') {
+          playerRef.current.seekTo(maxWatched, true);
+        }
+      } catch {}
+
+      const intMax = Math.floor(maxWatched);
+      setCurrentTime(intMax);
+      lastRenderedSecRef.current = intMax;
+      setAntiSkipWarning('Please watch the video completely without skipping.');
+      lastObservedTimeRef.current = maxWatched;
+      lastObservedRealTimeRef.current = Date.now();
+      // CRITICAL: Stop immediately and NEVER advance maxWatchedTime on a seek!
+      return;
+    }
+
+    // B. BACKWARD POSITION:
+    // User rewound or is replaying an earlier segment. Permitted, but never increases maxWatchedTime.
+    if (current <= maxWatched) {
+      const intCur = Math.floor(current);
+      if (intCur !== lastRenderedSecRef.current) {
+        lastRenderedSecRef.current = intCur;
+        setCurrentTime(intCur);
+      }
+      lastObservedTimeRef.current = current;
+      lastObservedRealTimeRef.current = Date.now();
+      return;
+    }
+
+    // C. LEGITIMATE CONTINUOUS FORWARD PLAYBACK:
+    // Current is slightly ahead of maxWatched (within 0.8s tolerance).
+    // Advance maxWatched strictly proportional to elapsed real wall-clock time!
+    const activeState = state !== undefined ? state : playerStateRef.current;
+    if (activeState === 1) {
+      const now = Date.now();
+      const elapsedRealSec = (now - lastObservedRealTimeRef.current) / 1000;
+      let rate = 1;
+      try {
+        rate = playerRef.current?.getPlaybackRate?.() || 1;
+      } catch {}
+      const maxLegitimateAdvance = elapsedRealSec * rate + 0.15;
+      const requestedAdvance = current - maxWatched;
+
+      const advance = Math.min(requestedAdvance, maxLegitimateAdvance);
+      if (advance > 0) {
+        maxWatchedTimeRef.current = maxWatched + advance;
+        totalWatchedSecondsRef.current += advance;
+        setAntiSkipWarning((prev) => (prev ? null : prev));
+      }
+
+      lastObservedRealTimeRef.current = now;
+      lastObservedTimeRef.current = current;
+
+      const intWatched = Math.floor(maxWatchedTimeRef.current);
+      if (intWatched !== lastRenderedSecRef.current) {
+        lastRenderedSecRef.current = intWatched;
+        setCurrentTime(intWatched);
+      }
+    }
+  }, []);
+
+  // 3. Initialize Official YouTube IFrame Player API (RUNS ONCE PER VIDEO ID)
   useEffect(() => {
-    let isMounted = true;
+    let isCancelled = false;
 
     loadYouTubeIframeApi()
       .then((YT) => {
-        if (!isMounted || !containerRef.current) return;
+        if (isCancelled || !containerRef.current) return;
 
-        playerRef.current = new YT.Player(playerId.current, {
+        // Ensure clean mount element inside containerRef
+        containerRef.current.innerHTML = '';
+        const mountDiv = document.createElement('div');
+        mountDiv.id = playerIdRef.current;
+        mountDiv.className = 'w-full h-full';
+        containerRef.current.appendChild(mountDiv);
+
+        playerRef.current = new YT.Player(playerIdRef.current, {
           videoId,
+          host: 'https://www.youtube.com',
           playerVars: {
             autoplay: 0,
             controls: 1,
-            disablekb: 1, // Disable keyboard shortcuts (arrow keys, J, L, numbers 0-9)
+            disablekb: 1, // Disable keyboard shortcuts to prevent bypass
             enablejsapi: 1,
             fs: 1,
             modestbranding: 1,
             playsinline: 1,
             rel: 0,
-            origin: typeof window !== 'undefined' ? window.location.origin : 'https://createlifafa.xyz',
+            origin: typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'https://createlifafa.xyz',
+            widget_referrer: typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'https://createlifafa.xyz',
           },
           events: {
             onReady: (event: any) => {
-              if (!isMounted) return;
+              if (isCancelled) return;
               setIsPlayerReady(true);
-              const dur = event.target.getDuration();
-              if (dur) {
-                durationRef.current = dur;
-                setDuration(dur);
-              }
-              // Start high-resolution monitoring immediately
-              startProgressPolling();
+              setPlayerError(null);
+              try {
+                const dur = event.target?.getDuration?.() || 0;
+                if (dur > 0) {
+                  durationRef.current = dur;
+                  setDuration(dur);
+                }
+              } catch {}
             },
             onStateChange: (event: any) => {
-              if (!isMounted) return;
+              if (isCancelled) return;
               const state = event.data;
               playerStateRef.current = state;
               setPlayerState(state);
+
+              // Capture duration if not yet populated
+              try {
+                const dur = playerRef.current?.getDuration?.() || 0;
+                if (dur > 0 && durationRef.current !== dur) {
+                  durationRef.current = dur;
+                  setDuration(dur);
+                }
+              } catch {}
 
               // YT.PlayerState:
               // -1 = UNSTARTED, 0 = ENDED, 1 = PLAYING, 2 = PAUSED, 3 = BUFFERING
@@ -254,8 +266,8 @@ export const YouTubeWatchPlayer: React.FC<YouTubeWatchPlayerProps> = ({
                 const cur = playerRef.current?.getCurrentTime?.() || 0;
                 lastObservedTimeRef.current = cur;
                 checkAndEnforceAntiSkip(cur, 1);
-              } else if (state === 3 || state === 2) {
-                // BUFFERING or PAUSED (e.g. user dragging scrubber or paused)
+              } else if (state === 2 || state === 3) {
+                // PAUSED or BUFFERING
                 isPlayingRef.current = false;
                 const cur = playerRef.current?.getCurrentTime?.() || 0;
                 checkAndEnforceAntiSkip(cur, state);
@@ -266,36 +278,81 @@ export const YouTubeWatchPlayer: React.FC<YouTubeWatchPlayerProps> = ({
               }
             },
             onError: (errEvent: any) => {
-              if (!isMounted) return;
-              console.error('YouTube Player Error:', errEvent.data);
-              setPlayerError('Unable to load this YouTube video. It may be restricted, private, or unavailable.');
+              if (isCancelled) return;
+              const code = errEvent.data;
+              console.error('YouTube Player Error:', code);
+              let msg = "Video couldn't be loaded. Please refresh and try again.";
+              if (code === 101 || code === 150) {
+                msg = 'This video cannot be played in embedded mode by request of its owner.';
+              } else if (code === 100) {
+                msg = 'This video is private, deleted, or unavailable.';
+              } else if (code === 2) {
+                msg = 'Invalid YouTube video ID.';
+              }
+              setPlayerError(msg);
             },
           },
         });
       })
       .catch((err) => {
-        if (!isMounted) return;
-        setPlayerError(err.message || 'Unable to load YouTube player API');
+        if (isCancelled) return;
+        console.error('Failed to initialize YouTube IFrame Player:', err);
+        setPlayerError("Video couldn't be loaded. Please refresh and try again.");
       });
 
     return () => {
-      isMounted = false;
-      stopProgressPolling();
+      isCancelled = true;
       if (playerRef.current && typeof playerRef.current.destroy === 'function') {
         try {
           playerRef.current.destroy();
         } catch {}
+        playerRef.current = null;
       }
     };
-  }, [videoId, startProgressPolling, stopProgressPolling, checkAndEnforceAntiSkip, handleNaturalEnd]);
+  }, [videoId, checkAndEnforceAntiSkip, handleNaturalEnd]);
+
+  // 4. High-Resolution Playback Polling (polls every 100ms continuously on mount)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!playerRef.current || isCompletedRef.current) return;
+
+      try {
+        const cur = playerRef.current.getCurrentTime?.() || 0;
+        const state = playerRef.current.getPlayerState?.();
+
+        // Also capture duration if not yet populated
+        if (durationRef.current === 0) {
+          const dur = playerRef.current.getDuration?.() || 0;
+          if (dur > 0) {
+            durationRef.current = dur;
+            setDuration(dur);
+          }
+        }
+
+        checkAndEnforceAntiSkip(cur, state);
+      } catch {
+        // Player may be unmounting or in transition
+      }
+    }, 100);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [checkAndEnforceAntiSkip]);
 
   // 5. Tab Visibility Protection
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
         if (isPlayingRef.current && playerRef.current && typeof playerRef.current.pauseVideo === 'function') {
-          playerRef.current.pauseVideo();
+          try {
+            playerRef.current.pauseVideo();
+          } catch {}
           setIsTabPaused(true);
+        }
+      } else {
+        if (playerStateRef.current === 1) {
+          setIsTabPaused(false);
         }
       }
     };
@@ -374,11 +431,13 @@ export const YouTubeWatchPlayer: React.FC<YouTubeWatchPlayerProps> = ({
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[11px] font-semibold">
               {playerState === 1 ? (
                 <>
-                  <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span>Watching...</span>
                 </>
+              ) : playerState === 2 ? (
+                <span>Paused</span>
               ) : (
-                <span>Required</span>
+                <span>Tap Play to Start</span>
               )}
             </div>
           )}
@@ -388,7 +447,7 @@ export const YouTubeWatchPlayer: React.FC<YouTubeWatchPlayerProps> = ({
       {/* Official YouTube IFrame Player Container (Responsive 16:9 Aspect Ratio) */}
       <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-slate-200 shadow-inner">
         {!isPlayerReady && !playerError && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 text-white gap-2 z-10">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 text-white gap-2 z-10 pointer-events-none">
             <Loader2 className="w-6 h-6 animate-spin text-red-500" />
             <span className="text-xs font-medium text-slate-300">Loading YouTube Player...</span>
           </div>
@@ -400,9 +459,7 @@ export const YouTubeWatchPlayer: React.FC<YouTubeWatchPlayerProps> = ({
             <span className="text-xs font-medium text-slate-200">{playerError}</span>
           </div>
         ) : (
-          <div ref={containerRef} className="w-full h-full">
-            <div id={playerId.current} className="w-full h-full" />
-          </div>
+          <div ref={containerRef} className="w-full h-full" />
         )}
       </div>
 
@@ -428,10 +485,22 @@ export const YouTubeWatchPlayer: React.FC<YouTubeWatchPlayerProps> = ({
           <span className="flex items-center gap-1.5">
             <span
               className={`w-2 h-2 rounded-full ${
-                playerState === 1 ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'
+                playerState === 1
+                  ? 'bg-emerald-500 animate-pulse'
+                  : playerState === 2
+                  ? 'bg-amber-400'
+                  : 'bg-slate-300'
               }`}
             />
-            <span>{playerState === 1 ? 'Watching' : playerState === 2 ? 'Paused' : 'Ready'}</span>
+            <span>
+              {playerState === 1
+                ? 'Watching'
+                : playerState === 2
+                ? 'Paused — Tap Play to Resume'
+                : playerState === 3
+                ? 'Buffering...'
+                : 'Ready — Tap Play to Start'}
+            </span>
           </span>
           <span className="font-mono">
             {formatTime(currentTime)} / {formatTime(duration)}
