@@ -121,14 +121,14 @@ export function useTaskLogic(
       } else if (!silent) {
         setVerificationError(
           result.error ||
-            "We couldn't verify your membership yet. Please make sure you joined the channel, then try again."
+            "Please make sure you joined using the linked Telegram account."
         );
       }
     } catch (err: any) {
       if (!silent) {
         setVerificationError(
           err.message ||
-            "We couldn't verify your membership yet. Please make sure you joined the channel, then try again."
+            "Please make sure you joined using the linked Telegram account."
         );
       }
     } finally {
@@ -292,12 +292,13 @@ export function useTaskLogic(
       } else {
         setVerificationError(
           result.error ||
-          "We couldn't verify your membership yet. Please make sure you joined the channel, then try again."
+          "Please make sure you joined using the linked Telegram account."
         );
       }
-    } catch {
+    } catch (err: any) {
       setVerificationError(
-        "We couldn't verify your membership yet. Please make sure you joined the channel, then try again."
+        err?.message ||
+        "Temporary verification delay. Please try again."
       );
     } finally {
       setIsVerifyingMembership(false);

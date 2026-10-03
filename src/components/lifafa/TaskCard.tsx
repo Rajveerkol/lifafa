@@ -165,14 +165,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       } else if (!silent) {
         setVerificationError(
           result.error ||
-            "We couldn't verify your membership yet. Please make sure you joined the channel, then try again."
+            "Please make sure you joined using the linked Telegram account."
         );
       }
     } catch (err: any) {
       if (!silent) {
         setVerificationError(
           err.message ||
-            "We couldn't verify your membership yet. Please make sure you joined the channel, then try again."
+            "Please make sure you joined using the linked Telegram account."
         );
       }
     } finally {
@@ -620,6 +620,24 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           {/* User logged in and Telegram bound -> 1-Click Verify */}
           {user && tgBinding?.isBound && (
             <div className="space-y-2">
+              {/* Linked Telegram account indicator */}
+              <div className="flex items-center justify-between text-[11px] text-slate-500 px-1">
+                <span className="flex items-center gap-1.5 truncate">
+                  <Send className="w-3 h-3 text-[#0088cc] shrink-0" />
+                  <span className="truncate">
+                    Verifying as{' '}
+                    <strong className="text-slate-700">
+                      {tgBinding.telegramUsername
+                        ? `@${tgBinding.telegramUsername.replace(/^@/, '')}`
+                        : `ID: ${tgBinding.telegramUserId}`}
+                    </strong>
+                  </span>
+                </span>
+                <span className="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-medium border border-emerald-200/50 shrink-0">
+                  Linked
+                </span>
+              </div>
+
               <button
                 type="button"
                 onClick={handleVerifyMembership}
@@ -629,7 +647,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                 {isVerifyingMembership ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Verifying Channel Membership...</span>
+                    <span>Verifying your Telegram membership...</span>
                   </>
                 ) : (
                   <>
@@ -645,8 +663,13 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           {verificationError && (
             <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2 text-[11px] text-amber-900">
               <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-              <div className="space-y-1">
+              <div className="space-y-1 flex-1">
                 <span>{verificationError}</span>
+                {tgBinding?.telegramUsername && (
+                  <p className="text-[10px] text-amber-700/80">
+                    Make sure you joined the channel using <strong>@{tgBinding.telegramUsername.replace(/^@/, '')}</strong>.
+                  </p>
+                )}
                 <div className="flex items-center gap-2 pt-1">
                   <button
                     type="button"
