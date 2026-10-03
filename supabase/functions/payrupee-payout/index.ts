@@ -9,7 +9,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-idempotency-key',
+  'Access-Control-Max-Age': '86400',
 };
 
 serve(async (req: Request) => {
@@ -91,7 +93,8 @@ serve(async (req: Request) => {
 
     // A. ORCHESTRATOR MODE: User requests withdrawal and automatic dispatch in one server-side flow
     if (body?.action === 'request_and_dispatch') {
-      const { amount, accountHolderName, bankAccountNumber, ifscCode, idempotencyKey } = body;
+      const { amount, accountHolderName, bankAccountNumber, ifscCode } = body;
+      const idempotencyKey = body?.idempotencyKey || req.headers.get('x-idempotency-key') || null;
 
       if (!amount || !accountHolderName || !bankAccountNumber || !ifscCode) {
         return new Response(

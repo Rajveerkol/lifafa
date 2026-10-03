@@ -102,12 +102,37 @@ export async function extractFunctionError(error: any, data?: any): Promise<stri
           if (json?.error) return typeof json.error === 'string' ? json.error : JSON.stringify(json.error);
           if (json?.message) return String(json.message);
         } catch {
-          return text.slice(0, 200);
+          const safeText = text.slice(0, 200).trim();
+          if (!safeText.includes('at ') && !safeText.includes('Error:') && !safeText.includes('sql') && !safeText.includes('<html')) {
+            return safeText;
+          }
         }
       }
     } catch {}
   }
 
-  return error?.message || 'Operation failed';
+  const rawMsg = String(error?.message || '');
+  if (
+    error?.name === 'FunctionsFetchError' ||
+    rawMsg.includes('Failed to send a request') ||
+    rawMsg.includes('Failed to fetch') ||
+    rawMsg.includes('NetworkError') ||
+    rawMsg.includes('fetch failed')
+  ) {
+    return 'Unable to connect to the withdrawal service. Please check your internet connection and try again.';
+  }
+
+  if (
+    rawMsg.includes('JWT') ||
+    rawMsg.includes('token') ||
+    rawMsg.includes('Unauthorized') ||
+    rawMsg.includes('session')
+  ) {
+    return 'Your session expired. Please sign in again.';
+  }
+
+  return rawMsg && !rawMsg.includes('stack') && !rawMsg.includes('at ')
+    ? rawMsg
+    : 'Unable to complete withdrawal. Please try again.';
 }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   Wallet,
@@ -36,6 +36,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successData, setSuccessData] = useState<any | null>(null);
+  const activeIdempotencyKeyRef = useRef<string | null>(null);
 
   const [withdrawableData, setWithdrawableData] = useState<{
     available_balance: number;
@@ -47,8 +48,16 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
     withdrawable_balance: wallet?.available_balance ?? 0,
   });
 
+  const handleClose = () => {
+    activeIdempotencyKeyRef.current = null;
+    setErrorMsg(null);
+    setLoading(false);
+    onClose();
+  };
+
   useEffect(() => {
     if (isOpen) {
+      activeIdempotencyKeyRef.current = null;
       let isMounted = true;
       walletService
         .getWithdrawableBalance()
@@ -81,6 +90,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return; // Strict double-click guard
     setErrorMsg(null);
 
     if (numAmount < 10) {
@@ -126,7 +136,11 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
 
     try {
       setLoading(true);
-      const idempotencyKey = `wth_${user?.id}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      // Preserve idempotency key across retries of this exact withdrawal attempt
+      if (!activeIdempotencyKeyRef.current) {
+        activeIdempotencyKeyRef.current = `wth_${user?.id || 'usr'}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      }
+      const idempotencyKey = activeIdempotencyKeyRef.current;
 
       const result = await walletService.requestWithdrawal(
         {
@@ -138,9 +152,12 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
         idempotencyKey
       );
 
+      // On definitive outcome or success, clear active idempotency key
+      activeIdempotencyKeyRef.current = null;
       await refreshWallet();
       setSuccessData(result);
     } catch (err: any) {
+      // Keep activeIdempotencyKeyRef intact for retry so server deduplicates if it reached backend
       setErrorMsg(err.message || 'Failed to process withdrawal request.');
     } finally {
       setLoading(false);
@@ -157,7 +174,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
           <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-indigo-400/20 rounded-full blur-xl pointer-events-none" />
 
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition-colors cursor-pointer z-10"
           >
             <X className="w-4 h-4" />
@@ -269,7 +286,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
             </div>
 
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-2xl shadow-md text-xs cursor-pointer transition-colors"
             >
               Done

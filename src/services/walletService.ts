@@ -53,27 +53,84 @@ export const walletService = {
       throw new Error('Supabase database is not configured.');
     }
 
-    // 1. Proactively obtain fresh valid access token
-    const token = await getValidAuthToken();
-    const headers: Record<string, string> = {};
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    if (idempotencyKey) {
-      headers['x-idempotency-key'] = idempotencyKey;
+    // 1. Proactively obtain fresh valid access token with auto-refresh
+    let token = await getValidAuthToken();
+    if (!token) {
+      try {
+        const { data: refreshData } = await supabase.auth.refreshSession();
+        token = refreshData?.session?.access_token || null;
+      } catch (authErr) {
+        console.warn('Session refresh attempt failed:', authErr);
+      }
     }
 
-    const { data, error } = await supabase.functions.invoke('payrupee-payout', {
-      headers,
-      body: {
-        action: 'request_and_dispatch',
-        amount: params.amount,
-        accountHolderName: params.accountHolderName.trim(),
-        bankAccountNumber: params.bankAccountNumber.trim(),
-        ifscCode: params.ifscCode.trim().toUpperCase(),
-        idempotencyKey: idempotencyKey || null,
-      },
-    });
+    if (!token) {
+      throw new Error('Your session expired. Please sign in again.');
+    }
+
+    // Standard allowed headers:
+    // Do NOT send custom non-standard headers like 'x-idempotency-key' here because Edge Function CORS
+    // restricts non-standard headers in browser preflight. The idempotencyKey is transmitted
+    // authoritatively inside the request body payload.
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    const payload = {
+      action: 'request_and_dispatch',
+      amount: params.amount,
+      accountHolderName: params.accountHolderName.trim(),
+      bankAccountNumber: params.bankAccountNumber.trim(),
+      ifscCode: params.ifscCode.trim().toUpperCase(),
+      idempotencyKey: idempotencyKey || null,
+    };
+
+    let data: any = null;
+    let error: any = null;
+
+    try {
+      const invokeResult = await supabase.functions.invoke('payrupee-payout', {
+        headers,
+        body: payload,
+      });
+      data = invokeResult.data;
+      error = invokeResult.error;
+    } catch (invokeErr: any) {
+      error = invokeErr;
+    }
+
+    // Fallback: If FunctionsFetchError occurred (network/transport quirk), attempt standard direct fetch
+    if (error && (error.name === 'FunctionsFetchError' || error.message?.includes('Failed to send a request'))) {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+      if (supabaseUrl && typeof window !== 'undefined' && typeof window.fetch === 'function') {
+        try {
+          const directResp = await window.fetch(
+            `${supabaseUrl}/functions/v1/payrupee-payout`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                apikey: supabaseAnonKey || '',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify(payload),
+            }
+          );
+
+          const directData = await directResp.json().catch(() => null);
+          if (directResp.ok) {
+            data = directData;
+            error = null;
+          } else {
+            data = directData;
+            error = new Error(directData?.error || `Service returned HTTP ${directResp.status}`);
+          }
+        } catch (directErr: any) {
+          console.warn('Direct fetch fallback also failed:', directErr);
+        }
+      }
+    }
 
     if (error) {
       if (data?.status === 'PROCESSING') {
