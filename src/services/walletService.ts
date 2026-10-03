@@ -3,10 +3,11 @@ import type { WalletTransaction, Withdrawal, PlatformFee, WithdrawableBalanceRes
 
 export interface RequestWithdrawalParams {
   amount: number;
-  accountHolderName: string;
-  bankAccountNumber: string;
-  ifscCode: string;
-  upiId?: string; // If provided, server-side RPC strictly rejects with error
+  upiId: string;
+  payoutMethod?: 'UPI';
+  accountHolderName?: string;
+  bankAccountNumber?: string;
+  ifscCode?: string;
 }
 
 export interface PlatformPaymentSettings {
@@ -47,10 +48,21 @@ export const walletService = {
     return (data || []) as WalletTransaction[];
   },
 
-  // Request withdrawal via server-side orchestrator Edge Function (Bank Account Only)
+  // Request withdrawal via server-side orchestrator Edge Function (UPI via PayNit)
+  // Dedicated endpoint: consumer-paynit-payout
   async requestWithdrawal(params: RequestWithdrawalParams, idempotencyKey?: string) {
     if (!isSupabaseConfigured || !supabase) {
       throw new Error('Supabase database is not configured.');
+    }
+
+    // Strict UPI-Only Enforcement
+    if (params.payoutMethod === ('IMPS' as any) || (params.bankAccountNumber && params.bankAccountNumber.trim() !== '')) {
+      throw new Error('IMPS payouts are no longer supported. All withdrawals are processed via UPI only.');
+    }
+
+    const cleanUpi = params.upiId?.trim()?.toLowerCase();
+    if (!cleanUpi) {
+      throw new Error('UPI ID is required for withdrawal.');
     }
 
     // 1. Proactively obtain fresh valid access token with auto-refresh
@@ -79,9 +91,9 @@ export const walletService = {
     const payload = {
       action: 'request_and_dispatch',
       amount: params.amount,
-      accountHolderName: params.accountHolderName.trim(),
-      bankAccountNumber: params.bankAccountNumber.trim(),
-      ifscCode: params.ifscCode.trim().toUpperCase(),
+      payoutMethod: 'UPI',
+      upiId: cleanUpi,
+      accountHolderName: params.accountHolderName?.trim() || null,
       idempotencyKey: idempotencyKey || null,
     };
 
@@ -89,7 +101,7 @@ export const walletService = {
     let error: any = null;
 
     try {
-      const invokeResult = await supabase.functions.invoke('payrupee-payout', {
+      const invokeResult = await supabase.functions.invoke('consumer-paynit-payout', {
         headers,
         body: payload,
       });
@@ -106,7 +118,7 @@ export const walletService = {
       if (supabaseUrl && typeof window !== 'undefined' && typeof window.fetch === 'function') {
         try {
           const directResp = await window.fetch(
-            `${supabaseUrl}/functions/v1/payrupee-payout`,
+            `${supabaseUrl}/functions/v1/consumer-paynit-payout`,
             {
               method: 'POST',
               headers: {

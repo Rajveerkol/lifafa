@@ -66,7 +66,7 @@ export const MerchantOnboardingCard: React.FC<MerchantOnboardingCardProps> = ({
             Register Your Merchant Account
           </h2>
           <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-            Automate instant disbursements directly to beneficiary bank accounts with an isolated float account and developer APIs.
+            Automate instant disbursements directly to beneficiary UPI accounts with an isolated float account and developer APIs.
           </p>
         </div>
 
@@ -78,7 +78,7 @@ export const MerchantOnboardingCard: React.FC<MerchantOnboardingCardProps> = ({
           </div>
           <div className="border-x border-slate-200">
             <span className="text-[10px] font-semibold text-slate-400 uppercase block">Clearing Rail</span>
-            <span className="text-xs font-bold text-slate-900 mt-0.5 block">IMPS Instant</span>
+            <span className="text-xs font-bold text-slate-900 mt-0.5 block">Instant UPI</span>
           </div>
           <div>
             <span className="text-[10px] font-semibold text-slate-400 uppercase block">Float Model</span>

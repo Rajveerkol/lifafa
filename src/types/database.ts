@@ -188,11 +188,12 @@ export interface Withdrawal {
   amount: number;
   fee_amount: number;
   net_amount: number;
-  account_holder_name: string;
-  bank_account_number_masked: string;
+  account_holder_name?: string | null;
+  bank_account_number_masked?: string | null;
   bank_account_encrypted?: string;
   ifsc_code: string | null;
   upi_id: string | null;
+  payout_method?: 'UPI' | 'IMPS';
   status: WithdrawalStatus;
   payout_provider: string;
   payout_reference_id: string | null;

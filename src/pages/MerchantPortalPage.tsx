@@ -381,70 +381,34 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
       return;
     }
 
-    if (payoutMethod === 'UPI') {
-      const cleanUpi = payoutUpiId.trim();
-      if (!cleanUpi || !cleanUpi.includes('@')) {
-        setPayoutErrorMsg('Please enter a valid UPI ID (e.g. name@upi)');
-        return;
-      }
-    } else {
-      if (!recipientName.trim()) {
-        setPayoutErrorMsg('Please enter beneficiary full name');
-        return;
-      }
-
-      if (accountNumber.trim() !== confirmAccountNumber.trim()) {
-        setPayoutErrorMsg('Bank account numbers do not match');
-        return;
-      }
-
-      const cleanIfsc = ifscCode.trim().toUpperCase();
-      if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(cleanIfsc)) {
-        setPayoutErrorMsg('Invalid 11-character IFSC code format (e.g. HDFC0001234)');
-        return;
-      }
+    const cleanUpi = payoutUpiId.trim().toLowerCase();
+    if (!cleanUpi || !cleanUpi.includes('@') || !/^[\w.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(cleanUpi)) {
+      setPayoutErrorMsg('Please enter a valid UPI ID (e.g. name@okhdfcbank or 9876543210@paytm)');
+      return;
     }
 
     // Open confirmation step modal
     setPayoutConfirmModalOpen(true);
   };
 
-  // Final Confirmed Payout Submission
+  // Final Confirmed Payout Submission (UPI Only)
   const handleFinalPayoutDispatch = async () => {
     if (!merchant) return;
     const amtNum = parseFloat(payoutAmount) || 0;
 
     try {
       setSubmittingPayout(true);
-      if (payoutMethod === 'UPI') {
-        await merchantGatewayService.createPayout({
-          orderId: payoutOrderId.trim(),
-          amount: amtNum,
-          method: 'UPI',
-          upiId: payoutUpiId.trim(),
-        });
-      } else {
-        const cleanIfsc = ifscCode.trim().toUpperCase();
-        await merchantGatewayService.createPayout({
-          orderId: payoutOrderId.trim(),
-          amount: amtNum,
-          method: 'IMPS',
-          recipient: {
-            name: recipientName.trim(),
-            account_number: accountNumber.trim(),
-            ifsc: cleanIfsc,
-          },
-        });
-      }
+      await merchantGatewayService.createPayout({
+        orderId: payoutOrderId.trim(),
+        amount: amtNum,
+        method: 'UPI',
+        upiId: payoutUpiId.trim().toLowerCase(),
+      });
 
       setPayoutConfirmModalOpen(false);
       setPayoutSuccessMsg('Payment Completed');
       setPayoutOrderId(`ord_${Date.now().toString().slice(-6)}`);
       setPayoutUpiId('');
-      setRecipientName('');
-      setAccountNumber('');
-      setConfirmAccountNumber('');
-      setIfscCode('');
       await loadMerchantData();
       setTimeout(() => setPayoutSuccessMsg(null), 7000);
     } catch (err: any) {
@@ -610,7 +574,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
   const sectionMeta: Record<MerchantNavSection, { title: string; subtitle: string }> = {
     dashboard: { title: 'Dashboard', subtitle: 'Real-time overview of merchant float and disbursement activity' },
     'add-money': { title: 'Add Float via UPI', subtitle: 'Deposit funds to payout balance with instant 2% fee calculation' },
-    'make-payout': { title: 'Make Payout', subtitle: 'Disburse funds directly to beneficiary accounts via PayNit instant UPI & IMPS rails' },
+    'make-payout': { title: 'Make Payout', subtitle: 'Disburse funds directly to beneficiary accounts via PayNit instant UPI rails' },
     payouts: { title: 'Payout History', subtitle: 'Searchable audit log of all bank transfers and disbursement statuses' },
     wallet: { title: 'Float Wallet & Ledger', subtitle: 'Double-entry balance audit ledger and float movement records' },
     deposits: { title: 'Deposit History', subtitle: 'Record of manual UPI float deposits and administrative clearing' },
@@ -653,7 +617,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                 Createlifafa.xyz Merchant Gateway
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 mt-2 max-w-md mx-auto">
-                Automated disbursements via PayNit instant UPI &amp; IMPS rails with isolated merchant float wallets and developer APIs.
+                Automated disbursements via PayNit instant UPI rails with isolated merchant float wallets and developer APIs.
               </p>
             </div>
 
@@ -679,7 +643,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
               </div>
               <div className="p-3 bg-slate-50 rounded-md border border-slate-100">
                 <div className="text-[11px] font-medium text-slate-500">Payout Rails</div>
-                <div className="text-sm font-semibold text-slate-900 mt-0.5">UPI &amp; IMPS</div>
+                <div className="text-sm font-semibold text-slate-900 mt-0.5">Instant UPI</div>
               </div>
               <div className="p-3 bg-slate-50 rounded-md border border-slate-100">
                 <div className="text-[11px] font-medium text-slate-500">Activation</div>
@@ -1467,7 +1431,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                   <div>
                     <h3 className="text-sm font-semibold text-slate-900">Initiate Instant Payout</h3>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      Direct disbursement via PayNit instant UPI &amp; IMPS rails (24x7 Settlement)
+                      Direct disbursement via PayNit Instant UPI rails (24x7 Settlement)
                     </p>
                   </div>
                   <span className="text-xs font-mono text-slate-500 bg-slate-50 px-2 py-1 rounded border border-slate-200">
@@ -1488,40 +1452,6 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                     <span>{payoutErrorMsg}</span>
                   </div>
                 )}
-
-                {/* Rail Selector */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Payout Rail *
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setPayoutMethod('UPI')}
-                      className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
-                        payoutMethod === 'UPI'
-                          ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs'
-                          : 'border-slate-200 bg-slate-50/50 text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      <Smartphone className="w-3.5 h-3.5" />
-                      <span>UPI (VPA)</span>
-                      <span className="ml-1 px-1.5 py-0.2 bg-blue-100 text-blue-800 text-[10px] font-bold rounded-sm">Instant</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPayoutMethod('IMPS')}
-                      className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
-                        payoutMethod === 'IMPS'
-                          ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs'
-                          : 'border-slate-200 bg-slate-50/50 text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      <Building2 className="w-3.5 h-3.5" />
-                      <span>Bank Account (IMPS)</span>
-                    </button>
-                  </div>
-                </div>
 
                 <form onSubmit={handleReviewPayout} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1578,88 +1508,25 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                     )}
                   </div>
 
-                  {payoutMethod === 'UPI' ? (
-                    <div>
-                      <label className="block text-xs font-medium text-slate-700 mb-1">
-                        Beneficiary UPI ID (VPA) *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={payoutUpiId}
-                        onChange={(e) => setPayoutUpiId(e.target.value)}
-                        placeholder="e.g. name@okhdfcbank or 9876543210@paytm"
-                        className="w-full px-3 py-2 rounded-md border border-slate-300 text-xs font-mono focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden"
-                      />
-                      <p className="text-[11px] text-slate-400 mt-1">Disbursed directly via PayNit UPI rails</p>
-                    </div>
-                  ) : (
-                    <>
-                      <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">
-                          Beneficiary Account Holder Name *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={recipientName}
-                          onChange={(e) => setRecipientName(e.target.value)}
-                          placeholder="As registered in beneficiary bank account"
-                          className="w-full px-3 py-2 rounded-md border border-slate-300 text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-medium text-slate-700 mb-1">
-                            Bank Account Number *
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            value={accountNumber}
-                            onChange={(e) => setAccountNumber(e.target.value)}
-                            placeholder="Enter account number"
-                            className="w-full px-3 py-2 rounded-md border border-slate-300 text-xs font-mono font-semibold focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-medium text-slate-700 mb-1">
-                            Confirm Account Number *
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            value={confirmAccountNumber}
-                            onChange={(e) => setConfirmAccountNumber(e.target.value)}
-                            placeholder="Re-enter account number"
-                            className="w-full px-3 py-2 rounded-md border border-slate-300 text-xs font-mono font-semibold focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">
-                          Bank IFSC Code *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          maxLength={11}
-                          value={ifscCode}
-                          onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
-                          placeholder="e.g. HDFC0001234"
-                          className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white text-xs font-mono font-semibold uppercase text-slate-900 placeholder:text-slate-400 caret-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden [color-scheme:light]"
-                        />
-                      </div>
-                    </>
-                  )}
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
+                      Beneficiary UPI ID (VPA) *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={payoutUpiId}
+                      onChange={(e) => setPayoutUpiId(e.target.value)}
+                      placeholder="e.g. name@okhdfcbank or 9876543210@paytm"
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 text-xs font-mono focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden"
+                    />
+                    <p className="text-[11px] text-slate-400 mt-1">Disbursed directly via PayNit instant UPI rails</p>
+                  </div>
 
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-md text-xs text-blue-900 flex items-start gap-2">
                     <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                     <p className="text-[11px] leading-relaxed">
-                      Payouts are processed instantly via automated PayNit {payoutMethod} rails. Verify beneficiary details carefully before confirming.
+                      Payouts are processed instantly via automated PayNit UPI rails. Verify beneficiary details carefully before confirming.
                     </p>
                   </div>
 
@@ -2213,22 +2080,15 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                           <td className="p-2.5 font-mono font-semibold text-amber-700">₹2.50</td>
                           <td className="p-2.5 font-mono">Principal + ₹2.50</td>
                         </tr>
-                        <tr>
-                          <td className="p-2.5 font-semibold text-slate-900">IMPS (Bank Account)</td>
-                          <td className="p-2.5 font-mono">₹1.00 &ndash; ₹1,000.00</td>
-                          <td className="p-2.5 font-mono font-semibold text-amber-700">₹2.50</td>
-                          <td className="p-2.5 font-mono">Principal + ₹2.50</td>
-                        </tr>
                       </tbody>
                     </table>
                   </div>
                 </div>
 
                 {/* JSON Request Schema */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-semibold text-slate-900">UPI Request Body Schema</h4>
-                    <pre className="bg-slate-900 p-3.5 rounded-md text-[11px] font-mono text-slate-200 overflow-x-auto border border-slate-800">
+                <div className="space-y-2">
+                  <h4 className="text-xs font-semibold text-slate-900">UPI Request Body Schema (Exclusive Rail)</h4>
+                  <pre className="bg-slate-900 p-3.5 rounded-md text-[11px] font-mono text-slate-200 overflow-x-auto border border-slate-800">
 {`{
   "order_id": "ord_1001",
   "amount": 250.00,
@@ -2236,24 +2096,10 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
   "upi_id": "beneficiary@upi",
   "note": "Optional remark"
 }`}
-                    </pre>
-                  </div>
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-semibold text-slate-900">IMPS Request Body Schema</h4>
-                    <pre className="bg-slate-900 p-3.5 rounded-md text-[11px] font-mono text-slate-200 overflow-x-auto border border-slate-800">
-{`{
-  "order_id": "ord_1002",
-  "amount": 500.00,
-  "payout_method": "IMPS",
-  "recipient": {
-    "name": "Ramesh Kumar",
-    "account_number": "001201567890",
-    "ifsc": "HDFC0001234"
-  },
-  "note": "Optional remark"
-}`}
-                    </pre>
-                  </div>
+                  </pre>
+                  <p className="text-[11px] text-slate-500">
+                    All merchant payouts are strictly processed via PayNit Instant UPI. Bank account (IMPS) parameters are not accepted.
+                  </p>
                 </div>
 
                 {/* Lifecycle HTTP Codes */}
@@ -2297,7 +2143,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                     <div>
                       <strong className="text-emerald-900">Merchant Account Active &amp; Verified</strong>
                       <p className="text-[11px] text-emerald-800 mt-0.5">
-                        Your account ({merchant.merchant_code}) is live. Automated PayNit UPI &amp; IMPS rails are operational 24x7.
+                        Your account ({merchant.merchant_code}) is live. Automated PayNit Instant UPI rails are operational 24x7.
                       </p>
                     </div>
                   </div>
@@ -2413,7 +2259,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                       <strong className="font-mono text-slate-800">2.0%</strong>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Payout Fee (UPI &amp; IMPS):</span>
+                      <span className="text-slate-500">Payout Fee (Instant UPI):</span>
                       <strong className="font-mono text-slate-800">₹2.50 Flat</strong>
                     </div>
                     <div className="flex justify-between">
@@ -2451,7 +2297,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                   <div className="p-4 rounded-md bg-slate-50 border border-slate-200 space-y-1">
                     <h4 className="font-semibold text-slate-900">How long does a transfer take?</h4>
                     <p className="text-slate-600 leading-relaxed text-[11px]">
-                      UPI transfers settle in 1 to 5 seconds; IMPS disbursements clear within 5 to 60 seconds into beneficiary accounts. Provider status updates via automated webhook.
+                      Instant UPI transfers settle within 1 to 5 seconds into beneficiary accounts. Provider status updates via automated webhook.
                     </p>
                   </div>
 
@@ -2484,7 +2330,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                     <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-md flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
                       <div>
-                        <span className="font-medium text-slate-800 block">PayNit UPI &amp; IMPS Rails</span>
+                        <span className="font-medium text-slate-800 block">PayNit Instant UPI Rails</span>
                         <span className="text-[10px] text-slate-500">OPERATIONAL</span>
                       </div>
                     </div>
@@ -2531,29 +2377,12 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
             <div className="space-y-2 text-xs">
               <div className="flex justify-between p-2 bg-slate-50 rounded border border-slate-200">
                 <span className="text-slate-500">Payout Rail:</span>
-                <span className="font-semibold text-blue-700">{payoutMethod}</span>
+                <span className="font-semibold text-blue-700">UPI (Instant)</span>
               </div>
-              {payoutMethod === 'UPI' ? (
-                <div className="flex justify-between p-2 bg-slate-50 rounded border border-slate-200">
-                  <span className="text-slate-500">UPI ID (VPA):</span>
-                  <span className="font-mono font-semibold text-slate-900">{payoutUpiId}</span>
-                </div>
-              ) : (
-                <>
-                  <div className="flex justify-between p-2 bg-slate-50 rounded border border-slate-200">
-                    <span className="text-slate-500">Beneficiary:</span>
-                    <span className="font-semibold text-slate-900">{recipientName}</span>
-                  </div>
-                  <div className="flex justify-between p-2 bg-slate-50 rounded border border-slate-200">
-                    <span className="text-slate-500">Account:</span>
-                    <span className="font-mono font-semibold text-slate-900">••••{accountNumber.slice(-4)}</span>
-                  </div>
-                  <div className="flex justify-between p-2 bg-slate-50 rounded border border-slate-200">
-                    <span className="text-slate-500">IFSC Code:</span>
-                    <span className="font-mono font-semibold text-slate-900">{ifscCode}</span>
-                  </div>
-                </>
-              )}
+              <div className="flex justify-between p-2 bg-slate-50 rounded border border-slate-200">
+                <span className="text-slate-500">UPI ID (VPA):</span>
+                <span className="font-mono font-semibold text-slate-900">{payoutUpiId}</span>
+              </div>
               <div className="flex justify-between p-2 bg-slate-50 rounded border border-slate-200">
                 <span className="text-slate-500">Transfer Amount:</span>
                 <span className="font-mono font-semibold text-slate-900">{formatCurrency(numPayoutAmt)}</span>
@@ -2569,7 +2398,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
             </div>
 
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-md text-[11px] text-amber-900">
-              Disbursements are dispatched immediately via automated PayNit {payoutMethod} rails. Once submitted, this transfer cannot be reversed.
+              Disbursements are dispatched immediately via automated PayNit UPI rails. Once submitted, this transfer cannot be reversed.
             </div>
 
             <div className="flex gap-2 pt-1">

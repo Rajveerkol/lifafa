@@ -1,8 +1,8 @@
 // Supabase Edge Function: merchant-paynit-payout
-// Dedicated Multi-Merchant Payout Gateway Outbound Dispatch via PayNit (UPI + IMPS).
+// Dedicated Multi-Merchant Payout Gateway Outbound Dispatch via PayNit (UPI ONLY).
 // 1. Authenticates via API Key (X-Client-Id + X-Client-Secret) OR Supabase Bearer JWT.
 // 2. Checks client IP against merchant_ip_whitelist.
-// 3. Determines Payout Method: UPI or IMPS.
+// 3. Enforces Payout Method: UPI ONLY (rejects IMPS / bank account attempts).
 // 4. Invokes merchant_initiate_payout_rpc for atomic float deduction & authoritative ₹2.50 fee.
 // 5. Dispatches server-side HTTP POST to PayNit API (https://api.paynit.in/api/v1/payout.php).
 // 6. PayNit Authentication: Bearer PAYNIT_API_KEY:PAYNIT_API_SECRET (Server-side ONLY).
@@ -194,83 +194,55 @@ serve(async (req: Request) => {
       );
     }
 
-    // Determine Payout Method: UPI or IMPS
+    // Determine Payout Method: UPI ONLY (IMPS no longer supported)
     const recipient = body.recipient || {};
     const rawMethod = String(body.type || body.method || body.payout_method || '').toUpperCase().trim();
-    const hasUpiField = Boolean(body.upi_id || recipient.upi_id);
-    const hasBankField = Boolean(body.account_number || recipient.account_number || body.bank_account_number);
+    const hasBankField = Boolean(body.account_number || recipient.account_number || body.bank_account_number || recipient.ifsc || body.ifsc_code);
 
-    let method: 'UPI' | 'IMPS' = 'IMPS';
-    if (rawMethod === 'UPI' || (hasUpiField && !hasBankField)) {
-      method = 'UPI';
-    } else {
-      method = 'IMPS';
+    if (rawMethod === 'IMPS' || hasBankField) {
+      return new Response(
+        JSON.stringify({ error: 'IMPS and bank account payouts are no longer supported. All merchant payouts are processed via UPI only.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    let upiId: string | null = null;
-    let accountHolderName: string | null = null;
-    let bankAccountNumber: string | null = null;
-    let ifscCode: string | null = null;
-
-    if (method === 'UPI') {
-      upiId = String(body.upi_id || recipient.upi_id || '').trim();
-      if (!upiId || !/^[\w.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(upiId)) {
-        return new Response(
-          JSON.stringify({ error: 'Invalid UPI ID format. Expected format: username@bank' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-    } else {
-      accountHolderName = String(recipient.name || body.account_holder_name || body.beneficiary_name || '').trim();
-      bankAccountNumber = String(recipient.account_number || body.bank_account_number || body.account_number || '').trim();
-      ifscCode = String(recipient.ifsc || body.ifsc_code || body.ifsc || '').trim().toUpperCase();
-
-      if (!accountHolderName || accountHolderName.length < 2) {
-        return new Response(
-          JSON.stringify({ error: 'Beneficiary account holder name is required for IMPS payout' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      if (!bankAccountNumber || bankAccountNumber.length < 4) {
-        return new Response(
-          JSON.stringify({ error: 'Valid bank account number (min 4 digits) is required for IMPS payout' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      if (!ifscCode || !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifscCode)) {
-        return new Response(
-          JSON.stringify({ error: 'Valid 11-character IFSC code is required for IMPS payout' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
+    const upiId = String(body.upi_id || recipient.upi_id || '').trim();
+    if (!upiId || !/^[\w.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(upiId)) {
+      return new Response(
+        JSON.stringify({ error: 'A valid UPI ID is required for payout. Expected format: username@bank' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+
+    const method: 'UPI' = 'UPI';
+    const accountHolderName = String(body.account_holder_name || recipient.name || 'UPI Beneficiary').trim();
 
     // 3. Execute Atomic Payout Initiation RPC (Pessimistic float deduction + authoritative ₹2.50 fee)
     let initRes: any = null;
     let initErr: any = null;
 
-    // Try upgraded 9-arg RPC signature (Migration 037)
+    // Try upgraded 9-arg RPC signature (Migration 037/039)
     const rpc9Attempt = await adminClient.rpc('merchant_initiate_payout_rpc', {
       p_merchant_id: merchantId,
       p_order_id: orderId,
       p_amount: amount,
       p_payout_method: method,
       p_upi_id: upiId,
-      p_account_holder_name: accountHolderName || (method === 'UPI' ? 'UPI Beneficiary' : null),
-      p_bank_account_number: bankAccountNumber || (method === 'UPI' ? 'UPI_RAIL' : null),
-      p_ifsc_code: ifscCode || (method === 'UPI' ? 'UPI0000000' : null),
+      p_account_holder_name: accountHolderName,
+      p_bank_account_number: null,
+      p_ifsc_code: null,
       p_idempotency_key: idempotencyKey,
     });
 
     if (rpc9Attempt.error && rpc9Attempt.error.message?.includes('function public.merchant_initiate_payout_rpc')) {
-      // Fallback to legacy 7-arg signature if migration 037 is pending manual execution
+      // Fallback to legacy 7-arg signature if migration is pending manual execution
       const rpc7Attempt = await adminClient.rpc('merchant_initiate_payout_rpc', {
         p_merchant_id: merchantId,
         p_order_id: orderId,
         p_amount: amount,
-        p_account_holder_name: accountHolderName || 'UPI Beneficiary',
-        p_bank_account_number: bankAccountNumber || 'UPI_RAIL',
-        p_ifsc_code: ifscCode || 'UPI0000000',
+        p_account_holder_name: accountHolderName,
+        p_bank_account_number: 'UPI_RAIL',
+        p_ifsc_code: 'UPI0000000',
         p_idempotency_key: idempotencyKey,
       });
       initRes = rpc7Attempt.data;
@@ -310,37 +282,13 @@ serve(async (req: Request) => {
     const authoritativeFee = 2.50; // MANDATORY FLAT ₹2.50 FEE
     const totalDebited = amount + authoritativeFee;
 
-    // 4. Retrieve Decrypted Bank Account (only for IMPS)
-    let decryptedAccount: string | null = bankAccountNumber;
-    if (method === 'IMPS') {
-      const { data: decAcc, error: decryptErr } = await adminClient.rpc(
-        'get_decrypted_merchant_bank_account_rpc',
-        { p_payout_id: payoutId }
-      );
-      if (!decryptErr && decAcc) {
-        decryptedAccount = decAcc;
-      }
-    }
-
-    // 5. Build PayNit Official Documented Payout Payload
-    let paynitPayload: any;
-    if (method === 'UPI') {
-      paynitPayload = {
-        type: 'UPI',
-        amount: amount,
-        upi_id: upiId,
-        note: note,
-      };
-    } else {
-      paynitPayload = {
-        type: 'IMPS',
-        amount: amount,
-        account_number: decryptedAccount ? decryptedAccount.trim() : '',
-        ifsc: ifscCode,
-        beneficiary_name: accountHolderName,
-        note: note,
-      };
-    }
+    // 4. Build PayNit Official Documented UPI Payout Payload
+    const paynitPayload = {
+      type: 'UPI',
+      amount: amount,
+      upi_id: upiId,
+      note: note,
+    };
 
     // 6. Dispatch HTTP POST to PayNit API (Server-Side Isolated)
     const controller = new AbortController();

@@ -149,7 +149,7 @@ export const lifafaService = {
       p_account_holder_name: payoutDetails?.accountHolderName?.trim() || null,
       p_bank_account_number: payoutDetails?.bankAccountNumber?.trim() || null,
       p_ifsc_code: payoutDetails?.ifscCode?.trim()?.toUpperCase() || null,
-      p_upi_id: payoutDetails?.bankAccountNumber?.trim() ? null : (payoutDetails?.upiId?.trim() || null),
+      p_upi_id: payoutDetails?.upiId?.trim()?.toLowerCase() || null,
     });
 
     if (error) {
@@ -160,7 +160,7 @@ export const lifafaService = {
       throw new Error(friendlyMsg);
     }
 
-    // Direct bank payout flow: If payout_mode is UPI_BANK, dispatch to PayRupee and verify from database
+    // Direct external payout flow: If payout_mode is UPI_BANK, dispatch to consumer-paynit-payout and verify from database
     if (data?.payout_mode === 'UPI_BANK') {
       if (!data?.withdrawal_id) {
         return {
@@ -178,11 +178,11 @@ export const lifafaService = {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      // 2. Invoke PayRupee Edge Function dispatch
+      // 2. Invoke Consumer PayNit Edge Function dispatch
       let payoutRes: any = null;
       let invokeErrorMessage: string | null = null;
       try {
-        const invokeResult = await supabase.functions.invoke('payrupee-payout', {
+        const invokeResult = await supabase.functions.invoke('consumer-paynit-payout', {
           headers,
           body: {
             withdrawal_id: data.withdrawal_id,
@@ -191,11 +191,11 @@ export const lifafaService = {
         payoutRes = invokeResult.data;
         if (invokeResult.error) {
           invokeErrorMessage = await extractFunctionError(invokeResult.error, invokeResult.data);
-          console.error('PayRupee invoke error:', invokeErrorMessage);
+          console.error('Consumer PayNit invoke error:', invokeErrorMessage);
         }
       } catch (invokeErr: any) {
-        invokeErrorMessage = invokeErr.message || 'Network exception dispatching bank payout';
-        console.error('PayRupee invoke exception:', invokeErr);
+        invokeErrorMessage = invokeErr.message || 'Network exception dispatching external payout';
+        console.error('Consumer PayNit invoke exception:', invokeErr);
       }
 
       // 3. CRITICAL CHECK: Authoritatively verify the payout state from the database.

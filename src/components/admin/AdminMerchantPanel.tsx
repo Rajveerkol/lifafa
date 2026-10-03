@@ -776,10 +776,10 @@ export const AdminMerchantPanel: React.FC = () => {
             </div>
 
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Payout Fee (IMPS Rail)</span>
-              <div className="text-2xl font-black text-slate-900 mt-1">₹2.50</div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase">IMPS Rail Status</span>
+              <div className="text-sm font-black text-rose-600 mt-1">DISCONTINUED / UPI ONLY</div>
               <p className="text-[11px] text-slate-500 mt-1">
-                Flat fee for all PayNit IMPS disbursements up to ₹1,000.00.
+                All payouts are routed strictly via PayNit Instant UPI.
               </p>
             </div>
           </div>
@@ -878,7 +878,7 @@ export const AdminMerchantPanel: React.FC = () => {
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200">
                 <span className="font-bold">Payout Rails Supported:</span>
-                <span className="font-mono text-slate-900">Dual Rails: UPI (VPA) &amp; IMPS</span>
+                <span className="font-mono text-slate-900">PayNit Instant UPI (Exclusive)</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200">
                 <span className="font-bold">Webhook Signature Algorithm:</span>
@@ -1051,7 +1051,7 @@ export const AdminMerchantPanel: React.FC = () => {
             </div>
 
             <p className="text-xs text-slate-500 leading-relaxed">
-              Approving this merchant sets their status to <strong>ACTIVE</strong> and unlocks live float deposit, instant PayNit payout dispatch (UPI &amp; IMPS), and server-side API key generation.
+              Approving this merchant sets their status to <strong>ACTIVE</strong> and unlocks live float deposit, instant PayNit payout dispatch (Instant UPI), and server-side API key generation.
             </p>
 
             <div>

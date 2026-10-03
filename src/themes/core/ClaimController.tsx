@@ -77,26 +77,15 @@ export function useClaimLogic(
 
     // Payout details validation if in UPI_BANK mode
     if (lifafa.payout_mode === 'UPI_BANK') {
-      const cleanName = accountHolderName.trim();
-      const cleanAcc = bankAccountNumber.trim();
-      const cleanIfsc = ifscCode.trim().toUpperCase();
       const cleanUpi = upiId.trim();
 
-      if (!cleanName || cleanName.length < 2) {
-        setErrorMsg('Please enter your full registered bank account holder name.');
+      if (!cleanUpi) {
+        setErrorMsg('Please enter your UPI ID to claim this Lifafa.');
         return;
       }
-      if (!cleanAcc || !/^\d{6,20}$/.test(cleanAcc)) {
-        setErrorMsg('Please enter a valid bank account number.');
-        return;
-      }
-      if (!cleanIfsc || !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(cleanIfsc)) {
-        setErrorMsg('Please enter a valid IFSC code.');
-        return;
-      }
-      // Optional UPI ID fallback: empty is allowed, but if provided, must be valid
-      if (cleanUpi && !/^[a-zA-Z0-9._-]{2,100}@[a-zA-Z]{2,64}$/.test(cleanUpi)) {
-        setErrorMsg('Please enter a valid UPI ID.');
+
+      if (!/^[\w.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(cleanUpi)) {
+        setErrorMsg('Please enter a valid UPI ID (e.g. username@bank).');
         return;
       }
     }
@@ -108,10 +97,7 @@ export function useClaimLogic(
       const payoutDetails =
         lifafa.payout_mode === 'UPI_BANK'
           ? {
-              accountHolderName: accountHolderName.trim(),
-              bankAccountNumber: bankAccountNumber.trim() || undefined,
-              ifscCode: ifscCode.trim().toUpperCase() || undefined,
-              upiId: upiId.trim() || undefined,
+              upiId: upiId.trim(),
             }
           : undefined;
 

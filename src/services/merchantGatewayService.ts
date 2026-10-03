@@ -310,7 +310,7 @@ export const merchantGatewayService = {
     return error?.message || 'Payout request failed';
   },
 
-  // Request payout via PayNit Edge Function (supporting both UPI and IMPS)
+  // Request payout via PayNit Edge Function (UPI ONLY)
   async createPayout(params: {
     orderId: string;
     amount: number;
@@ -328,6 +328,16 @@ export const merchantGatewayService = {
       throw new Error('Supabase is not configured.');
     }
 
+    // Strict UPI-Only Architecture Enforcement
+    if (params.method === 'IMPS' || params.recipient) {
+      throw new Error('IMPS payouts are no longer supported. All payouts are processed via UPI only.');
+    }
+
+    const cleanUpi = params.upiId?.trim()?.toLowerCase();
+    if (!cleanUpi) {
+      throw new Error('A valid UPI ID is required for payout.');
+    }
+
     // 1. Validate session and obtain fresh access token
     const token = await this.getValidSessionToken();
 
@@ -339,25 +349,15 @@ export const merchantGatewayService = {
       headers['x-idempotency-key'] = params.idempotencyKey;
     }
 
-    const method: 'UPI' | 'IMPS' = params.method || (params.upiId ? 'UPI' : 'IMPS');
     const payload: any = {
       order_id: params.orderId.trim(),
       amount: params.amount,
-      payout_method: method,
-      method: method,
+      payout_method: 'UPI',
+      method: 'UPI',
+      upi_id: cleanUpi,
       note: params.note || 'Merchant Payout',
       idempotency_key: params.idempotencyKey || null,
     };
-
-    if (method === 'UPI') {
-      payload.upi_id = params.upiId?.trim();
-    } else {
-      payload.recipient = {
-        name: params.recipient?.name?.trim() || '',
-        account_number: params.recipient?.account_number?.trim() || '',
-        ifsc: params.recipient?.ifsc?.trim()?.toUpperCase() || '',
-      };
-    }
 
     // 3. Invoke Edge Function with explicit fresh Bearer token
     // Try merchant-paynit-payout first, falling back to merchant-payrupee-payout if needed

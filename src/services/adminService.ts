@@ -262,13 +262,23 @@ export const adminService = {
     return data;
   },
 
-  // Dispatch pending withdrawal to PayRupee Edge Function
+  // Dispatch pending withdrawal (dynamically routes: PAYRUPEE -> payrupee-payout, PAYNIT -> consumer-paynit-payout)
   async dispatchPendingPayout(withdrawalId: string) {
     if (!isSupabaseConfigured || !supabase) {
       throw new Error('Supabase is not configured.');
     }
 
-    const { data, error } = await supabase.functions.invoke('payrupee-payout', {
+    // Inspect withdrawal record to route to correct provider dispatcher
+    const { data: wth } = await supabase
+      .from('withdrawals')
+      .select('id, payout_provider')
+      .eq('id', withdrawalId)
+      .maybeSingle();
+
+    const provider = String(wth?.payout_provider || 'PAYNIT').toUpperCase();
+    const targetEndpoint = provider === 'PAYRUPEE' ? 'payrupee-payout' : 'consumer-paynit-payout';
+
+    const { data, error } = await supabase.functions.invoke(targetEndpoint, {
       body: { withdrawal_id: withdrawalId },
     });
 

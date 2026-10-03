@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   Eye,
   EyeOff,
+  Zap,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { Lifafa, LifafaTask, PayoutMode } from '../types/database';
@@ -263,28 +264,17 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
       return;
     }
 
-    // Validate UPI / Bank details if Lifafa is in UPI_BANK mode
+    // Validate UPI details if Lifafa is in UPI_BANK mode
     if (lifafa.payout_mode === 'UPI_BANK') {
-      const cleanName = accountHolderName.trim();
-      const cleanAcc = bankAccountNumber.trim();
-      const cleanIfsc = ifscCode.trim().toUpperCase();
       const cleanUpi = upiId.trim();
 
-      if (!cleanName || cleanName.length < 2) {
-        setErrorMsg('Please enter account holder name as per bank records.');
+      if (!cleanUpi) {
+        setErrorMsg('Please enter your UPI ID to claim this Lifafa.');
         return;
       }
-      if (!cleanAcc || !/^\d{6,20}$/.test(cleanAcc)) {
-        setErrorMsg('Please enter a valid bank account number.');
-        return;
-      }
-      if (!cleanIfsc || !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(cleanIfsc)) {
-        setErrorMsg('Please enter a valid IFSC code.');
-        return;
-      }
-      // Optional UPI ID fallback: empty is allowed, but if provided, must be valid
-      if (cleanUpi && !/^[a-zA-Z0-9._-]{2,100}@[a-zA-Z]{2,64}$/.test(cleanUpi)) {
-        setErrorMsg('Please enter a valid UPI ID.');
+
+      if (!/^[\w.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(cleanUpi)) {
+        setErrorMsg('Please enter a valid UPI ID (e.g. username@bank).');
         return;
       }
     }
@@ -305,10 +295,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
         idempotencyKey,
         lifafa.payout_mode === 'UPI_BANK'
           ? {
-              accountHolderName: accountHolderName.trim(),
-              bankAccountNumber: bankAccountNumber.trim() || undefined,
-              ifscCode: ifscCode.trim().toUpperCase() || undefined,
-              upiId: upiId.trim() || undefined,
+              upiId: upiId.trim(),
             }
           : undefined
       );
@@ -902,66 +889,28 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                 </div>
               )}
 
-              {/* Direct Bank Settlement Form if lifafa payout_mode is UPI_BANK */}
+              {/* Direct Settlement Form if lifafa payout_mode is UPI_BANK */}
               {lifafa.payout_mode === 'UPI_BANK' && (
                 <div className="p-4 bg-white border border-slate-200 rounded-2xl space-y-3 shadow-xs">
                   <div className="flex items-center gap-1.5 text-xs font-black text-slate-800 border-b border-slate-100 pb-2">
-                    <Landmark className="w-4 h-4 text-blue-600" />
-                    <span>Direct Bank Settlement Details</span>
+                    <Zap className="w-4 h-4 text-emerald-600" />
+                    <span>Instant UPI Settlement Details</span>
                   </div>
 
                   <div>
                     <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                      Account Holder Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={accountHolderName}
-                      onChange={(e) => setAccountHolderName(e.target.value)}
-                      placeholder="Account holder name as per bank"
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 caret-slate-900 focus:outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all [color-scheme:light]"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                        Bank Account Number
-                      </label>
-                      <input
-                        type="text"
-                        value={bankAccountNumber}
-                        onChange={(e) => setBankAccountNumber(e.target.value)}
-                        placeholder="Account Number"
-                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 placeholder:text-slate-400 caret-slate-900 focus:outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all [color-scheme:light]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                        IFSC Code
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={11}
-                        value={ifscCode}
-                        onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
-                        placeholder="e.g. SBIN0001234"
-                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold uppercase text-slate-900 placeholder:text-slate-400 caret-slate-900 focus:outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all [color-scheme:light]"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                      UPI ID (Optional fallback)
+                      UPI ID (Instant Payout)
                     </label>
                     <input
                       type="text"
                       value={upiId}
                       onChange={(e) => setUpiId(e.target.value)}
-                      placeholder="username@bank"
+                      placeholder="e.g. username@okhdfcbank"
                       className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 caret-slate-900 focus:outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all [color-scheme:light]"
                     />
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      Enter your UPI ID (e.g. username@okhdfcbank) to receive your reward payout instantly.
+                    </p>
                   </div>
                 </div>
               )}
