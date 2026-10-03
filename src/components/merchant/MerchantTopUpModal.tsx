@@ -69,7 +69,10 @@ export const MerchantTopUpModal: React.FC<MerchantTopUpModalProps> = ({
   if (!isOpen) return null;
 
   const numAmount = parseFloat(grossAmount) || 0;
-  const { fee, netCredited } = merchantGatewayService.calculateDepositFee(numAmount);
+  const depositCalc = merchantGatewayService.calculateDepositFee(numAmount);
+  const fee = depositCalc.fee;
+  const totalPayable = depositCalc.totalPayable;
+  const walletCredit = depositCalc.walletCredit;
 
   const handleCopyUpi = () => {
     if (!upiSettings.upiId) return;
@@ -102,7 +105,7 @@ export const MerchantTopUpModal: React.FC<MerchantTopUpModalProps> = ({
       setLoading(true);
       await merchantGatewayService.submitDeposit({
         merchantId,
-        grossAmount: numAmount,
+        grossAmount: totalPayable,
         utrNumber: cleanUtr,
       });
       onSuccess();
@@ -114,7 +117,7 @@ export const MerchantTopUpModal: React.FC<MerchantTopUpModalProps> = ({
     }
   };
 
-  const dynamicUpiUri = `upi://pay?pa=${encodeURIComponent(upiSettings.upiId || 'createlifafa@upi')}&pn=${encodeURIComponent(upiSettings.payeeName || 'Createlifafa Payout Gateway')}&am=${numAmount}&cu=INR`;
+  const dynamicUpiUri = `upi://pay?pa=${encodeURIComponent(upiSettings.upiId || 'createlifafa@upi')}&pn=${encodeURIComponent(upiSettings.payeeName || 'Createlifafa Payout Gateway')}&am=${totalPayable}&cu=INR`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in">
@@ -149,7 +152,7 @@ export const MerchantTopUpModal: React.FC<MerchantTopUpModalProps> = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Deposit Gross Amount (₹) *
+                Deposit Amount (₹) *
               </label>
               <input
                 type="number"
@@ -167,16 +170,20 @@ export const MerchantTopUpModal: React.FC<MerchantTopUpModalProps> = ({
             {/* Fee calculation breakdown */}
             <div className="bg-slate-50 border border-slate-200/80 rounded-lg p-3 space-y-1.5 text-xs">
               <div className="flex justify-between text-slate-600">
-                <span>Gross Transfer Amount:</span>
+                <span>Deposit Amount:</span>
                 <span className="font-semibold text-slate-900">{formatCurrency(numAmount)}</span>
               </div>
               <div className="flex justify-between text-slate-600">
-                <span>Platform Processing Fee (2%):</span>
-                <span className="font-semibold text-amber-700">-{formatCurrency(fee)}</span>
+                <span>Deposit Fee (2%):</span>
+                <span className="font-semibold text-amber-700">+{formatCurrency(fee)}</span>
               </div>
               <div className="pt-1.5 border-t border-slate-200 flex justify-between font-bold text-slate-900">
-                <span>Net Credit to Float Balance:</span>
-                <span className="text-emerald-700">{formatCurrency(netCredited)}</span>
+                <span>Total Payable:</span>
+                <span className="text-blue-700 font-mono">{formatCurrency(totalPayable)}</span>
+              </div>
+              <div className="pt-1 border-t border-slate-200 flex justify-between font-bold text-emerald-700">
+                <span>Float Credited to Balance:</span>
+                <span className="font-mono">{formatCurrency(walletCredit)}</span>
               </div>
             </div>
 

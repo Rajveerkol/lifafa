@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { walletService } from '../../services/walletService';
+import { calculateWithdrawalFee } from '../../lib/feeCalculations';
 import { formatCurrency } from '../../lib/utils';
 
 interface WithdrawModalProps {
@@ -77,32 +78,33 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
   const availableBalance = wallet?.available_balance ?? 0;
   const effectiveWithdrawable = withdrawableData.withdrawable_balance;
   const numAmount = parseFloat(amount) || 0;
-  const FIXED_FEE = 3.58;
-  const totalDeduction = numAmount > 0 ? Math.round((numAmount + FIXED_FEE) * 100) / 100 : 0;
+  const feeInfo = calculateWithdrawalFee(numAmount);
+  const currentFee = feeInfo.fee;
+  const totalDeduction = numAmount > 0 ? feeInfo.totalDeducted : 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return; // Strict double-click guard
     setErrorMsg(null);
 
-    if (numAmount < 10) {
-      setErrorMsg('Minimum withdrawal amount is ₹10.00.');
+    if (numAmount < 1) {
+      setErrorMsg('Minimum withdrawal amount is ₹1.00.');
       return;
     }
 
-    if (numAmount > 1000) {
-      setErrorMsg('Maximum withdrawal amount is ₹1,000.00.');
+    if (numAmount > 5000) {
+      setErrorMsg('Maximum withdrawal amount is ₹5,000.00.');
       return;
     }
 
     if (totalDeduction > effectiveWithdrawable) {
       if (withdrawableData.blocked_balance > 0) {
         setErrorMsg(
-          `Withdrawal exceeds your eligible balance. You need ${formatCurrency(totalDeduction)} (${formatCurrency(numAmount)} payout + ₹${FIXED_FEE} platform fee), but only have ${formatCurrency(effectiveWithdrawable)} eligible for withdrawal (${formatCurrency(withdrawableData.blocked_balance)} is currently restricted under Lifafa withdrawal policy).`
+          `Withdrawal exceeds your eligible balance. You need ${formatCurrency(totalDeduction)} (${formatCurrency(numAmount)} payout + ${formatCurrency(currentFee)} platform fee), but only have ${formatCurrency(effectiveWithdrawable)} eligible for withdrawal (${formatCurrency(withdrawableData.blocked_balance)} is currently restricted under Lifafa withdrawal policy).`
         );
       } else {
         setErrorMsg(
-          `Insufficient available balance. You need ${formatCurrency(totalDeduction)} (${formatCurrency(numAmount)} payout + ₹${FIXED_FEE} platform fee), but only have ${formatCurrency(availableBalance)}.`
+          `Insufficient available balance. You need ${formatCurrency(totalDeduction)} (${formatCurrency(numAmount)} payout + ${formatCurrency(currentFee)} platform fee), but only have ${formatCurrency(availableBalance)}.`
         );
       }
       return;
@@ -178,7 +180,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
 
               <h3 className="text-xl font-black">Withdraw Funds</h3>
               <p className="text-xs text-blue-100/90 leading-relaxed">
-                Instant automated UPI transfers. Flat platform fee ₹3.58.
+                Instant automated UPI transfers. Tiered platform fee from ₹2.50.
               </p>
 
               <div className="pt-2 flex items-center justify-between text-xs border-t border-white/15">
@@ -261,7 +263,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
               </div>
               <div className="flex justify-between text-slate-500 text-[11px]">
                 <span>Platform Fee:</span>
-                <span>₹{FIXED_FEE.toFixed(2)}</span>
+                <span>{formatCurrency(currentFee)}</span>
               </div>
               <div className="flex justify-between text-slate-900 font-bold text-xs pt-1 border-t border-slate-200">
                 <span>Total Deducted:</span>
@@ -293,7 +295,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
                   Withdrawal Amount (₹) <span className="text-red-500">*</span>
                 </label>
                 <span className="text-[10px] text-slate-400 font-medium">
-                  Min ₹10 • Max ₹1,000
+                  Min ₹1 • Max ₹5,000
                 </span>
               </div>
               <div className="relative">
@@ -302,12 +304,12 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
                 </span>
                 <input
                   type="number"
-                  min="10"
-                  max="1000"
+                  min="1"
+                  max="5000"
                   step="any"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  placeholder="10.00"
+                  placeholder="500.00"
                   className="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:outline-hidden focus:border-blue-500 focus:bg-white transition-colors"
                   required
                 />
@@ -349,8 +351,8 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
                 <span className="font-bold text-slate-900">{formatCurrency(numAmount || 0)}</span>
               </div>
               <div className="flex justify-between items-center text-slate-600">
-                <span>Fixed Platform Fee:</span>
-                <span className="font-bold text-slate-900">₹{FIXED_FEE.toFixed(2)}</span>
+                <span>Platform Fee:</span>
+                <span className="font-bold text-slate-900">{formatCurrency(currentFee)}</span>
               </div>
               <div className="pt-1.5 border-t border-slate-200 flex justify-between items-center font-bold text-slate-900">
                 <span>Total Wallet Deduction:</span>
@@ -360,15 +362,15 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
 
             <button
               type="submit"
-              disabled={loading || availableBalance < totalDeduction || numAmount < 10}
+              disabled={loading || availableBalance < totalDeduction || numAmount < 1 || numAmount > 5000}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-blue-500/25 active:scale-98 transition-all text-xs flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading ? (
                 'Processing Payout Request...'
-              ) : numAmount >= 10 ? (
+              ) : numAmount >= 1 && numAmount <= 5000 ? (
                 `⚡ Withdraw ${formatCurrency(numAmount)} via UPI`
               ) : (
-                'Enter Amount (Min ₹10)'
+                'Enter Amount (Min ₹1 • Max ₹5,000)'
               )}
             </button>
 

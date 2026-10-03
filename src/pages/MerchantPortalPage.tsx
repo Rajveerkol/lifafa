@@ -152,7 +152,7 @@ const exportToCsv = (filename: string, headers: string[], rows: (string | number
 };
 
 export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNavigateHome }) => {
-  const { user, merchant: contextMerchant, logout, refreshMerchant } = useAuth();
+  const { user, merchant: contextMerchant, logout, refreshMerchant, refreshWallet } = useAuth();
 
   const [merchant, setMerchant] = useState<Merchant | null>(contextMerchant);
   const [wallet, setWallet] = useState<MerchantWallet | null>(null);
@@ -252,6 +252,9 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
         setLedger(lList);
         setApiKeys(kList);
         setWhitelist(ipList);
+        if (refreshWallet) {
+          refreshWallet().catch(() => {});
+        }
       }
     } catch (err) {
       console.error('Error loading merchant gateway records:', err);
@@ -259,7 +262,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
       setLoading(false);
       setRefreshing(false);
     }
-  }, [contextMerchant, refreshMerchant]);
+  }, [contextMerchant, refreshMerchant, refreshWallet]);
 
   useEffect(() => {
     loadMerchantData();
@@ -283,6 +286,9 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
     setRefreshing(true);
     loadMerchantData();
     loadUpiSettings();
+    if (refreshWallet) {
+      refreshWallet().catch(() => {});
+    }
   };
 
   const handleCopyUpi = () => {
@@ -334,17 +340,24 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
       return;
     }
 
+    const depCalc = merchantGatewayService.calculateDepositFee(grossNum);
+    const payableAmount = depCalc.totalPayable;
+    const walletCredit = depCalc.walletCredit;
+
     try {
       setSubmittingDeposit(true);
       await merchantGatewayService.submitDeposit({
         merchantId: merchant.id,
-        grossAmount: grossNum,
+        grossAmount: payableAmount,
         utrNumber: cleanUtr,
       });
 
-      setDepositSuccessMsg(`Float top-up of ₹${grossNum} submitted! Status: PENDING admin verification.`);
+      setDepositSuccessMsg(`Float top-up of ₹${walletCredit} (Total Paid: ₹${payableAmount} incl. 2% fee) submitted! Status: PENDING admin verification.`);
       setDepositUtr('');
       await loadMerchantData();
+      if (refreshWallet) {
+        refreshWallet().catch(() => {});
+      }
       setTimeout(() => setDepositSuccessMsg(null), 6000);
     } catch (err: any) {
       setDepositErrorMsg(err.message || 'Failed to submit float deposit request');
@@ -366,8 +379,8 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
       return;
     }
 
-    if (amtNum > 1000) {
-      setPayoutErrorMsg('Maximum payout amount per transaction is ₹1,000.00');
+    if (amtNum > 5000) {
+      setPayoutErrorMsg('Maximum payout amount per transaction is ₹5,000.00');
       return;
     }
 
@@ -410,6 +423,9 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
       setPayoutOrderId(`ord_${Date.now().toString().slice(-6)}`);
       setPayoutUpiId('');
       await loadMerchantData();
+      if (refreshWallet) {
+        refreshWallet().catch(() => {});
+      }
       setTimeout(() => setPayoutSuccessMsg(null), 7000);
     } catch (err: any) {
       setPayoutConfirmModalOpen(false);
@@ -419,14 +435,17 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
     }
   };
 
-  // Live Payout fee calculation
+  // Live Payout fee calculation (Unified tiered slabs)
   const numPayoutAmt = parseFloat(payoutAmount) || 0;
   const { fee: livePayoutFee, totalDeducted: liveTotalDeducted } = merchantGatewayService.calculatePayoutFee(numPayoutAmt);
 
-  // Live Deposit fee calculation
+  // Live Deposit fee calculation (Unified 2% deposit fee)
   const numDepositAmt = parseFloat(depositAmount) || 0;
-  const { fee: liveDepositFee, netCredited: liveNetCredited } = merchantGatewayService.calculateDepositFee(numDepositAmt);
-  const dynamicUpiUri = `upi://pay?pa=${encodeURIComponent(upiSettings.upiId || 'createlifafa@upi')}&pn=${encodeURIComponent(upiSettings.payeeName || 'Createlifafa Payout Gateway')}&am=${numDepositAmt}&cu=INR`;
+  const liveDepCalc = merchantGatewayService.calculateDepositFee(numDepositAmt);
+  const liveDepositFee = liveDepCalc.fee;
+  const liveTotalPayable = liveDepCalc.totalPayable;
+  const liveNetCredited = liveDepCalc.walletCredit;
+  const dynamicUpiUri = `upi://pay?pa=${encodeURIComponent(upiSettings.upiId || 'createlifafa@upi')}&pn=${encodeURIComponent(upiSettings.payeeName || 'Createlifafa Payout Gateway')}&am=${liveTotalPayable}&cu=INR`;
 
   // Real Metric Calculations (NO FAKE DATA)
   const metrics = useMemo(() => {
@@ -1229,7 +1248,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
 
                   <div>
                     <label className="block text-xs font-medium text-slate-700 mb-1.5">
-                      Deposit Gross Amount (₹)
+                      Deposit Amount (₹)
                     </label>
                     <input
                       type="number"
@@ -1264,15 +1283,19 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                   {/* Fee Breakdown Card */}
                   <div className="bg-slate-50 border border-slate-200 rounded-md p-3.5 space-y-2 text-xs">
                     <div className="flex justify-between text-slate-600">
-                      <span>Gross Transfer Amount:</span>
+                      <span>Deposit Amount:</span>
                       <span className="font-mono font-medium text-slate-900">{formatCurrency(numDepositAmt)}</span>
                     </div>
-                    <div className="flex justify-between text-amber-700">
-                      <span>Platform Deposit Fee (2.0%):</span>
-                      <span className="font-mono font-medium">-{formatCurrency(liveDepositFee)}</span>
+                    <div className="flex justify-between text-slate-600">
+                      <span>Deposit Fee (2.0%):</span>
+                      <span className="font-mono font-medium text-amber-700">+{formatCurrency(liveDepositFee)}</span>
                     </div>
-                    <div className="pt-2 border-t border-slate-200 flex justify-between font-semibold text-emerald-700">
-                      <span>Net Float Credited to Wallet:</span>
+                    <div className="pt-2 border-t border-slate-200 flex justify-between font-semibold text-slate-900">
+                      <span>Total Payable:</span>
+                      <span className="font-mono text-sm text-blue-700">{formatCurrency(liveTotalPayable)}</span>
+                    </div>
+                    <div className="pt-1 border-t border-slate-200 flex justify-between font-semibold text-emerald-700">
+                      <span>Float Credited to Wallet:</span>
                       <span className="font-mono text-sm">{formatCurrency(liveNetCredited)}</span>
                     </div>
                   </div>
@@ -1462,7 +1485,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                       <input
                         type="number"
                         min="1"
-                        max="1000"
+                        max="5000"
                         step="any"
                         required
                         value={payoutAmount}
@@ -1494,7 +1517,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                       <span className="font-mono font-semibold text-slate-900">{formatCurrency(numPayoutAmt)}</span>
                     </div>
                     <div className="flex justify-between text-slate-600">
-                      <span>Payout Fee (Flat ₹2.50):</span>
+                      <span>Payout Fee:</span>
                       <span className="font-mono font-semibold text-amber-700">+{formatCurrency(livePayoutFee)}</span>
                     </div>
                     <div className="pt-2 border-t border-slate-200 flex justify-between font-semibold text-slate-900">
@@ -2388,7 +2411,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                 <span className="font-mono font-semibold text-slate-900">{formatCurrency(numPayoutAmt)}</span>
               </div>
               <div className="flex justify-between p-2 bg-slate-50 rounded border border-slate-200">
-                <span className="text-slate-500">Gateway Fee (Flat):</span>
+                <span className="text-slate-500">Gateway Fee:</span>
                 <span className="font-mono font-semibold text-amber-700">+{formatCurrency(livePayoutFee)}</span>
               </div>
               <div className="flex justify-between p-2 bg-blue-50 rounded border border-blue-200 font-semibold">

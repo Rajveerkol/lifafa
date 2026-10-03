@@ -38,8 +38,8 @@ export const MerchantNewPayoutModal: React.FC<MerchantNewPayoutModalProps> = ({
       return;
     }
 
-    if (numAmount > 1000) {
-      setErrorMsg('Maximum payout amount per transaction is ₹1,000.00');
+    if (numAmount > 5000) {
+      setErrorMsg('Maximum payout amount per transaction is ₹5,000.00');
       return;
     }
 
@@ -111,7 +111,7 @@ export const MerchantNewPayoutModal: React.FC<MerchantNewPayoutModalProps> = ({
                 <input
                   type="number"
                   min="1"
-                  max="1000"
+                  max="5000"
                   step="any"
                   required
                   value={amount}
@@ -143,7 +143,7 @@ export const MerchantNewPayoutModal: React.FC<MerchantNewPayoutModalProps> = ({
                 <span className="font-semibold text-slate-900">{formatCurrency(numAmount)}</span>
               </div>
               <div className="flex justify-between text-slate-600">
-                <span>Gateway Fee (Flat ₹2.50):</span>
+                <span>Gateway Payout Fee:</span>
                 <span className="font-semibold text-slate-900">+{formatCurrency(fee)}</span>
               </div>
               <div className="pt-1.5 border-t border-slate-200 flex justify-between font-bold text-slate-900">

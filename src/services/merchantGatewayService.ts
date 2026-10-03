@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { calculateWithdrawalFee, calculateDepositFee as calcUnifiedDepositFee } from '../lib/feeCalculations';
 import type {
   Merchant,
   MerchantWallet,
@@ -27,20 +28,27 @@ export const MERCHANT_UPI_SETTINGS_STORAGE_KEY = 'lifafa_merchant_upi_settings';
 export const MERCHANT_UPI_SETTINGS_EVENT = 'lifafa_merchant_upi_settings_updated';
 
 export const merchantGatewayService = {
-  // Payout Fee Calculation: exact server-aligned rules (Flat ₹2.50 for all methods/amounts)
+  // Payout Fee Calculation: Authoritative fee slabs unified with website wallet
   calculatePayoutFee(amount: number): { fee: number; totalDeducted: number } {
-    const fee = 2.50;
-    return {
-      fee,
-      totalDeducted: Math.round((amount + fee) * 100) / 100,
-    };
+    return calculateWithdrawalFee(amount);
   },
 
-  // Deposit Fee Calculation: 2% platform fee
-  calculateDepositFee(grossAmount: number): { fee: number; netCredited: number } {
-    const fee = Math.round(grossAmount * 0.02 * 100) / 100;
-    const netCredited = Math.round((grossAmount - fee) * 100) / 100;
-    return { fee, netCredited };
+  // Deposit Fee Calculation: Unified 2% deposit fee (Total Payable = Deposit + 2%, Wallet Credit = Deposit)
+  calculateDepositFee(depositAmount: number): {
+    depositAmount: number;
+    fee: number;
+    totalPayable: number;
+    walletCredit: number;
+    netCredited: number;
+  } {
+    const res = calcUnifiedDepositFee(depositAmount);
+    return {
+      depositAmount: res.depositAmount,
+      fee: res.fee,
+      totalPayable: res.totalPayable,
+      walletCredit: res.walletCredit,
+      netCredited: res.walletCredit, // Backwards-compatibility alias
+    };
   },
 
   // Fetch Merchant profile for current authenticated user
@@ -77,7 +85,7 @@ export const merchantGatewayService = {
     return data as Merchant | null;
   },
 
-  // Fetch Merchant float wallet
+  // Fetch Merchant float wallet (Reads ONE shared wallet balance from public.wallets)
   async getMerchantWallet(merchantId: string): Promise<MerchantWallet | null> {
     if (merchantId === 'dev-demo-merchant-001') {
       return {
@@ -94,17 +102,53 @@ export const merchantGatewayService = {
     }
 
     if (!isSupabaseConfigured || !supabase) return null;
-    const { data, error } = await supabase
+
+    // 1. Resolve the merchant to find user_id
+    const { data: merchant, error: mchErr } = await supabase
+      .from('merchants')
+      .select('id, user_id')
+      .eq('id', merchantId)
+      .maybeSingle();
+
+    if (mchErr || !merchant) {
+      console.error('Error fetching merchant for shared wallet:', mchErr);
+      return null;
+    }
+
+    // 2. Fetch the authoritative single user wallet from public.wallets
+    const { data: userWallet, error: userWalletErr } = await supabase
+      .from('wallets')
+      .select('*')
+      .eq('user_id', merchant.user_id)
+      .maybeSingle();
+
+    if (userWalletErr) {
+      console.error('Error fetching authoritative shared wallet:', userWalletErr);
+    }
+
+    // 3. Also fetch merchant_wallets record for isolated stats (locked_payout_balance, totals)
+    const { data: mchWallet } = await supabase
       .from('merchant_wallets')
       .select('*')
       .eq('merchant_id', merchantId)
       .maybeSingle();
 
-    if (error) {
-      console.error('Error fetching merchant wallet:', error);
-      return null;
-    }
-    return data as MerchantWallet | null;
+    if (!userWallet && !mchWallet) return null;
+
+    // Return the authoritative user wallet available_balance as the shared balance
+    const sharedAvailable = userWallet ? Number(userWallet.available_balance) : (mchWallet ? Number(mchWallet.available_balance) : 0);
+
+    return {
+      id: mchWallet?.id || userWallet?.id || merchantId,
+      merchant_id: merchantId,
+      available_balance: sharedAvailable,
+      locked_payout_balance: mchWallet ? Number(mchWallet.locked_payout_balance) : 0,
+      total_deposited: userWallet ? Number(userWallet.total_deposited ?? mchWallet?.total_deposited ?? 0) : (mchWallet ? Number(mchWallet.total_deposited) : 0),
+      total_paid_out: userWallet ? Number(userWallet.total_withdrawn ?? mchWallet?.total_paid_out ?? 0) : (mchWallet ? Number(mchWallet.total_paid_out) : 0),
+      total_fees_paid: mchWallet ? Number(mchWallet.total_fees_paid) : 0,
+      created_at: mchWallet?.created_at || userWallet?.created_at || new Date().toISOString(),
+      updated_at: userWallet?.updated_at || mchWallet?.updated_at || new Date().toISOString(),
+    };
   },
 
   // Fetch Merchant payouts history

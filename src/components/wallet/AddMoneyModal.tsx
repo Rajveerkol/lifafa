@@ -23,6 +23,7 @@ import {
   DEFAULT_PAYMENT_SETTINGS,
   PAYMENT_SETTINGS_STORAGE_KEY,
 } from '../../services/walletService';
+import { calculateDepositFee } from '../../lib/feeCalculations';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import type { DepositRequest } from '../../types/database';
 
@@ -191,10 +192,16 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
     setSubmittedDeposit(null);
   };
 
-  // UPI payment intent link with configured payee name and UPI ID
+  // 2% Deposit Fee Calculation: Deposit Amount, Fee (2%), Total Payable, Wallet Credit
+  const feeCalc = calculateDepositFee(amount);
+  const depositFee = feeCalc.fee;
+  const totalPayable = feeCalc.totalPayable;
+  const walletCredit = feeCalc.walletCredit;
+
+  // UPI payment intent link with configured payee name, UPI ID, and Total Payable
   const activeUpiId = paymentSettings.upiId || depositUpiId || 'createlifafa@upi';
   const activePayeeName = paymentSettings.payeeName || 'Createlifafa';
-  const upiPayUrl = `upi://pay?pa=${encodeURIComponent(activeUpiId)}&pn=${encodeURIComponent(activePayeeName)}&am=${amount}&cu=INR`;
+  const upiPayUrl = `upi://pay?pa=${encodeURIComponent(activeUpiId)}&pn=${encodeURIComponent(activePayeeName)}&am=${totalPayable}&cu=INR`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
@@ -311,6 +318,26 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
                     </div>
                   </div>
 
+                  {/* 2% Deposit Fee Breakdown */}
+                  <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 text-xs">
+                    <div className="flex justify-between text-slate-600">
+                      <span>Deposit Amount:</span>
+                      <span className="font-bold text-slate-900">{formatCurrency(amount)}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-600">
+                      <span>Deposit Fee (2%):</span>
+                      <span className="font-bold text-amber-700">+{formatCurrency(depositFee)}</span>
+                    </div>
+                    <div className="pt-1.5 border-t border-slate-200 flex justify-between font-bold text-slate-900">
+                      <span>Total Payable:</span>
+                      <span className="text-blue-600 font-mono text-sm">{formatCurrency(totalPayable)}</span>
+                    </div>
+                    <div className="pt-1 border-t border-slate-200 flex justify-between font-bold text-emerald-700">
+                      <span>Wallet will be credited:</span>
+                      <span className="font-mono text-sm">{formatCurrency(walletCredit)}</span>
+                    </div>
+                  </div>
+
                   {/* Payment Details Card (UPI ID & Dynamic QR) */}
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3">
                     <div className="flex items-center justify-between">
@@ -370,7 +397,7 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
                         </div>
                       )}
                       <p className="text-[11px] text-slate-500 mt-2 font-medium">
-                        Scan QR with <span className="font-bold text-slate-700">PhonePe, GPay, Paytm, BHIM</span> to pay <span className="font-bold text-blue-600">₹{amount}</span>
+                        Scan QR with <span className="font-bold text-slate-700">PhonePe, GPay, Paytm, BHIM</span> to pay <span className="font-bold text-blue-600">₹{totalPayable}</span>
                       </p>
                     </div>
 
@@ -380,15 +407,15 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
                       className="sm:hidden w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
-                      <span>Open UPI App to Pay ₹{amount}</span>
+                      <span>Open UPI App to Pay ₹{totalPayable}</span>
                     </a>
 
                     {/* Instructions */}
                     <div className="bg-white/80 p-3 rounded-xl border border-slate-100 text-[11px] text-slate-600 space-y-1">
                       <p className="font-bold text-slate-700">Steps to deposit:</p>
-                      <p>1. Open your UPI app and transfer exactly <strong className="text-slate-900">₹{amount}</strong> to the UPI ID above.</p>
+                      <p>1. Open your UPI app and transfer exactly <strong className="text-slate-900">₹{totalPayable}</strong> (includes 2% fee) to the UPI ID above.</p>
                       <p>2. Once payment is successful, copy the <strong className="text-slate-900">12-digit UTR / Ref No.</strong> from transaction details.</p>
-                      <p>3. Click the button below to submit the UTR for verification.</p>
+                      <p>3. Submit the UTR. Your wallet will be credited with <strong className="text-emerald-700">₹{walletCredit}</strong>.</p>
                     </div>
                   </div>
 
@@ -398,7 +425,7 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
                     disabled={amount < 1}
                     className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-2xl shadow-md shadow-blue-500/20 text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-98"
                   >
-                    <span>I Have Paid ₹{amount} → Enter UTR Number</span>
+                    <span>I Have Paid ₹{totalPayable} → Enter UTR Number</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -409,8 +436,9 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
                 <form onSubmit={handleSubmitDeposit} className="space-y-4">
                   <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex justify-between items-center text-xs">
                     <div>
-                      <span className="text-slate-500 block text-[10px]">Payment Amount</span>
-                      <span className="font-bold text-slate-900 text-sm">{formatCurrency(amount)}</span>
+                      <span className="text-slate-500 block text-[10px]">Total Paid (with 2% fee)</span>
+                      <span className="font-bold text-slate-900 text-sm">{formatCurrency(totalPayable)}</span>
+                      <span className="text-[10px] text-emerald-700 font-medium block">Wallet receives: {formatCurrency(walletCredit)}</span>
                     </div>
                     <div className="text-right">
                       <span className="text-slate-500 block text-[10px]">Paid to UPI</span>
