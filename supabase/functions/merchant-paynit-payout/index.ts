@@ -4,7 +4,7 @@
 // 2. Checks client IP against merchant_ip_whitelist.
 // 3. Enforces Payout Method: UPI ONLY (rejects IMPS / bank account attempts).
 // 4. Invokes merchant_initiate_payout_rpc for atomic float deduction & authoritative ₹2.50 fee.
-// 5. Dispatches server-side HTTP POST to PayNit API (https://api.paynit.in/api/v1/payout.php).
+// 5. Dispatches server-side HTTP POST to PayNit API (https://api.paynit.in/v1/payout.php).
 // 6. PayNit Authentication: Bearer PAYNIT_API_KEY:PAYNIT_API_SECRET (Server-side ONLY).
 // 7. Handles Real PayNit Response:
 //    a. SUCCESS / processed -> Finalized via merchant_finalize_payout_success_rpc.
@@ -46,6 +46,7 @@ serve(async (req: Request) => {
       .trim()
       .replace(/\/+$/, '')
       .replace(/\/api\/v1\/?$/, '')
+      .replace(/\/v1\/?$/, '')
       .replace(/\/api\/?$/, '')
       .replace(/\/payout\.php\/?$/, '');
     if (!paynitBaseUrl.startsWith('http')) {
@@ -311,8 +312,8 @@ serve(async (req: Request) => {
     const paynitAuthHeader = `Bearer ${paynitApiKey}:${paynitApiSecret}`;
 
     try {
-      // Official PayNit documented payout endpoint: /api/v1/payout.php
-      const payoutUrl = `${paynitBaseUrl}/api/v1/payout.php`;
+      // Official PayNit documented payout endpoint: /v1/payout.php
+      const payoutUrl = `${paynitBaseUrl}/v1/payout.php`;
       paynitRes = await fetch(payoutUrl, {
         method: 'POST',
         headers: {
