@@ -319,6 +319,7 @@ serve(async (req: Request) => {
         headers: {
           Authorization: paynitAuthHeader,
           'Content-Type': 'application/json',
+          Origin: 'https://createlifafa.xyz',
         },
         body: JSON.stringify(paynitPayload),
         signal: controller.signal,
