@@ -42,7 +42,15 @@ serve(async (req: Request) => {
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     const paynitApiKey = Deno.env.get('PAYNIT_API_KEY') || '';
     const paynitApiSecret = Deno.env.get('PAYNIT_API_SECRET') || '';
-    const paynitBaseUrl = (Deno.env.get('PAYNIT_BASE_URL') || 'https://api.paynit.in').replace(/\/$/, '');
+    let paynitBaseUrl = (Deno.env.get('PAYNIT_BASE_URL') || 'https://api.paynit.in')
+      .trim()
+      .replace(/\/+$/, '')
+      .replace(/\/api\/v1\/?$/, '')
+      .replace(/\/api\/?$/, '')
+      .replace(/\/payout\.php\/?$/, '');
+    if (!paynitBaseUrl.startsWith('http')) {
+      paynitBaseUrl = 'https://api.paynit.in';
+    }
 
     if (!supabaseUrl || !serviceRoleKey) {
       return new Response(
@@ -52,6 +60,10 @@ serve(async (req: Request) => {
     }
 
     if (!paynitApiKey || !paynitApiSecret) {
+      const missingVars: string[] = [];
+      if (!paynitApiKey) missingVars.push('PAYNIT_API_KEY');
+      if (!paynitApiSecret) missingVars.push('PAYNIT_API_SECRET');
+      console.error(`PayNit provider credentials missing on server: ${missingVars.join(', ')}`);
       return new Response(
         JSON.stringify({ error: 'PayNit provider credentials not configured on server' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -299,9 +311,9 @@ serve(async (req: Request) => {
     const paynitAuthHeader = `Bearer ${paynitApiKey}:${paynitApiSecret}`;
 
     try {
-      // Primary documented endpoint: /api/v1/payout.php
-      const primaryUrl = `${paynitBaseUrl}/api/v1/payout.php`;
-      paynitRes = await fetch(primaryUrl, {
+      // Official PayNit documented payout endpoint: /api/v1/payout.php
+      const payoutUrl = `${paynitBaseUrl}/api/v1/payout.php`;
+      paynitRes = await fetch(payoutUrl, {
         method: 'POST',
         headers: {
           Authorization: paynitAuthHeader,
@@ -310,20 +322,6 @@ serve(async (req: Request) => {
         body: JSON.stringify(paynitPayload),
         signal: controller.signal,
       });
-
-      // If primary endpoint returns 404, fallback to /payout.php
-      if (paynitRes.status === 404) {
-        const fallbackUrl = `${paynitBaseUrl}/payout.php`;
-        paynitRes = await fetch(fallbackUrl, {
-          method: 'POST',
-          headers: {
-            Authorization: paynitAuthHeader,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(paynitPayload),
-          signal: controller.signal,
-        });
-      }
 
       clearTimeout(timeoutId);
       paynitData = await paynitRes.json().catch(() => ({}));
