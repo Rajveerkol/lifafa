@@ -20,6 +20,8 @@ import {
   Eye,
   EyeOff,
   Zap,
+  ArrowRight,
+  RotateCcw,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { Lifafa, LifafaTask, PayoutMode } from '../types/database';
@@ -33,12 +35,19 @@ import { ThemeProvider } from '../themes/ThemeContext';
 import { getTheme } from '../themes/registry';
 import { useResolvedTheme, buildClaimUrl } from '../themes/useThemeResolver';
 
+// Cinematic 3D Reward Experience Components
+import { CinematicEnvelope } from '../components/lifafa/cinematic/CinematicEnvelope';
+import { RewardBoxCTA } from '../components/lifafa/cinematic/RewardBoxCTA';
+import { CinematicSuccess } from '../components/lifafa/cinematic/CinematicSuccess';
+
 interface ClaimPageProps {
   code: string;
   onNavigateHome?: () => void;
   onOpenAuth: () => void;
   onOpenShare?: (lifafa: Lifafa) => void;
 }
+
+type ClaimStage = 'opening' | 'tasks' | 'upi' | 'success';
 
 export const ClaimPage: React.FC<ClaimPageProps> = ({
   code,
@@ -51,6 +60,9 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
   const [lifafa, setLifafa] = useState<Lifafa | null>(null);
   const [loadingLifafa, setLoadingLifafa] = useState(true);
   const [notFound, setNotFound] = useState(false);
+
+  // Cinematic experience stages
+  const [stage, setStage] = useState<ClaimStage>('opening');
 
   const [pinCode, setPinCode] = useState('');
   const [showClaimantPin, setShowClaimantPin] = useState(false);
@@ -76,9 +88,6 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
   const [showHowItWorks, setShowHowItWorks] = useState(false);
 
   // UPI / Bank Payout Details State
-  const [accountHolderName, setAccountHolderName] = useState('');
-  const [bankAccountNumber, setBankAccountNumber] = useState('');
-  const [ifscCode, setIfscCode] = useState('');
   const [upiId, setUpiId] = useState('');
 
   const resolvedThemeId = useResolvedTheme(lifafa);
@@ -92,11 +101,15 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
   const isPinRequired = Boolean(lifafa?.pin_code);
   const isPinUnlocked = !isPinRequired || Boolean(lifafaId && pinVerifiedLifafas[lifafaId]);
 
-  // Reset PIN input & error when navigating between different Lifafas
+  // Reset states when code changes
   useEffect(() => {
     setPinCode('');
     setShowClaimantPin(false);
     setPinError(null);
+    setStage('opening');
+    setClaimResult(null);
+    setAlreadyClaimed(null);
+    setErrorMsg(null);
   }, [code]);
 
   // Unlock Lifafa with secure server-side PIN verification
@@ -188,6 +201,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                 code: lifafa?.code || code,
                 payoutMode: existingClaim.payout_mode || lifafa?.payout_mode || 'WALLET',
               });
+              setStage('success');
             }
           });
 
@@ -214,9 +228,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
     };
   }, [lifafaId, userId]);
 
-  const { isExpired, formatted: timeLeft } = lifafa
-    ? formatTimeRemaining(lifafa.expires_at)
-    : { isExpired: false, formatted: '' };
+  const isExpired = lifafa ? formatTimeRemaining(lifafa.expires_at).isExpired : false;
 
   const isCompleted = Boolean(
     lifafa && (lifafa.status === 'COMPLETED' || lifafa.claimed_count >= lifafa.winner_count)
@@ -274,7 +286,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
       }
 
       if (!/^[a-zA-Z0-9._-]{2,255}@[a-zA-Z]{2,64}$/.test(cleanUpi)) {
-        setErrorMsg('Please enter a valid UPI ID (e.g. username@bank).');
+        setErrorMsg('Please enter a valid UPI ID (e.g. name@upi).');
         return;
       }
     }
@@ -305,16 +317,6 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
         ? res.payout_dispatched === true && res.withdrawal_status === 'SUCCESS'
         : true;
 
-      // Confetti celebration ONLY if fully successful
-      if (isFullySuccessful) {
-        confetti({
-          particleCount: 160,
-          spread: 100,
-          origin: { y: 0.55 },
-          colors: ['#2563eb', '#fbbf24', '#e11d48', '#10b981', '#6366f1'],
-        });
-      }
-
       setClaimResult({
         amount: res.amount,
         code: lifafa.code,
@@ -325,11 +327,33 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
         referenceId: res.payout_reference_id,
       });
 
+      if (isFullySuccessful) {
+        setStage('success');
+      }
+
       await refreshWallet();
     } catch (err: any) {
       let rawMsg = err.message || 'Failed to claim Lifafa';
       if (rawMsg.toLowerCase().includes('regular expression') || rawMsg.toLowerCase().includes('repetition count')) {
-        rawMsg = 'Please enter a valid IFSC code or Bank Account.';
+        rawMsg = 'Please enter a valid UPI ID (e.g. name@upi).';
+      } else if (rawMsg.toLowerCase().includes('duplicate key') || rawMsg.toLowerCase().includes('already claimed')) {
+        rawMsg = 'You have already claimed this Lifafa.';
+      } else if (rawMsg.toLowerCase().includes('creator')) {
+        rawMsg = 'Creators cannot claim their own Lifafa.';
+      } else if (rawMsg.toLowerCase().includes('expired')) {
+        rawMsg = 'This Lifafa has expired.';
+      } else if (rawMsg.toLowerCase().includes('completed') || rawMsg.toLowerCase().includes('all rewards')) {
+        rawMsg = 'All rewards for this Lifafa have already been claimed.';
+      } else if (rawMsg.toLowerCase().includes('pin')) {
+        rawMsg = 'Incorrect PIN code entered. Please try again.';
+      } else if (
+        rawMsg.includes('JWT') ||
+        rawMsg.includes('key') ||
+        rawMsg.includes('secret') ||
+        rawMsg.includes('relation') ||
+        rawMsg.includes('database')
+      ) {
+        rawMsg = 'Unable to process claim at this time. Please try again shortly.';
       }
       setErrorMsg(rawMsg);
     } finally {
@@ -344,7 +368,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
         <div className="w-16 h-16 rounded-3xl bg-white/80 border border-slate-200/80 flex items-center justify-center mb-4 animate-pulse shadow-sm">
           <Gift className="w-8 h-8 animate-bounce" style={{ color: v?.accentColor || '#2563eb' }} />
         </div>
-        <p className={`text-sm font-bold ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Opening Digital Lifafa...</p>
+        <p className={`text-sm font-bold ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Loading Digital Lifafa...</p>
         <span className="text-xs font-mono mt-1 font-bold" style={{ color: v?.accentColor || '#2563eb' }}>{code.toUpperCase()}</span>
       </div>
     );
@@ -392,7 +416,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
   return (
     <ThemeProvider themeId={resolvedThemeId}>
       <div className={`min-h-screen relative overflow-x-hidden ${v.pageBackground} flex flex-col items-center justify-between p-3 sm:p-5 selection:bg-blue-500 selection:text-white`}>
-        {/* Subtle Ambient Decorative Watermark Texts - Matching Reference Style */}
+        {/* Subtle Ambient Decorative Watermark Texts */}
         <div className="pointer-events-none select-none fixed inset-0 overflow-hidden z-0">
           <span className={`absolute bottom-6 left-4 ${v.ambientTextColor || 'text-slate-400/40'} text-xs font-bold tracking-wider`}>
             {v.ambientTextLeft}
@@ -407,195 +431,152 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
           )}
         </div>
 
-        {/* 1. Header matching Reference: Back Button (<) | Join & Claim 🎁 | How it works? */}
-        <header className="relative z-10 w-full max-w-md flex items-center justify-between py-2 pt-1">
-          {/* Circular Back Button */}
-          <div className="w-12 flex items-center justify-start">
-            {onNavigateHome ? (
+        {/* Header: Back Button (<) | Join & Claim 🎁 | How it works? */}
+        {stage !== 'opening' && stage !== 'success' && (
+          <header className="relative z-10 w-full max-w-md flex items-center justify-between py-2 pt-1 animate-in fade-in duration-300">
+            {/* Circular Back Button */}
+            <div className="w-12 flex items-center justify-start">
+              {stage === 'upi' ? (
+                <button
+                  type="button"
+                  onClick={() => setStage('tasks')}
+                  className={`w-10 h-10 rounded-full ${isDark ? 'bg-slate-800/90 text-white border-slate-700 hover:bg-slate-700' : 'bg-white text-slate-700 border-slate-200/80 hover:bg-slate-50'} shadow-xs border flex items-center justify-center transition-all cursor-pointer`}
+                  title="Back to requirements"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+              ) : onNavigateHome ? (
+                <button
+                  type="button"
+                  onClick={onNavigateHome}
+                  className={`w-10 h-10 rounded-full ${isDark ? 'bg-slate-800/90 text-white border-slate-700 hover:bg-slate-700' : 'bg-white text-slate-700 border-slate-200/80 hover:bg-slate-50'} shadow-xs border flex items-center justify-center transition-all cursor-pointer`}
+                  title="Back to home"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+              ) : (
+                <div className="w-10 h-10" />
+              )}
+            </div>
+
+            {/* Centered Title & Subtitle */}
+            <div className="text-center px-1">
+              <h1 className={`text-base sm:text-lg font-black ${isDark ? 'text-white' : 'text-slate-900'} tracking-tight flex items-center justify-center gap-1.5`}>
+                <span>{stage === 'upi' ? 'Claim' : 'Join &'}</span>
+                <span style={{ color: v.accentColor }}>{stage === 'upi' ? 'Reward' : 'Claim'}</span>
+                <span>{v.emoji}</span>
+              </h1>
+              <p className={`text-[11px] ${isDark ? 'text-slate-300' : 'text-slate-500'} font-medium`}>
+                {stage === 'upi' ? 'Enter UPI ID to receive payment' : 'Complete all steps to unlock your Lifafa'}
+              </p>
+            </div>
+
+            {/* Right: How It Works Pill Button */}
+            <div className="w-auto flex items-center justify-end">
               <button
                 type="button"
-                onClick={onNavigateHome}
-                className={`w-10 h-10 rounded-full ${isDark ? 'bg-slate-800/90 text-white border-slate-700 hover:bg-slate-700' : 'bg-white text-slate-700 border-slate-200/80 hover:bg-slate-50'} shadow-xs border flex items-center justify-center transition-all cursor-pointer`}
-                title="Back to home"
+                onClick={() => setShowHowItWorks(true)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ${isDark ? 'bg-slate-800/90 text-white border-slate-700 hover:bg-slate-700' : 'bg-white/90 text-slate-700 border-slate-200/90 hover:bg-white'} border text-xs font-semibold shadow-2xs transition-all cursor-pointer`}
               >
-                <ArrowLeft className="w-4 h-4" />
+                <HelpCircle className="w-3.5 h-3.5" style={{ color: v.accentColor }} />
+                <span className="hidden sm:inline">How it works?</span>
+                <span className="sm:hidden">Help</span>
               </button>
-            ) : (
-              <div className="w-10 h-10" />
-            )}
-          </div>
+            </div>
+          </header>
+        )}
 
-          {/* Centered Title & Subtitle */}
-          <div className="text-center px-1">
-            <h1 className={`text-base sm:text-lg font-black ${isDark ? 'text-white' : 'text-slate-900'} tracking-tight flex items-center justify-center gap-1.5`}>
-              <span>Join &amp;</span>
-              <span style={{ color: v.accentColor }}>Claim</span>
-              <span>{v.emoji}</span>
-            </h1>
-            <p className={`text-[11px] ${isDark ? 'text-slate-300' : 'text-slate-500'} font-medium`}>
-              Complete all steps to unlock your Lifafa
-            </p>
-          </div>
-
-          {/* Right: How It Works Pill Button */}
-          <div className="w-auto flex items-center justify-end">
-            <button
-              type="button"
-              onClick={() => setShowHowItWorks(true)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ${isDark ? 'bg-slate-800/90 text-white border-slate-700 hover:bg-slate-700' : 'bg-white/90 text-slate-700 border-slate-200/90 hover:bg-white'} border text-xs font-semibold shadow-2xs transition-all cursor-pointer`}
-            >
-              <HelpCircle className="w-3.5 h-3.5" style={{ color: v.accentColor }} />
-              <span className="hidden sm:inline">How it works?</span>
-              <span className="sm:hidden">Help</span>
-            </button>
-          </div>
-        </header>
-
-        {/* 2. Main Centered Lifafa Experience Card */}
+        {/* Main Experience Body */}
         <main className="relative z-10 w-full max-w-md my-auto py-2 space-y-4">
-          {/* Flow Branch 1: Claim Result (Success or Bank Dispatch Failure) */}
-          {claimResult ? (() => {
-            const isDirectBank = claimResult.payoutMode === 'UPI_BANK';
-            const isBankSuccess = isDirectBank && claimResult.payoutDispatched === true && claimResult.withdrawalStatus === 'SUCCESS';
-            const isWalletSuccess = !isDirectBank;
-            const isFullySuccessful = isBankSuccess || isWalletSuccess;
+          
+          {/* STAGE 1: Full-Screen Cinematic 3D Envelope Opening */}
+          {stage === 'opening' && (
+            <div className="animate-in fade-in zoom-in-95 duration-500">
+              <CinematicEnvelope
+                lifafa={lifafa}
+                accentColor={v.accentColor}
+                themeEmoji={v.emoji}
+                onOpened={() => {
+                  setStage('tasks');
+                }}
+              />
+            </div>
+          )}
 
-            if (isFullySuccessful) {
-              return (
-                <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 text-center space-y-5 animate-in zoom-in-95 duration-300">
-                  <div className="relative mx-auto w-28 h-28">
-                    <img
-                      src={v.heroArtwork}
-                      alt="Reward Unlocked"
-                      className="w-full h-full object-contain drop-shadow-xl"
-                    />
-                  </div>
+          {/* STAGE 5: Full-Screen Cinematic Success Experience */}
+          {stage === 'success' && claimResult && (
+            <div className="animate-in zoom-in-95 duration-500">
+              <CinematicSuccess
+                amount={claimResult.amount}
+                upiId={upiId}
+                payoutMode={claimResult.payoutMode || lifafa.payout_mode}
+                referenceId={claimResult.referenceId}
+                lifafa={lifafa}
+                shareUrl={buildClaimUrl(code, resolvedThemeId)}
+                onShare={onOpenShare ? () => onOpenShare(lifafa) : undefined}
+                onDone={() => {
+                  if (onNavigateHome) {
+                    onNavigateHome();
+                  } else {
+                    setStage('tasks');
+                  }
+                }}
+              />
+            </div>
+          )}
 
-                  <div className="space-y-1">
-                    <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Reward Claimed Successfully!</span>
-                    </span>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight pt-1">
-                      Congratulations!
-                    </h3>
-                    <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Payment Completed</p>
-                    <p className="text-xs text-slate-500">{lifafa.title}</p>
-                  </div>
-
-                  {/* Amount Display */}
-                  <div className="p-4 bg-gradient-to-br from-slate-50 to-slate-100/70 rounded-2xl border border-slate-200/80">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest block">
-                      Reward Amount
-                    </span>
-                    <span className="text-4xl sm:text-5xl font-black tracking-tight" style={{ color: v.accentColor }}>
-                      {formatCurrency(claimResult.amount)}
-                    </span>
-                    <p className="text-xs font-semibold text-emerald-600 mt-1 flex items-center justify-center gap-1">
-                      <Check className="w-3.5 h-3.5" />
-                      <span>
-                        {isDirectBank
-                          ? 'Dispatched directly to Bank Account!'
-                          : 'Credited instantly to your Createlifafa Wallet!'}
-                      </span>
-                    </p>
-                    {claimResult.referenceId && (
-                      <p className="text-[10px] text-slate-400 font-mono mt-1">
-                        Ref: {claimResult.referenceId}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Share & Home Actions */}
-                  <div className="space-y-2 pt-1">
-                    {onOpenShare ? (
-                      <button
-                        type="button"
-                        onClick={() => onOpenShare(lifafa)}
-                        className={`w-full py-3.5 ${v.ctaGradient} text-white font-bold rounded-2xl text-xs shadow-md ${v.ctaShadow} flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer`}
-                      >
-                        <Share2 className="w-4 h-4" />
-                        <span>Share This Lifafa With Friends</span>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={handleCopyShareUrl}
-                        className={`w-full py-3.5 ${v.ctaGradient} text-white font-bold rounded-2xl text-xs shadow-md ${v.ctaShadow} flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer`}
-                      >
-                        {copiedLink ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                        <span>{copiedLink ? 'Link Copied!' : 'Copy Lifafa Share Link'}</span>
-                      </button>
-                    )}
-
-                    {onNavigateHome && (
-                      <button
-                        type="button"
-                        onClick={onNavigateHome}
-                        className="w-full py-2.5 text-slate-500 hover:text-slate-800 text-xs font-bold transition-colors cursor-pointer"
-                      >
-                        Back to Home
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            }
-
-            // PAYOUT FAILURE STATE: Reward claimed/allocated, but bank payout dispatch failed
-            return (
-              <div className="bg-white rounded-3xl p-6 shadow-xl border border-rose-100 text-center space-y-5 animate-in zoom-in-95 duration-300">
-                <div className="w-16 h-16 rounded-3xl bg-rose-50 border border-rose-200 text-rose-500 mx-auto flex items-center justify-center shadow-xs">
-                  <AlertCircle className="w-8 h-8 text-rose-600" />
-                </div>
-
-                <div className="space-y-1">
-                  <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
-                    <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
-                    <span>Payout Dispatch Issue</span>
-                  </span>
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight pt-1">
-                    Reward Claimed — Bank Transfer Pending
-                  </h3>
-                  <p className="text-xs text-rose-600 font-semibold pt-1">
-                    Reward claimed, but bank payout could not be initiated.
-                  </p>
-                  <p className="text-xs text-slate-500 pt-0.5">
-                    {claimResult.payoutError || 'The direct bank payout request could not be completed.'}
-                  </p>
-                </div>
-
-                {/* Amount & Safe Fallback Notice */}
-                <div className="p-4 bg-amber-50/80 rounded-2xl border border-amber-200 text-left space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-amber-800 uppercase tracking-widest">
-                      Allocated Reward
-                    </span>
-                    <span className="text-lg font-black text-amber-900">
-                      {formatCurrency(claimResult.amount)}
-                    </span>
-                  </div>
-                  <p className="text-xs text-amber-800 leading-relaxed">
-                    Don't worry — your reward was successfully claimed. Because direct bank dispatch could not be completed, the funds have been credited to your Createlifafa wallet balance.
-                  </p>
-                </div>
-
-                {/* Actions */}
-                <div className="space-y-2 pt-1">
-                  {onNavigateHome && (
-                    <button
-                      type="button"
-                      onClick={onNavigateHome}
-                      className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl text-xs shadow-md transition-all cursor-pointer"
-                    >
-                      View in Createlifafa Wallet
-                    </button>
-                  )}
-                </div>
+          {/* Fallback Payout Dispatch Issue: allocated to wallet */}
+          {claimResult && !stage.includes('success') && claimResult.payoutDispatched === false && (
+            <div className="bg-white rounded-3xl p-6 shadow-xl border border-rose-100 text-center space-y-5 animate-in zoom-in-95 duration-300">
+              <div className="w-16 h-16 rounded-3xl bg-rose-50 border border-rose-200 text-rose-500 mx-auto flex items-center justify-center shadow-xs">
+                <AlertCircle className="w-8 h-8 text-rose-600" />
               </div>
-            );
-          })() : isCompleted ? (
-            /* Flow Branch 2: Fully Claimed */
+
+              <div className="space-y-1">
+                <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
+                  <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
+                  <span>Payout Dispatch Issue</span>
+                </span>
+                <h3 className="text-xl font-black text-slate-900 tracking-tight pt-1">
+                  Reward Claimed — Bank Transfer Pending
+                </h3>
+                <p className="text-xs text-rose-600 font-semibold pt-1">
+                  Reward claimed, but direct bank payout could not be initiated.
+                </p>
+                <p className="text-xs text-slate-500 pt-0.5">
+                  {claimResult.payoutError || 'The direct bank payout request could not be completed.'}
+                </p>
+              </div>
+
+              {/* Amount & Safe Fallback Notice */}
+              <div className="p-4 bg-amber-50/80 rounded-2xl border border-amber-200 text-left space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-amber-800 uppercase tracking-widest">
+                    Allocated Reward
+                  </span>
+                  <span className="text-lg font-black text-amber-900">
+                    {formatCurrency(claimResult.amount)}
+                  </span>
+                </div>
+                <p className="text-xs text-amber-800 leading-relaxed">
+                  Don't worry — your reward was successfully claimed. Because direct bank dispatch could not be completed, the funds have been credited to your Createlifafa wallet balance.
+                </p>
+              </div>
+
+              {onNavigateHome && (
+                <button
+                  type="button"
+                  onClick={onNavigateHome}
+                  className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl text-xs shadow-md transition-all cursor-pointer"
+                >
+                  View in Createlifafa Wallet
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Fully Claimed or Expired Views */}
+          {stage !== 'opening' && stage !== 'success' && !claimResult && isCompleted ? (
             <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 text-center space-y-4">
               <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 mx-auto flex items-center justify-center">
                 <Gift className="w-7 h-7" />
@@ -615,8 +596,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                 </button>
               )}
             </div>
-          ) : isExpired ? (
-            /* Flow Branch 3: Expired Lifafa */
+          ) : stage !== 'opening' && stage !== 'success' && !claimResult && isExpired ? (
             <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 text-center space-y-4">
               <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-500 border border-slate-200 mx-auto flex items-center justify-center">
                 <Clock className="w-7 h-7" />
@@ -635,12 +615,14 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                 </button>
               )}
             </div>
-          ) : (
-            /* Flow Branch 4: Primary Claim Page - Matching Reference Screenshot 5 */
-            <div className="space-y-4">
+          ) : null}
+
+          {/* STAGE 2: Lifafa Content & Requirements List */}
+          {stage === 'tasks' && !claimResult && !isCompleted && !isExpired && (
+            <div className="space-y-4 animate-in fade-in duration-300">
+              
               {/* PRIMARY THEMED HERO CARD */}
               <div className={`${v.heroGradient} rounded-3xl p-4 sm:p-5 text-white shadow-xl relative overflow-hidden space-y-4`}>
-                {/* Top Half: Left Title/Message + Right 3D Theme Gift Artwork */}
                 <div className="flex items-start justify-between gap-3 pt-1">
                   <div className="space-y-1 min-w-0 flex-1">
                     <span className="text-[10px] font-black uppercase tracking-wider text-white/80 block">
@@ -656,7 +638,6 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                     )}
                   </div>
 
-                  {/* 3D Theme Gift Artwork */}
                   <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0">
                     <img
                       src={v.heroArtwork}
@@ -666,10 +647,9 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                   </div>
                 </div>
 
-                {/* Bottom Half: 4-Stat Metric Box + Dual Progress Bar */}
+                {/* 4-Stat Metric Box + Dual Progress Bar */}
                 <div className="bg-white text-slate-800 rounded-2xl p-3 shadow-md">
                   <div className="grid grid-cols-4 gap-2 text-center divide-x divide-slate-100">
-                    {/* Stat 1: Total Users */}
                     <div className="space-y-0.5">
                       <div className="flex items-center justify-center gap-1 text-[10px] font-semibold text-slate-500">
                         <Users className="w-3 h-3" style={{ color: v.accentColor }} />
@@ -680,7 +660,6 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                       </span>
                     </div>
 
-                    {/* Stat 2: Per User */}
                     <div className="space-y-0.5 pl-1">
                       <div className="flex items-center justify-center gap-1 text-[10px] font-semibold text-slate-500">
                         <span className="text-xs font-bold text-emerald-600">₹</span>
@@ -691,7 +670,6 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                       </span>
                     </div>
 
-                    {/* Stat 3: Claimed */}
                     <div className="space-y-0.5 pl-1">
                       <div className="flex items-center justify-center gap-1 text-[10px] font-semibold text-slate-500">
                         <Gift className="w-3 h-3 text-purple-500" />
@@ -702,7 +680,6 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                       </span>
                     </div>
 
-                    {/* Stat 4: Remaining */}
                     <div className="space-y-0.5 pl-1">
                       <div className="flex items-center justify-center gap-1 text-[10px] font-semibold text-slate-500">
                         <Clock className="w-3 h-3 text-amber-500" />
@@ -714,7 +691,6 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                     </div>
                   </div>
 
-                  {/* Dual Progress Bar */}
                   <div className="mt-3 pt-2.5 border-t border-slate-100">
                     <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                       <div
@@ -740,7 +716,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                 </div>
               )}
 
-              {/* SECTION: Join Required Channels Header matching Reference */}
+              {/* Channels & Tasks Header */}
               <div className="space-y-3 pt-1">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
@@ -752,12 +728,11 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                         Join Required Channels
                       </h3>
                       <p className={`text-[11px] ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>
-                        Join all channels below to unlock the claim button
+                        Join all channels below to unlock the reward box
                       </p>
                     </div>
                   </div>
 
-                  {/* Theme Badge: Complete All Steps */}
                   <div className="shrink-0">
                     <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${v.channelHeaderBadgeBg} text-[11px] font-bold shadow-2xs`}>
                       <span>{v.emoji}</span>
@@ -781,7 +756,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                     ))
                   ) : (
                     <div className="p-4 bg-white border border-slate-100 rounded-2xl text-center text-xs text-slate-500">
-                      No mandatory tasks required for this Lifafa. You can claim directly below!
+                      No mandatory tasks required for this Lifafa. Your reward is unlocked!
                     </div>
                   )}
                 </div>
@@ -889,81 +864,182 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                 </div>
               )}
 
-              {/* Direct Settlement Form if lifafa payout_mode is UPI_BANK */}
-              {lifafa.payout_mode === 'UPI_BANK' && (
-                <div className="p-4 bg-white border border-slate-200 rounded-2xl space-y-3 shadow-xs">
-                  <div className="flex items-center gap-1.5 text-xs font-black text-slate-800 border-b border-slate-100 pb-2">
-                    <Zap className="w-4 h-4 text-emerald-600" />
-                    <span>Instant UPI Settlement Details</span>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                      UPI ID (Instant Payout)
-                    </label>
-                    <input
-                      type="text"
-                      value={upiId}
-                      onChange={(e) => setUpiId(e.target.value)}
-                      placeholder="e.g. username@okhdfcbank"
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 caret-slate-900 focus:outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all [color-scheme:light]"
-                    />
-                    <p className="text-[10px] text-slate-400 mt-1">
-                      Enter your UPI ID (e.g. username@okhdfcbank) to receive your reward payout instantly.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* STICKY / FLOATING CTA SECTION MATCHING REFERENCE */}
+              {/* STAGE 3: PREMIUM 3D NEXT REWARD BOX CTA */}
               <div className="pt-2 sticky bottom-3 z-30 pb-1">
-                <button
-                  type="button"
-                  onClick={handleClaim}
-                  disabled={claiming}
-                  className={`w-full py-4 px-6 ${v.ctaGradient} active:scale-[0.99] text-white font-black text-sm sm:text-base rounded-2xl shadow-xl ${v.ctaShadow} transition-all flex items-center justify-center gap-2 cursor-pointer`}
-                >
-                  {claiming ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Verifying &amp; Claiming...</span>
-                    </>
-                  ) : isPinRequired && !isPinUnlocked ? (
-                    <>
-                      <Lock className="w-4 h-4" />
-                      <span>Enter &amp; Unlock PIN First</span>
-                    </>
-                  ) : !allRequiredDone ? (
-                    <>
-                      <Lock className="w-4 h-4" />
-                      <span>Complete Required Tasks</span>
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="w-4 h-4" />
-                      <span>Verify &amp; Claim Lifafa →</span>
-                    </>
-                  )}
-                </button>
+                <RewardBoxCTA
+                  isUnlocked={allRequiredDone && isPinUnlocked}
+                  amountText={`₹${perUserAmount}`}
+                  disabledMessage={
+                    isPinRequired && !isPinUnlocked
+                      ? 'Enter & unlock PIN code above first'
+                      : 'Complete all required tasks above to unlock reward'
+                  }
+                  onClick={() => {
+                    setStage('upi');
+                  }}
+                />
 
-                {/* Trust and Safety Notice below button matching Reference */}
+                {/* Trust and Safety Notice below button */}
                 <div className={`flex items-center justify-center gap-1.5 text-[11px] ${isDark ? 'text-slate-300' : 'text-slate-500'} text-center mt-2.5`}>
                   <ShieldCheck className="w-3.5 h-3.5 shrink-0" style={{ color: v.accentColor }} />
                   <span>We check if you have joined all channels. Don't worry, it's 100% safe!</span>
                 </div>
               </div>
+
             </div>
           )}
+
+          {/* STAGE 4: UPI ENTRY & REWARD SCREEN */}
+          {stage === 'upi' && !claimResult && !isCompleted && !isExpired && (
+            <div className="space-y-4 animate-in fade-in zoom-in-95 duration-300">
+              
+              {/* Premium UPI Reward Card */}
+              <div className="relative rounded-3xl bg-white border border-slate-100 shadow-2xl p-5 sm:p-6 text-slate-800 space-y-5">
+                
+                {/* Visual Header */}
+                <div className="text-center space-y-1">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200/80 text-[11px] font-black uppercase tracking-wider">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                    <span>YOUR REWARD IS READY</span>
+                  </div>
+
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight pt-1">
+                    Enter UPI ID to Claim
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    {lifafa.payout_mode === 'UPI_BANK'
+                      ? 'Enter your UPI ID to receive your reward payout instantly.'
+                      : 'Your reward will be credited directly to your Createlifafa balance.'}
+                  </p>
+                </div>
+
+                {/* Reward Amount Highlight */}
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 via-yellow-400/5 to-slate-50 border border-amber-300/60 text-center">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-amber-800/80 block">
+                    Cash Prize
+                  </span>
+                  <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                    ₹{perUserAmount}
+                  </span>
+                  <span className="text-xs text-slate-500 block mt-0.5 font-medium">
+                    {lifafa.title}
+                  </span>
+                </div>
+
+                {/* UPI Input Field */}
+                {lifafa.payout_mode === 'UPI_BANK' && (
+                  <div className="space-y-2 text-left">
+                    <label htmlFor="payout-upi-id" className="block text-xs font-bold text-slate-700">
+                      UPI ID (Instant Payout)
+                    </label>
+
+                    <div className="relative flex items-center">
+                      <div className="absolute left-3.5 text-slate-400 pointer-events-none">
+                        <Zap className="w-4 h-4 text-emerald-600" />
+                      </div>
+                      <input
+                        id="payout-upi-id"
+                        type="text"
+                        value={upiId}
+                        onChange={(e) => {
+                          setUpiId(e.target.value);
+                          if (errorMsg) setErrorMsg(null);
+                        }}
+                        placeholder="name@upi"
+                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 placeholder:text-slate-400 caret-slate-900 focus:outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all [color-scheme:light]"
+                      />
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      Example: 7489339907@slc, username@okaxis, or your UPI ID
+                    </p>
+                  </div>
+                )}
+
+                {/* Wallet mode notice */}
+                {lifafa.payout_mode !== 'UPI_BANK' && (
+                  <div className="p-3.5 bg-blue-50/80 border border-blue-200 rounded-2xl flex items-center gap-3 text-xs text-blue-900">
+                    <Landmark className="w-5 h-5 text-blue-600 shrink-0" />
+                    <span>
+                      Instant wallet settlement enabled. Funds will be credited directly to your Createlifafa wallet balance upon claiming.
+                    </span>
+                  </div>
+                )}
+
+                {/* Error Card with Shake & Red Glow */}
+                {errorMsg && (
+                  <div className="p-4 bg-rose-50 border-2 border-rose-300 rounded-2xl text-left space-y-2 animate-card-shake shadow-md shadow-rose-500/10">
+                    <div className="flex items-center gap-2 text-xs font-bold text-rose-700">
+                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                      <span>{errorMsg}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setErrorMsg(null)}
+                      className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-800 underline underline-offset-2 hover:text-rose-950 cursor-pointer"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      <span>Dismiss &amp; Retry</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Large Premium CLAIM REWARD CTA Button */}
+                <div className="pt-2 space-y-2">
+                  <button
+                    id="claim-reward-btn"
+                    type="button"
+                    onClick={handleClaim}
+                    disabled={claiming}
+                    className={`w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 disabled:opacity-60 text-slate-950 font-black text-base shadow-xl shadow-emerald-500/25 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer border border-emerald-300/60`}
+                  >
+                    {claiming ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Verifying &amp; Claiming...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-5 h-5" />
+                        <span>CLAIM REWARD</span>
+                        <ArrowRight className="w-5 h-5" />
+                      </>
+                    )}
+                  </button>
+
+                  {/* Back to tasks button */}
+                  <button
+                    type="button"
+                    onClick={() => setStage('tasks')}
+                    disabled={claiming}
+                    className="w-full py-2.5 text-slate-500 hover:text-slate-800 text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    ← Back to Requirements
+                  </button>
+                </div>
+
+                {/* Trust Footer */}
+                <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400 pt-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Secure payout dispatch verified by Createlifafa</span>
+                </div>
+
+              </div>
+
+            </div>
+          )}
+
         </main>
 
-        {/* 3. Subtle Standalone Footer */}
-        <footer className={`relative z-10 w-full max-w-md text-center py-3 text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'} flex items-center justify-between`}>
-          <span>© {new Date().getFullYear()} Createlifafa.xyz</span>
-          <span className="flex items-center gap-1 text-slate-400">
-            <Sparkles className="w-3 h-3 text-amber-400" />
-            <span>India's Modern Digital Gifting</span>
-          </span>
-        </footer>
+        {/* Standalone Footer */}
+        {stage !== 'opening' && stage !== 'success' && (
+          <footer className={`relative z-10 w-full max-w-md text-center py-3 text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'} flex items-center justify-between`}>
+            <span>© {new Date().getFullYear()} Createlifafa.xyz</span>
+            <span className="flex items-center gap-1 text-slate-400">
+              <Sparkles className="w-3 h-3 text-amber-400" />
+              <span>India's Modern Digital Gifting</span>
+            </span>
+          </footer>
+        )}
 
         {/* How It Works Modal Dialog */}
         {showHowItWorks && (
@@ -989,9 +1065,9 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                     1
                   </div>
                   <div>
-                    <h5 className="font-bold text-slate-900">Join Required Channels</h5>
+                    <h5 className="font-bold text-slate-900">Open 3D Envelope</h5>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Tap "Join Now" for each channel listed in the tasks.
+                      Tap the wax seal on the envelope to reveal the Lifafa.
                     </p>
                   </div>
                 </div>
@@ -1001,9 +1077,9 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                     2
                   </div>
                   <div>
-                    <h5 className="font-bold text-slate-900">Verify Your Membership</h5>
+                    <h5 className="font-bold text-slate-900">Complete Requirements</h5>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Connect your Telegram account once to automatically verify channel membership.
+                      Join any required channels and verify your membership.
                     </p>
                   </div>
                 </div>
@@ -1013,9 +1089,9 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                     3
                   </div>
                   <div>
-                    <h5 className="font-bold text-slate-900">Verify &amp; Claim Lifafa</h5>
+                    <h5 className="font-bold text-slate-900">Open Reward Box &amp; Claim</h5>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Tap the "Verify &amp; Claim Lifafa" button at the bottom.
+                      Tap "YOUR REWARD IS READY" and enter your UPI ID for instant settlement!
                     </p>
                   </div>
                 </div>
@@ -1027,7 +1103,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                   <div>
                     <h5 className="font-bold text-slate-900">Instant Cash Reward</h5>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Your reward is credited immediately to your Createlifafa wallet or bank account!
+                      Your reward is credited immediately to your bank account or Createlifafa wallet!
                     </p>
                   </div>
                 </div>

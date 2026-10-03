@@ -143,7 +143,7 @@ export const merchantGatewayService = {
       merchant_id: merchantId,
       available_balance: sharedAvailable,
       locked_payout_balance: mchWallet ? Number(mchWallet.locked_payout_balance) : 0,
-      total_deposited: userWallet ? Number(userWallet.total_deposited ?? mchWallet?.total_deposited ?? 0) : (mchWallet ? Number(mchWallet.total_deposited) : 0),
+      total_deposited: mchWallet ? Number(mchWallet.total_deposited ?? 0) : 0,
       total_paid_out: userWallet ? Number(userWallet.total_withdrawn ?? mchWallet?.total_paid_out ?? 0) : (mchWallet ? Number(mchWallet.total_paid_out) : 0),
       total_fees_paid: mchWallet ? Number(mchWallet.total_fees_paid) : 0,
       created_at: mchWallet?.created_at || userWallet?.created_at || new Date().toISOString(),
