@@ -533,19 +533,33 @@ export const AdminMerchantPanel: React.FC = () => {
                 (p) =>
                   !searchTerm ||
                   p.order_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  p.account_holder_name.toLowerCase().includes(searchTerm.toLowerCase())
+                  (p.account_holder_name && p.account_holder_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                  (p.upi_id && p.upi_id.toLowerCase().includes(searchTerm.toLowerCase()))
               )
               .map((p) => {
                 const merchant = merchants.find((m) => m.id === p.merchant_id);
+                const isUpi = p.payout_method === 'UPI' || Boolean(p.upi_id);
                 return (
                   <div key={p.id} className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-slate-900">{p.account_holder_name}</span>
+                        <span className="text-xs font-bold text-slate-900">{p.account_holder_name || p.upi_id || 'Beneficiary'}</span>
+                        <span className={`inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                          isUpi
+                            ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                            : 'bg-slate-100 text-slate-700 border border-slate-200'
+                        }`}>
+                          {isUpi ? 'UPI' : 'IMPS'}
+                        </span>
                         {getStatusBadge(p.status)}
                       </div>
                       <div className="text-[11px] text-slate-600 font-mono">
-                        <span>{p.bank_account_number_masked}</span> • <span>{p.ifsc_code}</span>
+                        {isUpi ? (
+                          <span className="text-blue-700 font-semibold">{p.upi_id}</span>
+                        ) : (
+                          <span>{p.bank_account_number_masked} • {p.ifsc_code}</span>
+                        )}
+                        <span className="text-slate-400"> • Provider: <strong>{p.payout_provider || 'PayNit'}</strong></span>
                       </div>
                       <div className="text-[11px] text-slate-400 font-mono">
                         Order: <strong>{p.order_id}</strong> • Provider Order: <code>{p.provider_order_id}</code>
@@ -754,18 +768,18 @@ export const AdminMerchantPanel: React.FC = () => {
             </div>
 
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Payout Fee (Tier 1)</span>
-              <div className="text-2xl font-black text-slate-900 mt-1">₹3.70</div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase">Payout Fee (UPI Rail)</span>
+              <div className="text-2xl font-black text-slate-900 mt-1">₹2.50</div>
               <p className="text-[11px] text-slate-500 mt-1">
-                Applies to all disbursements where amount &le; ₹100.00.
+                Flat fee for all PayNit UPI disbursements up to ₹1,000.00.
               </p>
             </div>
 
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Payout Fee (Tier 2)</span>
-              <div className="text-2xl font-black text-slate-900 mt-1">₹3.80</div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase">Payout Fee (IMPS Rail)</span>
+              <div className="text-2xl font-black text-slate-900 mt-1">₹2.50</div>
               <p className="text-[11px] text-slate-500 mt-1">
-                Applies to disbursements where amount &gt; ₹100.00 and &le; ₹1,000.00.
+                Flat fee for all PayNit IMPS disbursements up to ₹1,000.00.
               </p>
             </div>
           </div>
@@ -860,11 +874,15 @@ export const AdminMerchantPanel: React.FC = () => {
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200">
                 <span className="font-bold">Provider Integration:</span>
-                <span className="font-mono text-blue-700">PayRupee (https://payrupee.tech/v1/payouts/)</span>
+                <span className="font-mono text-blue-700">PayNit (https://api.paynit.in/api/v1/payout.php)</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-slate-200">
+                <span className="font-bold">Payout Rails Supported:</span>
+                <span className="font-mono text-slate-900">Dual Rails: UPI (VPA) &amp; IMPS</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200">
                 <span className="font-bold">Webhook Signature Algorithm:</span>
-                <span className="font-mono text-slate-900">HMAC SHA-256 (X-PAYRUPEE-SIGNATURE)</span>
+                <span className="font-mono text-slate-900">HMAC SHA-256 (X-PAYNIT-SIGNATURE)</span>
               </div>
               <div className="flex justify-between py-1">
                 <span className="font-bold">Max Payout per Transaction:</span>
@@ -1033,7 +1051,7 @@ export const AdminMerchantPanel: React.FC = () => {
             </div>
 
             <p className="text-xs text-slate-500 leading-relaxed">
-              Approving this merchant sets their status to <strong>ACTIVE</strong> and unlocks live float deposit, instant PayRupee payout dispatch, and server-side API key generation.
+              Approving this merchant sets their status to <strong>ACTIVE</strong> and unlocks live float deposit, instant PayNit payout dispatch (UPI &amp; IMPS), and server-side API key generation.
             </p>
 
             <div>

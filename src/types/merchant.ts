@@ -61,17 +61,21 @@ export interface MerchantLedgerEntry {
   created_at: string;
 }
 
+export type MerchantPayoutMethod = 'UPI' | 'IMPS';
+
 export interface MerchantPayout {
   id: string;
   merchant_id: string;
   order_id: string;
   provider_order_id: string;
+  payout_method?: MerchantPayoutMethod;
+  upi_id?: string | null;
   amount: number;
   fee_amount: number;
   total_deducted: number;
-  account_holder_name: string;
-  bank_account_number_masked: string;
-  ifsc_code: string;
+  account_holder_name?: string | null;
+  bank_account_number_masked?: string | null;
+  ifsc_code?: string | null;
   status: MerchantPayoutStatus;
   payout_provider: string;
   provider_reference_id: string | null;

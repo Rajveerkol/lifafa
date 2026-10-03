@@ -27,9 +27,9 @@ export const MERCHANT_UPI_SETTINGS_STORAGE_KEY = 'lifafa_merchant_upi_settings';
 export const MERCHANT_UPI_SETTINGS_EVENT = 'lifafa_merchant_upi_settings_updated';
 
 export const merchantGatewayService = {
-  // Payout Fee Calculation: exact server-aligned rules
+  // Payout Fee Calculation: exact server-aligned rules (Flat ₹2.50 for all methods/amounts)
   calculatePayoutFee(amount: number): { fee: number; totalDeducted: number } {
-    const fee = amount <= 100 ? 3.70 : 3.80;
+    const fee = 2.50;
     return {
       fee,
       totalDeducted: Math.round((amount + fee) * 100) / 100,
@@ -310,15 +310,18 @@ export const merchantGatewayService = {
     return error?.message || 'Payout request failed';
   },
 
-  // Request payout via dedicated merchant-payrupee-payout Edge Function
+  // Request payout via PayNit Edge Function (supporting both UPI and IMPS)
   async createPayout(params: {
     orderId: string;
     amount: number;
-    recipient: {
+    method?: 'UPI' | 'IMPS';
+    upiId?: string;
+    recipient?: {
       name: string;
       account_number: string;
       ifsc: string;
     };
+    note?: string;
     idempotencyKey?: string;
   }): Promise<any> {
     if (!isSupabaseConfigured || !supabase) {
@@ -336,22 +339,44 @@ export const merchantGatewayService = {
       headers['x-idempotency-key'] = params.idempotencyKey;
     }
 
-    const payload = {
-      order_id: params.orderId,
+    const method: 'UPI' | 'IMPS' = params.method || (params.upiId ? 'UPI' : 'IMPS');
+    const payload: any = {
+      order_id: params.orderId.trim(),
       amount: params.amount,
-      recipient: {
-        name: params.recipient.name.trim(),
-        account_number: params.recipient.account_number.trim(),
-        ifsc: params.recipient.ifsc.trim().toUpperCase(),
-      },
+      payout_method: method,
+      method: method,
+      note: params.note || 'Merchant Payout',
       idempotency_key: params.idempotencyKey || null,
     };
 
+    if (method === 'UPI') {
+      payload.upi_id = params.upiId?.trim();
+    } else {
+      payload.recipient = {
+        name: params.recipient?.name?.trim() || '',
+        account_number: params.recipient?.account_number?.trim() || '',
+        ifsc: params.recipient?.ifsc?.trim()?.toUpperCase() || '',
+      };
+    }
+
     // 3. Invoke Edge Function with explicit fresh Bearer token
-    let { data, error, response } = await supabase.functions.invoke('merchant-payrupee-payout', {
+    // Try merchant-paynit-payout first, falling back to merchant-payrupee-payout if needed
+    let functionName = 'merchant-paynit-payout';
+    let { data, error, response } = await supabase.functions.invoke(functionName, {
       headers,
       body: payload,
     });
+
+    if (error && (error.name === 'FunctionsNotFoundError' || (error as any).status === 404)) {
+      functionName = 'merchant-payrupee-payout';
+      const fallbackResult = await supabase.functions.invoke(functionName, {
+        headers,
+        body: payload,
+      });
+      data = fallbackResult.data;
+      error = fallbackResult.error;
+      response = fallbackResult.response;
+    }
 
     // 4. If FunctionsFetchError occurred, attempt direct fetch fallback
     if (error && (error.name === 'FunctionsFetchError' || error.message?.includes('Failed to send a request'))) {
@@ -368,14 +393,26 @@ export const merchantGatewayService = {
             directHeaders['x-idempotency-key'] = params.idempotencyKey;
           }
 
-          const directResp = await window.fetch(
-            `${supabaseUrl}/functions/v1/merchant-payrupee-payout`,
+          let directResp = await window.fetch(
+            `${supabaseUrl}/functions/v1/${functionName}`,
             {
               method: 'POST',
               headers: directHeaders,
               body: JSON.stringify(payload),
             }
           );
+
+          if (!directResp.ok && directResp.status === 404 && functionName === 'merchant-paynit-payout') {
+            functionName = 'merchant-payrupee-payout';
+            directResp = await window.fetch(
+              `${supabaseUrl}/functions/v1/${functionName}`,
+              {
+                method: 'POST',
+                headers: directHeaders,
+                body: JSON.stringify(payload),
+              }
+            );
+          }
 
           response = directResp;
           const directText = await directResp.text();

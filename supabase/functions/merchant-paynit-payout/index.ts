@@ -1,5 +1,5 @@
-// Supabase Edge Function: merchant-payrupee-payout (Migrated to PayNit Unified Payouts)
-// Multi-Merchant Payout Gateway Outbound Dispatch.
+// Supabase Edge Function: merchant-paynit-payout
+// Dedicated Multi-Merchant Payout Gateway Outbound Dispatch via PayNit (UPI + IMPS).
 // 1. Authenticates via API Key (X-Client-Id + X-Client-Secret) OR Supabase Bearer JWT.
 // 2. Checks client IP against merchant_ip_whitelist.
 // 3. Determines Payout Method: UPI or IMPS.
