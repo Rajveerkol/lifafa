@@ -317,30 +317,18 @@ serve(async (req: Request) => {
     const paynitAuthHeader = `Bearer ${paynitApiKey}:${paynitApiSecret}`;
 
     try {
-      const primaryUrl = `${paynitBaseUrl}/api/v1/payout.php`;
-      paynitRes = await fetch(primaryUrl, {
+      // Official PayNit documented payout endpoint: /v1/payout.php
+      const payoutUrl = `${paynitBaseUrl}/v1/payout.php`;
+      paynitRes = await fetch(payoutUrl, {
         method: 'POST',
         headers: {
           Authorization: paynitAuthHeader,
           'Content-Type': 'application/json',
+          Origin: 'https://createlifafa.xyz',
         },
         body: JSON.stringify(paynitPayload),
         signal: controller.signal,
       });
-
-      // If primary endpoint returns 404, fallback to /payout.php
-      if (paynitRes.status === 404) {
-        const fallbackUrl = `${paynitBaseUrl}/payout.php`;
-        paynitRes = await fetch(fallbackUrl, {
-          method: 'POST',
-          headers: {
-            Authorization: paynitAuthHeader,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(paynitPayload),
-          signal: controller.signal,
-        });
-      }
 
       clearTimeout(timeoutId);
       paynitData = await paynitRes.json().catch(() => ({}));
