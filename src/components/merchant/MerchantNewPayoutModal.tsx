@@ -49,7 +49,7 @@ export const MerchantNewPayoutModal: React.FC<MerchantNewPayoutModalProps> = ({
     }
 
     const cleanUpi = upiId.trim().toLowerCase();
-    if (!cleanUpi || !cleanUpi.includes('@') || !/^[\w.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(cleanUpi)) {
+    if (!cleanUpi || !cleanUpi.includes('@') || !/^[a-zA-Z0-9._-]{2,255}@[a-zA-Z]{2,64}$/.test(cleanUpi)) {
       setErrorMsg('Please enter a valid UPI ID (e.g. name@okhdfcbank or 9876543210@paytm)');
       return;
     }

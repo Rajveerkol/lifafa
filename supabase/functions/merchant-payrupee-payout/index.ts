@@ -207,7 +207,7 @@ serve(async (req: Request) => {
     }
 
     const upiId = String(body.upi_id || recipient.upi_id || '').trim();
-    if (!upiId || !/^[\w.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(upiId)) {
+    if (!upiId || !/^[a-zA-Z0-9._-]{2,255}@[a-zA-Z]{2,64}$/.test(upiId)) {
       return new Response(
         JSON.stringify({ error: 'A valid UPI ID is required for payout. Expected format: username@bank' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
