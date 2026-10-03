@@ -113,7 +113,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
       setErrorMsg('UPI ID is required.');
       return;
     }
-    if (!/^[\w.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(cleanUpi)) {
+    if (!/^[a-zA-Z0-9._-]{2,255}@[a-zA-Z]{2,64}$/.test(cleanUpi)) {
       setErrorMsg('Please enter a valid UPI ID (e.g. username@bank).');
       return;
     }

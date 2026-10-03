@@ -288,7 +288,7 @@ serve(async (req: Request) => {
 
     const payoutAmount = Number(withdrawal.net_amount != null ? withdrawal.net_amount : withdrawal.amount);
     const upiId = String(withdrawal.upi_id || '').trim();
-    if (!upiId || !/^[\w.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(upiId)) {
+    if (!upiId || !/^[a-zA-Z0-9._-]{2,255}@[a-zA-Z]{2,64}$/.test(upiId)) {
       await adminClient
         .from('withdrawals')
         .update({ status: 'PENDING', updated_at: new Date().toISOString() })
