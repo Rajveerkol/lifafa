@@ -107,6 +107,13 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
   const numWinners = parseInt(winnerCount) || 1;
   const numMaxClaim = parseFloat(maxClaimAmount) || undefined;
 
+  const isUpi = payoutMode === 'UPI_BANK';
+  const minRequiredPrizePool = isUpi ? numWinners * 10 : 0.01;
+  const isUpiBelowMin = isUpi && (
+    (totalAmount !== '' && numTotalAmount < minRequiredPrizePool) ||
+    (distributionType === 'RANDOM' && minClaimAmount !== '' && parseFloat(minClaimAmount) < 10)
+  );
+
   const estimatedPayoutFees = calculateLifafaPayoutFees(
     numTotalAmount,
     numWinners,
@@ -264,6 +271,14 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
         setErrorMsg('Winner count must be at least 1.');
         return false;
       }
+      if (isUpi && numTotalAmount < minRequiredPrizePool) {
+        setErrorMsg('Each winner must receive at least ₹10 for UPI Lifafa.');
+        return false;
+      }
+      if (isUpi && distributionType === 'RANDOM' && minClaimAmount && parseFloat(minClaimAmount) < 10) {
+        setErrorMsg('Each winner must receive at least ₹10 for UPI Lifafa.');
+        return false;
+      }
       if (totalFundingRequired > availableBalance) {
         setErrorMsg(
           `Insufficient available wallet balance (${formatCurrency(availableBalance)}). Required: ${formatCurrency(totalFundingRequired)} (Prize Pool: ${formatCurrency(numTotalAmount)}${estimatedPayoutFees > 0 ? ` + Payout Fees: ${formatCurrency(estimatedPayoutFees)}` : ''})`
@@ -298,6 +313,16 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
 
     if (!user) {
       setErrorMsg('Please login to create a Lifafa.');
+      return;
+    }
+
+    if (isUpi && numTotalAmount < minRequiredPrizePool) {
+      setErrorMsg('Each winner must receive at least ₹10 for UPI Lifafa.');
+      return;
+    }
+
+    if (isUpi && distributionType === 'RANDOM' && minClaimAmount && parseFloat(minClaimAmount) < 10) {
+      setErrorMsg('Each winner must receive at least ₹10 for UPI Lifafa.');
       return;
     }
 
@@ -800,6 +825,11 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
                   <p className="text-[11px] text-slate-500 leading-snug">
                     Winners claim straight to their bank account / UPI VPA.
                   </p>
+                  <div className="mt-1.5 flex items-center gap-1">
+                    <span className="text-[10px] font-black text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-md">
+                      Minimum ₹10 per winner
+                    </span>
+                  </div>
                 </button>
 
                 <button
@@ -823,6 +853,50 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
                   </p>
                 </button>
               </div>
+
+              {/* UPI Minimum ₹10 Per Winner Requirement Banner */}
+              {isUpi && (
+                <div className={`mt-3 p-4 rounded-2xl border transition-all space-y-2 ${
+                  totalAmount !== '' && numTotalAmount < minRequiredPrizePool
+                    ? 'bg-red-50/90 border-red-200 text-red-950 shadow-xs'
+                    : 'bg-gradient-to-r from-emerald-50/80 to-teal-50/60 border-emerald-200/90 text-emerald-950'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {totalAmount !== '' && numTotalAmount < minRequiredPrizePool ? (
+                        <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                      ) : (
+                        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                      )}
+                      <span className="text-xs font-black">
+                        {totalAmount !== '' && numTotalAmount < minRequiredPrizePool
+                          ? 'UPI Lifafa requires at least ₹10 per winner.'
+                          : 'Minimum reward per winner: ₹10'}
+                      </span>
+                    </div>
+                    <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                      totalAmount !== '' && numTotalAmount < minRequiredPrizePool
+                        ? 'bg-red-100 text-red-700 border-red-300'
+                        : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                    }`}>
+                      Min. ₹10 / Winner
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs pt-0.5">
+                    <span className="font-semibold text-slate-600">
+                      Minimum prize pool for {numWinners} {numWinners === 1 ? 'winner' : 'winners'}:
+                    </span>
+                    <span className="font-mono font-black text-xs text-slate-900">
+                      {formatCurrency(minRequiredPrizePool)}
+                    </span>
+                  </div>
+                  {totalAmount !== '' && numTotalAmount < minRequiredPrizePool && (
+                    <p className="text-[11px] text-red-600 font-semibold pt-1 border-t border-red-200">
+                      Current total of {formatCurrency(numTotalAmount)} is below the required {formatCurrency(minRequiredPrizePool)} (₹{(numTotalAmount / numWinners).toFixed(2)}/winner).
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Distribution Mode Selection */}
@@ -874,17 +948,26 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Min / Claim (₹)
+                    Min / Claim (₹) {isUpi && <span className="text-emerald-700 font-bold">(min. ₹10.00)</span>}
                   </label>
                   <input
                     type="number"
-                    min="1"
+                    min={isUpi ? "10" : "1"}
                     step="any"
                     value={minClaimAmount}
                     onChange={(e) => setMinClaimAmount(e.target.value)}
-                    placeholder="e.g. 1.00"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold"
+                    placeholder={isUpi ? "min. 10.00" : "e.g. 1.00"}
+                    className={`w-full px-3 py-2 bg-slate-50 border rounded-xl text-xs font-semibold ${
+                      isUpi && minClaimAmount !== '' && parseFloat(minClaimAmount) < 10
+                        ? 'border-red-400 focus:border-red-500'
+                        : 'border-slate-200'
+                    }`}
                   />
+                  {isUpi && minClaimAmount !== '' && parseFloat(minClaimAmount) < 10 && (
+                    <p className="text-[10px] text-red-600 font-bold mt-1">
+                      Each winner must receive at least ₹10 for UPI Lifafa.
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -1171,7 +1254,8 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
             <button
               type="button"
               onClick={handleNextStep}
-              className="flex items-center gap-1.5 py-3.5 px-6 rounded-2xl text-xs font-black bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/25 active:scale-98 transition-all cursor-pointer"
+              disabled={currentStep === 3 && isUpiBelowMin}
+              className="flex items-center gap-1.5 py-3.5 px-6 rounded-2xl text-xs font-black bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white shadow-md shadow-blue-500/25 active:scale-98 transition-all cursor-pointer"
             >
               <span>Next: {STEPS[currentStep].label}</span>
               <ChevronRight className="w-4 h-4" />
@@ -1179,8 +1263,8 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
           ) : (
             <button
               type="submit"
-              disabled={loading || numTotalAmount <= 0 || numTotalAmount > availableBalance}
-              className="flex items-center gap-2 py-3.5 px-7 rounded-2xl text-xs font-black bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white shadow-lg shadow-emerald-600/30 active:scale-98 transition-all cursor-pointer"
+              disabled={loading || numTotalAmount <= 0 || (isUpi && isUpiBelowMin) || totalFundingRequired > availableBalance}
+              className="flex items-center gap-2 py-3.5 px-7 rounded-2xl text-xs font-black bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white shadow-lg shadow-emerald-600/30 active:scale-98 transition-all cursor-pointer"
             >
               {loading ? (
                 <>

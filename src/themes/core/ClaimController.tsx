@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { Lifafa, LifafaTask } from '../../types/database';
 import { lifafaService } from '../../services/lifafaService';
+import { fraudService } from '../../services/fraudService';
 import { useAuth } from '../../context/AuthContext';
 
 export interface UseClaimLogicResult {
@@ -102,11 +103,12 @@ export function useClaimLogic(
           : undefined;
 
       const idempotencyKey = crypto.randomUUID();
+      const deviceFp = fraudService.getDeviceFingerprint();
 
       const res = await lifafaService.claimLifafa(
         lifafa.code || code,
         pinCode.trim() || undefined,
-        undefined,
+        deviceFp,
         undefined,
         idempotencyKey,
         payoutDetails

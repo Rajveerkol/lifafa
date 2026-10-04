@@ -89,6 +89,16 @@ export const lifafaService = {
       throw new Error('Supabase database is not configured. Please connect Supabase.');
     }
 
+    // Strict validation: UPI Lifafa requires at least ₹10 per winner
+    if (params.payoutMode === 'UPI_BANK') {
+      if (params.totalAmount < params.winnerCount * 10) {
+        throw new Error('Each winner must receive at least ₹10 for UPI Lifafa.');
+      }
+      if (params.distributionType === 'RANDOM' && params.minClaimAmount && params.minClaimAmount < 10) {
+        throw new Error('Each winner must receive at least ₹10 for UPI Lifafa.');
+      }
+    }
+
     let { data, error } = await supabase.rpc('create_lifafa_rpc', {
       p_title: params.title,
       p_message: params.message || null,

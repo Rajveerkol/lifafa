@@ -192,16 +192,49 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
         setTasks(fetchedTasks || []);
 
         if (userId) {
-          lifafaService.getUserClaimForLifafa(lifafaId, userId).then((existingClaim) => {
+          lifafaService.getUserClaimForLifafa(lifafaId, userId).then(async (existingClaim) => {
             if (!isMounted) return;
             if (existingClaim) {
               setAlreadyClaimed(existingClaim.amount);
+
+              let wthStatus = 'SUCCESS';
+              let refId: string | undefined = undefined;
+              let payoutErr: string | undefined = undefined;
+
+              if (existingClaim.payout_mode === 'UPI_BANK' && existingClaim.withdrawal_id) {
+                try {
+                  const verified = await lifafaService.verifyClaimBankPayout(
+                    existingClaim.withdrawal_id,
+                    userId,
+                    existingClaim.amount
+                  );
+                  wthStatus = verified.status || 'PROCESSING';
+                  refId = verified.payout_reference_id;
+                  payoutErr = verified.error;
+                } catch {
+                  wthStatus = 'PROCESSING';
+                }
+              }
+
               setClaimResult({
                 amount: existingClaim.amount,
                 code: lifafa?.code || code,
                 payoutMode: existingClaim.payout_mode || lifafa?.payout_mode || 'WALLET',
+                payoutDispatched: wthStatus === 'SUCCESS' || wthStatus === 'PROCESSING',
+                withdrawalStatus: wthStatus,
+                payoutError: payoutErr,
+                referenceId: refId,
               });
-              setStage('success');
+
+              if (wthStatus === 'SUCCESS') {
+                setStage('success');
+              } else if (wthStatus === 'PROCESSING') {
+                setStage('tasks');
+              } else if (wthStatus === 'FAILED') {
+                setStage('upi');
+              } else {
+                setStage('success');
+              }
             }
           });
 
