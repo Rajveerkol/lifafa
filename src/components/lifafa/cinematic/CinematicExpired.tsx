@@ -206,7 +206,7 @@ export const CinematicExpired: React.FC<CinematicExpiredProps> = ({
 
           <div className="space-y-1">
             <h1 className="text-2xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-purple-200 tracking-tight">
-              {isClosedStatus ? 'ALL REWARDS CLAIMED' : 'LIFAFA HAS ENDED'}
+              {isClosedStatus ? 'LIFAFA OVER' : 'LIFAFA HAS ENDED'}
             </h1>
             <p className="text-xs sm:text-sm font-semibold text-slate-300 max-w-sm mx-auto leading-relaxed">
               All rewards from this Lifafa have already been claimed.
