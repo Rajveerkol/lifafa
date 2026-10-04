@@ -100,6 +100,7 @@ export interface Lifafa {
   status: LifafaStatus;
   expires_at: string;
   is_public: boolean;
+  is_public_visible?: boolean;
   pin_code: string | null;
   starts_at?: string;
   device_claim_limit?: number;

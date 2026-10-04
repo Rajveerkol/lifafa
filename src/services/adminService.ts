@@ -217,6 +217,27 @@ export const adminService = {
     return data;
   },
 
+  // Toggle Lifafa public listing visibility on /lifafa feed (Admin only)
+  async setLifafaPublicVisibility(
+    lifafaId: string,
+    isPublicVisible: boolean
+  ) {
+    if (!isSupabaseConfigured || !supabase) {
+      throw new Error('Supabase database is not configured.');
+    }
+
+    const { data, error } = await supabase.rpc('admin_set_lifafa_public_visibility_rpc', {
+      p_lifafa_id: lifafaId,
+      p_is_public_visible: isPublicVisible,
+    });
+
+    if (error) {
+      throw new Error(error.message || 'Failed to update Lifafa public visibility');
+    }
+
+    return data;
+  },
+
   // All Withdrawals with user profile details
   async getAllWithdrawals(): Promise<Withdrawal[]> {
     if (!isSupabaseConfigured || !supabase) return [];

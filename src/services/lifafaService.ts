@@ -416,6 +416,7 @@ export const lifafaService = {
         *,
         creator_profile:profiles!creator_id(id, full_name, avatar_url)
       `)
+      .eq('is_public_visible', true)
       .eq('is_public', true)
       .in('status', ['ACTIVE', 'COMPLETED', 'EXPIRED'])
       .order('created_at', { ascending: false })

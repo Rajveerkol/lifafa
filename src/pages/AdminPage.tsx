@@ -30,6 +30,8 @@ import {
   Image as ImageIcon,
   Trash2,
   Eye,
+  EyeOff,
+  Globe,
   Sparkles,
   Copy,
   Check,
@@ -133,6 +135,9 @@ export const AdminPage: React.FC = () => {
   const [lifafaWithdrawalReason, setLifafaWithdrawalReason] = useState('');
   const [lifafaWithdrawalLoading, setLifafaWithdrawalLoading] = useState(false);
   const [lifafaWithdrawalError, setLifafaWithdrawalError] = useState<string | null>(null);
+
+  // Lifafa Public Visibility toggle loading state
+  const [lifafaVisibilityLoadingId, setLifafaVisibilityLoadingId] = useState<string | null>(null);
 
   const loadData = async () => {
     setLoading(true);
@@ -282,6 +287,28 @@ export const AdminPage: React.FC = () => {
       setLifafaWithdrawalError(err.message || 'Failed to update withdrawal status');
     } finally {
       setLifafaWithdrawalLoading(false);
+    }
+  };
+
+  const handleToggleLifafaPublicVisibility = async (lifafa: Lifafa, newVisibility: boolean) => {
+    const actionText = newVisibility ? 'show on public listing' : 'hide from public listing';
+    if (!confirm(`Are you sure you want to ${actionText} for "${lifafa.title}" (${lifafa.code})?\n\nDirect claim links will remain functional.`)) {
+      return;
+    }
+
+    try {
+      setLifafaVisibilityLoadingId(lifafa.id);
+      await adminService.setLifafaPublicVisibility(lifafa.id, newVisibility);
+      setLifafasList((prev) =>
+        prev.map((item) =>
+          item.id === lifafa.id ? { ...item, is_public_visible: newVisibility } : item
+        )
+      );
+    } catch (err: any) {
+      alert(err.message || 'Failed to update Lifafa public listing visibility');
+      await loadData();
+    } finally {
+      setLifafaVisibilityLoadingId(null);
     }
   };
 
@@ -1279,7 +1306,7 @@ export const AdminPage: React.FC = () => {
       ) : section === 'lifafas' ? (
         /* 4. Lifafas Management */
         <div className="bg-white rounded-3xl border border-slate-100 shadow-2xs overflow-hidden">
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+          <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <input
               type="text"
               value={searchLifafa}
@@ -1287,6 +1314,17 @@ export const AdminPage: React.FC = () => {
               placeholder="Search Lifafas by title or code..."
               className="w-full sm:w-80 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium"
             />
+            <div className="text-[11px] text-slate-500 flex items-center gap-3">
+              <span className="inline-flex items-center gap-1">
+                <Globe className="w-3.5 h-3.5 text-blue-600" />
+                <strong>{lifafasList.filter((l) => l.is_public_visible).length}</strong> Public Listed
+              </span>
+              <span className="text-slate-300">•</span>
+              <span className="inline-flex items-center gap-1">
+                <EyeOff className="w-3.5 h-3.5 text-slate-400" />
+                <strong>{lifafasList.filter((l) => !l.is_public_visible).length}</strong> Unlisted
+              </span>
+            </div>
           </div>
 
           <div className="divide-y divide-slate-100">
@@ -1308,6 +1346,17 @@ export const AdminPage: React.FC = () => {
                       <span className="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-full uppercase">
                         {l.status}
                       </span>
+                      {l.is_public_visible ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                          <Globe className="w-3 h-3 text-blue-600" />
+                          Public Listed
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                          <EyeOff className="w-3 h-3 text-slate-400" />
+                          Unlisted / Private
+                        </span>
+                      )}
                       {l.withdrawal_status === 'BLOCKED' ? (
                         <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
                           <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
@@ -1326,10 +1375,42 @@ export const AdminPage: React.FC = () => {
                     <span className="text-[10px] text-slate-400">Created on {formatDate(l.created_at)}</span>
                   </div>
 
-                  <div className="flex items-center gap-3 self-end sm:self-center">
+                  <div className="flex flex-wrap items-center gap-2.5 self-end sm:self-center">
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:inline">
                       {l.distribution_type}
                     </span>
+
+                    {l.is_public_visible ? (
+                      <button
+                        type="button"
+                        disabled={lifafaVisibilityLoadingId === l.id}
+                        onClick={() => handleToggleLifafaPublicVisibility(l, false)}
+                        className="px-3 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                        title="Hide from public /lifafa explore page (Direct claim links stay functional)"
+                      >
+                        {lifafaVisibilityLoadingId === l.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-600" />
+                        ) : (
+                          <EyeOff className="w-3.5 h-3.5 text-slate-600" />
+                        )}
+                        <span>Hide from Public</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={lifafaVisibilityLoadingId === l.id}
+                        onClick={() => handleToggleLifafaPublicVisibility(l, true)}
+                        className="px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                        title="Show on public /lifafa explore page"
+                      >
+                        {lifafaVisibilityLoadingId === l.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600" />
+                        ) : (
+                          <Globe className="w-3.5 h-3.5 text-blue-600" />
+                        )}
+                        <span>Show on Public</span>
+                      </button>
+                    )}
 
                     {l.withdrawal_status === 'BLOCKED' ? (
                       <button
