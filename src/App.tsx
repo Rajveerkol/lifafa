@@ -205,6 +205,7 @@ export function App() {
         <ClaimPage
           code={claimRouteCode}
           onNavigateHome={() => handleTabChange('home')}
+          onExploreLifafas={() => handleTabChange('lifafa')}
           onOpenAuth={() => setAuthModalOpen(true)}
           onOpenShare={handleShareLifafa}
         />

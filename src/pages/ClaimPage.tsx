@@ -39,10 +39,12 @@ import { useResolvedTheme, buildClaimUrl } from '../themes/useThemeResolver';
 import { CinematicEnvelope } from '../components/lifafa/cinematic/CinematicEnvelope';
 import { RewardBoxCTA } from '../components/lifafa/cinematic/RewardBoxCTA';
 import { CinematicSuccess } from '../components/lifafa/cinematic/CinematicSuccess';
+import { CinematicExpired } from '../components/lifafa/cinematic/CinematicExpired';
 
 interface ClaimPageProps {
   code: string;
   onNavigateHome?: () => void;
+  onExploreLifafas?: () => void;
   onOpenAuth: () => void;
   onOpenShare?: (lifafa: Lifafa) => void;
 }
@@ -52,6 +54,7 @@ type ClaimStage = 'opening' | 'tasks' | 'upi' | 'success';
 export const ClaimPage: React.FC<ClaimPageProps> = ({
   code,
   onNavigateHome,
+  onExploreLifafas,
   onOpenAuth,
   onOpenShare,
 }) => {
@@ -267,6 +270,10 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
     lifafa && (lifafa.status === 'COMPLETED' || lifafa.claimed_count >= lifafa.winner_count)
   );
 
+  const isLifafaEnded = Boolean(
+    lifafa && (isCompleted || isExpired || lifafa.status === 'CANCELLED' || lifafa.remaining_amount <= 0)
+  );
+
   const requiredTasks = tasks.filter((t) => t.is_required && t.is_enabled);
   const allRequiredDone = requiredTasks.length === 0 || requiredTasks.every((t) => completedTaskIds.has(t.id));
 
@@ -394,8 +401,8 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
     }
   };
 
-  // State A: Loading Lifafa
-  if (loadingLifafa) {
+  // State A: Loading Lifafa or verifying user claim status
+  if (loadingLifafa || (userId && loadingTasks && !alreadyClaimed)) {
     return (
       <div className={`min-h-screen ${v?.pageBackground || 'bg-gradient-to-b from-[#F0F6FF] via-[#E8F1FD] to-[#F3F8FF]'} ${isDark ? 'text-white' : 'text-slate-800'} flex flex-col items-center justify-center p-4`}>
         <div className="w-16 h-16 rounded-3xl bg-white/80 border border-slate-200/80 flex items-center justify-center mb-4 animate-pulse shadow-sm">
@@ -433,6 +440,17 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
           )}
         </div>
       </div>
+    );
+  }
+
+  // State C: Lifafa Ended / Expired / All Rewards Claimed
+  if (isLifafaEnded && !alreadyClaimed && !claimResult) {
+    return (
+      <CinematicExpired
+        lifafa={lifafa}
+        onExploreMore={onExploreLifafas || onNavigateHome}
+        onNavigateHome={onNavigateHome}
+      />
     );
   }
 
@@ -640,47 +658,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
             )
           )}
 
-          {/* Fully Claimed or Expired Views */}
-          {stage !== 'opening' && stage !== 'success' && !claimResult && isCompleted ? (
-            <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 text-center space-y-4">
-              <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 mx-auto flex items-center justify-center">
-                <Gift className="w-7 h-7" />
-              </div>
-              <h3 className="text-lg font-black text-slate-900">All Rewards Claimed</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                All {lifafa.winner_count} spots for this Lifafa have already been claimed. Explore more
-                gifts on Createlifafa.xyz!
-              </p>
-              {onNavigateHome && (
-                <button
-                  type="button"
-                  onClick={onNavigateHome}
-                  className={`w-full py-3 ${v.ctaGradient} text-white font-bold rounded-xl text-xs cursor-pointer shadow-sm`}
-                >
-                  Explore More Lifafas
-                </button>
-              )}
-            </div>
-          ) : stage !== 'opening' && stage !== 'success' && !claimResult && isExpired ? (
-            <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 text-center space-y-4">
-              <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-500 border border-slate-200 mx-auto flex items-center justify-center">
-                <Clock className="w-7 h-7" />
-              </div>
-              <h3 className="text-lg font-black text-slate-900">Lifafa Expired</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                The time window to claim this digital gift has ended.
-              </p>
-              {onNavigateHome && (
-                <button
-                  type="button"
-                  onClick={onNavigateHome}
-                  className={`w-full py-3 ${v.ctaGradient} text-white font-bold rounded-xl text-xs cursor-pointer shadow-sm`}
-                >
-                  Explore Active Lifafas
-                </button>
-              )}
-            </div>
-          ) : null}
+          {/* Fully Claimed or Expired Views handled authoritatively by CinematicExpired */}
 
           {/* STAGE 2: Lifafa Content & Requirements List */}
           {stage === 'tasks' && !claimResult && !isCompleted && !isExpired && (
