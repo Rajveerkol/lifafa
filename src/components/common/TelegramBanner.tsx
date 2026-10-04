@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2 } from 'lucide-react';
+import { Send, CheckCircle2, ArrowRight, BellRing } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { notificationService } from '../../services/notificationService';
 
@@ -22,40 +22,70 @@ export const TelegramBanner: React.FC = () => {
 
   return (
     <>
-      <div className="bg-white rounded-2xl p-3 sm:p-4 border border-slate-100 shadow-sm flex items-center justify-between gap-3 hover:shadow-md transition-shadow">
-        <div className="flex items-center gap-3">
-          {/* Circular Telegram Icon */}
-          <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white shrink-0 shadow-md shadow-sky-500/20">
-            <Send className="w-5 h-5 -rotate-12 translate-x-[-1px] translate-y-[1px]" />
+      <div className="relative group overflow-hidden bg-white/95 rounded-2xl p-3.5 sm:p-4 border border-blue-100 hover:border-blue-200 shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-between gap-3">
+        {/* Soft Ambient Blue Corner Glow */}
+        <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-blue-500/10 blur-xl pointer-events-none group-hover:bg-blue-500/15 transition-all" />
+
+        <div className="flex items-center gap-3 min-w-0">
+          {/* Circular Telegram Icon with Soft Ambient Glow */}
+          <div className="relative shrink-0">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-sky-400 via-sky-500 to-blue-600 flex items-center justify-center text-white shadow-md shadow-sky-500/25 group-hover:scale-105 transition-transform duration-300">
+              <Send className="w-5 h-5 -rotate-12 translate-x-[-1px] translate-y-[1px]" />
+            </div>
+            {/* Live Notification Pulse Indicator */}
+            {!isActivated && (
+              <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-600 border-2 border-white" />
+              </span>
+            )}
           </div>
 
-          <div className="flex flex-col">
-            <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
-              Activate Telegram Bot Alert
-            </h4>
-            <p className="text-[11px] sm:text-xs text-slate-500 leading-tight">
-              Get all transaction and important updates via Telegram
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center gap-1.5">
+              <h4 className="text-xs sm:text-sm font-black text-slate-900 leading-snug truncate">
+                Activate Telegram Bot Alert
+              </h4>
+              <BellRing className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+            </div>
+            <p className="text-[11px] sm:text-xs text-slate-500 leading-tight truncate">
+              Get transaction &amp; important updates in real-time
             </p>
           </div>
         </div>
 
         {/* Action Button */}
         <button
+          type="button"
           onClick={handleClick}
-          className="shrink-0 bg-red-600 hover:bg-red-700 text-white text-[11px] sm:text-xs font-black px-3.5 py-2 rounded-full uppercase tracking-wider shadow-md shadow-red-500/25 active:scale-95 transition-all"
+          className={`shrink-0 flex items-center gap-1.5 text-[11px] sm:text-xs font-black px-4 py-2 sm:py-2.5 rounded-xl uppercase tracking-wider shadow-md active:scale-95 transition-all cursor-pointer ${
+            isActivated
+              ? 'bg-emerald-600 text-white shadow-emerald-500/25'
+              : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-blue-500/25 group-hover:shadow-blue-500/40'
+          }`}
         >
-          {isActivated ? 'ACTIVATED' : 'CLICK HERE'}
+          {isActivated ? (
+            <>
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>ACTIVATED</span>
+            </>
+          ) : (
+            <>
+              <span>ACTIVATE</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </>
+          )}
         </button>
       </div>
 
       {/* Info Dialog */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-center">
-            <div className="w-14 h-14 mx-auto rounded-full bg-sky-50 text-sky-600 flex items-center justify-center mb-3">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-center animate-in zoom-in-95 duration-200">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mb-3 shadow-inner">
               <Send className="w-7 h-7" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-1">Telegram Bot Alerts</h3>
+            <h3 className="text-lg font-black text-slate-900 mb-1">Telegram Bot Alerts</h3>
             <p className="text-xs text-slate-600 mb-4 leading-relaxed">
               Connect our Telegram notification bot to receive real-time alerts whenever you claim rewards, your Lifafas are redeemed, or payouts complete.
             </p>
@@ -68,13 +98,15 @@ export const TelegramBanner: React.FC = () => {
                 href="https://t.me/createlifafa_bot"
                 target="_blank"
                 rel="noreferrer"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-sm"
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-sm transition-all"
               >
-                Open in Telegram
+                <span>Open in Telegram</span>
+                <ArrowRight className="w-4 h-4" />
               </a>
               <button
+                type="button"
                 onClick={() => setShowModal(false)}
-                className="w-full py-2.5 text-slate-500 hover:text-slate-700 text-xs font-semibold"
+                className="w-full py-2.5 text-slate-500 hover:text-slate-700 text-xs font-semibold cursor-pointer"
               >
                 Dismiss
               </button>

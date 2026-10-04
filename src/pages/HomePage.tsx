@@ -17,6 +17,7 @@ import {
 import { HeroWalletCard } from '../components/wallet/HeroWalletCard';
 import { TelegramBanner } from '../components/common/TelegramBanner';
 import { TrustBadges } from '../components/common/TrustBadges';
+import { QuickActionCard } from '../components/dashboard/QuickActionCard';
 import { LifafaCard } from '../components/lifafa/LifafaCard';
 import { Logo } from '../components/common/Logo';
 import { useAuth } from '../context/AuthContext';
@@ -91,115 +92,97 @@ export const HomePage: React.FC<HomePageProps> = ({
   };
 
   return (
-    <div className="space-y-5 sm:space-y-6 pb-20 md:pb-10">
-      {/* If user is logged in, show the full Dashboard matching reference screenshot media_1788926025859.png */}
+    <div className="relative space-y-5 sm:space-y-6 pb-20 md:pb-10 overflow-x-clip">
+      {/* Ambient background spotlights for subtle 3D lighting depth (contained to prevent horizontal overflow) */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="absolute -top-10 left-1/4 w-96 h-96 bg-blue-400/5 rounded-full blur-3xl" />
+        <div className="absolute top-72 right-4 w-80 h-80 bg-indigo-400/5 rounded-full blur-3xl" />
+      </div>
+
+      {/* If user is logged in, show the full Flagship Dashboard */}
       {user ? (
         <section className="space-y-4">
-          {/* 1. Hero Wallet Balance Card */}
-          <HeroWalletCard
-            onAddMoneyClick={onOpenAddMoney}
-            onWithdrawClick={onOpenWithdraw}
-          />
+          {/* 1. Hero 3D Wallet Balance Card (Flagship Element) */}
+          <div className="animate-in fade-in slide-in-from-top-2 duration-500">
+            <HeroWalletCard
+              onAddMoneyClick={onOpenAddMoney}
+              onWithdrawClick={onOpenWithdraw}
+            />
+          </div>
 
-          {/* 2. Telegram Bot Alert Banner */}
-          <TelegramBanner />
+          {/* 2. Telegram Bot Alert Banner with live notification pulse */}
+          <div className="animate-in fade-in slide-in-from-top-2 duration-500 delay-100">
+            <TelegramBanner />
+          </div>
 
-          {/* 3. Action Grid (2x3 on mobile, matching media_1788926025859.png) */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {/* Lifafa replaces Games completely */}
-            <div
+          {/* 3. Action Grid (2x3 on mobile, 3x2 on tablet/desktop) with 3D Interactive QuickActionCards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 animate-in fade-in duration-500 delay-150">
+            <QuickActionCard
+              icon={Gift}
+              title="Explore Lifafa"
+              subtitle="Claim digital rewards"
               onClick={() => onNavigate('lifafa')}
-              className="bg-white rounded-3xl p-4 border border-slate-100 shadow-2xs hover:shadow-md hover:border-blue-100 transition-all cursor-pointer flex flex-col justify-between"
-            >
-              <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-2">
-                <Gift className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
-                  Explore Lifafa
-                </h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">Claim digital rewards</p>
-              </div>
-            </div>
+              iconBgColor="bg-purple-50"
+              iconTextColor="text-purple-600"
+              index={0}
+            />
 
-            <div
+            <QuickActionCard
+              icon={Users}
+              title="Refer & Earn"
+              subtitle="Invite friends & earn"
               onClick={() => onNavigate('profile')}
-              className="bg-white rounded-3xl p-4 border border-slate-100 shadow-2xs hover:shadow-md hover:border-blue-100 transition-all cursor-pointer flex flex-col justify-between"
-            >
-              <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-2">
-                <Users className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
-                  Refer & Earn
-                </h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">Invite friends & earn</p>
-              </div>
-            </div>
+              iconBgColor="bg-amber-50"
+              iconTextColor="text-amber-600"
+              index={1}
+            />
 
-            <div
+            <QuickActionCard
+              icon={FileText}
+              title="Wallet History"
+              subtitle="Check balance & ledger"
               onClick={() => onNavigate('wallet')}
-              className="bg-white rounded-3xl p-4 border border-slate-100 shadow-2xs hover:shadow-md hover:border-blue-100 transition-all cursor-pointer flex flex-col justify-between"
-            >
-              <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-2">
-                <FileText className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
-                  Wallet History
-                </h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">Check balance & ledger</p>
-              </div>
-            </div>
+              iconBgColor="bg-blue-50"
+              iconTextColor="text-blue-600"
+              index={2}
+            />
 
-            <div
+            <QuickActionCard
+              icon={Send}
+              title="Transactions"
+              subtitle="View all transactions"
               onClick={() => onNavigate('wallet')}
-              className="bg-white rounded-3xl p-4 border border-slate-100 shadow-2xs hover:shadow-md hover:border-blue-100 transition-all cursor-pointer flex flex-col justify-between"
-            >
-              <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mb-2">
-                <Send className="w-5 h-5 -rotate-12" />
-              </div>
-              <div>
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
-                  Transactions
-                </h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">View all transactions</p>
-              </div>
-            </div>
+              iconBgColor="bg-sky-50"
+              iconTextColor="text-sky-600"
+              index={3}
+            />
 
-            <div
+            <QuickActionCard
+              icon={PlusCircle}
+              title="Create Lifafa"
+              subtitle="Gift money with tasks"
               onClick={() => onNavigate('lifafa', { action: 'create' })}
-              className="bg-white rounded-3xl p-4 border border-slate-100 shadow-2xs hover:shadow-md hover:border-blue-100 transition-all cursor-pointer flex flex-col justify-between"
-            >
-              <div className="w-10 h-10 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-2">
-                <PlusCircle className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
-                  Create Lifafa
-                </h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">Gift money with tasks</p>
-              </div>
-            </div>
+              iconBgColor="bg-emerald-50"
+              iconTextColor="text-emerald-600"
+              badge="Popular"
+              index={4}
+            />
 
-            <div
+            <QuickActionCard
+              icon={Headphones}
+              title="Support"
+              subtitle="Get help & support"
               onClick={() => onNavigate('profile')}
-              className="bg-white rounded-3xl p-4 border border-slate-100 shadow-2xs hover:shadow-md hover:border-blue-100 transition-all cursor-pointer flex flex-col justify-between"
-            >
-              <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-2">
-                <Headphones className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
-                  Support
-                </h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">Get help & support</p>
-              </div>
-            </div>
+              iconBgColor="bg-indigo-50"
+              iconTextColor="text-indigo-600"
+              index={5}
+            />
           </div>
 
           {/* 4. Trust Badges row */}
-          <TrustBadges />
+          <div className="animate-in fade-in duration-500 delay-200">
+            <TrustBadges />
+          </div>
         </section>
       ) : (
         /* Landing Hero Section when visitor is not logged in */
@@ -240,27 +223,34 @@ export const HomePage: React.FC<HomePageProps> = ({
       )}
 
       {/* Quick Code Lookup Box */}
-      <section className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-100 shadow-2xs">
+      <section className="group relative overflow-hidden bg-white hover:bg-gradient-to-br hover:from-white hover:to-blue-50/20 rounded-3xl p-4 sm:p-5 border border-slate-100/90 hover:border-blue-200/80 shadow-2xs hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300">
+        <div className="flex items-center gap-2 mb-2.5">
+          <div className="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 shadow-2xs">
+            <Sparkles className="w-3.5 h-3.5" />
+          </div>
+          <span className="text-xs font-black text-slate-800 tracking-tight">Quick Lifafa Claim</span>
+          <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">• Have a code from friends or Telegram?</span>
+        </div>
         <form onSubmit={handleQuickCodeClaim} className="flex flex-col sm:flex-row items-center gap-2">
           <div className="relative w-full">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-blue-500" />
             <input
               type="text"
               value={quickCode}
               onChange={(e) => setQuickCode(e.target.value.toUpperCase())}
               placeholder="Enter Lifafa Code (e.g. LF-8X92K)..."
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-mono uppercase focus:outline-hidden focus:border-blue-500 focus:bg-white"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50/80 border border-slate-200 rounded-2xl text-xs sm:text-sm font-mono uppercase tracking-wider focus:outline-hidden focus:border-blue-500 focus:bg-white transition-colors"
             />
           </div>
           <button
             type="submit"
             disabled={searchingCode || !quickCode.trim()}
-            className="w-full sm:w-auto shrink-0 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-2.5 px-5 rounded-2xl text-xs sm:text-sm shadow-md shadow-blue-500/20 active:scale-98 transition-all"
+            className="w-full sm:w-auto shrink-0 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-black py-2.5 px-6 rounded-2xl text-xs sm:text-sm shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer disabled:cursor-not-allowed"
           >
             {searchingCode ? 'Looking up...' : 'Claim Code'}
           </button>
         </form>
-        {codeError && <p className="text-[11px] text-red-600 mt-2 pl-2">{codeError}</p>}
+        {codeError && <p className="text-[11px] text-red-600 mt-2 pl-2 font-medium">{codeError}</p>}
       </section>
 
       {/* Featured Public Lifafas Feed */}
@@ -360,18 +350,18 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* Bots Coming Soon Teaser */}
       <section
         onClick={() => onNavigate('bots')}
-        className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-blue-100 rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 cursor-pointer hover:shadow-md transition-all"
+        className="group relative overflow-hidden bg-gradient-to-r from-indigo-50/80 via-blue-50/70 to-purple-50/60 border border-blue-100/80 hover:border-blue-200 rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 cursor-pointer hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-0.5 transition-all duration-300"
       >
         <div className="flex items-center gap-4 text-center sm:text-left">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-indigo-500/20">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-indigo-500/20 group-hover:scale-105 group-hover:-rotate-3 transition-transform duration-300">
             <Sparkles className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center justify-center sm:justify-start gap-2">
-              <h4 className="text-sm sm:text-base font-extrabold text-slate-900">
+              <h4 className="text-sm sm:text-base font-black text-slate-900 group-hover:text-indigo-600 transition-colors">
                 Automated Gifting Bots
               </h4>
-              <span className="text-[10px] bg-red-600 text-white font-black px-2 py-0.5 rounded-full uppercase">
+              <span className="text-[10px] bg-red-600 text-white font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
                 Coming Soon
               </span>
             </div>
@@ -381,7 +371,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
         </div>
 
-        <button className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-xs">
+        <button className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black py-2.5 px-5 rounded-xl shadow-md shadow-blue-500/20 group-hover:shadow-lg active:scale-95 transition-all cursor-pointer">
           Notify Me
         </button>
       </section>
