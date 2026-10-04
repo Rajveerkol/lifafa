@@ -27,7 +27,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { lifafaService } from '../services/lifafaService';
+import { lifafaService, calculateLifafaPayoutFees, getLifafaPayoutFee } from '../services/lifafaService';
 import type { DistributionType, TaskType, Lifafa, PayoutMode } from '../types/database';
 import { formatCurrency } from '../lib/utils';
 import { TelegramTaskBuilder, type VerifiedTelegramChannel } from '../components/lifafa/TelegramTaskBuilder';
@@ -105,6 +105,16 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
   const availableBalance = wallet?.available_balance ?? 0;
   const numTotalAmount = parseFloat(totalAmount) || 0;
   const numWinners = parseInt(winnerCount) || 1;
+  const numMaxClaim = parseFloat(maxClaimAmount) || undefined;
+
+  const estimatedPayoutFees = calculateLifafaPayoutFees(
+    numTotalAmount,
+    numWinners,
+    distributionType,
+    payoutMode,
+    numMaxClaim
+  );
+  const totalFundingRequired = numTotalAmount + estimatedPayoutFees;
 
   // Perpetual non-expiring date (Year 9999) satisfies database NOT NULL constraint without enforcing visible expiration
   const computeExpiryDate = (): string => '9999-12-31T23:59:59.999Z';
@@ -254,9 +264,9 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
         setErrorMsg('Winner count must be at least 1.');
         return false;
       }
-      if (numTotalAmount > availableBalance) {
+      if (totalFundingRequired > availableBalance) {
         setErrorMsg(
-          `Insufficient available wallet balance (${formatCurrency(availableBalance)}). Required: ${formatCurrency(numTotalAmount)}`
+          `Insufficient available wallet balance (${formatCurrency(availableBalance)}). Required: ${formatCurrency(totalFundingRequired)} (Prize Pool: ${formatCurrency(numTotalAmount)}${estimatedPayoutFees > 0 ? ` + Payout Fees: ${formatCurrency(estimatedPayoutFees)}` : ''})`
         );
         return false;
       }
@@ -892,6 +902,38 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
                 </div>
               </div>
             )}
+
+            {/* Funding & Payout Fee Summary Card */}
+            {numTotalAmount > 0 && numWinners > 0 && (
+              <div className="p-4 rounded-2xl border transition-all space-y-2.5 bg-slate-50 border-slate-200">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-slate-600">Prize Pool:</span>
+                  <span className="font-bold text-slate-900">{formatCurrency(numTotalAmount)}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-semibold text-slate-600">Estimated Payout Fees:</span>
+                    {payoutMode === 'UPI_BANK' && (
+                      <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded-full">
+                        {numWinners} claims × ₹{distributionType === 'EQUAL' ? getLifafaPayoutFee(numTotalAmount / numWinners).toFixed(2) : getLifafaPayoutFee(numTotalAmount / numWinners).toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                  <span className={`font-bold ${payoutMode === 'UPI_BANK' ? 'text-amber-700' : 'text-emerald-600'}`}>
+                    {payoutMode === 'UPI_BANK' ? formatCurrency(estimatedPayoutFees) : '₹0.00 (Wallet Free)'}
+                  </span>
+                </div>
+                <div className="border-t border-slate-200 pt-2 flex items-center justify-between text-xs">
+                  <span className="font-black text-slate-800">Total Required Funding:</span>
+                  <span className="text-sm font-black text-blue-700">{formatCurrency(totalFundingRequired)}</span>
+                </div>
+                {payoutMode === 'UPI_BANK' && (
+                  <p className="text-[11px] text-slate-500 italic pt-0.5">
+                    * Payout fees are reserved in escrow and only recognized when a winner claims. Any unclaimed fees are fully refunded when the Lifafa closes.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -1054,8 +1096,18 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
                 <span className="text-xs font-bold text-indigo-700 uppercase bg-indigo-50 px-2 py-0.5 rounded-md">{selectedTheme}</span>
               </div>
               <div className="flex items-center justify-between pb-2 border-b border-slate-200/80">
-                <span className="text-xs font-bold text-slate-500">Total Pool</span>
-                <span className="text-base font-black text-emerald-700">{formatCurrency(numTotalAmount)}</span>
+                <span className="text-xs font-bold text-slate-500">Prize Pool</span>
+                <span className="text-sm font-black text-slate-900">{formatCurrency(numTotalAmount)}</span>
+              </div>
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200/80">
+                <span className="text-xs font-bold text-slate-500">Estimated Payout Fees</span>
+                <span className={`text-xs font-bold ${payoutMode === 'UPI_BANK' ? 'text-amber-700' : 'text-emerald-700'}`}>
+                  {payoutMode === 'UPI_BANK' ? formatCurrency(estimatedPayoutFees) : '₹0.00 (Wallet Free)'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200/80">
+                <span className="text-xs font-bold text-slate-500">Total Required Funding</span>
+                <span className="text-base font-black text-blue-700">{formatCurrency(totalFundingRequired)}</span>
               </div>
               <div className="flex items-center justify-between pb-2 border-b border-slate-200/80">
                 <span className="text-xs font-bold text-slate-500">Winners & Distribution</span>
@@ -1080,11 +1132,15 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
             {/* Atomic Wallet Deductions Note */}
             <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-xs">
               <div>
-                <span className="text-emerald-800 font-bold block">Wallet Reservation:</span>
-                <span className="text-[11px] text-emerald-600">No platform fee (₹0.00)</span>
+                <span className="text-emerald-800 font-bold block">Total Wallet Reservation:</span>
+                <span className="text-[11px] text-emerald-600">
+                  {payoutMode === 'UPI_BANK'
+                    ? `Prize Pool: ${formatCurrency(numTotalAmount)} + Payout Fees: ${formatCurrency(estimatedPayoutFees)}`
+                    : 'No external payout fees (₹0.00)'}
+                </span>
               </div>
               <div className="text-right">
-                <span className="text-lg font-black text-emerald-700">{formatCurrency(numTotalAmount)}</span>
+                <span className="text-lg font-black text-emerald-700">{formatCurrency(totalFundingRequired)}</span>
               </div>
             </div>
           </div>

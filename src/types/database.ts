@@ -111,6 +111,8 @@ export interface Lifafa {
   creator_note: string | null;
   payout_mode?: PayoutMode;
   withdrawal_status?: 'ALLOWED' | 'BLOCKED';
+  total_fee_amount?: number;
+  remaining_fee_amount?: number;
   created_at: string;
   updated_at: string;
   creator_profile?: Profile;

@@ -47,6 +47,41 @@ export interface ClaimLifafaResult {
   payout_error?: string;
 }
 
+// Authoritative server-aligned Lifafa external payout fee slabs:
+// ₹1 - ₹500       -> ₹2.50
+// >₹500 - ₹1,000  -> ₹2.70
+// >₹1,000 - ₹5,000 -> ₹3.50
+export function getLifafaPayoutFee(amount: number): number {
+  if (!amount || amount <= 0) return 0;
+  if (amount <= 500) return 2.50;
+  if (amount <= 1000) return 2.70;
+  return 3.50;
+}
+
+export function calculateLifafaPayoutFees(
+  totalAmount: number,
+  winnerCount: number,
+  distributionType: DistributionType,
+  payoutMode: PayoutMode,
+  maxClaimAmount?: number
+): number {
+  if (payoutMode !== 'UPI_BANK' || !totalAmount || !winnerCount || winnerCount < 1) {
+    return 0;
+  }
+  if (distributionType === 'EQUAL') {
+    const perWinner = totalAmount / winnerCount;
+    return Number((winnerCount * getLifafaPayoutFee(perWinner)).toFixed(2));
+  }
+  if (maxClaimAmount && maxClaimAmount > 0) {
+    return Number((winnerCount * getLifafaPayoutFee(maxClaimAmount)).toFixed(2));
+  }
+  if (totalAmount <= 500) {
+    return Number((winnerCount * 2.50).toFixed(2));
+  }
+  const avgAmount = totalAmount / winnerCount;
+  return Number((winnerCount * getLifafaPayoutFee(avgAmount)).toFixed(2));
+}
+
 export const lifafaService = {
   // Create Lifafa via atomic server-side RPC (Zero frontend trust, wallet reservation & allocation generation inside PostgreSQL)
   async createLifafa(params: CreateLifafaParams, idempotencyKey?: string) {
