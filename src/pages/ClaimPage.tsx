@@ -525,54 +525,86 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
             </div>
           )}
 
-          {/* Fallback Payout Dispatch Issue: allocated to wallet */}
-          {claimResult && !stage.includes('success') && claimResult.payoutDispatched === false && (
-            <div className="bg-white rounded-3xl p-6 shadow-xl border border-rose-100 text-center space-y-5 animate-in zoom-in-95 duration-300">
-              <div className="w-16 h-16 rounded-3xl bg-rose-50 border border-rose-200 text-rose-500 mx-auto flex items-center justify-center shadow-xs">
-                <AlertCircle className="w-8 h-8 text-rose-600" />
-              </div>
-
-              <div className="space-y-1">
-                <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
-                  <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
-                  <span>Payout Dispatch Issue</span>
-                </span>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight pt-1">
-                  Reward Claimed — Bank Transfer Pending
-                </h3>
-                <p className="text-xs text-rose-600 font-semibold pt-1">
-                  Reward claimed, but direct bank payout could not be initiated.
-                </p>
-                <p className="text-xs text-slate-500 pt-0.5">
-                  {claimResult.payoutError || 'The direct bank payout request could not be completed.'}
-                </p>
-              </div>
-
-              {/* Amount & Safe Fallback Notice */}
-              <div className="p-4 bg-amber-50/80 rounded-2xl border border-amber-200 text-left space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-amber-800 uppercase tracking-widest">
-                    Allocated Reward
-                  </span>
-                  <span className="text-lg font-black text-amber-900">
-                    {formatCurrency(claimResult.amount)}
-                  </span>
+          {/* External UPI Payout Status: Processing or Failed State */}
+          {claimResult && !stage.includes('success') && (
+            claimResult.withdrawalStatus === 'PROCESSING' ? (
+              <div className="bg-white rounded-3xl p-6 shadow-xl border border-amber-100 text-center space-y-5 animate-in zoom-in-95 duration-300">
+                <div className="w-16 h-16 rounded-3xl bg-amber-50 border border-amber-200 text-amber-600 mx-auto flex items-center justify-center shadow-xs">
+                  <Clock className="w-8 h-8 text-amber-600 animate-pulse" />
                 </div>
-                <p className="text-xs text-amber-800 leading-relaxed">
-                  Don't worry — your reward was successfully claimed. Because direct bank dispatch could not be completed, the funds have been credited to your Createlifafa wallet balance.
-                </p>
-              </div>
 
-              {onNavigateHome && (
-                <button
-                  type="button"
-                  onClick={onNavigateHome}
-                  className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl text-xs shadow-md transition-all cursor-pointer"
-                >
-                  View in Createlifafa Wallet
-                </button>
-              )}
-            </div>
+                <div className="space-y-1">
+                  <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
+                    <Clock className="w-3.5 h-3.5 text-amber-600" />
+                    <span>UPI Payout Processing</span>
+                  </span>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight pt-1">
+                    Reward Claimed — UPI Payout Processing
+                  </h3>
+                  <p className="text-xs text-amber-700 font-semibold pt-1">
+                    Your reward of {formatCurrency(claimResult.amount)} is being transferred to {upiId || 'your UPI ID'}.
+                  </p>
+                  <p className="text-xs text-slate-500 pt-0.5">
+                    Payment provider is processing the instant UPI transfer. Payouts typically complete within 1–5 minutes.
+                  </p>
+                </div>
+
+                {claimResult.referenceId && (
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center font-mono text-[11px] text-slate-600">
+                    Reference ID: <span className="font-bold text-slate-900">{claimResult.referenceId}</span>
+                  </div>
+                )}
+
+                {onNavigateHome && (
+                  <button
+                    type="button"
+                    onClick={onNavigateHome}
+                    className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl text-xs shadow-md transition-all cursor-pointer"
+                  >
+                    Done / Back to Home
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="bg-white rounded-3xl p-6 shadow-xl border border-rose-100 text-center space-y-5 animate-in zoom-in-95 duration-300">
+                <div className="w-16 h-16 rounded-3xl bg-rose-50 border border-rose-200 text-rose-500 mx-auto flex items-center justify-center shadow-xs">
+                  <AlertCircle className="w-8 h-8 text-rose-600" />
+                </div>
+
+                <div className="space-y-1">
+                  <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
+                    <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
+                    <span>UPI Payout Failed</span>
+                  </span>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight pt-1">
+                    UPI Payout Could Not Be Dispatched
+                  </h3>
+                  <p className="text-xs text-rose-600 font-semibold pt-1">
+                    The instant UPI transfer could not be initiated by the payment provider.
+                  </p>
+                  <p className="text-xs text-slate-500 pt-0.5">
+                    {claimResult.payoutError || 'The UPI payout request could not be completed.'}
+                  </p>
+                </div>
+
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-left space-y-1 text-xs text-slate-600">
+                  <span className="font-bold text-slate-800">What should you do?</span>
+                  <p className="leading-relaxed">
+                    Please ensure your UPI ID is active and able to receive payments, then try claiming again or contact support.
+                  </p>
+                </div>
+
+                {onNavigateHome && (
+                  <button
+                    type="button"
+                    onClick={onNavigateHome}
+                    className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl text-xs shadow-md transition-all cursor-pointer"
+                  >
+                    Back to Home
+                  </button>
+                )}
+              </div>
+            )
           )}
 
           {/* Fully Claimed or Expired Views */}

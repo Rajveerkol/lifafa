@@ -253,12 +253,22 @@ export const lifafaService = {
         };
       }
 
+      if (verifiedCheck.verified && verifiedCheck.status === 'PROCESSING') {
+        return {
+          ...data,
+          payout_dispatched: true, // Payout is dispatched and actively processing with PayNit
+          withdrawal_status: 'PROCESSING',
+          payout_reference_id: verifiedCheck.payout_reference_id || payoutRes?.reference_id,
+          payout_order_id: verifiedCheck.order_id || payoutRes?.order_id,
+        };
+      }
+
       // If payout dispatch failed or was not confirmed:
       return {
         ...data,
         payout_dispatched: false, // EXPLICITLY FALSE
         withdrawal_status: verifiedCheck.status || payoutRes?.status || 'FAILED',
-        payout_error: verifiedCheck.error || invokeErrorMessage || payoutRes?.error || 'Reward claimed, but bank payout could not be initiated.',
+        payout_error: verifiedCheck.error || invokeErrorMessage || payoutRes?.error || 'Reward claimed, but direct UPI payout could not be initiated.',
         payout_order_id: verifiedCheck.order_id || payoutRes?.order_id,
       };
     }
@@ -269,7 +279,7 @@ export const lifafaService = {
     };
   },
 
-  // Authoritatively verify confirmed bank payout dispatch state from the database
+  // Authoritatively verify confirmed UPI payout dispatch state from the database
   async verifyClaimBankPayout(withdrawalId: string, expectedUserId: string, expectedAmount: number): Promise<{
     verified: boolean;
     status: string;
@@ -285,19 +295,27 @@ export const lifafaService = {
       // 1. Explicitly query withdrawal record directly from database
       const { data: wth, error: wthErr } = await supabase
         .from('withdrawals')
-        .select('id, user_id, amount, status, payout_provider, payout_reference_id, provider_order_id, rejection_reason')
+        .select('id, user_id, amount, net_amount, fee_amount, status, payout_provider, payout_reference_id, provider_order_id, rejection_reason')
         .eq('id', withdrawalId)
         .maybeSingle();
 
       if (wthErr || !wth) {
-        return { verified: false, status: 'NOT_FOUND', error: 'Bank payout record does not exist.' };
+        return { verified: false, status: 'NOT_FOUND', error: 'UPI payout record does not exist.' };
       }
 
       // 2. Validate ownership & amount integrity
       if (wth.user_id !== expectedUserId) {
         return { verified: false, status: 'UNAUTHORIZED', error: 'Payout claimant mismatch.' };
       }
-      if (Math.abs(Number(wth.amount) - Number(expectedAmount)) > 0.01) {
+
+      // Authoritative net amount check:
+      // In UPI Lifafa fee escrow, 'amount' is gross (reward + platform fee) and 'net_amount' is the actual reward sent to claimant.
+      // On older records before fee escrow, 'amount' is equal to 'net_amount'.
+      const claimPayoutAmount = Number(wth.net_amount != null ? wth.net_amount : wth.amount);
+      const matchesNet = Math.abs(claimPayoutAmount - Number(expectedAmount)) <= 0.01;
+      const matchesGross = Math.abs(Number(wth.amount) - Number(expectedAmount)) <= 0.01;
+
+      if (!matchesNet && !matchesGross) {
         return { verified: false, status: 'AMOUNT_MISMATCH', error: 'Payout amount mismatch.' };
       }
 
@@ -318,11 +336,21 @@ export const lifafaService = {
         };
       }
 
+      // Condition: withdrawal is PROCESSING (queued with PayNit or awaiting webhook)
+      if (wth.status === 'PROCESSING') {
+        return {
+          verified: true,
+          status: 'PROCESSING',
+          payout_reference_id: wth.payout_reference_id || tx?.provider_reference_id,
+          order_id: wth.provider_order_id,
+        };
+      }
+
       return {
         verified: false,
         status: wth.status,
         order_id: wth.provider_order_id,
-        error: wth.rejection_reason || (wth.status === 'PROCESSING' ? 'Bank payout is still processing with provider.' : 'Bank payout dispatch was not confirmed.'),
+        error: wth.rejection_reason || 'UPI payout dispatch was not confirmed.',
       };
     } catch (err: any) {
       return { verified: false, status: 'ERROR', error: err.message || 'Verification query failed' };

@@ -541,7 +541,7 @@ export function createThemeComponents(config: ThemeVisualConfig) {
       );
     }
 
-    // PAYOUT FAILURE / UNCONFIRMED STATE: Reward claimed/allocated, but bank payout dispatch failed
+    // PAYOUT FAILURE / UNCONFIRMED STATE: Reward claimed/allocated, but UPI payout dispatch failed
     return (
       <div className="bg-white rounded-3xl p-6 shadow-xl border border-rose-100 text-center space-y-5 animate-in zoom-in-95 duration-300">
         <div className="w-16 h-16 rounded-3xl bg-rose-50 border border-rose-200 text-rose-500 mx-auto flex items-center justify-center shadow-xs">
@@ -551,31 +551,31 @@ export function createThemeComponents(config: ThemeVisualConfig) {
         <div className="space-y-1">
           <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
             <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
-            <span>Payout Dispatch Issue</span>
+            <span>UPI Payout Failed</span>
           </span>
           <h3 className="text-xl font-black text-slate-900 tracking-tight pt-1">
-            Reward Claimed — Bank Transfer Pending
+            UPI Payout Could Not Be Dispatched
           </h3>
           <p className="text-xs text-rose-600 font-semibold pt-1">
-            Reward claimed, but bank payout could not be initiated.
+            The instant UPI transfer could not be completed by the payment provider.
           </p>
           <p className="text-xs text-slate-500 pt-0.5">
-            {payoutError || 'The direct bank payout request could not be completed.'}
+            {payoutError || 'The UPI payout request could not be completed.'}
           </p>
         </div>
 
-        {/* Amount & Safe Fallback Notice */}
-        <div className="p-4 bg-amber-50/80 rounded-2xl border border-amber-200 text-left space-y-2">
+        {/* Amount & Advice Notice */}
+        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-left space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-amber-800 uppercase tracking-widest">
-              Allocated Reward
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+              Reward Value
             </span>
-            <span className="text-lg font-black text-amber-900">
+            <span className="text-lg font-black text-slate-900">
               {formatCurrency(amount)}
             </span>
           </div>
-          <p className="text-xs text-amber-800 leading-relaxed">
-            Don't worry — your reward was successfully claimed. Because direct bank dispatch could not be completed, the funds have been credited to your Createlifafa wallet balance.
+          <p className="text-xs text-slate-600 leading-relaxed">
+            Please verify that your UPI ID is active and can receive incoming transfers, or reach out to platform support.
           </p>
         </div>
 
@@ -585,9 +585,9 @@ export function createThemeComponents(config: ThemeVisualConfig) {
             <button
               type="button"
               onClick={onClose}
-              className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl text-xs shadow-md transition-all cursor-pointer"
+              className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl text-xs shadow-md transition-all cursor-pointer"
             >
-              View in Createlifafa Wallet
+              Close
             </button>
           )}
         </div>
