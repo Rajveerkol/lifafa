@@ -1,5 +1,13 @@
 import { supabase, isSupabaseConfigured, getValidAuthToken, extractFunctionError } from '../lib/supabase';
-import type { Lifafa, LifafaTask, LifafaClaim, DistributionType, PayoutMode } from '../types/database';
+import type {
+  Lifafa,
+  LifafaTask,
+  LifafaClaim,
+  DistributionType,
+  PayoutMode,
+  CancelLifafaPreview,
+  CancelLifafaResult,
+} from '../types/database';
 
 export interface CreateLifafaParams {
   title: string;
@@ -516,8 +524,25 @@ export const lifafaService = {
     return (data || []) as (LifafaClaim & { lifafa: Lifafa })[];
   },
 
+  // Fetch authoritative financial preview breakdown prior to cancellation
+  async previewCancelLifafaRefund(lifafaId: string): Promise<CancelLifafaPreview> {
+    if (!isSupabaseConfigured || !supabase) {
+      throw new Error('Supabase database is not configured.');
+    }
+
+    const { data, error } = await supabase.rpc('preview_cancel_lifafa_refund_rpc', {
+      p_lifafa_id: lifafaId,
+    });
+
+    if (error) {
+      throw new Error(error.message || 'Failed to fetch refund preview');
+    }
+
+    return data as CancelLifafaPreview;
+  },
+
   // Idempotent refund/release of unused reserved amount for expired or cancelled Lifafa
-  async refundExpiredOrCancelled(lifafaId: string) {
+  async refundExpiredOrCancelled(lifafaId: string): Promise<CancelLifafaResult> {
     if (!isSupabaseConfigured || !supabase) {
       throw new Error('Supabase database is not configured.');
     }
@@ -530,7 +555,7 @@ export const lifafaService = {
       throw new Error(error.message || 'Refund failed');
     }
 
-    return data;
+    return data as CancelLifafaResult;
   },
 
   // Authoritatively check if a user has already claimed a specific Lifafa

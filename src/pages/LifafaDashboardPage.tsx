@@ -10,8 +10,10 @@ import {
   ShieldCheck,
   RefreshCw,
   Loader2,
+  RotateCcw,
 } from 'lucide-react';
 import { LifafaCard } from '../components/lifafa/LifafaCard';
+import { CancelLifafaModal } from '../components/lifafa/CancelLifafaModal';
 import { useAuth } from '../context/AuthContext';
 import { lifafaService } from '../services/lifafaService';
 import type { Lifafa, LifafaClaim } from '../types/database';
@@ -37,7 +39,7 @@ export const LifafaDashboardPage: React.FC<LifafaDashboardPageProps> = ({
   const [myCreated, setMyCreated] = useState<Lifafa[]>([]);
   const [myClaimed, setMyClaimed] = useState<(LifafaClaim & { lifafa: Lifafa })[]>([]);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [cancelModalLifafa, setCancelModalLifafa] = useState<Lifafa | null>(null);
 
   // Authoritative user claims lookup map
   const myClaimedMap = useMemo(() => {
@@ -73,23 +75,6 @@ export const LifafaDashboardPage: React.FC<LifafaDashboardPageProps> = ({
   useEffect(() => {
     loadData();
   }, [user]);
-
-  const handleRefundCancel = async (lifafaId: string) => {
-    if (!confirm('Are you sure you want to cancel and refund remaining funds for this Lifafa?')) {
-      return;
-    }
-
-    try {
-      setActionLoading(lifafaId);
-      await lifafaService.refundExpiredOrCancelled(lifafaId);
-      await refreshWallet();
-      await loadData();
-    } catch (e: any) {
-      alert(e.message || 'Refund failed');
-    } finally {
-      setActionLoading(null);
-    }
-  };
 
   // Filter items based on tab
   const getFilteredLifafas = (): Lifafa[] => {
@@ -259,17 +244,29 @@ export const LifafaDashboardPage: React.FC<LifafaDashboardPageProps> = ({
               />
               {user?.id === lifafa.creator_id && lifafa.remaining_amount > 0 && lifafa.status === 'ACTIVE' && (
                 <button
-                  onClick={() => handleRefundCancel(lifafa.id)}
-                  disabled={actionLoading === lifafa.id}
-                  className="mt-1 text-[11px] font-bold text-red-600 hover:text-red-700 py-1 text-center"
+                  type="button"
+                  onClick={() => setCancelModalLifafa(lifafa)}
+                  className="mt-2 w-full py-2 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/80 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer flex items-center justify-center gap-1.5"
                 >
-                  {actionLoading === lifafa.id ? 'Refunding...' : 'Cancel Lifafa & Refund Remaining'}
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Cancel Lifafa & Refund Remaining</span>
                 </button>
               )}
             </div>
           ))}
         </div>
       )}
+
+      {/* Authoritative Premium Cancel & Refund Modal */}
+      <CancelLifafaModal
+        lifafa={cancelModalLifafa}
+        isOpen={Boolean(cancelModalLifafa)}
+        onClose={() => setCancelModalLifafa(null)}
+        onSuccess={async () => {
+          await refreshWallet();
+          await loadData();
+        }}
+      />
     </div>
   );
 };

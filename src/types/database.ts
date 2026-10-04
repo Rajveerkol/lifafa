@@ -119,6 +119,47 @@ export interface Lifafa {
   creator_profile?: Profile;
 }
 
+export interface CancelLifafaPreview {
+  success: boolean;
+  lifafa_id: string;
+  code: string;
+  title: string;
+  status: string;
+  payout_mode: string;
+  claimed_count: number;
+  winner_count: number;
+  total_prize_pool: number;
+  already_distributed_amount: number;
+  remaining_prize: number;
+  total_payout_fee_escrow: number;
+  consumed_payout_fee: number;
+  remaining_payout_fee_reserve: number;
+  creation_fee_note: string;
+  total_refundable_amount: number;
+  is_eligible: boolean;
+  eligibility_message: string;
+}
+
+export interface CancelLifafaResult {
+  success: boolean;
+  idempotent?: boolean;
+  lifafa_id: string;
+  code: string;
+  title?: string;
+  status: string;
+  claimed_count: number;
+  winner_count: number;
+  total_prize_pool?: number;
+  distributed_amount?: number;
+  consumed_fees?: number;
+  refunded_prize?: number;
+  refunded_fee_reserve?: number;
+  total_refunded: number;
+  refunded_amount: number;
+  new_balance?: number;
+  message: string;
+}
+
 export interface LifafaAllocation {
   id: string;
   lifafa_id: string;
