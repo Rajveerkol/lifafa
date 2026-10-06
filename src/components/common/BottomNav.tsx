@@ -12,7 +12,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onSelectTab })
     { id: 'home', label: 'Home', icon: Home },
     { id: 'lifafa', label: 'Lifafa', icon: Gift },
     { id: 'merchant', label: 'Gateway', icon: Building2 },
-    { id: 'bots', label: 'Bots', icon: Bot, isSoon: true },
+    { id: 'bots', label: 'Bots', icon: Bot },
     { id: 'wallet', label: 'Wallet', icon: Wallet },
     { id: 'profile', label: 'Profile', icon: User },
   ];
@@ -40,11 +40,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onSelectTab })
                     isActive ? 'stroke-[2.5px]' : 'stroke-2'
                   }`}
                 />
-                {item.isSoon && (
-                  <span className="absolute -top-1.5 -right-3.5 bg-amber-500 text-white text-[8px] font-black px-1 py-0.2 rounded-full uppercase scale-85">
-                    SOON
-                  </span>
-                )}
               </div>
               <span
                 className={`text-[10px] mt-0.5 tracking-tight ${

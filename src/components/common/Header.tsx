@@ -20,11 +20,18 @@ export const Header: React.FC<HeaderProps> = ({
   const { user, wallet, merchant, isMerchant, isAdmin, unreadNotificationsCount, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navItems = [
+  interface HeaderNavItem {
+    id: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    badge?: string;
+  }
+
+  const navItems: HeaderNavItem[] = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'lifafa', label: 'Lifafa', icon: Gift },
     { id: 'merchant', label: 'Gateway', icon: Building2 },
-    { id: 'bots', label: 'Bots', icon: Bot, badge: 'Soon' },
+    { id: 'bots', label: 'Bots', icon: Bot },
     { id: 'wallet', label: 'Wallet', icon: Wallet },
     { id: 'profile', label: 'Profile', icon: User },
   ];

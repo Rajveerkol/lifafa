@@ -143,34 +143,60 @@ export const BotPlanModal: React.FC<BotPlanModalProps> = ({ isOpen, onClose, onS
                 <div className="text-xs font-bold uppercase tracking-wider text-slate-400">
                   Select Bot Plan Tier
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                   {CANONICAL_BOT_PLANS.map((tier) => {
                     const isSelected = selectedPlan.price === tier.price;
                     return (
                       <div
                         key={tier.price}
                         onClick={() => setSelectedPlan(tier)}
-                        className={`relative p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                        className={`relative p-4 sm:p-5 rounded-2xl border-2 cursor-pointer transition-all ${
                           isSelected
                             ? 'bg-gradient-to-b from-blue-50/70 to-cyan-50/40 border-blue-500 shadow-md shadow-blue-500/10'
                             : 'bg-white border-slate-100 hover:border-slate-200 hover:bg-slate-50/50'
                         }`}
                       >
+                        {/* 1. Badge Layer */}
                         {tier.badge && (
-                          <span className="absolute top-3 right-3 text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-blue-600 text-white shadow-2xs">
-                            {tier.badge}
-                          </span>
+                          <div className="absolute top-3.5 right-3.5 z-10 pointer-events-none">
+                            <span
+                              className={`inline-flex items-center text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-xs ${
+                                tier.badge === 'VIP'
+                                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white border border-amber-400/60 shadow-amber-500/20'
+                                  : 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-blue-500/20'
+                              }`}
+                            >
+                              {tier.badge}
+                            </span>
+                          </div>
                         )}
-                        <div className="flex items-center justify-between mb-1.5">
-                          <h4 className="font-bold text-sm text-slate-900">{tier.name}</h4>
-                          <span className="text-lg font-black text-blue-600">₹{tier.price}</span>
+
+                        {/* 2. Header Layer (Plan Name & Price) */}
+                        <div className={`mb-2 ${tier.badge ? 'pr-20' : ''}`}>
+                          <h4 className="font-extrabold text-sm sm:text-base text-slate-900 tracking-tight leading-snug">
+                            {tier.name}
+                          </h4>
+                          <div className="flex items-baseline gap-1.5 mt-1">
+                            <span className="text-lg sm:text-xl font-black text-blue-600 tracking-tight">
+                              ₹{tier.price}
+                            </span>
+                            <span className="text-[10px] font-medium text-slate-400">
+                              /one-time
+                            </span>
+                          </div>
                         </div>
-                        <p className="text-xs text-slate-500 mb-3">{tier.tagline}</p>
-                        <ul className="space-y-1.5">
+
+                        {/* 3. Tagline */}
+                        <p className="text-xs text-slate-500 mb-3 leading-relaxed">
+                          {tier.tagline}
+                        </p>
+
+                        {/* 4. Features */}
+                        <ul className="space-y-1.5 pt-2.5 border-t border-slate-100">
                           {tier.features.slice(0, 3).map((feat, i) => (
                             <li key={i} className="text-[11px] text-slate-600 flex items-center gap-1.5">
                               <Check className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
-                              <span>{feat}</span>
+                              <span className="leading-tight">{feat}</span>
                             </li>
                           ))}
                         </ul>
