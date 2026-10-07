@@ -32,8 +32,364 @@ async function hashSecret(secret: string): Promise<string> {
     .join('');
 }
 
+// Activation boundary for automated status-check wallet refunds (ISO 8601).
+// Payouts created BEFORE this timestamp are treated as HISTORICAL transactions
+// and will NEVER be refunded or modified by this automated check.
+const STATUS_REFUND_ACTIVATION_BOUNDARY = '2026-10-07T10:45:00.000Z';
+
 // In-memory rate limiting map for merchant status checks (sliding 60s window per merchant)
 const merchantStatusRateLimit = new Map<string, { count: number; resetAt: number }>();
+
+interface RefundReconciliationResult {
+  success: boolean;
+  status: 'FAILED';
+  refunded: boolean;
+  already_refunded: boolean;
+  is_historical?: boolean;
+  no_deduction?: boolean;
+  refund_amount: number;
+  order_id: string;
+  rejection_reason: string;
+  message: string;
+}
+
+async function reconcileFailedPayoutWithRefund(
+  adminClient: any,
+  merchantId: string,
+  payout: any,
+  rejectionReason: string,
+  paynitData: any
+): Promise<RefundReconciliationResult> {
+  const payoutId = payout.id;
+  const payoutAmount = Number(payout.amount || 0);
+  const feeAmount = Number(payout.fee_amount != null ? payout.fee_amount : PAYNIT_PAYOUT_FEE);
+  const totalDeducted = Number(payout.total_deducted != null ? payout.total_deducted : (payoutAmount + feeAmount));
+
+  // 1. BOUNDARY CHECK: Only NEW payouts created on or after activation boundary are eligible for automated refund
+  const payoutCreatedAt = payout.created_at ? new Date(payout.created_at).getTime() : 0;
+  const boundaryTime = new Date(STATUS_REFUND_ACTIVATION_BOUNDARY).getTime();
+  const isHistoricalPayout = payoutCreatedAt < boundaryTime;
+
+  if (isHistoricalPayout) {
+    // Financial Safety: DO NOT modify wallet balances, DO NOT insert refund transactions
+    return {
+      success: true,
+      status: 'FAILED',
+      refunded: false,
+      already_refunded: false,
+      is_historical: true,
+      refund_amount: 0,
+      order_id: payout.order_id,
+      rejection_reason: rejectionReason,
+      message: 'Historical transaction created prior to automated refund activation. Wallet balance was not modified.',
+    };
+  }
+
+  // 2. DOUBLE-REFUND PROTECTION & IDEMPOTENCY CHECK
+  const currentDbStatus = String(payout.status || '').toUpperCase();
+
+  // Check existing refund ledger entries
+  const { data: existingRefundLedgers } = await adminClient
+    .from('merchant_ledger_entries')
+    .select('id, entry_type')
+    .eq('merchant_id', merchantId)
+    .eq('reference_id', String(payoutId))
+    .in('entry_type', ['PAYOUT_REFUND', 'PAYOUT_FEE_REFUND'])
+    .limit(1);
+
+  // Check existing wallet refund transactions
+  const { data: existingWalletRefunds } = await adminClient
+    .from('wallet_transactions')
+    .select('id, type')
+    .eq('reference_id', String(payoutId))
+    .in('type', ['WITHDRAWAL_REVERSAL', 'REFUND'])
+    .limit(1);
+
+  const hasAlreadyRefunded =
+    currentDbStatus === 'FAILED' ||
+    currentDbStatus === 'REVERSED' ||
+    (existingRefundLedgers && existingRefundLedgers.length > 0) ||
+    (existingWalletRefunds && existingWalletRefunds.length > 0);
+
+  if (hasAlreadyRefunded) {
+    return {
+      success: true,
+      status: 'FAILED',
+      already_refunded: true,
+      refunded: false,
+      refund_amount: totalDeducted,
+      order_id: payout.order_id,
+      rejection_reason: payout.rejection_reason || rejectionReason,
+      message: `Payout is already marked as Failed. The authoritative refund of ₹${totalDeducted.toFixed(2)} was already credited to your wallet previously.`,
+    };
+  }
+
+  // 3. ACTUAL DEDUCTION VERIFICATION: Verify wallet funds were ACTUALLY debited/locked
+  const { data: existingDebits } = await adminClient
+    .from('merchant_ledger_entries')
+    .select('id, amount, entry_type')
+    .eq('merchant_id', merchantId)
+    .eq('reference_id', String(payoutId))
+    .in('entry_type', ['PAYOUT_LOCK', 'PAYOUT_FEE_LOCK', 'PAYOUT'])
+    .limit(1);
+
+  const { data: existingWalletDebits } = await adminClient
+    .from('wallet_transactions')
+    .select('id, amount, type')
+    .eq('reference_id', String(payoutId))
+    .in('type', ['WITHDRAWAL', 'FEE'])
+    .limit(1);
+
+  const wasMoneyDeducted =
+    totalDeducted > 0 &&
+    ((existingDebits && existingDebits.length > 0) ||
+     (existingWalletDebits && existingWalletDebits.length > 0) ||
+     currentDbStatus === 'PENDING' ||
+     currentDbStatus === 'PROCESSING');
+
+  if (!wasMoneyDeducted) {
+    // If no deduction was made, update status to FAILED but refund ₹0
+    await adminClient
+      .from('merchant_payouts')
+      .update({
+        status: 'FAILED',
+        rejection_reason: rejectionReason,
+        processed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', payoutId);
+
+    return {
+      success: true,
+      status: 'FAILED',
+      refunded: false,
+      already_refunded: false,
+      no_deduction: true,
+      refund_amount: 0,
+      order_id: payout.order_id,
+      rejection_reason: rejectionReason,
+      message: 'Payout marked as Failed. No wallet deduction was recorded for this transaction, so no refund was required.',
+    };
+  }
+
+  // 4. ATTEMPT DATABASE RPC (if user has executed migration 066)
+  try {
+    const { data: rpcRes, error: rpcErr } = await adminClient.rpc('merchant_reconcile_payout_status_v2_rpc', {
+      p_merchant_id: merchantId,
+      p_order_id: payout.order_id,
+      p_target_status: 'FAILED',
+      p_rejection_reason: rejectionReason,
+      p_raw_payload: paynitData,
+      p_activation_boundary: STATUS_REFUND_ACTIVATION_BOUNDARY,
+    });
+
+    if (!rpcErr && rpcRes && rpcRes.success) {
+      return {
+        success: true,
+        status: 'FAILED',
+        refunded: Boolean(rpcRes.refunded),
+        already_refunded: Boolean(rpcRes.already_refunded),
+        is_historical: Boolean(rpcRes.is_historical),
+        no_deduction: Boolean(rpcRes.no_deduction),
+        refund_amount: Number(rpcRes.refund_amount || 0),
+        order_id: payout.order_id,
+        rejection_reason: rejectionReason,
+        message: rpcRes.message || `Payout Failed. The authoritative amount of ₹${totalDeducted.toFixed(2)} has been refunded to your Gateway wallet.`,
+      };
+    }
+  } catch (rpcCallErr: any) {
+    console.warn('Notice: merchant_reconcile_payout_status_v2_rpc not available or threw:', rpcCallErr?.message);
+  }
+
+  // 5. DIRECT SERVICE-ROLE DUAL-WALLET CREDITING (Primary, robust & immediate execution)
+  // Retrieve merchant owner user_id
+  const { data: merchantRec } = await adminClient
+    .from('merchants')
+    .select('id, user_id')
+    .eq('id', merchantId)
+    .single();
+
+  if (!merchantRec || !merchantRec.user_id) {
+    throw new Error('Merchant record or owner user ID not found');
+  }
+
+  const userId = merchantRec.user_id;
+
+  // A. Credit public.wallets (authoritative user wallet displayed on website & dashboard)
+  const { data: userWallet } = await adminClient
+    .from('wallets')
+    .select('id, available_balance, total_withdrawn')
+    .eq('user_id', userId)
+    .single();
+
+  if (!userWallet) {
+    throw new Error('Authoritative user wallet not found');
+  }
+
+  const userBalBefore = Number(userWallet.available_balance || 0);
+  const userBalMid = userBalBefore + payoutAmount;
+  const userBalAfter = userBalBefore + totalDeducted;
+  const currentWithdrawn = Number(userWallet.total_withdrawn || 0);
+  const newWithdrawn = Math.max(0, currentWithdrawn - payoutAmount);
+
+  await adminClient
+    .from('wallets')
+    .update({
+      available_balance: userBalAfter,
+      total_withdrawn: newWithdrawn,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userWallet.id);
+
+  // B. Credit public.merchant_wallets (tracks Gateway float & locked payout balance)
+  const { data: mchWallet } = await adminClient
+    .from('merchant_wallets')
+    .select('id, available_balance, locked_payout_balance')
+    .eq('merchant_id', merchantId)
+    .maybeSingle();
+
+  let mchBalBefore = userBalBefore;
+  let mchBalMid = userBalMid;
+  let mchBalAfter = userBalAfter;
+
+  if (mchWallet) {
+    mchBalBefore = Number(mchWallet.available_balance || 0);
+    mchBalMid = mchBalBefore + payoutAmount;
+    mchBalAfter = mchBalBefore + totalDeducted;
+    const currLocked = Number(mchWallet.locked_payout_balance || 0);
+    const newLocked = Math.max(0, currLocked - totalDeducted);
+
+    await adminClient
+      .from('merchant_wallets')
+      .update({
+        available_balance: mchBalAfter,
+        locked_payout_balance: newLocked,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', mchWallet.id);
+  }
+
+  // C. Double-Entry Audit in public.merchant_ledger_entries
+  const timestampMs = Date.now();
+  if (mchWallet) {
+    const ledgerRows = [
+      {
+        merchant_id: merchantId,
+        wallet_id: mchWallet.id,
+        amount: payoutAmount,
+        fee_amount: 0.00,
+        entry_type: 'PAYOUT_REFUND',
+        reference_type: 'PAYOUT',
+        reference_id: String(payoutId),
+        idempotency_key: `mch_py_ref_amt_${payoutId}_${timestampMs}`,
+        balance_before: mchBalBefore,
+        balance_after: mchBalMid,
+        metadata: {
+          reason: rejectionReason,
+          order_id: payout.order_id,
+          provider_order_id: payout.provider_order_id,
+          refund_type: 'PRINCIPAL',
+          source: 'merchant_status_check',
+        },
+      },
+      {
+        merchant_id: merchantId,
+        wallet_id: mchWallet.id,
+        amount: feeAmount,
+        fee_amount: 0.00,
+        entry_type: 'PAYOUT_FEE_REFUND',
+        reference_type: 'PAYOUT',
+        reference_id: String(payoutId),
+        idempotency_key: `mch_py_ref_fee_${payoutId}_${timestampMs}`,
+        balance_before: mchBalMid,
+        balance_after: mchBalAfter,
+        metadata: {
+          reason: rejectionReason,
+          order_id: payout.order_id,
+          fee_refunded: feeAmount,
+          refund_type: 'FEE',
+          source: 'merchant_status_check',
+        },
+      },
+    ];
+    await adminClient.from('merchant_ledger_entries').insert(ledgerRows);
+  }
+
+  // D. Double-Entry Audit in public.wallet_transactions
+  const walletTxRows = [
+    {
+      user_id: userId,
+      wallet_id: userWallet.id,
+      amount: payoutAmount,
+      type: 'WITHDRAWAL_REVERSAL',
+      status: 'SUCCESS',
+      reference_type: 'MERCHANT_PAYOUT',
+      reference_id: String(payoutId),
+      idempotency_key: `tx_mch_ref_amt_${payoutId}_${timestampMs}`,
+      balance_before: userBalBefore,
+      balance_after: userBalMid,
+      metadata: {
+        merchant_id: merchantId,
+        order_id: payout.order_id,
+        reason: rejectionReason,
+        source: 'merchant_status_check',
+      },
+    },
+    {
+      user_id: userId,
+      wallet_id: userWallet.id,
+      amount: feeAmount,
+      type: 'REFUND',
+      status: 'SUCCESS',
+      reference_type: 'MERCHANT_PAYOUT_FEE',
+      reference_id: String(payoutId),
+      idempotency_key: `tx_mch_ref_fee_${payoutId}_${timestampMs}`,
+      balance_before: userBalMid,
+      balance_after: userBalAfter,
+      metadata: {
+        merchant_id: merchantId,
+        order_id: payout.order_id,
+        fee: feeAmount,
+        reason: rejectionReason,
+        source: 'merchant_status_check',
+      },
+    },
+  ];
+  await adminClient.from('wallet_transactions').insert(walletTxRows);
+
+  // E. Update public.merchant_payouts record
+  await adminClient
+    .from('merchant_payouts')
+    .update({
+      status: 'FAILED',
+      rejection_reason: rejectionReason,
+      processed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', payoutId);
+
+  // F. Insert provider event log
+  await adminClient
+    .from('merchant_payout_events')
+    .insert({
+      provider_event_id: `evt_status_fail_${payoutId}_${timestampMs}`,
+      payout_id: payoutId,
+      event_type: 'payout.failed_refunded',
+      raw_payload: paynitData,
+    })
+    .catch((evtErr: any) => console.warn('payout event insert warning:', evtErr?.message));
+
+  return {
+    success: true,
+    status: 'FAILED',
+    refunded: true,
+    already_refunded: false,
+    refund_amount: totalDeducted,
+    order_id: payout.order_id,
+    rejection_reason: rejectionReason,
+    message: `Payout Failed. The authoritative amount of ₹${totalDeducted.toFixed(2)} has been refunded to your Gateway wallet.`,
+  };
+}
 
 async function handleMerchantCheckOrderStatus(
   adminClient: any,
@@ -114,6 +470,11 @@ async function handleMerchantCheckOrderStatus(
   const feeAmount = Number(payout.fee_amount != null ? payout.fee_amount : 2.50);
   const totalDeducted = Number(payout.total_deducted != null ? payout.total_deducted : (payoutAmount + feeAmount));
 
+  // Determine historical vs new transaction boundary
+  const payoutCreatedAt = payout.created_at ? new Date(payout.created_at).getTime() : 0;
+  const boundaryTime = new Date(STATUS_REFUND_ACTIVATION_BOUNDARY).getTime();
+  const isHistoricalPayout = payoutCreatedAt < boundaryTime;
+
   // 3. Short-Circuit Terminal States (Idempotency & Double-Refund Protection)
   if (currentDbStatus === 'SUCCESS') {
     return new Response(
@@ -132,16 +493,33 @@ async function handleMerchantCheckOrderStatus(
   }
 
   if (currentDbStatus === 'FAILED' || currentDbStatus === 'REVERSED') {
+    if (isHistoricalPayout) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          status: 'FAILED',
+          is_historical: true,
+          refunded: false,
+          already_refunded: false,
+          refund_amount: 0,
+          order_id: payout.order_id,
+          rejection_reason: payout.rejection_reason,
+          message: 'Historical transaction created prior to automated refund activation. Wallet balance was not modified.',
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
         status: 'FAILED',
         already_refunded: true,
-        refunded: true,
+        refunded: false,
         refund_amount: totalDeducted,
         order_id: payout.order_id,
         rejection_reason: payout.rejection_reason,
-        message: `Payout Failed. The amount of ₹${totalDeducted.toFixed(2)} has been refunded to your Gateway wallet.`,
+        message: `Payout is already marked as Failed. The authoritative refund of ₹${totalDeducted.toFixed(2)} was already credited to your wallet previously.`,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -237,15 +615,35 @@ async function handleMerchantCheckOrderStatus(
     rawStatus === 'canceled' ||
     (statusCode === 400 && paynitData.success === false && rawStatus === '');
 
-  // 6. Handle SUCCESS -> Finalize State Idempotently
+  // 6. Handle SUCCESS -> Finalize State Idempotently (NEVER REFUND)
   if (isSuccess) {
-    const successEventId = `status_succ_${payoutId}_${Date.now()}`;
-    await adminClient.rpc('merchant_finalize_payout_success_rpc', {
-      p_provider_order_id: payout.provider_order_id || payout.order_id,
-      p_provider_reference_id: paynitData.order_id || paynitLookupId,
-      p_provider_event_id: successEventId,
-      p_raw_payload: paynitData,
-    }).catch((e: any) => console.warn('Merchant finalize success RPC warning:', e));
+    // Update payout status if not already success
+    await adminClient
+      .from('merchant_payouts')
+      .update({
+        status: 'SUCCESS',
+        provider_reference_id: paynitData.order_id || paynitLookupId,
+        processed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', payoutId);
+
+    // Release locked float in merchant_wallets without adding to available balance
+    const { data: mWallet } = await adminClient
+      .from('merchant_wallets')
+      .select('id, locked_payout_balance')
+      .eq('merchant_id', merchantId)
+      .maybeSingle();
+
+    if (mWallet) {
+      await adminClient
+        .from('merchant_wallets')
+        .update({
+          locked_payout_balance: Math.max(0, Number(mWallet.locked_payout_balance || 0) - totalDeducted),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', mWallet.id);
+    }
 
     return new Response(
       JSON.stringify({
@@ -262,7 +660,7 @@ async function handleMerchantCheckOrderStatus(
     );
   }
 
-  // 7. Handle PROCESSING / PENDING -> Retain Processing State
+  // 7. Handle PROCESSING / PENDING -> Retain Processing State (NEVER REFUND)
   if (isProcessing) {
     return new Response(
       JSON.stringify({
@@ -276,44 +674,34 @@ async function handleMerchantCheckOrderStatus(
     );
   }
 
-  // 8. Handle DEFINITIVE FAILED -> Safe Authoritative Wallet Refund (Maximum Once)
+  // 8. Handle DEFINITIVE FAILED -> Safe Authoritative Wallet Refund (Maximum Once, New Transactions Only)
   if (isDefinitiveFailure) {
     const rejectionReason = paynitData.message || paynitData.error || 'Payment failed at banking provider';
-    const failEventId = `status_fail_${payoutId}_${Date.now()}`;
-
     try {
-      const { data: recData, error: recErr } = await adminClient.rpc('merchant_reconcile_payout_status_rpc', {
-        p_merchant_id: merchantId,
-        p_order_id: payout.order_id,
-        p_target_status: 'FAILED',
-        p_rejection_reason: rejectionReason,
-        p_raw_payload: paynitData,
-      });
+      const refundResult = await reconcileFailedPayoutWithRefund(
+        adminClient,
+        merchantId,
+        payout,
+        rejectionReason,
+        paynitData
+      );
 
-      if (recErr || !recData?.success) {
-        await adminClient.rpc('merchant_finalize_payout_failure_rpc', {
-          p_provider_order_id: payout.provider_order_id || payout.order_id,
-          p_rejection_reason: rejectionReason,
-          p_provider_event_id: failEventId,
-          p_raw_payload: paynitData,
-        });
-      }
-    } catch (rpcErr: any) {
-      console.warn('merchant failure RPC notice:', rpcErr?.message);
+      return new Response(
+        JSON.stringify(refundResult),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } catch (refundErr: any) {
+      console.error('Safe refund reconciliation exception:', refundErr);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          status: 'FAILED',
+          order_id: payout.order_id,
+          error: refundErr?.message || 'Failed to complete wallet refund reconciliation',
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        status: 'FAILED',
-        refunded: true,
-        refund_amount: totalDeducted,
-        order_id: payout.order_id,
-        rejection_reason: rejectionReason,
-        message: `Payout Failed. The amount of ₹${totalDeducted.toFixed(2)} has been refunded to your Gateway wallet.`,
-      }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
   }
 
   // 9. Ambiguous / Unknown Provider Response -> NEVER REFUND

@@ -279,32 +279,117 @@ export const MerchantOrderStatusChecker: React.FC<MerchantOrderStatusCheckerProp
               </div>
 
               {/* Authoritative Refund Notification */}
-              <div className="p-3 bg-white border border-rose-200 rounded-md flex items-start gap-3 shadow-2xs">
-                <div className="w-7 h-7 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5 border border-emerald-100">
-                  <Coins className="w-4 h-4" />
-                </div>
-                <div className="flex-1 text-xs">
-                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span>💰 Amount refunded to your Gateway wallet</span>
-                    {result.refund_amount != null && (
-                      <span className="text-emerald-700 font-mono font-black">
-                        (+{formatCurrency(result.refund_amount)})
-                      </span>
+              {result.refunded ? (
+                <div className="p-3 bg-white border border-emerald-200 rounded-md flex items-start gap-3 shadow-2xs">
+                  <div className="w-7 h-7 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5 border border-emerald-100">
+                    <Coins className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 text-xs">
+                    <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                      <span>💰 Amount refunded to your Gateway wallet</span>
+                      {result.refund_amount != null && (
+                        <span className="text-emerald-700 font-mono font-black">
+                          (+{formatCurrency(result.refund_amount)})
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-slate-600 mt-0.5 leading-snug text-[11px]">
+                      The full locked/deducted float (Transfer Amount + Gateway Fee) has now been credited back to your Merchant Gateway wallet.
+                    </p>
+                    {result.rejection_reason && (
+                      <div className="mt-1.5 pt-1.5 border-t border-slate-100 text-[10px] text-slate-500">
+                        <span className="font-semibold text-slate-700">Provider Reason: </span>
+                        <span>{result.rejection_reason}</span>
+                      </div>
                     )}
                   </div>
-                  <p className="text-slate-600 mt-0.5 leading-snug text-[11px]">
-                    {result.already_refunded
-                      ? 'The full locked/deducted float (Transfer Amount + Gateway Fee) had already been safely refunded to your Gateway wallet.'
-                      : 'The full locked/deducted float (Transfer Amount + Gateway Fee) has now been credited back to your Merchant Gateway wallet.'}
-                  </p>
-                  {result.rejection_reason && (
-                    <div className="mt-1.5 pt-1.5 border-t border-slate-100 text-[10px] text-slate-500">
-                      <span className="font-semibold text-slate-700">Provider Reason: </span>
-                      <span>{result.rejection_reason}</span>
-                    </div>
-                  )}
                 </div>
-              </div>
+              ) : result.already_refunded ? (
+                <div className="p-3 bg-white border border-blue-200 rounded-md flex items-start gap-3 shadow-2xs">
+                  <div className="w-7 h-7 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5 border border-blue-100">
+                    <RotateCcw className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 text-xs">
+                    <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                      <span>💰 Already Refunded to Gateway Wallet</span>
+                      {result.refund_amount != null && (
+                        <span className="text-blue-700 font-mono font-black">
+                          ({formatCurrency(result.refund_amount)})
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-slate-600 mt-0.5 leading-snug text-[11px]">
+                      The full locked/deducted float (Transfer Amount + Gateway Fee) had already been safely refunded to your Gateway wallet previously.
+                    </p>
+                    {result.rejection_reason && (
+                      <div className="mt-1.5 pt-1.5 border-t border-slate-100 text-[10px] text-slate-500">
+                        <span className="font-semibold text-slate-700">Provider Reason: </span>
+                        <span>{result.rejection_reason}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : result.is_historical ? (
+                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-md flex items-start gap-3 shadow-2xs">
+                  <div className="w-7 h-7 rounded-md bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 mt-0.5 border border-amber-200">
+                    <Clock className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 text-xs">
+                    <div className="font-bold text-amber-950 flex items-center gap-1.5">
+                      <span>ℹ️ Historical Transaction</span>
+                      <span className="text-amber-800 font-mono text-[10px] font-semibold bg-amber-200/60 px-1.5 py-0.5 rounded">
+                        Pre-Automation
+                      </span>
+                    </div>
+                    <p className="text-amber-800 mt-0.5 leading-snug text-[11px]">
+                      This transaction was created prior to automated refund activation. Wallet balance was not modified. Please contact support if manual reconciliation is required.
+                    </p>
+                    {result.rejection_reason && (
+                      <div className="mt-1.5 pt-1.5 border-t border-amber-200/60 text-[10px] text-amber-900/80">
+                        <span className="font-semibold">Provider Reason: </span>
+                        <span>{result.rejection_reason}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : result.no_deduction ? (
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-md flex items-start gap-3 shadow-2xs">
+                  <div className="w-7 h-7 rounded-md bg-slate-200 text-slate-600 flex items-center justify-center shrink-0 mt-0.5 border border-slate-300">
+                    <ShieldCheck className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 text-xs">
+                    <div className="font-bold text-slate-800">
+                      ℹ️ No Wallet Deduction Recorded
+                    </div>
+                    <p className="text-slate-600 mt-0.5 leading-snug text-[11px]">
+                      No wallet funds were locked or deducted for this transaction, so ₹0.00 was refunded.
+                    </p>
+                    {result.rejection_reason && (
+                      <div className="mt-1.5 pt-1.5 border-t border-slate-200 text-[10px] text-slate-500">
+                        <span className="font-semibold text-slate-700">Provider Reason: </span>
+                        <span>{result.rejection_reason}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3 bg-white border border-rose-200 rounded-md flex items-start gap-3 shadow-2xs">
+                  <div className="w-7 h-7 rounded-md bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 mt-0.5 border border-rose-100">
+                    <AlertCircle className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 text-xs">
+                    <div className="font-bold text-slate-900">
+                      {result.message || 'Payout failed at banking provider.'}
+                    </div>
+                    {result.rejection_reason && (
+                      <div className="mt-1 text-[10px] text-slate-500">
+                        <span className="font-semibold text-slate-700">Provider Reason: </span>
+                        <span>{result.rejection_reason}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <div className="pt-2 border-t border-rose-200/60 flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div className="flex items-center gap-1.5 font-mono">

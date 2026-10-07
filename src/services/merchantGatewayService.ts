@@ -27,6 +27,8 @@ export interface MerchantOrderStatusCheckResult {
   provider_reference_id?: string;
   refunded?: boolean;
   already_refunded?: boolean;
+  is_historical?: boolean;
+  no_deduction?: boolean;
   refund_amount?: number;
   rejection_reason?: string;
   message?: string;
