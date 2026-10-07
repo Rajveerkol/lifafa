@@ -4,17 +4,18 @@ import path from 'path';
 import fs from 'fs';
 
 // Cloudflare Workers Static Assets uses native not_found_handling = "single-page-application"
-// Exclude _redirects from dist to prevent Cloudflare Error 100324 (infinite loop)
-function excludeRedirectsFromDistPlugin(): Plugin {
+// Exclude Hostinger .htaccess and problematic _redirects from dist
+function cleanCloudflareDistPlugin(): Plugin {
   return {
-    name: 'exclude-redirects-from-dist',
+    name: 'clean-cloudflare-dist',
     closeBundle() {
-      const redirectsPath = path.resolve(__dirname, 'dist/_redirects');
-      if (fs.existsSync(redirectsPath)) {
-        try {
-          fs.unlinkSync(redirectsPath);
-        } catch {
-          // ignore error if unable to delete
+      const filesToClean = ['dist/_redirects', 'dist/.htaccess'];
+      for (const relPath of filesToClean) {
+        const fullPath = path.resolve(__dirname, relPath);
+        if (fs.existsSync(fullPath)) {
+          try {
+            fs.unlinkSync(fullPath);
+          } catch {}
         }
       }
     },
@@ -23,7 +24,7 @@ function excludeRedirectsFromDistPlugin(): Plugin {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), excludeRedirectsFromDistPlugin()],
+  plugins: [react(), cleanCloudflareDistPlugin()],
   define: {
     'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(
       process.env.VITE_SUPABASE_URL || 'https://pxqyeonymwlpiklfyjbb.supabase.co'

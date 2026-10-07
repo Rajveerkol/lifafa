@@ -72,8 +72,14 @@ export function App() {
 
 
 
+  // Direct route detection for /login
+  const isLoginRoute = () => {
+    const raw = typeof window !== 'undefined' ? window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase() : '';
+    return raw === 'login' || raw === 'signin';
+  };
+
   // Modals
-  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState<boolean>(isLoginRoute);
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
   const [addMoneyModalOpen, setAddMoneyModalOpen] = useState(false);
   const [notificationDrawerOpen, setNotificationDrawerOpen] = useState(false);
@@ -108,7 +114,10 @@ export function App() {
       setClaimRouteCode(null);
 
       const raw = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
-      if (raw === 'games') {
+      if (raw === 'login' || raw === 'signin') {
+        setAuthModalOpen(true);
+        setCurrentTab('home');
+      } else if (raw === 'games') {
         setCurrentTab('merchant');
       } else if (
         [
