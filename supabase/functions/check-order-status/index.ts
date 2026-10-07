@@ -48,6 +48,14 @@ interface RefundReconciliationResult {
   message: string;
 }
 
+async function hashSecret(secret: string): Promise<string> {
+  const data = new TextEncoder().encode(secret);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 async function reconcileFailedPayoutWithRefund(
   adminClient: any,
   merchantId: string,
@@ -68,7 +76,7 @@ async function reconcileFailedPayoutWithRefund(
   if (isHistoricalPayout) {
     // Financial Safety: DO NOT modify wallet balances, DO NOT insert refund transactions
     return {
-      success: true,
+      success: false,
       status: 'FAILED',
       refunded: false,
       already_refunded: false,
@@ -76,7 +84,7 @@ async function reconcileFailedPayoutWithRefund(
       refund_amount: 0,
       order_id: payout.order_id,
       rejection_reason: rejectionReason,
-      message: 'Historical transaction created prior to automated refund activation. Wallet balance was not modified.',
+      message: 'Payment Failed',
     };
   }
 
@@ -108,14 +116,14 @@ async function reconcileFailedPayoutWithRefund(
 
   if (hasAlreadyRefunded) {
     return {
-      success: true,
+      success: false,
       status: 'FAILED',
       already_refunded: true,
       refunded: false,
       refund_amount: totalDeducted,
       order_id: payout.order_id,
       rejection_reason: payout.rejection_reason || rejectionReason,
-      message: `Payout is already marked as Failed. The authoritative refund of ₹${totalDeducted.toFixed(2)} was already credited to your wallet previously.`,
+      message: 'Payment Failed',
     };
   }
 
@@ -155,7 +163,7 @@ async function reconcileFailedPayoutWithRefund(
       .eq('id', payoutId);
 
     return {
-      success: true,
+      success: false,
       status: 'FAILED',
       refunded: false,
       already_refunded: false,
@@ -163,7 +171,7 @@ async function reconcileFailedPayoutWithRefund(
       refund_amount: 0,
       order_id: payout.order_id,
       rejection_reason: rejectionReason,
-      message: 'Payout marked as Failed. No wallet deduction was recorded for this transaction, so no refund was required.',
+      message: 'Payment Failed',
     };
   }
 
@@ -180,7 +188,7 @@ async function reconcileFailedPayoutWithRefund(
 
     if (!rpcErr && rpcRes && rpcRes.success) {
       return {
-        success: true,
+        success: false,
         status: 'FAILED',
         refunded: Boolean(rpcRes.refunded),
         already_refunded: Boolean(rpcRes.already_refunded),
@@ -189,7 +197,7 @@ async function reconcileFailedPayoutWithRefund(
         refund_amount: Number(rpcRes.refund_amount || 0),
         order_id: payout.order_id,
         rejection_reason: rejectionReason,
-        message: rpcRes.message || `Payout Failed. The authoritative amount of ₹${totalDeducted.toFixed(2)} has been refunded to your Gateway wallet.`,
+        message: 'Payment Failed',
       };
     }
   } catch (rpcCallErr: any) {
@@ -375,14 +383,14 @@ async function reconcileFailedPayoutWithRefund(
     .catch((evtErr: any) => console.warn('payout event insert warning:', evtErr?.message));
 
   return {
-    success: true,
+    success: false,
     status: 'FAILED',
     refunded: true,
     already_refunded: false,
     refund_amount: totalDeducted,
     order_id: payout.order_id,
     rejection_reason: rejectionReason,
-    message: `Payout Failed. The authoritative amount of ₹${totalDeducted.toFixed(2)} has been refunded to your Gateway wallet.`,
+    message: 'Payment Failed',
   };
 }
 
@@ -408,53 +416,132 @@ serve(async (req: Request) => {
 
     if (!supabaseUrl || !serviceRoleKey) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Server configuration error: missing database credentials' }),
+        JSON.stringify({ success: false, message: 'Server configuration error: missing database credentials' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     if (!paynitApiKey || !paynitApiSecret) {
       return new Response(
-        JSON.stringify({ success: false, error: 'PayNit provider credentials not configured on server' }),
+        JSON.stringify({ success: false, message: 'PayNit provider credentials not configured on server' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // 1. Authenticate Caller
-    const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
-    if (!authHeader || !/^Bearer\s+/i.test(authHeader)) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Missing or invalid Authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
-    const { data: { user }, error: authError } = await adminClient.auth.getUser(token);
 
-    if (authError || !user) {
+    // 1. Authenticate Caller (Dual Auth: API Key OR Bearer Session)
+    let merchantId: string | null = null;
+    const clientIdHeader = req.headers.get('X-Client-Id') || req.headers.get('x-client-id');
+    const clientSecretHeader = req.headers.get('X-Client-Secret') || req.headers.get('x-client-secret');
+    const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
+
+    const clientIp = (
+      req.headers.get('x-forwarded-for')?.split(',')[0] ||
+      req.headers.get('cf-connecting-ip') ||
+      '127.0.0.1'
+    ).trim();
+
+    if (clientIdHeader && clientSecretHeader) {
+      // API Key Authentication Path
+      const secretHash = await hashSecret(clientSecretHeader.trim());
+
+      const { data: keyRecord, error: keyErr } = await adminClient
+        .from('merchant_api_keys')
+        .select('merchant_id, client_secret_hash, is_active')
+        .eq('client_id', clientIdHeader.trim())
+        .maybeSingle();
+
+      if (keyErr || !keyRecord || !keyRecord.is_active || keyRecord.client_secret_hash !== secretHash) {
+        return new Response(
+          JSON.stringify({ success: false, message: 'Invalid API credentials' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      merchantId = keyRecord.merchant_id;
+
+      // Verify merchant is ACTIVE and has PAID setup fee
+      const { data: mchAuthRecord } = await adminClient
+        .from('merchants')
+        .select('id, status, setup_fee_status')
+        .eq('id', merchantId)
+        .maybeSingle();
+
+      if (!mchAuthRecord || mchAuthRecord.status !== 'ACTIVE' || mchAuthRecord.setup_fee_status !== 'PAID') {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            message: 'Merchant Gateway is not active. Account must be approved with PAID setup fee prior to API dispatch.',
+          }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // IP Whitelist Check
+      const { data: whitelist } = await adminClient
+        .from('merchant_ip_whitelist')
+        .select('ip_address')
+        .eq('merchant_id', merchantId);
+
+      if (whitelist && whitelist.length > 0) {
+        const allowed = whitelist.some((entry: any) => String(entry.ip_address).trim() === clientIp);
+        if (!allowed) {
+          return new Response(
+            JSON.stringify({ success: false, message: `Forbidden: Client IP ${clientIp} is not authorized for this merchant` }),
+            { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+
+      // Update last_used_at on API key
+      await adminClient
+        .from('merchant_api_keys')
+        .update({ last_used_at: new Date().toISOString() })
+        .eq('client_id', clientIdHeader.trim());
+
+    } else if (authHeader && /^Bearer\s+/i.test(authHeader)) {
+      // Browser Bearer JWT Authentication Path
+      const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+      const { data: { user }, error: userErr } = await adminClient.auth.getUser(token);
+
+      if (userErr || !user) {
+        return new Response(
+          JSON.stringify({ success: false, message: 'Invalid API credentials' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const { data: merchantRecord } = await adminClient
+        .from('merchants')
+        .select('id, user_id, status, setup_fee_status')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!merchantRecord || merchantRecord.status !== 'ACTIVE' || merchantRecord.setup_fee_status !== 'PAID') {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            message: 'No active approved merchant account associated with this session. Setup fee must be PAID and account approved by admin.',
+          }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      merchantId = merchantRecord.id;
+    } else {
       return new Response(
-        JSON.stringify({ success: false, error: 'Unauthorized: Session invalid or expired' }),
+        JSON.stringify({ success: false, message: 'Invalid API credentials' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Resolve authenticated merchant record
-    const { data: merchantRecord } = await adminClient
-      .from('merchants')
-      .select('id, user_id, status')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    if (!merchantRecord) {
+    if (!merchantId) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Transaction not found.' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: false, message: 'Invalid API credentials' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    const merchantId = merchantRecord.id;
 
     // 2. Rate Limiting (10 requests/minute per merchant)
     const now = Date.now();
@@ -465,7 +552,7 @@ serve(async (req: Request) => {
         return new Response(
           JSON.stringify({
             success: false,
-            error: 'Too many status check requests. Please wait a minute before checking again.',
+            message: 'Too many status check requests. Please wait a minute before checking again.',
           }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
@@ -481,7 +568,7 @@ serve(async (req: Request) => {
       body = await req.json();
     } catch {
       return new Response(
-        JSON.stringify({ success: false, error: 'Invalid JSON request payload' }),
+        JSON.stringify({ success: false, message: 'Invalid JSON request payload' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -489,7 +576,7 @@ serve(async (req: Request) => {
     const rawOrderId = body?.order_id || body?.orderId;
     if (!rawOrderId || typeof rawOrderId !== 'string') {
       return new Response(
-        JSON.stringify({ success: false, error: 'Order ID is required.' }),
+        JSON.stringify({ success: false, message: 'Order ID is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -497,7 +584,7 @@ serve(async (req: Request) => {
     const cleanOrderId = rawOrderId.trim();
     if (cleanOrderId.length < 3 || cleanOrderId.length > 100 || !/^[a-zA-Z0-9_\-\.:]{3,100}$/.test(cleanOrderId)) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Invalid Order ID format. Please check the ID and try again.' }),
+        JSON.stringify({ success: false, message: 'Invalid Order ID format. Please check the ID and try again.' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -525,7 +612,7 @@ serve(async (req: Request) => {
       return new Response(
         JSON.stringify({
           success: false,
-          error: 'Transaction not found.',
+          message: 'Transaction not found',
         }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -547,13 +634,15 @@ serve(async (req: Request) => {
       return new Response(
         JSON.stringify({
           success: true,
-          status: 'SUCCESS',
           order_id: payout.order_id,
+          status: 'SUCCESS',
+          message: 'Payment Completed',
           amount: payoutAmount,
+          payout_method: payout.payout_method || 'UPI',
+          upi_id: payout.upi_id || '',
+          utr: payout.provider_reference_id || payout.provider_order_id || '',
           fee: feeAmount,
           total_deducted: totalDeducted,
-          provider_reference_id: payout.provider_reference_id,
-          message: 'Payment Successful. Payout has been completed by the banking network.',
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -563,15 +652,15 @@ serve(async (req: Request) => {
       if (isHistoricalPayout) {
         return new Response(
           JSON.stringify({
-            success: true,
+            success: false,
+            order_id: payout.order_id,
             status: 'FAILED',
+            message: 'Payment Failed',
             is_historical: true,
             refunded: false,
             already_refunded: false,
             refund_amount: 0,
-            order_id: payout.order_id,
-            rejection_reason: payout.rejection_reason,
-            message: 'Historical transaction created prior to automated refund activation. Wallet balance was not modified.',
+            rejection_reason: payout.rejection_reason || 'Payment failed at banking provider',
           }),
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
@@ -579,14 +668,14 @@ serve(async (req: Request) => {
 
       return new Response(
         JSON.stringify({
-          success: true,
+          success: false,
+          order_id: payout.order_id,
           status: 'FAILED',
+          message: 'Payment Failed',
           already_refunded: true,
           refunded: false,
           refund_amount: totalDeducted,
-          order_id: payout.order_id,
-          rejection_reason: payout.rejection_reason,
-          message: `Payout is already marked as Failed. The authoritative refund of ₹${totalDeducted.toFixed(2)} was already credited to your wallet previously.`,
+          rejection_reason: payout.rejection_reason || 'Payment failed at banking provider',
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -638,11 +727,10 @@ serve(async (req: Request) => {
       // FINANCIAL SAFETY RULE: On timeout, network failure, or abort, NEVER auto-refund!
       return new Response(
         JSON.stringify({
-          success: false,
-          status: 'PROCESSING',
+          success: true,
           order_id: payout.order_id,
-          amount: payoutAmount,
-          message: 'Unable to confirm the final status. Please try again later.',
+          status: 'PROCESSING',
+          message: 'Payment is still processing',
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -654,11 +742,10 @@ serve(async (req: Request) => {
       // Upstream 5xx: State is uncertain -> DO NOT refund
       return new Response(
         JSON.stringify({
-          success: false,
-          status: 'PROCESSING',
+          success: true,
           order_id: payout.order_id,
-          amount: payoutAmount,
-          message: 'Unable to confirm the final status. Please try again later.',
+          status: 'PROCESSING',
+          message: 'Payment is still processing',
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -684,11 +771,13 @@ serve(async (req: Request) => {
 
     // 8. Handle SUCCESS -> Finalize State Idempotently (NEVER REFUND)
     if (isSuccess) {
+      const utr = paynitData.order_id || payout.provider_reference_id || paynitLookupId || '';
+
       await adminClient
         .from('merchant_payouts')
         .update({
           status: 'SUCCESS',
-          provider_reference_id: paynitData.order_id || paynitLookupId,
+          provider_reference_id: utr,
           processed_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
@@ -714,13 +803,15 @@ serve(async (req: Request) => {
       return new Response(
         JSON.stringify({
           success: true,
-          status: 'SUCCESS',
           order_id: payout.order_id,
+          status: 'SUCCESS',
+          message: 'Payment Completed',
           amount: payoutAmount,
+          payout_method: payout.payout_method || 'UPI',
+          upi_id: payout.upi_id || '',
+          utr: utr,
           fee: feeAmount,
           total_deducted: totalDeducted,
-          provider_reference_id: paynitData.order_id || paynitLookupId,
-          message: 'Payment Successful. Payout has been completed by the banking network.',
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -731,10 +822,9 @@ serve(async (req: Request) => {
       return new Response(
         JSON.stringify({
           success: true,
-          status: 'PROCESSING',
           order_id: payout.order_id,
-          amount: payoutAmount,
-          message: 'Transaction is still processing.',
+          status: 'PROCESSING',
+          message: 'Payment is still processing',
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -761,8 +851,9 @@ serve(async (req: Request) => {
         return new Response(
           JSON.stringify({
             success: false,
-            status: 'FAILED',
             order_id: payout.order_id,
+            status: 'FAILED',
+            message: 'Payment Failed',
             error: refundErr?.message || 'Failed to complete wallet refund reconciliation',
           }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -773,17 +864,17 @@ serve(async (req: Request) => {
     // 11. Ambiguous / Unknown Provider Response -> NEVER REFUND
     return new Response(
       JSON.stringify({
-        success: false,
-        status: 'UNKNOWN',
+        success: true,
         order_id: payout.order_id,
-        message: 'Unable to confirm status. Please try again later.',
+        status: 'PROCESSING',
+        message: 'Payment is still processing',
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (err: any) {
     console.error('check-order-status error:', err);
     return new Response(
-      JSON.stringify({ success: false, error: 'Internal server error while checking status' }),
+      JSON.stringify({ success: false, message: 'Internal server error while checking status' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

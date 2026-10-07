@@ -60,6 +60,7 @@ import { MerchantNewPayoutModal } from '../components/merchant/MerchantNewPayout
 import { MerchantApiKeysManager } from '../components/merchant/MerchantApiKeysManager';
 import { MerchantIpWhitelistManager } from '../components/merchant/MerchantIpWhitelistManager';
 import { MerchantOrderStatusChecker } from '../components/merchant/MerchantOrderStatusChecker';
+import { MerchantApiDocumentation } from '../components/merchant/MerchantApiDocumentation';
 
 export type MerchantNavSection =
   | 'dashboard'
@@ -205,8 +206,6 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
   const [payoutSuccessMsg, setPayoutSuccessMsg] = useState<string | null>(null);
   const [payoutErrorMsg, setPayoutErrorMsg] = useState<string | null>(null);
 
-  // API Docs copy state
-  const [copiedCurl, setCopiedCurl] = useState<boolean>(false);
 
   // Webhook URL in profile
   const [webhookUrl, setWebhookUrl] = useState<string>('https://api.yourdomain.com/webhooks/lifafa');
@@ -300,23 +299,6 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
     setTimeout(() => setCopiedUpi(false), 2000);
   };
 
-  const handleCopyCurl = () => {
-    const curlCommand = `curl -X POST https://pxqyeonymwlpiklfyjbb.supabase.co/functions/v1/merchant-paynit-payout \\
-  -H "Content-Type: application/json" \\
-  -H "X-Client-Id: your_client_id" \\
-  -H "X-Client-Secret: your_client_secret" \\
-  -H "X-Idempotency-Key: ${Date.now()}" \\
-  -d '{
-    "order_id": "ord_1001",
-    "amount": 250.00,
-    "payout_method": "UPI",
-    "upi_id": "beneficiary@upi",
-    "note": "Merchant Payout"
-  }'`;
-    navigator.clipboard.writeText(curlCommand);
-    setCopiedCurl(true);
-    setTimeout(() => setCopiedCurl(false), 2000);
-  };
 
   // Inline Deposit Submission
   const handleInlineDepositSubmit = async (e: React.FormEvent) => {
@@ -2063,109 +2045,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
           {/* SECTION 9: API DOCUMENTATION                             */}
           {/* ======================================================== */}
           {activeSection === 'api-docs' && (
-            <div className="space-y-6">
-              <div className="bg-white rounded-lg border border-slate-200 shadow-xs p-5 sm:p-6 space-y-6">
-                <div>
-                  <span className="inline-flex items-center text-[10px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 uppercase tracking-wider mb-2">
-                    REST API Specification v1.0
-                  </span>
-                  <h3 className="text-base font-semibold text-slate-900">Developer API Integration</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Programmatically initiate automated disbursements from your ERP or custom backend
-                  </p>
-                </div>
-
-                {/* Base URL and headers */}
-                <div className="space-y-3">
-                  <div className="p-3 bg-slate-900 text-slate-100 rounded-md font-mono text-xs space-y-2">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                      <span className="text-slate-400">Endpoint:</span>
-                      <span className="text-emerald-400 font-semibold">
-                        POST https://pxqyeonymwlpiklfyjbb.supabase.co/functions/v1/merchant-paynit-payout
-                      </span>
-                    </div>
-                    <div className="space-y-1 text-slate-300 text-[11px]">
-                      <div className="text-slate-400 font-semibold">Required Headers:</div>
-                      <div>X-Client-Id: &lt;YOUR_API_CLIENT_ID&gt;</div>
-                      <div>X-Client-Secret: &lt;YOUR_API_CLIENT_SECRET&gt;</div>
-                      <div>X-Idempotency-Key: &lt;UNIQUE_TRANSACTION_KEY&gt;</div>
-                      <div>Content-Type: application/json</div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end">
-                    <button
-                      onClick={handleCopyCurl}
-                      className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 cursor-pointer"
-                    >
-                      {copiedCurl ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{copiedCurl ? 'cURL Copied!' : 'Copy cURL Command'}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Fee Schedule Table */}
-                <div className="space-y-2">
-                  <h4 className="text-xs font-semibold text-slate-900">Authoritative Flat Fee Structure</h4>
-                  <div className="overflow-x-auto border border-slate-200 rounded-md">
-                    <table className="w-full text-xs text-left border-collapse">
-                      <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
-                        <tr>
-                          <th className="p-2.5">Payout Rail</th>
-                          <th className="p-2.5">Amount Range</th>
-                          <th className="p-2.5">Provider Payout Fee</th>
-                          <th className="p-2.5">Float Deduction</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 text-slate-700">
-                        <tr>
-                          <td className="p-2.5 font-semibold text-blue-700">UPI (VPA)</td>
-                          <td className="p-2.5 font-mono">₹1.00 &ndash; ₹1,000.00</td>
-                          <td className="p-2.5 font-mono font-semibold text-amber-700">₹2.50</td>
-                          <td className="p-2.5 font-mono">Principal + ₹2.50</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {/* JSON Request Schema */}
-                <div className="space-y-2">
-                  <h4 className="text-xs font-semibold text-slate-900">UPI Request Body Schema (Exclusive Rail)</h4>
-                  <pre className="bg-slate-900 p-3.5 rounded-md text-[11px] font-mono text-slate-200 overflow-x-auto border border-slate-800">
-{`{
-  "order_id": "ord_1001",
-  "amount": 250.00,
-  "payout_method": "UPI",
-  "upi_id": "beneficiary@upi",
-  "note": "Optional remark"
-}`}
-                  </pre>
-                  <p className="text-[11px] text-slate-500">
-                    All merchant payouts are strictly processed via PayNit Instant UPI. Bank account (IMPS) parameters are not accepted.
-                  </p>
-                </div>
-
-                {/* Lifecycle HTTP Codes */}
-                <div className="space-y-2">
-                  <h4 className="text-xs font-semibold text-slate-900">HTTP Response Lifecycle Codes</h4>
-                  <div className="space-y-2 text-xs">
-                    <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-md">
-                      <strong className="text-emerald-900">HTTP 200 OK: SUCCESS (Payment Completed)</strong>
-                      <p className="text-[11px] text-emerald-800 mt-0.5">
-                        Payout successfully disbursed and marked Payment Completed. Float balance finalized.
-                      </p>
-                    </div>
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                      <strong className="text-red-900">HTTP 400 Bad Request / 402 Insufficient Funds</strong>
-                      <p className="text-[11px] text-red-800 mt-0.5">
-                        Request rejected (e.g. invalid IFSC, insufficient float). Float unlocked immediately.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <MerchantApiDocumentation />
           )}
 
           {/* ======================================================== */}

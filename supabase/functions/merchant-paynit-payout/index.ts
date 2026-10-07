@@ -73,7 +73,7 @@ async function reconcileFailedPayoutWithRefund(
   if (isHistoricalPayout) {
     // Financial Safety: DO NOT modify wallet balances, DO NOT insert refund transactions
     return {
-      success: true,
+      success: false,
       status: 'FAILED',
       refunded: false,
       already_refunded: false,
@@ -81,7 +81,7 @@ async function reconcileFailedPayoutWithRefund(
       refund_amount: 0,
       order_id: payout.order_id,
       rejection_reason: rejectionReason,
-      message: 'Historical transaction created prior to automated refund activation. Wallet balance was not modified.',
+      message: 'Payment Failed',
     };
   }
 
@@ -113,14 +113,14 @@ async function reconcileFailedPayoutWithRefund(
 
   if (hasAlreadyRefunded) {
     return {
-      success: true,
+      success: false,
       status: 'FAILED',
       already_refunded: true,
       refunded: false,
       refund_amount: totalDeducted,
       order_id: payout.order_id,
       rejection_reason: payout.rejection_reason || rejectionReason,
-      message: `Payout is already marked as Failed. The authoritative refund of ₹${totalDeducted.toFixed(2)} was already credited to your wallet previously.`,
+      message: 'Payment Failed',
     };
   }
 
@@ -160,7 +160,7 @@ async function reconcileFailedPayoutWithRefund(
       .eq('id', payoutId);
 
     return {
-      success: true,
+      success: false,
       status: 'FAILED',
       refunded: false,
       already_refunded: false,
@@ -168,7 +168,7 @@ async function reconcileFailedPayoutWithRefund(
       refund_amount: 0,
       order_id: payout.order_id,
       rejection_reason: rejectionReason,
-      message: 'Payout marked as Failed. No wallet deduction was recorded for this transaction, so no refund was required.',
+      message: 'Payment Failed',
     };
   }
 
@@ -185,7 +185,7 @@ async function reconcileFailedPayoutWithRefund(
 
     if (!rpcErr && rpcRes && rpcRes.success) {
       return {
-        success: true,
+        success: false,
         status: 'FAILED',
         refunded: Boolean(rpcRes.refunded),
         already_refunded: Boolean(rpcRes.already_refunded),
@@ -194,7 +194,7 @@ async function reconcileFailedPayoutWithRefund(
         refund_amount: Number(rpcRes.refund_amount || 0),
         order_id: payout.order_id,
         rejection_reason: rejectionReason,
-        message: rpcRes.message || `Payout Failed. The authoritative amount of ₹${totalDeducted.toFixed(2)} has been refunded to your Gateway wallet.`,
+        message: 'Payment Failed',
       };
     }
   } catch (rpcCallErr: any) {
@@ -380,14 +380,14 @@ async function reconcileFailedPayoutWithRefund(
     .catch((evtErr: any) => console.warn('payout event insert warning:', evtErr?.message));
 
   return {
-    success: true,
+    success: false,
     status: 'FAILED',
     refunded: true,
     already_refunded: false,
     refund_amount: totalDeducted,
     order_id: payout.order_id,
     rejection_reason: rejectionReason,
-    message: `Payout Failed. The authoritative amount of ₹${totalDeducted.toFixed(2)} has been refunded to your Gateway wallet.`,
+    message: 'Payment Failed',
   };
 }
 
@@ -422,7 +422,7 @@ async function handleMerchantCheckOrderStatus(
   const rawOrderId = body?.order_id || body?.orderId;
   if (!rawOrderId || typeof rawOrderId !== 'string') {
     return new Response(
-      JSON.stringify({ success: false, error: 'Order ID is required.' }),
+      JSON.stringify({ success: false, message: 'Order ID is required' }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
@@ -430,7 +430,7 @@ async function handleMerchantCheckOrderStatus(
   const cleanOrderId = rawOrderId.trim();
   if (cleanOrderId.length < 3 || cleanOrderId.length > 100 || !/^[a-zA-Z0-9_\-\.:]{3,100}$/.test(cleanOrderId)) {
     return new Response(
-      JSON.stringify({ success: false, error: 'Invalid Order ID format. Please check the ID and try again.' }),
+      JSON.stringify({ success: false, message: 'Invalid Order ID format. Please check the ID and try again.' }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
@@ -458,7 +458,7 @@ async function handleMerchantCheckOrderStatus(
     return new Response(
       JSON.stringify({
         success: false,
-        error: 'Transaction not found.',
+        message: 'Transaction not found',
       }),
       { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -480,13 +480,15 @@ async function handleMerchantCheckOrderStatus(
     return new Response(
       JSON.stringify({
         success: true,
-        status: 'SUCCESS',
         order_id: payout.order_id,
+        status: 'SUCCESS',
+        message: 'Payment Completed',
         amount: payoutAmount,
+        payout_method: payout.payout_method || 'UPI',
+        upi_id: payout.upi_id || '',
+        utr: payout.provider_reference_id || payout.provider_order_id || '',
         fee: feeAmount,
         total_deducted: totalDeducted,
-        provider_reference_id: payout.provider_reference_id,
-        message: 'Payment Successful. Payout has been completed by the banking network.',
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -496,15 +498,15 @@ async function handleMerchantCheckOrderStatus(
     if (isHistoricalPayout) {
       return new Response(
         JSON.stringify({
-          success: true,
+          success: false,
+          order_id: payout.order_id,
           status: 'FAILED',
+          message: 'Payment Failed',
           is_historical: true,
           refunded: false,
           already_refunded: false,
           refund_amount: 0,
-          order_id: payout.order_id,
-          rejection_reason: payout.rejection_reason,
-          message: 'Historical transaction created prior to automated refund activation. Wallet balance was not modified.',
+          rejection_reason: payout.rejection_reason || 'Payment failed at banking provider',
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -512,14 +514,14 @@ async function handleMerchantCheckOrderStatus(
 
     return new Response(
       JSON.stringify({
-        success: true,
+        success: false,
+        order_id: payout.order_id,
         status: 'FAILED',
+        message: 'Payment Failed',
         already_refunded: true,
         refunded: false,
         refund_amount: totalDeducted,
-        order_id: payout.order_id,
-        rejection_reason: payout.rejection_reason,
-        message: `Payout is already marked as Failed. The authoritative refund of ₹${totalDeducted.toFixed(2)} was already credited to your wallet previously.`,
+        rejection_reason: payout.rejection_reason || 'Payment failed at banking provider',
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -571,11 +573,10 @@ async function handleMerchantCheckOrderStatus(
     // FINANCIAL SAFETY RULE: On timeout, network failure, or abort, NEVER auto-refund!
     return new Response(
       JSON.stringify({
-        success: false,
-        status: 'PROCESSING',
+        success: true,
         order_id: payout.order_id,
-        amount: payoutAmount,
-        message: 'Unable to confirm the final status. Please try again later.',
+        status: 'PROCESSING',
+        message: 'Payment is still processing',
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -587,11 +588,10 @@ async function handleMerchantCheckOrderStatus(
     // Upstream 5xx: State is uncertain -> DO NOT refund
     return new Response(
       JSON.stringify({
-        success: false,
-        status: 'PROCESSING',
+        success: true,
         order_id: payout.order_id,
-        amount: payoutAmount,
-        message: 'Unable to confirm the final status. Please try again later.',
+        status: 'PROCESSING',
+        message: 'Payment is still processing',
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -617,12 +617,14 @@ async function handleMerchantCheckOrderStatus(
 
   // 6. Handle SUCCESS -> Finalize State Idempotently (NEVER REFUND)
   if (isSuccess) {
+    const utr = paynitData.order_id || payout.provider_reference_id || paynitLookupId || '';
+
     // Update payout status if not already success
     await adminClient
       .from('merchant_payouts')
       .update({
         status: 'SUCCESS',
-        provider_reference_id: paynitData.order_id || paynitLookupId,
+        provider_reference_id: utr,
         processed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
@@ -648,13 +650,15 @@ async function handleMerchantCheckOrderStatus(
     return new Response(
       JSON.stringify({
         success: true,
-        status: 'SUCCESS',
         order_id: payout.order_id,
+        status: 'SUCCESS',
+        message: 'Payment Completed',
         amount: payoutAmount,
+        payout_method: payout.payout_method || 'UPI',
+        upi_id: payout.upi_id || '',
+        utr: utr,
         fee: feeAmount,
         total_deducted: totalDeducted,
-        provider_reference_id: paynitData.order_id || paynitLookupId,
-        message: 'Payment Successful. Payout has been completed by the banking network.',
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -665,10 +669,9 @@ async function handleMerchantCheckOrderStatus(
     return new Response(
       JSON.stringify({
         success: true,
-        status: 'PROCESSING',
         order_id: payout.order_id,
-        amount: payoutAmount,
-        message: 'Transaction is still processing.',
+        status: 'PROCESSING',
+        message: 'Payment is still processing',
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -695,8 +698,9 @@ async function handleMerchantCheckOrderStatus(
       return new Response(
         JSON.stringify({
           success: false,
-          status: 'FAILED',
           order_id: payout.order_id,
+          status: 'FAILED',
+          message: 'Payment Failed',
           error: refundErr?.message || 'Failed to complete wallet refund reconciliation',
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -707,10 +711,10 @@ async function handleMerchantCheckOrderStatus(
   // 9. Ambiguous / Unknown Provider Response -> NEVER REFUND
   return new Response(
     JSON.stringify({
-      success: false,
-      status: 'UNKNOWN',
+      success: true,
       order_id: payout.order_id,
-      message: 'Unable to confirm status. Please try again later.',
+      status: 'PROCESSING',
+      message: 'Payment is still processing',
     }),
     { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   );
