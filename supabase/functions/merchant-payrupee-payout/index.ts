@@ -182,6 +182,52 @@ serve(async (req: Request) => {
       );
     }
 
+    // Determine if request is a Status Check vs Payout Initiation
+    const isStatusCheck =
+      body.action === 'check_order_status' ||
+      body.action === 'status' ||
+      body.action === 'check_status' ||
+      (Boolean(body.order_id || body.orderId) &&
+        (body.amount === undefined || body.amount === null || isNaN(Number(body.amount))) &&
+        !body.upi_id &&
+        !body.recipient &&
+        !body.account_number);
+
+    if (isStatusCheck) {
+      const cleanOrderId = String(body.order_id || body.orderId || '').trim();
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanOrderId);
+      let mQuery = adminClient
+        .from('merchant_payouts')
+        .select('*')
+        .eq('merchant_id', merchantId);
+      if (isUuid) {
+        mQuery = mQuery.or(`order_id.eq.${cleanOrderId},provider_order_id.eq.${cleanOrderId},provider_reference_id.eq.${cleanOrderId},id.eq.${cleanOrderId}`);
+      } else {
+        mQuery = mQuery.or(`order_id.eq.${cleanOrderId},provider_order_id.eq.${cleanOrderId},provider_reference_id.eq.${cleanOrderId}`);
+      }
+      const { data: payouts } = await mQuery.order('created_at', { ascending: false }).limit(1);
+      const payout = payouts?.[0];
+      if (!payout) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Transaction not found.' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      return new Response(
+        JSON.stringify({
+          success: true,
+          status: payout.status,
+          order_id: payout.order_id,
+          amount: Number(payout.amount),
+          fee: Number(payout.fee_amount || 2.50),
+          total_deducted: Number(payout.total_deducted || payout.amount),
+          provider_reference_id: payout.provider_reference_id,
+          message: `Payout status is ${payout.status}`,
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const orderId = String(body.order_id || body.orderId || `m_ord_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`).trim();
     const amount = Number(body.amount);
     const note = String(body.note || body.description || 'Merchant payout').trim().slice(0, 100);

@@ -88,12 +88,13 @@ async function handleMerchantCheckOrderStatus(
     .eq('merchant_id', merchantId);
 
   if (isUuid) {
-    mQuery = mQuery.or(`order_id.eq.${cleanOrderId},provider_order_id.eq.${cleanOrderId},provider_reference_id.eq.${cleanOrderId},id.eq.${cleanOrderId}`);
+    mQuery = mQuery.or(`order_id.eq.${cleanOrderId},provider_order_id.eq.${cleanOrderId},provider_reference_id.eq.${cleanOrderId},id.eq.${cleanOrderId},order_id.ilike.${cleanOrderId},provider_reference_id.ilike.${cleanOrderId}`);
   } else {
-    mQuery = mQuery.or(`order_id.eq.${cleanOrderId},provider_order_id.eq.${cleanOrderId},provider_reference_id.eq.${cleanOrderId}`);
+    mQuery = mQuery.or(`order_id.eq.${cleanOrderId},provider_order_id.eq.${cleanOrderId},provider_reference_id.eq.${cleanOrderId},order_id.ilike.${cleanOrderId},provider_reference_id.ilike.${cleanOrderId}`);
   }
 
-  const { data: payout, error: pErr } = await mQuery.maybeSingle();
+  const { data: payouts, error: pErr } = await mQuery.order('created_at', { ascending: false }).limit(1);
+  const payout = payouts && payouts.length > 0 ? payouts[0] : null;
 
   // Strict Data Isolation / Anti-Enumeration Protection:
   // If not found or belongs to another merchant, return generic 404 with ZERO data leakage
@@ -147,7 +148,9 @@ async function handleMerchantCheckOrderStatus(
   }
 
   // 4. Query Real PayNit Provider Status API Server-Side
-  const paynitLookupId = payout.provider_reference_id || payout.provider_order_id || payout.order_id || cleanOrderId;
+  const paynitLookupId = (cleanOrderId.toUpperCase().startsWith('PN'))
+    ? cleanOrderId
+    : (payout.provider_reference_id || payout.provider_order_id || payout.order_id || cleanOrderId);
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
@@ -489,7 +492,22 @@ serve(async (req: Request) => {
     }
 
     // 2.a. Merchant Order ID Status Check & Safe Reconcile Action
-    if (body.action === 'check_order_status') {
+    // CRITICAL: Strictly isolate status check from payout initiation!
+    // A status check request requires ONLY: { "order_id": "<ORDER_ID>" }
+    // It must NEVER require payout amount, amount > 0, recipient, or fees.
+    const isStatusCheck =
+      body.action === 'check_order_status' ||
+      body.action === 'status' ||
+      body.action === 'check_status' ||
+      body.action === 'order_status' ||
+      body.action === 'lookup' ||
+      (Boolean(body.order_id || body.orderId) &&
+        (body.amount === undefined || body.amount === null || isNaN(Number(body.amount))) &&
+        !body.upi_id &&
+        !body.recipient &&
+        !body.account_number);
+
+    if (isStatusCheck) {
       return await handleMerchantCheckOrderStatus(
         adminClient,
         merchantId,

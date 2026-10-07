@@ -603,8 +603,8 @@ export const merchantGatewayService = {
       const response = await supabase.functions.invoke('merchant-paynit-payout', {
         headers: { Authorization: `Bearer ${token}` },
         body: {
-          action: 'check_order_status',
           order_id: cleanOrderId,
+          action: 'check_order_status',
         },
       });
 
@@ -618,6 +618,82 @@ export const merchantGatewayService = {
           response.response,
           response.data
         );
+
+        // Resilient fallback: If deployed Edge Function returns payout amount validation error
+        // (due to older cloud deployment version before status-check handler was merged),
+        // resolve authoritative status from the authenticated merchant's payout database record
+        if (errorMsg.includes('payout amount') || errorMsg.includes('greater than zero')) {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { data: merchant } = await supabase
+              .from('merchants')
+              .select('id')
+              .eq('user_id', user.id)
+              .maybeSingle();
+
+            if (merchant) {
+              const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanOrderId);
+              let mQuery = supabase
+                .from('merchant_payouts')
+                .select('*')
+                .eq('merchant_id', merchant.id);
+
+              if (isUuid) {
+                mQuery = mQuery.or(`order_id.eq.${cleanOrderId},provider_order_id.eq.${cleanOrderId},provider_reference_id.eq.${cleanOrderId},id.eq.${cleanOrderId},order_id.ilike.${cleanOrderId},provider_reference_id.ilike.${cleanOrderId}`);
+              } else {
+                mQuery = mQuery.or(`order_id.eq.${cleanOrderId},provider_order_id.eq.${cleanOrderId},provider_reference_id.eq.${cleanOrderId},order_id.ilike.${cleanOrderId},provider_reference_id.ilike.${cleanOrderId}`);
+              }
+
+              const { data: payouts } = await mQuery.order('created_at', { ascending: false }).limit(1);
+              const payout = payouts?.[0];
+
+              if (payout) {
+                const dbStatus = String(payout.status || '').toUpperCase();
+                const amt = Number(payout.amount);
+                const fee = Number(payout.fee_amount != null ? payout.fee_amount : 2.50);
+                const total = Number(payout.total_deducted != null ? payout.total_deducted : amt + fee);
+
+                if (dbStatus === 'SUCCESS') {
+                  return {
+                    success: true,
+                    status: 'SUCCESS',
+                    order_id: payout.order_id,
+                    amount: amt,
+                    fee,
+                    total_deducted: total,
+                    provider_reference_id: payout.provider_reference_id,
+                    message: 'Payment Successful. Payout has been completed by the banking network.',
+                  };
+                }
+
+                if (dbStatus === 'FAILED' || dbStatus === 'REVERSED') {
+                  return {
+                    success: true,
+                    status: 'FAILED',
+                    already_refunded: true,
+                    refunded: true,
+                    refund_amount: total,
+                    order_id: payout.order_id,
+                    rejection_reason: payout.rejection_reason,
+                    message: `Payout Failed. The amount of ₹${total.toFixed(2)} has been refunded to your Gateway wallet.`,
+                  };
+                }
+
+                return {
+                  success: true,
+                  status: 'PROCESSING',
+                  order_id: payout.order_id,
+                  amount: amt,
+                  fee,
+                  total_deducted: total,
+                  provider_reference_id: payout.provider_reference_id,
+                  message: 'Transaction is currently processing with the payout provider.',
+                };
+              }
+            }
+          }
+        }
+
         throw new Error(errorMsg);
       }
 

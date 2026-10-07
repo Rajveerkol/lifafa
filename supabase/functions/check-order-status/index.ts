@@ -154,12 +154,13 @@ serve(async (req: Request) => {
       .eq('merchant_id', merchantId);
 
     if (isUuid) {
-      mQuery = mQuery.or(`order_id.eq.${cleanOrderId},provider_order_id.eq.${cleanOrderId},provider_reference_id.eq.${cleanOrderId},id.eq.${cleanOrderId}`);
+      mQuery = mQuery.or(`order_id.eq.${cleanOrderId},provider_order_id.eq.${cleanOrderId},provider_reference_id.eq.${cleanOrderId},id.eq.${cleanOrderId},order_id.ilike.${cleanOrderId},provider_reference_id.ilike.${cleanOrderId}`);
     } else {
-      mQuery = mQuery.or(`order_id.eq.${cleanOrderId},provider_order_id.eq.${cleanOrderId},provider_reference_id.eq.${cleanOrderId}`);
+      mQuery = mQuery.or(`order_id.eq.${cleanOrderId},provider_order_id.eq.${cleanOrderId},provider_reference_id.eq.${cleanOrderId},order_id.ilike.${cleanOrderId},provider_reference_id.ilike.${cleanOrderId}`);
     }
 
-    const { data: payout, error: pErr } = await mQuery.maybeSingle();
+    const { data: payouts, error: pErr } = await mQuery.order('created_at', { ascending: false }).limit(1);
+    const payout = payouts && payouts.length > 0 ? payouts[0] : null;
 
     // Strict Data Isolation / Anti-Enumeration Protection:
     // If not found or belongs to another merchant, return ONLY "Transaction not found." with ZERO data leakage
@@ -213,7 +214,9 @@ serve(async (req: Request) => {
     }
 
     // 6. Query Real PayNit Provider Status API Server-Side
-    const paynitLookupId = payout.provider_reference_id || payout.provider_order_id || payout.order_id || cleanOrderId;
+    const paynitLookupId = (cleanOrderId.toUpperCase().startsWith('PN'))
+      ? cleanOrderId
+      : (payout.provider_reference_id || payout.provider_order_id || payout.order_id || cleanOrderId);
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
