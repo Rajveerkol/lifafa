@@ -24,6 +24,18 @@ function excludeRedirectsFromDistPlugin(): Plugin {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), excludeRedirectsFromDistPlugin()],
+  define: {
+    'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(
+      process.env.VITE_SUPABASE_URL || 'https://pxqyeonymwlpiklfyjbb.supabase.co'
+    ),
+    'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(
+      process.env.VITE_SUPABASE_ANON_KEY ||
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4cXllb255bXdscGlrbGZ5amJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5MTc2NzAsImV4cCI6MjEwNDQ5MzY3MH0.Oo5y8zsMbS4uq3HuZmWUbkk_VGkvRW0_J-jCGQkhTlg'
+    ),
+    'import.meta.env.VITE_ALLOW_DEV_SIMULATOR': JSON.stringify(
+      process.env.VITE_ALLOW_DEV_SIMULATOR || 'false'
+    ),
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
