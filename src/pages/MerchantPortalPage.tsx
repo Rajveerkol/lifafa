@@ -236,23 +236,25 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
         await refreshMerchant();
       }
 
-      if (contextMerchant) {
-        setMerchant(contextMerchant);
-        const [w, pList, dList, lList, kList, ipList] = await Promise.all([
-          merchantGatewayService.getMerchantWallet(contextMerchant.id),
-          merchantGatewayService.getMerchantPayouts(contextMerchant.id),
-          merchantGatewayService.getMerchantDeposits(contextMerchant.id),
-          merchantGatewayService.getMerchantLedger(contextMerchant.id),
-          merchantGatewayService.getMerchantApiKeys(contextMerchant.id),
-          merchantGatewayService.getMerchantIpWhitelist(contextMerchant.id),
+      const activeMerchant = contextMerchant || merchant;
+      if (activeMerchant) {
+        setMerchant(activeMerchant);
+        const [wRes, pRes, dRes, lRes, kRes, ipRes] = await Promise.allSettled([
+          merchantGatewayService.getMerchantWallet(activeMerchant.id),
+          merchantGatewayService.getMerchantPayouts(activeMerchant.id),
+          merchantGatewayService.getMerchantDeposits(activeMerchant.id),
+          merchantGatewayService.getMerchantLedger(activeMerchant.id),
+          merchantGatewayService.getMerchantApiKeys(activeMerchant.id),
+          merchantGatewayService.getMerchantIpWhitelist(activeMerchant.id),
         ]);
 
-        setWallet(w);
-        setPayouts(pList);
-        setDeposits(dList);
-        setLedger(lList);
-        setApiKeys(kList);
-        setWhitelist(ipList);
+        if (wRes.status === 'fulfilled') setWallet(wRes.value);
+        if (pRes.status === 'fulfilled') setPayouts(pRes.value);
+        if (dRes.status === 'fulfilled') setDeposits(dRes.value);
+        if (lRes.status === 'fulfilled') setLedger(lRes.value);
+        if (kRes.status === 'fulfilled') setApiKeys(kRes.value);
+        if (ipRes.status === 'fulfilled') setWhitelist(ipRes.value);
+
         if (refreshWallet) {
           refreshWallet().catch(() => {});
         }
@@ -263,7 +265,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
       setLoading(false);
       setRefreshing(false);
     }
-  }, [contextMerchant, refreshMerchant, refreshWallet]);
+  }, [contextMerchant, merchant, refreshMerchant, refreshWallet]);
 
   useEffect(() => {
     loadMerchantData();

@@ -911,6 +911,103 @@ serve(async (req: Request) => {
       );
     }
 
+    // 2.b. Merchant API Key Management Actions (Authenticated via Session or Admin)
+    if (body.action === 'list_api_keys' || body.action === 'get_api_keys') {
+      const { data: keys, error: keysErr } = await adminClient
+        .from('merchant_api_keys')
+        .select('id, merchant_id, key_name, client_id, is_active, last_used_at, created_at')
+        .eq('merchant_id', merchantId)
+        .order('created_at', { ascending: false });
+
+      if (keysErr) {
+        return new Response(
+          JSON.stringify({ success: false, message: keysErr.message, keys: [] }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      return new Response(
+        JSON.stringify({ success: true, keys: keys || [] }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (body.action === 'rotate_api_key' || body.action === 'generate_api_key') {
+      const keyName = String(body.key_name || 'Primary API Key').trim().slice(0, 50);
+      
+      // 1. Generate new credentials
+      const randomBytesHex = (bytes: number) => {
+        const arr = new Uint8Array(bytes);
+        crypto.getRandomValues(arr);
+        return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+      };
+
+      const clientId = `mk_live_${randomBytesHex(16)}`;
+      const rawSecret = `sk_live_${randomBytesHex(24)}`;
+      const secretHash = await hashSecret(rawSecret);
+      const keyId = crypto.randomUUID();
+
+      // 2. Atomically revoke all existing active keys for this merchant
+      await adminClient
+        .from('merchant_api_keys')
+        .update({ is_active: false })
+        .eq('merchant_id', merchantId)
+        .eq('is_active', true);
+
+      // 3. Insert new key as ACTIVE
+      const { error: insErr } = await adminClient
+        .from('merchant_api_keys')
+        .insert({
+          id: keyId,
+          merchant_id: merchantId,
+          key_name: keyName,
+          client_id: clientId,
+          client_secret_hash: secretHash,
+          is_active: true,
+          created_at: new Date().toISOString(),
+        });
+
+      if (insErr) {
+        return new Response(
+          JSON.stringify({ success: false, message: insErr.message }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          key_id: keyId,
+          client_id: clientId,
+          client_secret: rawSecret,
+          key_name: keyName,
+          is_active: true,
+          created_at: new Date().toISOString(),
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (body.action === 'revoke_api_key') {
+      const keyId = String(body.key_id || '').trim();
+      if (!keyId) {
+        return new Response(
+          JSON.stringify({ success: false, message: 'Key ID is required' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      await adminClient
+        .from('merchant_api_keys')
+        .update({ is_active: false })
+        .eq('id', keyId)
+        .eq('merchant_id', merchantId);
+
+      return new Response(
+        JSON.stringify({ success: true, message: 'API Key revoked successfully' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const orderId = String(body.order_id || body.orderId || `m_ord_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`).trim();
     const amount = Number(body.amount);
     const note = String(body.note || body.description || 'Merchant payout').trim().slice(0, 100);

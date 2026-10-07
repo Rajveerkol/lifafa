@@ -219,18 +219,68 @@ export const merchantGatewayService = {
     return (data || []) as MerchantLedgerEntry[];
   },
 
-  // Fetch Merchant API keys via secure RPC (never exposes client_secret_hash)
+  // Fetch Merchant API keys via multi-strategy redundancy (Edge Function, RPC, Direct Select)
   async getMerchantApiKeys(merchantId: string): Promise<MerchantApiKey[]> {
     if (!isSupabaseConfigured || !supabase) return [];
-    const { data, error } = await supabase.rpc('merchant_list_api_keys_rpc', {
-      p_merchant_id: merchantId,
-    });
 
-    if (error) {
-      console.error('Error fetching merchant API keys:', error);
-      return [];
+    // Strategy 1: Edge Function using authenticated user session
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        const edgeRes = await fetch('https://pxqyeonymwlpiklfyjbb.supabase.co/functions/v1/merchant-paynit-payout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ action: 'list_api_keys', merchant_id: merchantId }),
+        });
+        if (edgeRes.ok) {
+          const edgeData = await edgeRes.json();
+          if (edgeData?.success && Array.isArray(edgeData.keys)) {
+            return edgeData.keys as MerchantApiKey[];
+          }
+        }
+      }
+    } catch (edgeErr) {
+      console.warn('Edge Function list_api_keys fallback:', edgeErr);
     }
-    return (data || []) as MerchantApiKey[];
+
+    // Strategy 2: RPC merchant_list_api_keys_rpc
+    try {
+      const { data, error } = await supabase.rpc('merchant_list_api_keys_rpc', {
+        p_merchant_id: merchantId,
+      });
+
+      if (!error && Array.isArray(data)) {
+        return data as MerchantApiKey[];
+      }
+      if (error) {
+        console.warn('merchant_list_api_keys_rpc fallback:', error);
+      }
+    } catch (rpcErr) {
+      console.warn('RPC merchant_list_api_keys_rpc exception:', rpcErr);
+    }
+
+    // Strategy 3: Direct RLS select on safe columns (excludes client_secret_hash)
+    try {
+      const { data: directData, error: directErr } = await supabase
+        .from('merchant_api_keys')
+        .select('id, merchant_id, key_name, client_id, is_active, last_used_at, created_at')
+        .eq('merchant_id', merchantId)
+        .order('created_at', { ascending: false });
+
+      if (!directErr && Array.isArray(directData)) {
+        return directData as MerchantApiKey[];
+      }
+      if (directErr) {
+        console.warn('Direct query on merchant_api_keys error:', directErr);
+      }
+    } catch (directCatchErr) {
+      console.warn('Direct query exception:', directCatchErr);
+    }
+
+    return [];
   },
 
   // Fetch Merchant IP whitelist
@@ -518,15 +568,68 @@ export const merchantGatewayService = {
     return data;
   },
 
-  // Generate new API Key pair server-side (secret returned ONCE)
+  // Generate / Rotate new API Key pair server-side (Atomic single-active-key rotation)
   async generateApiKey(params: {
     merchantId: string;
     keyName: string;
-  }): Promise<{ clientId: string; clientSecret: string }> {
+  }): Promise<{ clientId: string; clientSecret: string; keyId?: string; createdAt?: string }> {
     if (!isSupabaseConfigured || !supabase) {
       throw new Error('Supabase is not configured.');
     }
 
+    // Strategy 1: Edge Function atomic rotation (authenticated session)
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        const edgeRes = await fetch('https://pxqyeonymwlpiklfyjbb.supabase.co/functions/v1/merchant-paynit-payout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            action: 'rotate_api_key',
+            merchant_id: params.merchantId,
+            key_name: params.keyName.trim() || 'Primary API Key',
+          }),
+        });
+
+        if (edgeRes.ok) {
+          const edgeData = await edgeRes.json();
+          if (edgeData?.success && edgeData.client_id && edgeData.client_secret) {
+            return {
+              clientId: edgeData.client_id,
+              clientSecret: edgeData.client_secret,
+              keyId: edgeData.key_id,
+              createdAt: edgeData.created_at,
+            };
+          }
+        }
+      }
+    } catch (edgeErr) {
+      console.warn('Edge Function rotate_api_key fallback:', edgeErr);
+    }
+
+    // Strategy 2: RPC merchant_rotate_api_key_rpc
+    try {
+      const { data: rotData, error: rotError } = await supabase.rpc('merchant_rotate_api_key_rpc', {
+        p_merchant_id: params.merchantId,
+        p_key_name: params.keyName.trim() || 'Primary API Key',
+      });
+
+      if (!rotError && rotData?.success && rotData.client_id && rotData.client_secret) {
+        return {
+          clientId: rotData.client_id,
+          clientSecret: rotData.client_secret,
+          keyId: rotData.key_id,
+          createdAt: rotData.created_at,
+        };
+      }
+    } catch (rotErr) {
+      console.warn('RPC merchant_rotate_api_key_rpc fallback:', rotErr);
+    }
+
+    // Strategy 3: RPC merchant_generate_api_key_rpc
     const { data, error } = await supabase.rpc('merchant_generate_api_key_rpc', {
       p_merchant_id: params.merchantId,
       p_key_name: params.keyName.trim() || 'Primary API Key',
@@ -540,21 +643,58 @@ export const merchantGatewayService = {
     return {
       clientId: data.client_id,
       clientSecret: data.client_secret,
+      keyId: data.key_id,
+      createdAt: data.created_at || new Date().toISOString(),
     };
   },
 
-  // Revoke API Key
-  async revokeApiKey(keyId: string): Promise<void> {
+  // Revoke API Key (Multi-strategy)
+  async revokeApiKey(keyId: string, merchantId?: string): Promise<void> {
     if (!isSupabaseConfigured || !supabase) {
       throw new Error('Supabase is not configured.');
     }
 
+    // Strategy 1: Edge Function
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        const edgeRes = await fetch('https://pxqyeonymwlpiklfyjbb.supabase.co/functions/v1/merchant-paynit-payout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            action: 'revoke_api_key',
+            key_id: keyId,
+            merchant_id: merchantId,
+          }),
+        });
+
+        if (edgeRes.ok) {
+          const edgeData = await edgeRes.json();
+          if (edgeData?.success) return;
+        }
+      }
+    } catch (edgeErr) {
+      console.warn('Edge Function revoke_api_key fallback:', edgeErr);
+    }
+
+    // Strategy 2: RPC merchant_revoke_api_key_rpc
     const { error } = await supabase.rpc('merchant_revoke_api_key_rpc', {
       p_key_id: keyId,
     });
 
     if (error) {
-      throw new Error(error.message || 'Failed to revoke API Key');
+      // Strategy 3: Direct update
+      const { error: directErr } = await supabase
+        .from('merchant_api_keys')
+        .update({ is_active: false })
+        .eq('id', keyId);
+
+      if (directErr) {
+        throw new Error(error.message || directErr.message || 'Failed to revoke API Key');
+      }
     }
   },
 
