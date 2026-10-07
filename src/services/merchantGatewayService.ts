@@ -17,6 +17,22 @@ export interface MerchantUpiSettings {
   status: 'ACTIVE' | 'INACTIVE';
 }
 
+export interface MerchantOrderStatusCheckResult {
+  success: boolean;
+  status?: 'SUCCESS' | 'PROCESSING' | 'FAILED' | 'UNKNOWN';
+  order_id?: string;
+  amount?: number;
+  fee?: number;
+  total_deducted?: number;
+  provider_reference_id?: string;
+  refunded?: boolean;
+  already_refunded?: boolean;
+  refund_amount?: number;
+  rejection_reason?: string;
+  message?: string;
+  error?: string;
+}
+
 export const DEFAULT_MERCHANT_UPI_SETTINGS: MerchantUpiSettings = {
   payeeName: 'Createlifafa Payout Gateway',
   upiId: 'createlifafa@upi',
@@ -565,6 +581,50 @@ export const merchantGatewayService = {
       p_whitelist_id: id,
     });
     if (error || !data?.success) throw new Error(error?.message || 'Failed to remove IP whitelist entry');
+  },
+
+  // Check real-time provider status for a merchant's own Gateway payout Order ID
+  async checkPayoutStatus(orderId: string): Promise<MerchantOrderStatusCheckResult> {
+    if (!isSupabaseConfigured || !supabase) {
+      throw new Error('Supabase database is not configured.');
+    }
+
+    const cleanOrderId = orderId.trim();
+    if (!cleanOrderId) {
+      throw new Error('Please enter an Order ID.');
+    }
+
+    const token = await this.getValidSessionToken();
+    if (!token) {
+      throw new Error('Please sign in to your Merchant account to check payout status.');
+    }
+
+    try {
+      const response = await supabase.functions.invoke('merchant-paynit-payout', {
+        headers: { Authorization: `Bearer ${token}` },
+        body: {
+          action: 'check_order_status',
+          order_id: cleanOrderId,
+        },
+      });
+
+      if (!response.error && response.data) {
+        return response.data as MerchantOrderStatusCheckResult;
+      }
+
+      if (response.error) {
+        const errorMsg = await this.parseEdgeFunctionError(
+          response.error,
+          response.response,
+          response.data
+        );
+        throw new Error(errorMsg);
+      }
+
+      return response.data as MerchantOrderStatusCheckResult;
+    } catch (err: any) {
+      throw new Error(err.message || 'Unable to check payout status. Please try again.');
+    }
   },
 
   // ================= ADMIN GATEWAY METHODS =================

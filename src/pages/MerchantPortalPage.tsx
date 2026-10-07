@@ -59,6 +59,7 @@ import { MerchantTopUpModal } from '../components/merchant/MerchantTopUpModal';
 import { MerchantNewPayoutModal } from '../components/merchant/MerchantNewPayoutModal';
 import { MerchantApiKeysManager } from '../components/merchant/MerchantApiKeysManager';
 import { MerchantIpWhitelistManager } from '../components/merchant/MerchantIpWhitelistManager';
+import { MerchantOrderStatusChecker } from '../components/merchant/MerchantOrderStatusChecker';
 
 export type MerchantNavSection =
   | 'dashboard'
@@ -177,6 +178,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
 
   // Filters & Search
   const [payoutSearch, setPayoutSearch] = useState('');
+  const [checkerOrderId, setCheckerOrderId] = useState<string>('');
   const [payoutStatusFilter, setPayoutStatusFilter] = useState<'ALL' | 'PENDING' | 'PROCESSING' | 'SUCCESS' | 'FAILED'>('ALL');
   const [payoutDateFilter, setPayoutDateFilter] = useState<'ALL' | 'TODAY' | 'WEEK' | 'MONTH'>('ALL');
   const [depositSearch, setDepositSearch] = useState('');
@@ -1569,6 +1571,13 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
           {/* ======================================================== */}
           {activeSection === 'payouts' && (
             <div className="space-y-4">
+              {/* Order ID Status Check & Safe Reconcile */}
+              <MerchantOrderStatusChecker
+                initialOrderId={checkerOrderId}
+                key={checkerOrderId}
+                onStatusChecked={loadMerchantData}
+              />
+
               {/* Filter & Search Bar */}
               <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                 {/* Status tabs */}
@@ -1693,15 +1702,27 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                             <td className="px-4 py-2.5 font-mono text-[11px] text-slate-500">
                               {formatDate(p.created_at)}
                             </td>
-                            <td className="px-4 py-2.5 text-right">
+                            <td className="px-4 py-2.5 text-right whitespace-nowrap space-x-2">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setSelectedPayoutDetail(p);
                                 }}
-                                className="text-blue-600 hover:text-blue-800 font-medium text-[11px] cursor-pointer"
+                                className="text-slate-600 hover:text-slate-900 font-medium text-[11px] cursor-pointer"
                               >
                                 View
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCheckerOrderId(p.order_id);
+                                  window.scrollTo({ top: 100, behavior: 'smooth' });
+                                }}
+                                className="text-blue-600 hover:text-blue-800 font-semibold text-[11px] cursor-pointer inline-flex items-center gap-1 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded border border-blue-100 transition-colors"
+                                title="Check real-time provider status"
+                              >
+                                <Search className="w-2.5 h-2.5" />
+                                <span>Check Status</span>
                               </button>
                             </td>
                           </tr>
@@ -2537,12 +2558,28 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
               </div>
             </div>
 
-            <button
-              onClick={() => setSelectedPayoutDetail(null)}
-              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium py-2 rounded-md transition-colors cursor-pointer mt-6"
-            >
-              Close Details
-            </button>
+            <div className="space-y-2 mt-6">
+              <button
+                onClick={() => {
+                  const targetOrderId = selectedPayoutDetail.order_id;
+                  setSelectedPayoutDetail(null);
+                  setActiveSection('payouts');
+                  setCheckerOrderId(targetOrderId);
+                  window.scrollTo({ top: 100, behavior: 'smooth' });
+                }}
+                className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-semibold py-2 rounded-md transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <Search className="w-3.5 h-3.5" />
+                <span>Check Real-Time Provider Status</span>
+              </button>
+
+              <button
+                onClick={() => setSelectedPayoutDetail(null)}
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium py-2 rounded-md transition-colors cursor-pointer"
+              >
+                Close Details
+              </button>
+            </div>
           </div>
         </div>
       )}
