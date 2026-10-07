@@ -175,7 +175,7 @@ test('Step 1 Channel Normalization: Handles @mishra4488, trailing slashes, and f
 
 // 8. URL Claim Query Parameter Sanitization
 test('Navigation Trap Protection: Cleans claim query parameter without page reload', () => {
-  const currentHref = 'https://paleturquoise-crocodile-131192.hostingersite.com/?claim=LF-WPQEDM';
+  const currentHref = 'https://createlifafa.xyz/?claim=LF-WPQEDM';
   const url = new URL(currentHref);
   assert.strictEqual(url.searchParams.get('claim'), 'LF-WPQEDM');
 

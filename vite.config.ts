@@ -4,7 +4,7 @@ import path from 'path';
 import fs from 'fs';
 
 // Cloudflare Workers Static Assets uses native not_found_handling = "single-page-application"
-// Exclude Hostinger .htaccess and problematic _redirects from dist
+// Exclude legacy server config files and problematic _redirects from dist
 function cleanCloudflareDistPlugin(): Plugin {
   return {
     name: 'clean-cloudflare-dist',

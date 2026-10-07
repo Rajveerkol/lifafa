@@ -113,16 +113,14 @@ test('Dedicated Pages: AccountSecurity, HelpSupport, Terms, Privacy exist with n
   assert(helpContent.includes('contact support through the platform'), 'Must use neutral in-platform support instructions');
 });
 
-// 7. Verify SPA fallback in public/.htaccess and dist/.htaccess
-test('Hostinger SPA Support: .htaccess exists in public and dist with rewrite rules', () => {
-  const publicHtaccess = path.resolve('public/.htaccess');
-  const distHtaccess = path.resolve('dist/.htaccess');
+// 7. Verify Cloudflare SPA fallback in wrangler.toml
+test('Cloudflare SPA Support: wrangler.toml specifies single-page-application assets handling', () => {
+  const wranglerPath = path.resolve('wrangler.toml');
+  assert(fs.existsSync(wranglerPath), 'wrangler.toml must exist');
 
-  assert(fs.existsSync(publicHtaccess), 'public/.htaccess must exist');
-  assert(fs.existsSync(distHtaccess), 'dist/.htaccess must exist in build output');
-
-  const content = fs.readFileSync(distHtaccess, 'utf8');
-  assert(content.includes('RewriteRule . /index.html [L]'), 'Must rewrite all non-file requests to /index.html');
+  const content = fs.readFileSync(wranglerPath, 'utf8');
+  assert(content.includes('not_found_handling = "single-page-application"'), 'Must specify single-page-application SPA handling');
+  assert(content.includes('directory = "./dist"'), 'Must specify dist directory');
 });
 
 // 8. Verify App.tsx handles all dedicated routes on refresh and navigation

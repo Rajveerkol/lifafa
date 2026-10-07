@@ -50,10 +50,10 @@ async function run() {
   const hasEligibleBalanceCheck = bundle.includes('Withdrawal exceeds your eligible balance');
 
   if (bundleFile === '/assets/index-D_e4vRfS.js' && hasAdminRpc && hasWithdrawableRpc && hasPayoutRestricted) {
-    check(1, 'Hostinger deployed build corresponds to commit 6fefcb4', 'PASS',
+    check(1, 'Cloudflare deployed build corresponds to commit 6fefcb4', 'PASS',
       `Live bundle: ${bundleFile} verified. Contains all Migration 025 RPCs and UI text.`);
   } else {
-    check(1, 'Hostinger deployed build corresponds to commit 6fefcb4', 'FAIL',
+    check(1, 'Cloudflare deployed build corresponds to commit 6fefcb4', 'FAIL',
       `Bundle: ${bundleFile}, adminRpc: ${hasAdminRpc}, withdrawableRpc: ${hasWithdrawableRpc}`);
   }
 
