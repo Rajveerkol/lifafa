@@ -107,7 +107,18 @@ export const lifafaService = {
       }
     }
 
-    let { data, error } = await supabase.rpc('create_lifafa_rpc', {
+    // Validate session & proactively refresh if token is expired or about to expire
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const session = sessionData?.session;
+      if (!session || (session.expires_at && session.expires_at * 1000 < Date.now() + 30000)) {
+        await supabase.auth.refreshSession();
+      }
+    } catch (authCheckErr) {
+      console.warn('Session verification warning:', authCheckErr);
+    }
+
+    const rpcPayload = {
       p_title: params.title,
       p_message: params.message || null,
       p_total_amount: params.totalAmount,
@@ -126,7 +137,9 @@ export const lifafaService = {
       p_starts_at: params.startsAt || null,
       p_device_claim_limit: params.deviceClaimLimit ?? 1,
       p_payout_mode: params.payoutMode || 'WALLET',
-    });
+    };
+
+    let { data, error } = await supabase.rpc('create_lifafa_rpc', rpcPayload);
 
     // Resilient Fallback: If remote PostgreSQL enum task_type has not yet been extended via Migration 034,
     // retry transparently with CUSTOM task_type and [YOUTUBE_WATCH:videoId] metadata tag
@@ -143,33 +156,54 @@ export const lifafaService = {
         return t;
       });
 
-      const retryRes = await supabase.rpc('create_lifafa_rpc', {
-        p_title: params.title,
-        p_message: params.message || null,
-        p_total_amount: params.totalAmount,
-        p_winner_count: params.winnerCount,
-        p_distribution_type: params.distributionType,
-        p_expires_at: params.expiresAt,
-        p_is_public: params.isPublic ?? true,
-        p_pin_code: params.pinCode || null,
-        p_allow_cancel: params.allowCancel ?? true,
-        p_show_remaining: params.showRemaining ?? true,
-        p_creator_note: params.creatorNote || null,
+      const fallbackPayload = {
+        ...rpcPayload,
         p_tasks: fallbackTasks,
-        p_idempotency_key: idempotencyKey || null,
-        p_min_claim_amount: params.minClaimAmount || null,
-        p_max_claim_amount: params.maxClaimAmount || null,
-        p_starts_at: params.startsAt || null,
-        p_device_claim_limit: params.deviceClaimLimit ?? 1,
-        p_payout_mode: params.payoutMode || 'WALLET',
-      });
+      };
 
+      const retryRes = await supabase.rpc('create_lifafa_rpc', fallbackPayload);
       data = retryRes.data;
       error = retryRes.error;
     }
 
     if (error) {
-      throw new Error(error.message || 'Failed to create Lifafa');
+      const errorMsg = error.message || '';
+      const errorCode = (error as any).code || '';
+
+      // Intercept 42501 permission denied (often caused by expired/lapsed session during multi-step creation)
+      if (
+        errorCode === '42501' ||
+        errorMsg.toLowerCase().includes('permission denied') ||
+        errorMsg.toLowerCase().includes('permission denied for function')
+      ) {
+        // Attempt a fresh session refresh and one immediate retry
+        try {
+          const { data: refreshed } = await supabase.auth.refreshSession();
+          if (refreshed?.session) {
+            const retryRes = await supabase.rpc('create_lifafa_rpc', rpcPayload);
+            if (!retryRes.error && retryRes.data) {
+              return retryRes.data;
+            }
+          }
+        } catch {
+          // Fall through to sanitized error
+        }
+
+        throw new Error('Your session has expired or you do not have permission. Please refresh the page or sign in again.');
+      }
+
+      // Preserve descriptive financial/business messages
+      if (errorMsg.includes('Insufficient balance')) {
+        throw new Error(errorMsg);
+      }
+      if (errorMsg.includes('Each winner must receive at least ₹10')) {
+        throw new Error(errorMsg);
+      }
+      if (errorMsg.includes('Authentication required')) {
+        throw new Error('Please sign in to create a Lifafa.');
+      }
+
+      throw new Error(errorMsg || 'Failed to create Lifafa. Please try again.');
     }
 
     return data;

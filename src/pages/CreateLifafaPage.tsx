@@ -364,7 +364,12 @@ export const CreateLifafaPage: React.FC<CreateLifafaPageProps> = ({
       await refreshWallet();
       onSuccessCreated({ ...res, theme_id: selectedTheme });
     } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to create Lifafa');
+      const msg = err.message || '';
+      if (msg.includes('permission denied') || msg.includes('42501')) {
+        setErrorMsg('Your session has expired. Please refresh the page or sign in again.');
+      } else {
+        setErrorMsg(msg || 'Failed to create Lifafa');
+      }
     } finally {
       setLoading(false);
     }
