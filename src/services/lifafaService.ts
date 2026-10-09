@@ -56,14 +56,14 @@ export interface ClaimLifafaResult {
 }
 
 // Authoritative server-aligned Lifafa external payout fee slabs:
-// ₹1 - ₹500       -> ₹2.50
-// >₹500 - ₹1,000  -> ₹2.70
-// >₹1,000 - ₹5,000 -> ₹3.50
+// ₹1 - ₹499.99     -> ₹2.50
+// ₹500 - ₹999.99   -> ₹5.00
+// ₹1,000 - ₹2,000  -> ₹10.00
 export function getLifafaPayoutFee(amount: number): number {
   if (!amount || amount <= 0) return 0;
-  if (amount <= 500) return 2.50;
-  if (amount <= 1000) return 2.70;
-  return 3.50;
+  if (amount < 500) return 2.50;
+  if (amount < 1000) return 5.00;
+  return 10.00;
 }
 
 export function calculateLifafaPayoutFees(
@@ -82,9 +82,6 @@ export function calculateLifafaPayoutFees(
   }
   if (maxClaimAmount && maxClaimAmount > 0) {
     return Number((winnerCount * getLifafaPayoutFee(maxClaimAmount)).toFixed(2));
-  }
-  if (totalAmount <= 500) {
-    return Number((winnerCount * 2.50).toFixed(2));
   }
   const avgAmount = totalAmount / winnerCount;
   return Number((winnerCount * getLifafaPayoutFee(avgAmount)).toFixed(2));

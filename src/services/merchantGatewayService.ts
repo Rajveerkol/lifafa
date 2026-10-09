@@ -792,7 +792,7 @@ export const merchantGatewayService = {
               if (payout) {
                 const dbStatus = String(payout.status || '').toUpperCase();
                 const amt = Number(payout.amount);
-                const fee = Number(payout.fee_amount != null ? payout.fee_amount : 2.50);
+                const fee = Number(payout.fee_amount != null ? payout.fee_amount : calculateWithdrawalFee(amt).fee);
                 const total = Number(payout.total_deducted != null ? payout.total_deducted : amt + fee);
 
                 if (dbStatus === 'SUCCESS') {

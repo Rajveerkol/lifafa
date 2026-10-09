@@ -30,7 +30,13 @@ const corsHeaders = {
 // Payouts created BEFORE this timestamp are treated as HISTORICAL transactions
 // and will NEVER be refunded or modified by this automated check.
 const STATUS_REFUND_ACTIVATION_BOUNDARY = '2026-10-07T10:45:00.000Z';
-const PAYNIT_PAYOUT_FEE = 2.50;
+function calculateMerchantPayoutFee(amount: number): number {
+  const num = Math.round(Number(amount) * 100) / 100;
+  if (isNaN(num) || num <= 0) return 0;
+  if (num < 500) return 2.50;
+  if (num < 1000) return 5.00;
+  return 10.00;
+}
 
 // In-memory rate limiting map (sliding 60s window per merchant)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -65,7 +71,7 @@ async function reconcileFailedPayoutWithRefund(
 ): Promise<RefundReconciliationResult> {
   const payoutId = payout.id;
   const payoutAmount = Number(payout.amount || 0);
-  const feeAmount = Number(payout.fee_amount != null ? payout.fee_amount : PAYNIT_PAYOUT_FEE);
+  const feeAmount = Number(payout.fee_amount != null ? payout.fee_amount : calculateMerchantPayoutFee(payoutAmount));
   const totalDeducted = Number(payout.total_deducted != null ? payout.total_deducted : (payoutAmount + feeAmount));
 
   // 1. BOUNDARY CHECK: Only NEW payouts created on or after activation boundary are eligible for automated refund
@@ -621,7 +627,7 @@ serve(async (req: Request) => {
     const payoutId = payout.id;
     const currentDbStatus = String(payout.status || '').toUpperCase();
     const payoutAmount = Number(payout.amount);
-    const feeAmount = Number(payout.fee_amount != null ? payout.fee_amount : PAYNIT_PAYOUT_FEE);
+    const feeAmount = Number(payout.fee_amount != null ? payout.fee_amount : calculateMerchantPayoutFee(payoutAmount));
     const totalDeducted = Number(payout.total_deducted != null ? payout.total_deducted : (payoutAmount + feeAmount));
 
     // Determine historical vs new transaction boundary

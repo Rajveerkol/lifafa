@@ -16,17 +16,19 @@ export interface DepositFeeResult {
 }
 
 /**
- * Payout & Withdrawal Fee Slabs:
- * - ₹1 to ₹500           -> Fee = ₹2.50
- * - Above ₹500 to ₹1,000 -> Fee = ₹2.70
- * - Above ₹1,000 to ₹5,000 -> Fee = ₹3.50
+ * Authoritative Payout & Withdrawal Fee Slabs:
+ * - ₹1 to ₹499.99          -> Fixed Charge = ₹2.50
+ * - ₹500 to ₹999.99        -> Fixed Charge = ₹5.00
+ * - ₹1,000 to ₹2,000       -> Fixed Charge = ₹10.00
  *
  * Exact boundaries:
- * ₹500     -> ₹2.50  (Total: ₹502.50)
- * ₹500.01  -> ₹2.70  (Total: ₹502.71)
- * ₹1,000   -> ₹2.70  (Total: ₹1,002.70)
- * ₹1,000.01 -> ₹3.50 (Total: ₹1,003.51)
- * ₹5,000   -> ₹3.50  (Total: ₹5,003.50)
+ * ₹1        -> ₹2.50  (Total: ₹3.50)
+ * ₹499.99   -> ₹2.50  (Total: ₹502.49)
+ * ₹500      -> ₹5.00  (Total: ₹505.00)
+ * ₹999.99   -> ₹5.00  (Total: ₹1,004.99)
+ * ₹1,000    -> ₹10.00 (Total: ₹1,010.00)
+ * ₹2,000    -> ₹10.00 (Total: ₹2,010.00)
+ * Above ₹2,000 up to max platform limit (₹5,000) -> ₹10.00
  */
 export function calculateWithdrawalFee(amount: number): FeeSlabResult {
   const num = Math.round(Number(amount) * 100) / 100;
@@ -35,12 +37,12 @@ export function calculateWithdrawalFee(amount: number): FeeSlabResult {
   }
 
   let fee = 2.50;
-  if (num <= 500) {
+  if (num < 500) {
     fee = 2.50;
-  } else if (num <= 1000) {
-    fee = 2.70;
+  } else if (num < 1000) {
+    fee = 5.00;
   } else {
-    fee = 3.50;
+    fee = 10.00;
   }
 
   const totalDeducted = Math.round((num + fee) * 100) / 100;

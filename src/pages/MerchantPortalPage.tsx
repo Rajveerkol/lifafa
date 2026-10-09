@@ -644,7 +644,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
               </div>
               <div className="p-3 bg-slate-50 rounded-md border border-slate-100">
                 <div className="text-[11px] font-medium text-slate-500">Payout Fee</div>
-                <div className="text-sm font-semibold font-mono text-slate-900 mt-0.5">₹2.50 Flat</div>
+                <div className="text-sm font-semibold font-mono text-slate-900 mt-0.5">From ₹2.50</div>
               </div>
               <div className="p-3 bg-slate-50 rounded-md border border-slate-100">
                 <div className="text-[11px] font-medium text-slate-500">Payout Rails</div>
@@ -2185,12 +2185,20 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                       <strong className="font-mono text-slate-800">2.0%</strong>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Payout Fee (Instant UPI):</span>
-                      <strong className="font-mono text-slate-800">₹2.50 Flat</strong>
+                      <span className="text-slate-500">Payout Fee (₹1–₹499.99):</span>
+                      <strong className="font-mono text-slate-800">₹2.50 Fixed</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Payout Fee (₹500–₹999.99):</span>
+                      <strong className="font-mono text-slate-800">₹5.00 Fixed</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Payout Fee (₹1,000–₹2,000):</span>
+                      <strong className="font-mono text-slate-800">₹10.00 Fixed</strong>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500">Maximum Per Transaction:</span>
-                      <strong className="font-mono text-slate-800">₹1,000.00</strong>
+                      <strong className="font-mono text-slate-800">₹5,000.00</strong>
                     </div>
                   </div>
                 </div>

@@ -22,7 +22,13 @@ const corsHeaders = {
   'Access-Control-Max-Age': '86400',
 };
 
-const PAYNIT_PAYOUT_FEE = 2.50;
+function calculateMerchantPayoutFee(amount: number): number {
+  const num = Math.round(Number(amount) * 100) / 100;
+  if (isNaN(num) || num <= 0) return 0;
+  if (num < 500) return 2.50;
+  if (num < 1000) return 5.00;
+  return 10.00;
+}
 
 async function hashSecret(secret: string): Promise<string> {
   const data = new TextEncoder().encode(secret);
@@ -219,8 +225,8 @@ serve(async (req: Request) => {
           status: payout.status,
           order_id: payout.order_id,
           amount: Number(payout.amount),
-          fee: Number(payout.fee_amount || 2.50),
-          total_deducted: Number(payout.total_deducted || payout.amount),
+          fee: Number(payout.fee_amount != null ? payout.fee_amount : calculateMerchantPayoutFee(Number(payout.amount))),
+          total_deducted: Number(payout.total_deducted != null ? payout.total_deducted : (Number(payout.amount) + calculateMerchantPayoutFee(Number(payout.amount)))),
           provider_reference_id: payout.provider_reference_id,
           message: `Payout status is ${payout.status}`,
         }),
@@ -307,6 +313,8 @@ serve(async (req: Request) => {
 
     // If request was already processed idempotently
     if (initRes.idempotent) {
+      const idempotentFee = initRes.fee != null ? Number(initRes.fee) : calculateMerchantPayoutFee(amount);
+      const idempotentTotalDebited = initRes.total_deducted != null ? Number(initRes.total_deducted) : (amount + idempotentFee);
       return new Response(
         JSON.stringify({
           success: true,
@@ -315,8 +323,8 @@ serve(async (req: Request) => {
           provider_order_id: initRes.provider_order_id,
           status: initRes.status,
           amount: amount,
-          fee: 2.50,
-          total_debited: amount + 2.50,
+          fee: idempotentFee,
+          total_debited: idempotentTotalDebited,
           method: method,
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -325,8 +333,8 @@ serve(async (req: Request) => {
 
     const payoutId = initRes.payout_id;
     const providerOrderId = initRes.provider_order_id;
-    const authoritativeFee = 2.50; // MANDATORY FLAT ₹2.50 FEE
-    const totalDebited = amount + authoritativeFee;
+    const authoritativeFee = initRes.fee != null ? Number(initRes.fee) : calculateMerchantPayoutFee(amount);
+    const totalDebited = initRes.total_deducted != null ? Number(initRes.total_deducted) : (amount + authoritativeFee);
 
     // 4. Build PayNit Official Documented UPI Payout Payload
     const paynitPayload = {
