@@ -32,6 +32,8 @@
 --      ₹500.00 - ₹999.99 -> ₹5.00
 --      ₹1,000.00+        -> ₹10.00
 -- 5. Preserves UPI-only validation, ownership verification, and double-entry auditing.
+-- 6. Fixes transaction_type enum:
+--    - Uses canonical 'FEE'::public.transaction_type instead of non-existent 'PLATFORM_FEE'.
 -- ==============================================================================
 
 CREATE OR REPLACE FUNCTION public.merchant_initiate_payout_rpc(
@@ -293,7 +295,7 @@ BEGIN
         v_merchant.user_id,
         v_user_wallet.id,
         v_fee,
-        'PLATFORM_FEE',
+        'FEE',
         'SUCCESS',
         'MERCHANT_PAYOUT_FEE',
         v_payout_id::text,

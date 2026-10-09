@@ -311,7 +311,8 @@ serve(async (req: Request) => {
       const isSchemaOrColumnError =
         initErr?.message?.includes('total_fees_paid') ||
         initErr?.message?.includes('does not exist') ||
-        initErr?.message?.includes('function public.merchant_initiate_payout_rpc');
+        initErr?.message?.includes('function public.merchant_initiate_payout_rpc') ||
+        initErr?.message?.includes('transaction_type');
 
       if (isSchemaOrColumnError) {
         console.warn('RPC initiation failed with schema error, executing resilient service-role fallback:', initErr?.message);
@@ -479,7 +480,7 @@ serve(async (req: Request) => {
               user_id: mchInfo.user_id,
               wallet_id: userWallet.id,
               amount: authoritativeFee,
-              type: 'PLATFORM_FEE',
+              type: 'FEE',
               status: 'SUCCESS',
               reference_type: 'MERCHANT_PAYOUT_FEE',
               reference_id: String(insertedPayout.id),
