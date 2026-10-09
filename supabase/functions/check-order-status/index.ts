@@ -52,6 +52,7 @@ interface RefundReconciliationResult {
   order_id: string;
   rejection_reason: string;
   message: string;
+  refund_status?: 'REFUNDED' | 'NOT_APPLICABLE';
 }
 
 async function hashSecret(secret: string): Promise<string> {
@@ -91,6 +92,7 @@ async function reconcileFailedPayoutWithRefund(
       order_id: payout.order_id,
       rejection_reason: rejectionReason,
       message: 'Payment Failed',
+      refund_status: 'NOT_APPLICABLE',
     };
   }
 
@@ -129,7 +131,8 @@ async function reconcileFailedPayoutWithRefund(
       refund_amount: totalDeducted,
       order_id: payout.order_id,
       rejection_reason: payout.rejection_reason || rejectionReason,
-      message: 'Payment Failed',
+      message: `Payment Failed — ₹${totalDeducted.toFixed(2)} refunded to your wallet.`,
+      refund_status: 'REFUNDED',
     };
   }
 
@@ -177,7 +180,8 @@ async function reconcileFailedPayoutWithRefund(
       refund_amount: 0,
       order_id: payout.order_id,
       rejection_reason: rejectionReason,
-      message: 'Payment Failed',
+      message: 'Payment Failed — no wallet deduction was found, so no refund was issued.',
+      refund_status: 'NOT_APPLICABLE',
     };
   }
 
@@ -193,17 +197,32 @@ async function reconcileFailedPayoutWithRefund(
     });
 
     if (!rpcErr && rpcRes && rpcRes.success) {
+      const isHist = Boolean(rpcRes.is_historical);
+      const isNoDed = Boolean(rpcRes.no_deduction);
+      const isRef = Boolean(rpcRes.refunded);
+      const isAlrRef = Boolean(rpcRes.already_refunded);
+
+      let msg = 'Payment Failed';
+      let refStatus: 'REFUNDED' | 'NOT_APPLICABLE' = 'NOT_APPLICABLE';
+      if (isRef || isAlrRef) {
+        msg = `Payment Failed — ₹${totalDeducted.toFixed(2)} refunded to your wallet.`;
+        refStatus = 'REFUNDED';
+      } else if (isNoDed) {
+        msg = 'Payment Failed — no wallet deduction was found, so no refund was issued.';
+      }
+
       return {
         success: false,
         status: 'FAILED',
-        refunded: Boolean(rpcRes.refunded),
-        already_refunded: Boolean(rpcRes.already_refunded),
-        is_historical: Boolean(rpcRes.is_historical),
-        no_deduction: Boolean(rpcRes.no_deduction),
+        refunded: isRef,
+        already_refunded: isAlrRef,
+        is_historical: isHist,
+        no_deduction: isNoDed,
         refund_amount: Number(rpcRes.refund_amount || 0),
         order_id: payout.order_id,
         rejection_reason: rejectionReason,
-        message: 'Payment Failed',
+        message: msg,
+        refund_status: refStatus,
       };
     }
   } catch (rpcCallErr: any) {
@@ -211,6 +230,37 @@ async function reconcileFailedPayoutWithRefund(
   }
 
   // 5. DIRECT SERVICE-ROLE DUAL-WALLET CREDITING (Primary, robust & immediate execution)
+  // ATOMIC CONCURRENCY GUARD: Transition status to FAILED first with conditional update
+  // Only EXACTLY ONE concurrent execution can succeed in transitioning status!
+  const { data: updatedPayouts, error: updatePayoutErr } = await adminClient
+    .from('merchant_payouts')
+    .update({
+      status: 'FAILED',
+      rejection_reason: rejectionReason,
+      processed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', payoutId)
+    .neq('status', 'FAILED')
+    .neq('status', 'REVERSED')
+    .neq('status', 'SUCCESS')
+    .select('id, status');
+
+  if (updatePayoutErr || !updatedPayouts || updatedPayouts.length === 0) {
+    // Concurrency Collision: Another concurrent request already transitioned this payout
+    return {
+      success: false,
+      status: 'FAILED',
+      already_refunded: true,
+      refunded: false,
+      refund_amount: totalDeducted,
+      order_id: payout.order_id,
+      rejection_reason: payout.rejection_reason || rejectionReason,
+      message: `Payment Failed — ₹${totalDeducted.toFixed(2)} refunded to your wallet.`,
+      refund_status: 'REFUNDED',
+    };
+  }
+
   // Retrieve merchant owner user_id
   const { data: merchantRec } = await adminClient
     .from('merchants')
@@ -366,18 +416,7 @@ async function reconcileFailedPayoutWithRefund(
   ];
   await adminClient.from('wallet_transactions').insert(walletTxRows);
 
-  // E. Update public.merchant_payouts record
-  await adminClient
-    .from('merchant_payouts')
-    .update({
-      status: 'FAILED',
-      rejection_reason: rejectionReason,
-      processed_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', payoutId);
-
-  // F. Insert provider event log
+  // E. Insert provider event log
   await adminClient
     .from('merchant_payout_events')
     .insert({
@@ -396,7 +435,8 @@ async function reconcileFailedPayoutWithRefund(
     refund_amount: totalDeducted,
     order_id: payout.order_id,
     rejection_reason: rejectionReason,
-    message: 'Payment Failed',
+    message: `Payment Failed — ₹${totalDeducted.toFixed(2)} refunded to your wallet.`,
+    refund_status: 'REFUNDED',
   };
 }
 
@@ -662,6 +702,7 @@ serve(async (req: Request) => {
             order_id: payout.order_id,
             status: 'FAILED',
             message: 'Payment Failed',
+            refund_status: 'NOT_APPLICABLE',
             is_historical: true,
             refunded: false,
             already_refunded: false,
@@ -677,7 +718,8 @@ serve(async (req: Request) => {
           success: false,
           order_id: payout.order_id,
           status: 'FAILED',
-          message: 'Payment Failed',
+          message: `Payment Failed — ₹${totalDeducted.toFixed(2)} refunded to your wallet.`,
+          refund_status: 'REFUNDED',
           already_refunded: true,
           refunded: false,
           refund_amount: totalDeducted,
@@ -688,6 +730,7 @@ serve(async (req: Request) => {
     }
 
     // 6. Query Real PayNit Provider Status API Server-Side
+    const paynitPortalCookie = Deno.env.get('PAYNIT_PORTAL_COOKIE') || Deno.env.get('PAYNIT_SID') || '';
     const paynitLookupId = (cleanOrderId.toUpperCase().startsWith('PN'))
       ? cleanOrderId
       : (payout.provider_reference_id || payout.provider_order_id || payout.order_id || cleanOrderId);
@@ -697,23 +740,46 @@ serve(async (req: Request) => {
 
     let paynitRes: Response | null = null;
     let paynitData: any = {};
-    const paynitAuthHeader = `Bearer ${paynitApiKey}:${paynitApiSecret}`;
+    let queryCompleted = false;
 
-    try {
-      let statusUrl = `${paynitBaseUrl}/v1/status.php`;
-      paynitRes = await fetch(statusUrl, {
-        method: 'POST',
-        headers: {
-          Authorization: paynitAuthHeader,
-          'Content-Type': 'application/json',
-          Origin: 'https://createlifafa.xyz',
-        },
-        body: JSON.stringify({ order_id: paynitLookupId }),
-        signal: controller.signal,
-      });
+    // A. If portal session cookie is configured, attempt portal refresh endpoint
+    if (paynitPortalCookie) {
+      try {
+        const portalRes = await fetch('https://portal.paynit.in/user/api/refresh_txn.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cookie': `PAYNIT_SID=${paynitPortalCookie}`,
+            'User-Agent': 'Createlifafa-Gateway/1.0',
+            'Origin': 'https://portal.paynit.in',
+            'Referer': 'https://portal.paynit.in/user/payout_history.php',
+          },
+          body: JSON.stringify({ order_id: paynitLookupId }),
+          signal: controller.signal,
+          redirect: 'manual',
+        });
 
-      if (paynitRes.status === 404) {
-        statusUrl = `${paynitBaseUrl}/status.php`;
+        if (portalRes.status === 200) {
+          const contentType = portalRes.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            const portalJson = await portalRes.json().catch(() => null);
+            if (portalJson && typeof portalJson === 'object' && (portalJson.status !== undefined || portalJson.success !== undefined)) {
+              paynitData = portalJson;
+              paynitRes = portalRes;
+              queryCompleted = true;
+            }
+          }
+        }
+      } catch (_portalErr) {
+        // Portal request failed or timed out; seamlessly proceed to official API
+      }
+    }
+
+    // B. Query official server-to-server PayNit status API
+    if (!queryCompleted) {
+      try {
+        const paynitAuthHeader = `Bearer ${paynitApiKey}:${paynitApiSecret}`;
+        let statusUrl = `${paynitBaseUrl}/v1/status.php`;
         paynitRes = await fetch(statusUrl, {
           method: 'POST',
           headers: {
@@ -724,26 +790,42 @@ serve(async (req: Request) => {
           body: JSON.stringify({ order_id: paynitLookupId }),
           signal: controller.signal,
         });
-      }
 
+        if (paynitRes.status === 404) {
+          statusUrl = `${paynitBaseUrl}/status.php`;
+          paynitRes = await fetch(statusUrl, {
+            method: 'POST',
+            headers: {
+              Authorization: paynitAuthHeader,
+              'Content-Type': 'application/json',
+              Origin: 'https://createlifafa.xyz',
+            },
+            body: JSON.stringify({ order_id: paynitLookupId }),
+            signal: controller.signal,
+          });
+        }
+
+        clearTimeout(timeoutId);
+        paynitData = await paynitRes.json().catch(() => ({}));
+      } catch (_networkErr) {
+        clearTimeout(timeoutId);
+        // FINANCIAL SAFETY RULE: On timeout, network failure, or abort, NEVER auto-refund!
+        return new Response(
+          JSON.stringify({
+            success: true,
+            order_id: payout.order_id,
+            status: 'PROCESSING',
+            message: 'Payment is still processing. No refund has been issued.',
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    } else {
       clearTimeout(timeoutId);
-      paynitData = await paynitRes.json().catch(() => ({}));
-    } catch (_networkErr) {
-      clearTimeout(timeoutId);
-      // FINANCIAL SAFETY RULE: On timeout, network failure, or abort, NEVER auto-refund!
-      return new Response(
-        JSON.stringify({
-          success: true,
-          order_id: payout.order_id,
-          status: 'PROCESSING',
-          message: 'Payment is still processing',
-        }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
     }
 
     // 7. Evaluate Provider Outcome
-    const statusCode = paynitRes.status;
+    const statusCode = paynitRes ? paynitRes.status : 500;
     if (statusCode >= 500) {
       // Upstream 5xx: State is uncertain -> DO NOT refund
       return new Response(
@@ -751,7 +833,7 @@ serve(async (req: Request) => {
           success: true,
           order_id: payout.order_id,
           status: 'PROCESSING',
-          message: 'Payment is still processing',
+          message: 'Payment is still processing. No refund has been issued.',
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -763,6 +845,38 @@ serve(async (req: Request) => {
       paynitData.data?.status ||
       ''
     ).toLowerCase().trim();
+
+    const rawMessage = String(
+      paynitData.message ||
+      paynitData.msg ||
+      paynitData.error ||
+      paynitData.data?.message ||
+      ''
+    ).trim();
+
+    const rawUtr = String(
+      paynitData.utr ||
+      paynitData.rrn ||
+      paynitData.bank_ref_no ||
+      paynitData.reference_id ||
+      paynitData.data?.utr ||
+      paynitData.transaction?.utr ||
+      ''
+    ).trim();
+
+    // Preserve existing valid UTR if current response omits it (Never overwrite with empty)
+    const effectiveUtr = rawUtr || payout.provider_reference_id || payout.provider_order_id || '';
+
+    // If provider returned a new valid UTR, persist it to database
+    if (rawUtr && rawUtr !== payout.provider_reference_id) {
+      await adminClient
+        .from('merchant_payouts')
+        .update({
+          provider_reference_id: rawUtr,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', payoutId);
+    }
 
     const isSuccess = rawStatus === 'success' || rawStatus === 'processed' || rawStatus === 'completed';
     const isProcessing = rawStatus === 'processing' || rawStatus === 'pending' || rawStatus === 'queued' || rawStatus === 'in_process';
@@ -777,13 +891,11 @@ serve(async (req: Request) => {
 
     // 8. Handle SUCCESS -> Finalize State Idempotently (NEVER REFUND)
     if (isSuccess) {
-      const utr = paynitData.order_id || payout.provider_reference_id || paynitLookupId || '';
-
       await adminClient
         .from('merchant_payouts')
         .update({
           status: 'SUCCESS',
-          provider_reference_id: utr,
+          provider_reference_id: effectiveUtr,
           processed_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
@@ -815,7 +927,7 @@ serve(async (req: Request) => {
           amount: payoutAmount,
           payout_method: payout.payout_method || 'UPI',
           upi_id: payout.upi_id || '',
-          utr: utr,
+          utr: effectiveUtr,
           fee: feeAmount,
           total_deducted: totalDeducted,
         }),
@@ -830,7 +942,7 @@ serve(async (req: Request) => {
           success: true,
           order_id: payout.order_id,
           status: 'PROCESSING',
-          message: 'Payment is still processing',
+          message: 'Payment is still processing. No refund has been issued.',
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -838,7 +950,7 @@ serve(async (req: Request) => {
 
     // 10. Handle DEFINITIVE FAILED -> Safe Authoritative Wallet Refund (Maximum Once, New Transactions Only)
     if (isDefinitiveFailure) {
-      const rejectionReason = paynitData.message || paynitData.error || 'Payment failed at banking provider';
+      const rejectionReason = rawMessage || 'Payment failed at banking provider';
       try {
         const refundResult = await reconcileFailedPayoutWithRefund(
           adminClient,
@@ -867,13 +979,13 @@ serve(async (req: Request) => {
       }
     }
 
-    // 11. Ambiguous / Unknown Provider Response -> NEVER REFUND
+    // 11. Ambiguous / Unknown / Malformed Provider Response -> NEVER REFUND
     return new Response(
       JSON.stringify({
         success: true,
         order_id: payout.order_id,
         status: 'PROCESSING',
-        message: 'Payment is still processing',
+        message: 'Payment is still processing. No refund has been issued.',
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

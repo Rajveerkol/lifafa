@@ -174,7 +174,7 @@ export const MerchantOrderStatusChecker: React.FC<MerchantOrderStatusCheckerProp
                   </div>
                   <div>
                     <h4 className="text-xs sm:text-sm font-bold text-emerald-950 flex items-center gap-1.5">
-                      <span>🟢 Payout Successful</span>
+                      <span>🟢 Payment Completed</span>
                     </h4>
                     <p className="text-[11px] text-emerald-800">
                       Disbursed to beneficiary by banking provider
@@ -203,11 +203,11 @@ export const MerchantOrderStatusChecker: React.FC<MerchantOrderStatusCheckerProp
                     <span className="font-mono text-emerald-800">+{formatCurrency(result.fee)}</span>
                   </div>
                 )}
-                {result.provider_reference_id && (
+                {(result.utr || result.provider_reference_id) && (
                   <div>
                     <span className="text-emerald-700 block text-[10px] uppercase font-semibold">Bank UTR / Ref</span>
                     <span className="font-mono font-semibold text-emerald-900 select-all truncate block">
-                      {result.provider_reference_id}
+                      {result.utr || result.provider_reference_id}
                     </span>
                   </div>
                 )}
@@ -225,7 +225,7 @@ export const MerchantOrderStatusChecker: React.FC<MerchantOrderStatusCheckerProp
                   </div>
                   <div>
                     <h4 className="text-xs sm:text-sm font-bold text-blue-950 flex items-center gap-1.5">
-                      <span>🟡 Payout Processing</span>
+                      <span>🟡 Payment is still processing. No refund has been issued.</span>
                     </h4>
                     <p className="text-[11px] text-blue-800">
                       Transaction is still processing with the banking network
@@ -238,7 +238,7 @@ export const MerchantOrderStatusChecker: React.FC<MerchantOrderStatusCheckerProp
               </div>
 
               <div className="p-2.5 bg-white/70 border border-blue-200/80 rounded text-xs text-blue-900 leading-relaxed">
-                Clearing settlement usually completes within a few minutes. Locked float is preserved. If it does not complete, re-check here to trigger an automatic refund.
+                Clearing settlement usually completes within a few minutes. Locked float is preserved. If it does not complete, re-check here to trigger an automatic refund once confirmed failed.
               </div>
 
               <div className="pt-2 border-t border-blue-200/60 flex flex-wrap items-center justify-between gap-2 text-xs">
@@ -286,12 +286,7 @@ export const MerchantOrderStatusChecker: React.FC<MerchantOrderStatusCheckerProp
                   </div>
                   <div className="flex-1 text-xs">
                     <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                      <span>💰 Amount refunded to your Gateway wallet</span>
-                      {result.refund_amount != null && (
-                        <span className="text-emerald-700 font-mono font-black">
-                          (+{formatCurrency(result.refund_amount)})
-                        </span>
-                      )}
+                      <span>💰 Payment Failed — {formatCurrency(result.refund_amount || 0)} refunded to your wallet.</span>
                     </div>
                     <p className="text-slate-600 mt-0.5 leading-snug text-[11px]">
                       The full locked/deducted float (Transfer Amount + Gateway Fee) has now been credited back to your Merchant Gateway wallet.
@@ -311,12 +306,7 @@ export const MerchantOrderStatusChecker: React.FC<MerchantOrderStatusCheckerProp
                   </div>
                   <div className="flex-1 text-xs">
                     <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                      <span>💰 Already Refunded to Gateway Wallet</span>
-                      {result.refund_amount != null && (
-                        <span className="text-blue-700 font-mono font-black">
-                          ({formatCurrency(result.refund_amount)})
-                        </span>
-                      )}
+                      <span>💰 Payment Failed — {formatCurrency(result.refund_amount || 0)} refunded to your wallet.</span>
                     </div>
                     <p className="text-slate-600 mt-0.5 leading-snug text-[11px]">
                       The full locked/deducted float (Transfer Amount + Gateway Fee) had already been safely refunded to your Gateway wallet previously.
@@ -336,10 +326,7 @@ export const MerchantOrderStatusChecker: React.FC<MerchantOrderStatusCheckerProp
                   </div>
                   <div className="flex-1 text-xs">
                     <div className="font-bold text-amber-950 flex items-center gap-1.5">
-                      <span>ℹ️ Historical Transaction</span>
-                      <span className="text-amber-800 font-mono text-[10px] font-semibold bg-amber-200/60 px-1.5 py-0.5 rounded">
-                        Pre-Automation
-                      </span>
+                      <span>ℹ️ Historical Transaction (Pre-Automation)</span>
                     </div>
                     <p className="text-amber-800 mt-0.5 leading-snug text-[11px]">
                       This transaction was created prior to automated refund activation. Wallet balance was not modified. Please contact support if manual reconciliation is required.
@@ -359,7 +346,7 @@ export const MerchantOrderStatusChecker: React.FC<MerchantOrderStatusCheckerProp
                   </div>
                   <div className="flex-1 text-xs">
                     <div className="font-bold text-slate-800">
-                      ℹ️ No Wallet Deduction Recorded
+                      ℹ️ Payment Failed — no wallet deduction was found, so no refund was issued.
                     </div>
                     <p className="text-slate-600 mt-0.5 leading-snug text-[11px]">
                       No wallet funds were locked or deducted for this transaction, so ₹0.00 was refunded.

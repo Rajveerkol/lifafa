@@ -24,11 +24,13 @@ export interface MerchantOrderStatusCheckResult {
   amount?: number;
   fee?: number;
   total_deducted?: number;
+  utr?: string;
   provider_reference_id?: string;
   refunded?: boolean;
   already_refunded?: boolean;
   is_historical?: boolean;
   no_deduction?: boolean;
+  refund_status?: 'REFUNDED' | 'NOT_APPLICABLE';
   refund_amount?: number;
   rejection_reason?: string;
   message?: string;
@@ -742,13 +744,21 @@ export const merchantGatewayService = {
     }
 
     try {
-      const response = await supabase.functions.invoke('merchant-paynit-payout', {
+      let response = await supabase.functions.invoke('check-order-status', {
         headers: { Authorization: `Bearer ${token}` },
-        body: {
-          order_id: cleanOrderId,
-          action: 'check_order_status',
-        },
+        body: { order_id: cleanOrderId },
       });
+
+      if (response.error || !response.data) {
+        // Fallback to merchant-paynit-payout endpoint
+        response = await supabase.functions.invoke('merchant-paynit-payout', {
+          headers: { Authorization: `Bearer ${token}` },
+          body: {
+            order_id: cleanOrderId,
+            action: 'check_order_status',
+          },
+        });
+      }
 
       if (!response.error && response.data) {
         return response.data as MerchantOrderStatusCheckResult;
@@ -794,6 +804,7 @@ export const merchantGatewayService = {
                 const amt = Number(payout.amount);
                 const fee = Number(payout.fee_amount != null ? payout.fee_amount : calculateWithdrawalFee(amt).fee);
                 const total = Number(payout.total_deducted != null ? payout.total_deducted : amt + fee);
+                const utr = payout.provider_reference_id || payout.provider_order_id || '';
 
                 if (dbStatus === 'SUCCESS') {
                   return {
@@ -803,21 +814,23 @@ export const merchantGatewayService = {
                     amount: amt,
                     fee,
                     total_deducted: total,
-                    provider_reference_id: payout.provider_reference_id,
-                    message: 'Payment Successful. Payout has been completed by the banking network.',
+                    utr,
+                    provider_reference_id: utr,
+                    message: 'Payment Completed',
                   };
                 }
 
                 if (dbStatus === 'FAILED' || dbStatus === 'REVERSED') {
                   return {
-                    success: true,
+                    success: false,
                     status: 'FAILED',
                     already_refunded: true,
-                    refunded: true,
+                    refunded: false,
+                    refund_status: 'REFUNDED',
                     refund_amount: total,
                     order_id: payout.order_id,
                     rejection_reason: payout.rejection_reason,
-                    message: `Payout Failed. The amount of ₹${total.toFixed(2)} has been refunded to your Gateway wallet.`,
+                    message: `Payment Failed — ₹${total.toFixed(2)} refunded to your wallet.`,
                   };
                 }
 
@@ -828,8 +841,9 @@ export const merchantGatewayService = {
                   amount: amt,
                   fee,
                   total_deducted: total,
-                  provider_reference_id: payout.provider_reference_id,
-                  message: 'Transaction is currently processing with the payout provider.',
+                  utr,
+                  provider_reference_id: utr,
+                  message: 'Payment is still processing. No refund has been issued.',
                 };
               }
             }
