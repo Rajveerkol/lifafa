@@ -474,7 +474,7 @@ BEGIN
     -- 1. Deduct authoritative single user wallet
     UPDATE public.wallets
     SET available_balance = v_bal_after,
-        total_fees_paid = total_fees_paid + v_fee,
+        total_withdrawn = total_withdrawn + p_amount,
         updated_at = TIMEZONE('utc'::text, NOW())
     WHERE id = v_user_wallet.id;
 
