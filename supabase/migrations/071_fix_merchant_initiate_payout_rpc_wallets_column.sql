@@ -1,31 +1,45 @@
 -- ==============================================================================
--- MIGRATION 071: FIX MERCHANT INITIATE PAYOUT RPC WALLETS COLUMN
+-- MIGRATION 071 (CORRECTED): FIX MERCHANT INITIATE PAYOUT RPC WALLETS COLUMN
 -- ==============================================================================
 -- SQL STATUS: NOT EXECUTED — AWAITING MANUAL EXECUTION
 --
--- ROOT CAUSE:
--- In Migration 069, merchant_initiate_payout_rpc attempted to execute:
---   UPDATE public.wallets SET total_fees_paid = total_fees_paid + v_fee
--- However, public.wallets has NO "total_fees_paid" column (that column exists
--- on public.merchant_wallets). This caused PostgreSQL runtime error:
---   column "total_fees_paid" does not exist (HTTP 400)
+-- EXPLANATION OF ERROR 42P13:
+-- PostgreSQL error "42P13: cannot remove parameter defaults from existing function"
+-- occurs when CREATE OR REPLACE FUNCTION is called on a function whose parameters
+-- previously had default values (specifically p_payout_method DEFAULT 'UPI' and
+-- p_upi_id DEFAULT NULL), but the replacement statement omitted those defaults.
 --
--- FIX:
--- 1. Updates public.wallets: available_balance and total_withdrawn (+ p_amount).
--- 2. Preserves public.merchant_wallets: available_balance and locked_payout_balance.
--- 3. Retains authoritative global fee slabs:
+-- RESOLUTION:
+-- 1. Preserves the exact 9-parameter signature and all parameter defaults:
+--      (
+--        p_merchant_id UUID,
+--        p_order_id TEXT,
+--        p_amount NUMERIC(12, 2),
+--        p_payout_method TEXT DEFAULT 'UPI',
+--        p_upi_id TEXT DEFAULT NULL,
+--        p_account_holder_name TEXT DEFAULT NULL,
+--        p_bank_account_number TEXT DEFAULT NULL,
+--        p_ifsc_code TEXT DEFAULT NULL,
+--        p_idempotency_key TEXT DEFAULT NULL
+--      )
+-- 2. Replaces the function in-place without dropping it, avoiding any downtime,
+--    preserving dependent permissions, and keeping the function OID intact.
+-- 3. Fixes the wallets table column reference:
+--    - Updates available_balance and total_withdrawn on public.wallets (NOT total_fees_paid).
+--    - Preserves locked_payout_balance and available_balance on public.merchant_wallets.
+-- 4. Preserves authoritative global fee slabs:
 --      ₹1.00 - ₹499.99   -> ₹2.50
 --      ₹500.00 - ₹999.99 -> ₹5.00
 --      ₹1,000.00+        -> ₹10.00
--- 4. Full double-entry audit logging in merchant_ledger_entries and wallet_transactions.
+-- 5. Preserves UPI-only validation, ownership verification, and double-entry auditing.
 -- ==============================================================================
 
 CREATE OR REPLACE FUNCTION public.merchant_initiate_payout_rpc(
     p_merchant_id UUID,
     p_order_id TEXT,
     p_amount NUMERIC(12, 2),
-    p_payout_method TEXT,
-    p_upi_id TEXT,
+    p_payout_method TEXT DEFAULT 'UPI',
+    p_upi_id TEXT DEFAULT NULL,
     p_account_holder_name TEXT DEFAULT NULL,
     p_bank_account_number TEXT DEFAULT NULL,
     p_ifsc_code TEXT DEFAULT NULL,
@@ -52,7 +66,6 @@ DECLARE
     v_bal_before NUMERIC(12, 2);
     v_bal_mid NUMERIC(12, 2);
     v_bal_after NUMERIC(12, 2);
-    v_timestamp_ms BIGINT := (EXTRACT(EPOCH FROM clock_timestamp()) * 1000)::BIGINT;
 BEGIN
     -- A. Strict UPI-Only Architecture Enforcement
     IF (p_payout_method IS NOT NULL AND UPPER(TRIM(p_payout_method)) = 'IMPS')
@@ -132,7 +145,7 @@ BEGIN
         );
     END IF;
 
-    -- H. SHARED WALLET LOCK & DEBIT:
+    -- H. Authoritative User Wallet Lock & Debit:
     SELECT * INTO v_user_wallet
     FROM public.wallets
     WHERE user_id = v_merchant.user_id
@@ -303,6 +316,6 @@ BEGIN
 END;
 $$;
 
--- Security Grants
+-- Security Grants (Matches existing permissions)
 REVOKE ALL ON FUNCTION public.merchant_initiate_payout_rpc(UUID, TEXT, NUMERIC, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.merchant_initiate_payout_rpc(UUID, TEXT, NUMERIC, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT) TO authenticated, service_role;
