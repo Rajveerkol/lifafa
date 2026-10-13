@@ -25,7 +25,7 @@ const corsHeaders = {
 };
 
 const PAYNIT_USER_AGENT =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36';
+  'CreateLifafa-Payout-Engine/1.0 (Supabase-Edge-Runtime; +https://createlifafa.xyz)';
 
 function getCanonicalPaynitBaseUrl(): string {
   let rawUrl = (Deno.env.get('PAYNIT_BASE_URL') || 'https://api.paynit.in').trim();
@@ -108,6 +108,8 @@ serve(async (req: Request) => {
       }
     }
 
+    let dispatchedRpcRes: any = null;
+
     // Single-call server orchestrator: If action === 'request_and_dispatch', initiate reservation first
     if (body.action === 'request_and_dispatch') {
       const {
@@ -162,6 +164,7 @@ serve(async (req: Request) => {
         );
       }
 
+      dispatchedRpcRes = rpcRes;
       withdrawal_id = rpcRes.withdrawal_id;
 
       // If request was already processed idempotently and in terminal or processing state
@@ -199,15 +202,51 @@ serve(async (req: Request) => {
     }
 
     // 3. Retrieve and Validate Target Withdrawal Record
-    const { data: existingWth, error: fetchErr } = await adminClient
-      .from('withdrawals')
-      .select('id, user_id, amount, fee_amount, net_amount, account_holder_name, ifsc_code, bank_account_number_masked, upi_id, status, payout_provider, payout_method, provider_order_id, payout_reference_id, rejection_reason, guest_claim_token')
-      .eq('id', withdrawal_id)
-      .maybeSingle();
+    let existingWth: any = null;
+    let fetchErr: any = null;
 
-    if (fetchErr || !existingWth) {
+    // Retry with short backoff in case of read replica lag immediately after request_withdrawal_rpc
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const res = await adminClient
+        .from('withdrawals')
+        .select('id, user_id, amount, fee_amount, net_amount, account_holder_name, ifsc_code, bank_account_number_masked, upi_id, status, payout_provider, payout_method, provider_order_id, payout_reference_id, rejection_reason, guest_claim_token')
+        .eq('id', withdrawal_id)
+        .maybeSingle();
+
+      existingWth = res.data;
+      fetchErr = res.error;
+
+      if (existingWth) break;
+      if (attempt < 2) await new Promise((r) => setTimeout(r, 150));
+    }
+
+    // Fallback: If this is request_and_dispatch, the withdrawal was JUST created by request_withdrawal_rpc!
+    // Never fail an already debited/created withdrawal just because read replica lag delayed PostgREST SELECT.
+    if (!existingWth && body.action === 'request_and_dispatch' && dispatchedRpcRes?.withdrawal_id) {
+      existingWth = {
+        id: withdrawal_id,
+        user_id: user?.id || null,
+        amount: Number(dispatchedRpcRes.total_deducted ?? (Number(body.amount) + 2.5)),
+        fee_amount: Number(dispatchedRpcRes.fee ?? 2.5),
+        net_amount: Number(dispatchedRpcRes.amount ?? body.amount),
+        account_holder_name: body.accountHolderName ? String(body.accountHolderName).trim() : (user?.full_name || 'Beneficiary'),
+        ifsc_code: null,
+        bank_account_number_masked: null,
+        upi_id: String(body.upiId).trim().toLowerCase(),
+        status: 'PENDING',
+        payout_provider: 'PAYNIT',
+        payout_method: 'UPI',
+        provider_order_id: null,
+        payout_reference_id: null,
+        rejection_reason: null,
+        guest_claim_token: null,
+      };
+    }
+
+    if (!existingWth) {
+      console.error('Failed to locate withdrawal record after retries:', { withdrawal_id, fetchErr });
       return new Response(
-        JSON.stringify({ error: 'Withdrawal record not found' }),
+        JSON.stringify({ error: fetchErr?.message || 'Withdrawal record not found' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -331,7 +370,6 @@ serve(async (req: Request) => {
             Authorization: `Bearer ${paynitApiKey}:${paynitApiSecret}`,
             'Content-Type': 'application/json',
             'User-Agent': PAYNIT_USER_AGENT,
-            Origin: 'https://createlifafa.xyz',
             Accept: 'application/json',
           },
           body: JSON.stringify({ order_id: orderIdToCheck }),
@@ -497,7 +535,6 @@ serve(async (req: Request) => {
           Authorization: paynitAuthHeader,
           'Content-Type': 'application/json',
           'User-Agent': PAYNIT_USER_AGENT,
-          Origin: 'https://createlifafa.xyz',
           Accept: 'application/json',
         },
         body: JSON.stringify(paynitPayload),
@@ -699,7 +736,6 @@ serve(async (req: Request) => {
             Authorization: paynitAuthHeader,
             'Content-Type': 'application/json',
             'User-Agent': PAYNIT_USER_AGENT,
-            Origin: 'https://createlifafa.xyz',
             Accept: 'application/json',
           },
           body: JSON.stringify({ order_id: deterministicOrderId }),

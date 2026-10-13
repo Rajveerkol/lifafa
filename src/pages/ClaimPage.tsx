@@ -685,7 +685,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
 
           {/* External UPI Payout Status: Processing or Failed State */}
           {claimResult && !stage.includes('success') && (
-            claimResult.withdrawalStatus === 'PROCESSING' ? (
+            (claimResult.withdrawalStatus === 'PROCESSING' || claimResult.withdrawalStatus === 'PENDING') ? (
               <div className="bg-white rounded-3xl p-6 shadow-xl border border-amber-100 text-center space-y-5 animate-in zoom-in-95 duration-300">
                 <div className="w-16 h-16 rounded-3xl bg-amber-50 border border-amber-200 text-amber-600 mx-auto flex items-center justify-center shadow-xs">
                   <Clock className="w-8 h-8 text-amber-600 animate-pulse" />

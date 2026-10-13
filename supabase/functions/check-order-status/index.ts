@@ -27,7 +27,7 @@ const corsHeaders = {
 };
 
 const PAYNIT_USER_AGENT =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36';
+  'CreateLifafa-Payout-Engine/1.0 (Supabase-Edge-Runtime; +https://createlifafa.xyz)';
 
 // Activation boundary for automated status-check wallet refunds (ISO 8601).
 // Payouts created BEFORE this timestamp are treated as HISTORICAL transactions
@@ -798,7 +798,6 @@ serve(async (req: Request) => {
             Authorization: paynitAuthHeader,
             'Content-Type': 'application/json',
             'User-Agent': PAYNIT_USER_AGENT,
-            Origin: 'https://createlifafa.xyz',
             Accept: 'application/json',
           },
           body: JSON.stringify({ order_id: paynitLookupId }),
@@ -813,7 +812,6 @@ serve(async (req: Request) => {
               Authorization: paynitAuthHeader,
               'Content-Type': 'application/json',
               'User-Agent': PAYNIT_USER_AGENT,
-              Origin: 'https://createlifafa.xyz',
               Accept: 'application/json',
             },
             body: JSON.stringify({ order_id: paynitLookupId }),

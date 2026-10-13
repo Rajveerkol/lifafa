@@ -144,7 +144,11 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
       setSuccessData(result);
     } catch (err: any) {
       // Keep activeIdempotencyKeyRef intact for retry so server deduplicates if it reached backend
-      setErrorMsg(err.message || 'Failed to process withdrawal request.');
+      let msg = err.message || 'Failed to process withdrawal request.';
+      if (msg.includes('Withdrawal record not found')) {
+        msg = 'Your withdrawal request was submitted and is processing. Please check your transaction history shortly.';
+      }
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }

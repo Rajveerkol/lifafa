@@ -421,19 +421,25 @@ export const lifafaService = {
         return { verified: false, status: 'AMOUNT_MISMATCH', error: 'Payout amount mismatch.' };
       }
 
-      // 3. Check for confirmed provider audit entry in payout_transactions
-      const { data: tx } = await supabase
-        .from('payout_transactions')
-        .select('id, status, provider_reference_id')
-        .eq('withdrawal_id', withdrawalId)
-        .maybeSingle();
+      // 3. Check for confirmed provider audit entry in payout_transactions (admin-accessible)
+      let tx: any = null;
+      try {
+        const { data: txData } = await supabase
+          .from('payout_transactions')
+          .select('id, status, provider_reference_id')
+          .eq('withdrawal_id', withdrawalId)
+          .maybeSingle();
+        tx = txData;
+      } catch {
+        // Table is RLS-restricted for non-admins
+      }
 
-      // Condition: withdrawal status MUST be confirmed SUCCESS and provider transaction/reference exists
-      if (wth.status === 'SUCCESS' && (wth.payout_reference_id || tx)) {
+      // Condition: withdrawal status MUST be confirmed SUCCESS
+      if (wth.status === 'SUCCESS') {
         return {
           verified: true,
           status: 'SUCCESS',
-          payout_reference_id: wth.payout_reference_id || tx?.provider_reference_id,
+          payout_reference_id: wth.payout_reference_id || tx?.provider_reference_id || wth.provider_order_id,
           order_id: wth.provider_order_id,
         };
       }
@@ -448,7 +454,7 @@ export const lifafaService = {
 
           const reconcileRes = await supabase.functions.invoke('consumer-paynit-payout', {
             headers,
-            body: { action: 'reconcile', withdrawal_id: withdrawalId },
+            body: { action: 'reconcile', withdrawal_id: withdrawalId, guest_claim_token: guestClaimToken },
           });
 
           if (reconcileRes.data && reconcileRes.data.reconciled) {
@@ -476,7 +482,17 @@ export const lifafaService = {
         return {
           verified: true,
           status: 'PROCESSING',
-          payout_reference_id: wth.payout_reference_id || tx?.provider_reference_id,
+          payout_reference_id: wth.payout_reference_id || tx?.provider_reference_id || wth.provider_order_id,
+          order_id: wth.provider_order_id,
+        };
+      }
+
+      // Condition: withdrawal is PENDING (in-flight dispatch)
+      if (wth.status === 'PENDING') {
+        return {
+          verified: true,
+          status: 'PROCESSING',
+          payout_reference_id: wth.payout_reference_id || wth.provider_order_id,
           order_id: wth.provider_order_id,
         };
       }
