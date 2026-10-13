@@ -26,6 +26,9 @@ const corsHeaders = {
   'Access-Control-Max-Age': '86400',
 };
 
+const PAYNIT_USER_AGENT =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36';
+
 // Activation boundary for automated status-check wallet refunds (ISO 8601).
 // Payouts created BEFORE this timestamp are treated as HISTORICAL transactions
 // and will NEVER be refunded or modified by this automated check.
@@ -785,7 +788,9 @@ serve(async (req: Request) => {
           headers: {
             Authorization: paynitAuthHeader,
             'Content-Type': 'application/json',
+            'User-Agent': PAYNIT_USER_AGENT,
             Origin: 'https://createlifafa.xyz',
+            Accept: 'application/json',
           },
           body: JSON.stringify({ order_id: paynitLookupId }),
           signal: controller.signal,
@@ -798,7 +803,9 @@ serve(async (req: Request) => {
             headers: {
               Authorization: paynitAuthHeader,
               'Content-Type': 'application/json',
+              'User-Agent': PAYNIT_USER_AGENT,
               Origin: 'https://createlifafa.xyz',
+              Accept: 'application/json',
             },
             body: JSON.stringify({ order_id: paynitLookupId }),
             signal: controller.signal,
@@ -806,7 +813,12 @@ serve(async (req: Request) => {
         }
 
         clearTimeout(timeoutId);
-        paynitData = await paynitRes.json().catch(() => ({}));
+        const rawStatusText = await paynitRes.text().catch(() => '');
+        try {
+          paynitData = JSON.parse(rawStatusText);
+        } catch {
+          paynitData = {};
+        }
       } catch (_networkErr) {
         clearTimeout(timeoutId);
         // FINANCIAL SAFETY RULE: On timeout, network failure, or abort, NEVER auto-refund!

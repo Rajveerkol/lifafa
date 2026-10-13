@@ -2408,7 +2408,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                   )}
                   <div className="flex justify-between">
                     <span className="text-slate-500">Provider:</span>
-                    <strong className="text-slate-900">PayNit</strong>
+                    <strong className="text-slate-900">{selectedPayoutDetail.payout_provider || 'PayNit'}</strong>
                   </div>
                 </div>
 

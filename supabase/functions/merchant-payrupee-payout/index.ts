@@ -22,6 +22,9 @@ const corsHeaders = {
   'Access-Control-Max-Age': '86400',
 };
 
+const PAYNIT_USER_AGENT =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36';
+
 function calculateMerchantPayoutFee(amount: number): number {
   const num = Math.round(Number(amount) * 100) / 100;
   if (isNaN(num) || num <= 0) return 0;
@@ -553,34 +556,42 @@ serve(async (req: Request) => {
     const paynitAuthHeader = `Bearer ${paynitApiKey}:${paynitApiSecret}`;
 
     try {
-      // Primary documented endpoint: /api/v1/payout.php
-      const primaryUrl = `${paynitBaseUrl}/api/v1/payout.php`;
-      paynitRes = await fetch(primaryUrl, {
+      // Documented PayNit endpoint: /v1/payout.php
+      const payoutUrl = `${paynitBaseUrl}/v1/payout.php`;
+      paynitRes = await fetch(payoutUrl, {
         method: 'POST',
         headers: {
           Authorization: paynitAuthHeader,
           'Content-Type': 'application/json',
+          'User-Agent': PAYNIT_USER_AGENT,
+          Origin: 'https://createlifafa.xyz',
+          Accept: 'application/json',
         },
         body: JSON.stringify(paynitPayload),
         signal: controller.signal,
       });
 
-      // If primary endpoint returns 404, fallback to /payout.php
-      if (paynitRes.status === 404) {
-        const fallbackUrl = `${paynitBaseUrl}/payout.php`;
-        paynitRes = await fetch(fallbackUrl, {
-          method: 'POST',
-          headers: {
-            Authorization: paynitAuthHeader,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(paynitPayload),
-          signal: controller.signal,
-        });
-      }
-
       clearTimeout(timeoutId);
-      paynitData = await paynitRes.json().catch(() => ({}));
+      const rawText = await paynitRes.text().catch(() => '');
+      try {
+        paynitData = JSON.parse(rawText);
+      } catch {
+        const isHtml = rawText.includes('<html') || rawText.includes('<!DOCTYPE');
+        if (isHtml) {
+          const titleMatch = rawText.match(/<title>([^<]+)<\/title>/i);
+          const challengeTitle = titleMatch ? titleMatch[1].trim() : 'WAF Challenge';
+          paynitData = {
+            success: false,
+            error: `Hostinger CDN Challenge (${paynitRes.status}): ${challengeTitle}`,
+            is_waf_challenge: true,
+          };
+        } else {
+          paynitData = {
+            success: false,
+            error: rawText.slice(0, 200) || `HTTP ${paynitRes.status}`,
+          };
+        }
+      }
     } catch (netErr: any) {
       clearTimeout(timeoutId);
 

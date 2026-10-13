@@ -24,6 +24,9 @@ const corsHeaders = {
   'Access-Control-Max-Age': '86400',
 };
 
+const PAYNIT_USER_AGENT =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36';
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -324,14 +327,34 @@ serve(async (req: Request) => {
         headers: {
           Authorization: paynitAuthHeader,
           'Content-Type': 'application/json',
+          'User-Agent': PAYNIT_USER_AGENT,
           Origin: 'https://createlifafa.xyz',
+          Accept: 'application/json',
         },
         body: JSON.stringify(paynitPayload),
         signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
-      paynitData = await paynitRes.json().catch(() => ({}));
+      const rawText = await paynitRes.text().catch(() => '');
+      try {
+        paynitData = JSON.parse(rawText);
+      } catch {
+        const isHtml = rawText.includes('<html') || rawText.includes('<!DOCTYPE');
+        if (isHtml) {
+          const titleMatch = rawText.match(/<title>([^<]+)<\/title>/i);
+          const challengeTitle = titleMatch ? titleMatch[1].trim() : 'WAF Challenge';
+          paynitData = {
+            success: false,
+            error: `Hostinger CDN Challenge (${paynitRes.status}): ${challengeTitle}`,
+          };
+        } else {
+          paynitData = {
+            success: false,
+            error: rawText.slice(0, 200) || `HTTP ${paynitRes.status}`,
+          };
+        }
+      }
     } catch (networkErr: any) {
       clearTimeout(timeoutId);
 
