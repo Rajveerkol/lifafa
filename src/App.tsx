@@ -278,7 +278,13 @@ export function App() {
             />
           ) : (
             <LifafaDashboardPage
-              onCreateClick={() => setIsCreatingLifafa(true)}
+              onCreateClick={() => {
+                if (!user) {
+                  setAuthModalOpen(true);
+                } else {
+                  setIsCreatingLifafa(true);
+                }
+              }}
               onClaimClick={handleClaimLifafa}
               onShareClick={handleShareLifafa}
             />

@@ -34,9 +34,10 @@ export const taskService = {
   async verifyAndRecordTask(
     taskId: string,
     lifafaId: string,
-    userId: string,
-    taskType: TaskType,
-    targetUrl?: string | null
+    userId?: string,
+    taskType?: TaskType,
+    targetUrl?: string | null,
+    guestClaimToken?: string
   ): Promise<TaskVerificationResult> {
     if (!isSupabaseConfigured || !supabase) {
       return {
@@ -75,6 +76,7 @@ export const taskService = {
     try {
       const { data, error } = await supabase.rpc('record_engagement_task_completion_rpc', {
         p_task_id: taskId,
+        p_guest_claim_token: guestClaimToken || null,
       });
 
       if (error) {

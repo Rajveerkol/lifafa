@@ -218,7 +218,8 @@ export const lifafaService = {
       bankAccountNumber?: string;
       ifscCode?: string;
       upiId?: string;
-    }
+    },
+    guestClaimToken?: string
   ): Promise<ClaimLifafaResult> {
     if (!isSupabaseConfigured || !supabase) {
       throw new Error('Supabase database is not configured.');
@@ -234,6 +235,7 @@ export const lifafaService = {
       p_bank_account_number: payoutDetails?.bankAccountNumber?.trim() || null,
       p_ifsc_code: payoutDetails?.ifscCode?.trim()?.toUpperCase() || null,
       p_upi_id: payoutDetails?.upiId?.trim()?.toLowerCase() || null,
+      p_guest_claim_token: guestClaimToken || null,
     });
 
     if (error) {
@@ -255,7 +257,7 @@ export const lifafaService = {
         };
       }
 
-      // 1. Obtain fresh access token to avoid 401 Unauthorized
+      // 1. Obtain fresh access token to avoid 401 Unauthorized (optional for guest)
       const token = await getValidAuthToken();
       const headers: Record<string, string> = {};
       if (token) {
@@ -270,6 +272,7 @@ export const lifafaService = {
           headers,
           body: {
             withdrawal_id: data.withdrawal_id,
+            guest_claim_token: guestClaimToken || data?.guest_claim_token || undefined,
           },
         });
         payoutRes = invokeResult.data;
@@ -289,7 +292,8 @@ export const lifafaService = {
       const verifiedCheck = await lifafaService.verifyClaimBankPayout(
         data.withdrawal_id,
         currentUserId || '',
-        data.amount
+        data.amount,
+        guestClaimToken || data?.guest_claim_token
       );
 
       if (verifiedCheck.verified && verifiedCheck.status === 'SUCCESS') {
@@ -328,8 +332,13 @@ export const lifafaService = {
     };
   },
 
-  // Authoritatively verify confirmed UPI payout dispatch state from the database
-  async verifyClaimBankPayout(withdrawalId: string, expectedUserId: string, expectedAmount: number): Promise<{
+  // Authoritatively verify confirmed UPI payout dispatch state from the database or provider
+  async verifyClaimBankPayout(
+    withdrawalId: string,
+    expectedUserId: string,
+    expectedAmount: number,
+    guestClaimToken?: string
+  ): Promise<{
     verified: boolean;
     status: string;
     payout_reference_id?: string;
@@ -338,6 +347,50 @@ export const lifafaService = {
   }> {
     if (!isSupabaseConfigured || !supabase) {
       return { verified: false, status: 'UNKNOWN', error: 'Database not configured' };
+    }
+
+    // Guest claimant verification branch via Edge Function status check
+    if (!expectedUserId && guestClaimToken) {
+      try {
+        const checkRes = await supabase.functions.invoke('consumer-paynit-payout', {
+          body: {
+            action: 'check_status',
+            withdrawal_id: withdrawalId,
+            guest_claim_token: guestClaimToken,
+          },
+        });
+
+        if (checkRes.data) {
+          const res = checkRes.data;
+          if (res.status === 'SUCCESS') {
+            return {
+              verified: true,
+              status: 'SUCCESS',
+              payout_reference_id: res.reference_id,
+              order_id: res.order_id,
+            };
+          }
+          if (res.status === 'PROCESSING') {
+            return {
+              verified: true,
+              status: 'PROCESSING',
+              payout_reference_id: res.reference_id,
+              order_id: res.order_id,
+            };
+          }
+          if (res.status === 'FAILED') {
+            return {
+              verified: false,
+              status: 'FAILED',
+              order_id: res.order_id,
+              error: res.error || 'Payment could not be completed by provider.',
+            };
+          }
+        }
+      } catch (guestErr) {
+        console.error('Guest payout verification check error:', guestErr);
+      }
+      return { verified: true, status: 'PROCESSING' };
     }
 
     try {
@@ -641,5 +694,39 @@ export const lifafaService = {
     }
 
     return (data || null) as LifafaClaim | null;
+  },
+
+  // Authoritatively check if a guest claimant has already claimed a specific Lifafa
+  async getGuestClaimForLifafa(lifafaCode: string, guestClaimToken: string): Promise<{
+    found: boolean;
+    claim_id?: string;
+    amount?: number;
+    payout_mode?: string;
+    withdrawal_id?: string;
+    withdrawal_status?: string;
+    order_id?: string;
+    payout_reference_id?: string;
+    rejection_reason?: string;
+    created_at?: string;
+  } | null> {
+    if (!isSupabaseConfigured || !supabase || !guestClaimToken) {
+      return null;
+    }
+
+    try {
+      const { data, error } = await supabase.rpc('get_guest_claim_status_rpc', {
+        p_lifafa_code: lifafaCode.trim().toUpperCase(),
+        p_guest_claim_token: guestClaimToken.trim(),
+      });
+
+      if (error || !data || !data.found) {
+        return null;
+      }
+
+      return data;
+    } catch (err) {
+      console.error('Error checking guest claim:', err);
+      return null;
+    }
   },
 };

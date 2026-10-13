@@ -64,6 +64,24 @@ function sanitizePayoutErrorMessage(msg?: string | null): string {
   return msg;
 }
 
+function getOrCreateGuestClaimToken(lifafaCode: string): string {
+  if (typeof window === 'undefined') return '';
+  const clean = lifafaCode.trim().toUpperCase();
+  if (!clean) return '';
+  const storageKey = `guest_claim_token_${clean}`;
+  let token = localStorage.getItem(storageKey);
+  if (!token || token.length < 16) {
+    const randomHex = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+    token = `gcl_${Date.now().toString(36)}_${randomHex}`;
+    try {
+      localStorage.setItem(storageKey, token);
+    } catch {}
+  }
+  return token;
+}
+
 export const ClaimPage: React.FC<ClaimPageProps> = ({
   code,
   onNavigateHome,
@@ -72,6 +90,10 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
   onOpenShare,
 }) => {
   const { user, refreshWallet } = useAuth();
+
+  const [guestClaimToken, setGuestClaimToken] = useState<string>(() => {
+    return code ? getOrCreateGuestClaimToken(code) : '';
+  });
 
   const [lifafa, setLifafa] = useState<Lifafa | null>(null);
   const [loadingLifafa, setLoadingLifafa] = useState(true);
@@ -126,15 +148,14 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
     setClaimResult(null);
     setAlreadyClaimed(null);
     setErrorMsg(null);
+    if (code) {
+      setGuestClaimToken(getOrCreateGuestClaimToken(code));
+    }
   }, [code]);
 
   // Unlock Lifafa with secure server-side PIN verification
   const handleUnlockLifafa = async () => {
     if (!lifafa) return;
-    if (!user) {
-      onOpenAuth();
-      return;
-    }
     const cleanPin = pinCode.trim();
     if (!cleanPin) {
       setPinError('Please enter the security PIN.');
@@ -263,6 +284,63 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
             );
             setCompletedTaskIds(verified);
           });
+        } else if (code && guestClaimToken) {
+          // Restore guest completed tasks from localStorage
+          try {
+            const cached = localStorage.getItem(`guest_completed_tasks_${code.toUpperCase()}`);
+            if (cached) {
+              const parsed = JSON.parse(cached);
+              if (Array.isArray(parsed)) {
+                setCompletedTaskIds(new Set(parsed));
+              }
+            }
+          } catch {}
+
+          // Check if guest already claimed this Lifafa
+          lifafaService.getGuestClaimForLifafa(code, guestClaimToken).then(async (existingClaim) => {
+            if (!isMounted || !existingClaim || !existingClaim.found) return;
+            setAlreadyClaimed(existingClaim.amount || null);
+
+            let wthStatus = existingClaim.withdrawal_status || 'SUCCESS';
+            let refId: string | undefined = existingClaim.payout_reference_id;
+            let payoutErr: string | undefined = existingClaim.rejection_reason;
+
+            if (existingClaim.payout_mode === 'UPI_BANK' && existingClaim.withdrawal_id) {
+              try {
+                const verified = await lifafaService.verifyClaimBankPayout(
+                  existingClaim.withdrawal_id,
+                  '',
+                  existingClaim.amount || 0,
+                  guestClaimToken
+                );
+                wthStatus = verified.status || 'PROCESSING';
+                refId = verified.payout_reference_id || refId;
+                payoutErr = verified.error || payoutErr;
+              } catch {
+                wthStatus = 'PROCESSING';
+              }
+            }
+
+            setClaimResult({
+              amount: existingClaim.amount || 0,
+              code: lifafa?.code || code,
+              payoutMode: (existingClaim.payout_mode as PayoutMode) || lifafa?.payout_mode || 'UPI_BANK',
+              payoutDispatched: wthStatus === 'SUCCESS' || wthStatus === 'PROCESSING',
+              withdrawalStatus: wthStatus,
+              payoutError: payoutErr,
+              referenceId: refId,
+            });
+
+            if (wthStatus === 'SUCCESS') {
+              setStage('success');
+            } else if (wthStatus === 'PROCESSING') {
+              setStage('tasks');
+            } else if (wthStatus === 'FAILED') {
+              setStage('upi');
+            } else {
+              setStage('success');
+            }
+          });
         }
       })
       .catch((err) => {
@@ -275,7 +353,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [lifafaId, userId]);
+  }, [lifafaId, userId, code, guestClaimToken]);
 
   const isExpired = lifafa ? formatTimeRemaining(lifafa.expires_at).isExpired : false;
 
@@ -291,7 +369,15 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
   const allRequiredDone = requiredTasks.length === 0 || requiredTasks.every((t) => completedTaskIds.has(t.id));
 
   const handleTaskDone = (taskId: string) => {
-    setCompletedTaskIds((prev) => new Set([...prev, taskId]));
+    setCompletedTaskIds((prev) => {
+      const next = new Set([...prev, taskId]);
+      if (!userId && code) {
+        try {
+          localStorage.setItem(`guest_completed_tasks_${code.toUpperCase()}`, JSON.stringify(Array.from(next)));
+        } catch {}
+      }
+      return next;
+    });
   };
 
   const handleCopyShareUrl = () => {
@@ -302,12 +388,14 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
   };
 
   const handleClaim = async () => {
-    if (!user) {
+    if (!lifafa) return;
+
+    // Enforce login ONLY if Lifafa reward is credited to internal user wallet
+    if (lifafa.payout_mode === 'WALLET' && !user) {
+      setErrorMsg('This Lifafa reward is credited to your Createlifafa wallet balance. Please sign in with Google to claim.');
       onOpenAuth();
       return;
     }
-
-    if (!lifafa) return;
 
     if (user && lifafa.creator_id === user.id) {
       setErrorMsg('Creators cannot claim their own Lifafa.');
@@ -349,7 +437,10 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
       setErrorMsg(null);
 
       const deviceFp = fraudService.getDeviceFingerprint();
-      const idempotencyKey = `claim_${lifafa.id}_${user.id}_${Date.now()}`;
+      const effectiveGuestToken = !user ? (guestClaimToken || getOrCreateGuestClaimToken(lifafa.code)) : undefined;
+      const idempotencyKey = user
+        ? `claim_${lifafa.id}_${user.id}_${Date.now()}`
+        : `claim_${lifafa.id}_guest_${effectiveGuestToken}_${Date.now()}`;
 
       // Authoritative atomic server RPC claim & payout dispatch
       const res = await lifafaService.claimLifafa(
@@ -362,7 +453,8 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
           ? {
               upiId: upiId.trim(),
             }
-          : undefined
+          : undefined,
+        effectiveGuestToken
       );
 
       const isDirectBank = (res.payout_mode || lifafa.payout_mode) === 'UPI_BANK';
@@ -384,7 +476,9 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
         setStage('success');
       }
 
-      await refreshWallet();
+      if (user) {
+        await refreshWallet();
+      }
     } catch (err: any) {
       let rawMsg = err.message || 'Failed to claim Lifafa';
       if (rawMsg.toLowerCase().includes('regular expression') || rawMsg.toLowerCase().includes('repetition count')) {
@@ -623,26 +717,50 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                   <button
                     type="button"
                     onClick={async () => {
-                      if (!lifafa || !userId) return;
+                      if (!lifafa) return;
                       try {
-                        const existingClaim = await lifafaService.getUserClaimForLifafa(lifafa.id, userId);
-                        if (existingClaim?.withdrawal_id) {
-                          const verified = await lifafaService.verifyClaimBankPayout(
-                            existingClaim.withdrawal_id,
-                            userId,
-                            existingClaim.amount
-                          );
-                          if (verified.status === 'SUCCESS') {
-                            setClaimResult((prev) =>
-                              prev ? { ...prev, withdrawalStatus: 'SUCCESS', payoutDispatched: true } : null
+                        if (userId) {
+                          const existingClaim = await lifafaService.getUserClaimForLifafa(lifafa.id, userId);
+                          if (existingClaim?.withdrawal_id) {
+                            const verified = await lifafaService.verifyClaimBankPayout(
+                              existingClaim.withdrawal_id,
+                              userId,
+                              existingClaim.amount
                             );
-                            setStage('success');
-                          } else if (verified.status === 'FAILED') {
-                            setClaimResult((prev) =>
-                              prev
-                                ? { ...prev, withdrawalStatus: 'FAILED', payoutDispatched: false, payoutError: verified.error }
-                                : null
+                            if (verified.status === 'SUCCESS') {
+                              setClaimResult((prev) =>
+                                prev ? { ...prev, withdrawalStatus: 'SUCCESS', payoutDispatched: true } : null
+                              );
+                              setStage('success');
+                            } else if (verified.status === 'FAILED') {
+                              setClaimResult((prev) =>
+                                prev
+                                  ? { ...prev, withdrawalStatus: 'FAILED', payoutDispatched: false, payoutError: verified.error }
+                                  : null
+                              );
+                            }
+                          }
+                        } else if (guestClaimToken) {
+                          const existingClaim = await lifafaService.getGuestClaimForLifafa(lifafa.code, guestClaimToken);
+                          if (existingClaim?.withdrawal_id) {
+                            const verified = await lifafaService.verifyClaimBankPayout(
+                              existingClaim.withdrawal_id,
+                              '',
+                              existingClaim.amount || 0,
+                              guestClaimToken
                             );
+                            if (verified.status === 'SUCCESS') {
+                              setClaimResult((prev) =>
+                                prev ? { ...prev, withdrawalStatus: 'SUCCESS', payoutDispatched: true } : null
+                              );
+                              setStage('success');
+                            } else if (verified.status === 'FAILED') {
+                              setClaimResult((prev) =>
+                                prev
+                                  ? { ...prev, withdrawalStatus: 'FAILED', payoutDispatched: false, payoutError: verified.error }
+                                  : null
+                              );
+                            }
                           }
                         }
                       } catch (err: any) {
@@ -861,6 +979,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                         onCompleted={handleTaskDone}
                         onOpenAuth={onOpenAuth}
                         taskNumber={idx + 1}
+                        guestClaimToken={guestClaimToken}
                       />
                     ))
                   ) : (

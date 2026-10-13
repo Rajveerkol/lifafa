@@ -73,34 +73,9 @@ serve(async (req: Request) => {
       );
     }
 
-    // 1. Authenticate Caller Session
-    const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
-    if (!authHeader || !/^Bearer\s+/i.test(authHeader)) {
-      return new Response(
-        JSON.stringify({ error: 'Missing Authorization Bearer token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
-    const userClient = createClient(supabaseUrl, serviceRoleKey, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
-    });
 
-    const { data: { user }, error: authError } = await adminClient.auth.getUser(token);
-    if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized: Invalid session token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const { data: isAdmin } = await adminClient.rpc('is_admin', {
-      check_user_id: user.id,
-    });
-
-    // 2. Parse and Validate Request Payload
+    // 1. Parse and Validate Request Payload
     let body: any = {};
     try {
       body = await req.json();
@@ -112,6 +87,26 @@ serve(async (req: Request) => {
     }
 
     let withdrawal_id: string | undefined = body?.withdrawal_id;
+
+    // 2. Authenticate Caller Session (if available)
+    const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
+    const token = authHeader && /^Bearer\s+/i.test(authHeader)
+      ? authHeader.replace(/^Bearer\s+/i, '').trim()
+      : null;
+
+    let user: any = null;
+    let isAdmin = false;
+
+    if (token) {
+      const { data: userData, error: authError } = await adminClient.auth.getUser(token);
+      if (!authError && userData?.user) {
+        user = userData.user;
+        const { data: adminFlag } = await adminClient.rpc('is_admin', {
+          check_user_id: user.id,
+        });
+        isAdmin = Boolean(adminFlag);
+      }
+    }
 
     // Single-call server orchestrator: If action === 'request_and_dispatch', initiate reservation first
     if (body.action === 'request_and_dispatch') {
@@ -139,6 +134,17 @@ serve(async (req: Request) => {
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+
+      if (!user || !token) {
+        return new Response(
+          JSON.stringify({ error: 'Authentication required for wallet withdrawal request' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const userClient = createClient(supabaseUrl, serviceRoleKey, {
+        global: { headers: { Authorization: `Bearer ${token}` } },
+      });
 
       const { data: rpcRes, error: rpcErr } = await userClient.rpc('request_withdrawal_rpc', {
         p_amount: Number(amount),
@@ -195,7 +201,7 @@ serve(async (req: Request) => {
     // 3. Retrieve and Validate Target Withdrawal Record
     const { data: existingWth, error: fetchErr } = await adminClient
       .from('withdrawals')
-      .select('id, user_id, amount, fee_amount, net_amount, account_holder_name, ifsc_code, bank_account_number_masked, upi_id, status, payout_provider, payout_method, provider_order_id, payout_reference_id, rejection_reason')
+      .select('id, user_id, amount, fee_amount, net_amount, account_holder_name, ifsc_code, bank_account_number_masked, upi_id, status, payout_provider, payout_method, provider_order_id, payout_reference_id, rejection_reason, guest_claim_token')
       .eq('id', withdrawal_id)
       .maybeSingle();
 
@@ -206,8 +212,18 @@ serve(async (req: Request) => {
       );
     }
 
-    // Authorization: User must own the withdrawal, or caller must be admin
-    if (existingWth.user_id !== user.id && !isAdmin) {
+    // Authorization: User must own the withdrawal, or caller must be admin, or matching guest claim token
+    const isOwner = Boolean(user && existingWth.user_id && existingWth.user_id === user.id);
+    const cleanGuestToken = typeof body.guest_claim_token === 'string' ? body.guest_claim_token.trim() : null;
+    const isAuthorizedGuest = Boolean(
+      existingWth.user_id === null &&
+      cleanGuestToken &&
+      cleanGuestToken.length >= 16 &&
+      existingWth.guest_claim_token &&
+      existingWth.guest_claim_token === cleanGuestToken
+    );
+
+    if (!isOwner && !isAdmin && !isAuthorizedGuest) {
       return new Response(
         JSON.stringify({ error: 'Forbidden: You do not have permission to dispatch this withdrawal' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
