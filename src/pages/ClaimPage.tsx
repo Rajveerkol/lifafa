@@ -645,15 +645,31 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                   </p>
                 </div>
 
-                {onNavigateHome && (
+                <div className="space-y-2 pt-1">
                   <button
                     type="button"
-                    onClick={onNavigateHome}
-                    className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl text-xs shadow-md transition-all cursor-pointer"
+                    onClick={() => {
+                      setClaimResult(null);
+                      setAlreadyClaimed(null);
+                      setErrorMsg(null);
+                      setStage('upi');
+                    }}
+                    className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl text-xs shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
                   >
-                    Back to Home
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Try Again / Re-enter UPI ID</span>
                   </button>
-                )}
+
+                  {onNavigateHome && (
+                    <button
+                      type="button"
+                      onClick={onNavigateHome}
+                      className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs transition-all cursor-pointer"
+                    >
+                      Back to Home
+                    </button>
+                  )}
+                </div>
               </div>
             )
           )}
