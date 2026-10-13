@@ -230,9 +230,144 @@ serve(async (req: Request) => {
       );
     }
 
-    // 4. Concurrently Lock Withdrawal from PENDING -> PROCESSING with deterministic ORD_<withdrawal_id>
-    const deterministicOrderId = `ORD_${withdrawal_id}`;
+    const deterministicOrderId = existingWth.provider_order_id || `ORD_${withdrawal_id}`;
 
+    // 3b. RECONCILIATION PATH: Authoritatively check status with PayNit or reconcile stuck PROCESSING withdrawals
+    if (body.action === 'check_status' || body.action === 'reconcile' || existingWth.status === 'PROCESSING') {
+      const orderIdToCheck = existingWth.payout_reference_id || existingWth.provider_order_id || deterministicOrderId;
+
+      // Check if withdrawal has NO provider reference and its previous log was a connect error
+      const { data: txList } = await adminClient
+        .from('payout_transactions')
+        .select('*')
+        .eq('withdrawal_id', withdrawal_id)
+        .order('created_at', { ascending: false });
+
+      const lastTx = txList && txList.length > 0 ? txList[0] : null;
+      const isKnownConnectFailure = !existingWth.payout_reference_id && lastTx && (
+        lastTx.status === 'NETWORK_TIMEOUT' ||
+        lastTx.status === 'CONNECT_FAILED' ||
+        JSON.stringify(lastTx.raw_payload || {}).includes('Connect') ||
+        JSON.stringify(lastTx.raw_payload || {}).includes('fatal alert') ||
+        JSON.stringify(lastTx.raw_payload || {}).includes('InternalError')
+      );
+
+      // If connection definitively failed before transmission, PayNit NEVER received the request.
+      // Finalize as FAILED via admin_update_withdrawal_rpc to release escrow and allow clean claimant retry.
+      if (isKnownConnectFailure && existingWth.status === 'PROCESSING') {
+        await adminClient.rpc('admin_update_withdrawal_rpc', {
+          p_withdrawal_id: existingWth.id,
+          p_new_status: 'FAILED',
+          p_payout_reference_id: deterministicOrderId,
+          p_rejection_reason: 'Payment provider connection failed before dispatch (TLS/Connect error). Escrow safely refunded.',
+        });
+
+        await adminClient.from('payout_transactions').insert({
+          withdrawal_id: existingWth.id,
+          provider: 'PAYNIT',
+          provider_event_id: `reconcile_conn_fail_${Date.now()}`,
+          provider_reference_id: deterministicOrderId,
+          status: 'RECONCILED_FAILED',
+          raw_payload: { message: 'Reconciled connect failure: provider never received request. Escrow refunded.' },
+        });
+
+        return new Response(
+          JSON.stringify({
+            success: false,
+            status: 'FAILED',
+            order_id: deterministicOrderId,
+            reconciled: true,
+            error: 'Payment provider connection failed before dispatch. Funds have been safely refunded according to platform policy.',
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Query PayNit official status endpoint: POST /v1/status.php
+      let statusData: any = null;
+      let statusRes: Response | null = null;
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        statusRes = await fetch(`${paynitBaseUrl}/v1/status.php`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${paynitApiKey}:${paynitApiSecret}`,
+            'Content-Type': 'application/json',
+            'User-Agent': PAYNIT_USER_AGENT,
+            Origin: 'https://createlifafa.xyz',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({ order_id: orderIdToCheck }),
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+        const rawText = await statusRes.text().catch(() => '');
+        try { statusData = JSON.parse(rawText); } catch { statusData = { raw: rawText }; }
+      } catch (stErr: any) {
+        statusData = { error: stErr.message };
+      }
+
+      const rawStatus = String(statusData?.status || statusData?.transaction?.status || '').toLowerCase();
+      const isConfirmedSuccess = statusRes?.ok && statusData?.success === true && (rawStatus === 'success' || rawStatus === 'processed');
+      const isConfirmedFailure = (statusRes?.ok && statusData?.success === false) || rawStatus === 'failed' || rawStatus === 'rejected';
+
+      if (isConfirmedSuccess) {
+        const confirmedRef = statusData.order_id || statusData.transaction?.order_id || orderIdToCheck;
+        await adminClient.rpc('admin_update_withdrawal_rpc', {
+          p_withdrawal_id: existingWth.id,
+          p_new_status: 'SUCCESS',
+          p_payout_reference_id: confirmedRef,
+        });
+        return new Response(
+          JSON.stringify({
+            success: true,
+            status: 'SUCCESS',
+            order_id: deterministicOrderId,
+            reference_id: confirmedRef,
+            reconciled: true,
+            message: 'Payout verified as SUCCESS via provider status check.',
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (isConfirmedFailure) {
+        const reason = statusData.message || statusData.error || 'Payment failed or not found at provider.';
+        await adminClient.rpc('admin_update_withdrawal_rpc', {
+          p_withdrawal_id: existingWth.id,
+          p_new_status: 'FAILED',
+          p_payout_reference_id: orderIdToCheck,
+          p_rejection_reason: reason,
+        });
+        return new Response(
+          JSON.stringify({
+            success: false,
+            status: 'FAILED',
+            order_id: deterministicOrderId,
+            reconciled: true,
+            error: reason,
+            message: 'Payout confirmed failed by provider. Funds safely refunded.',
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // If status is still genuinely pending with PayNit
+      return new Response(
+        JSON.stringify({
+          success: true,
+          status: 'PROCESSING',
+          order_id: deterministicOrderId,
+          reference_id: orderIdToCheck,
+          reconciled: false,
+          message: 'Payout is still processing with payment provider.',
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // 4. Concurrently Lock Withdrawal from PENDING -> PROCESSING with deterministic ORD_<withdrawal_id>
     const { data: lockedRows, error: lockErr } = await adminClient
       .from('withdrawals')
       .update({
@@ -248,8 +383,6 @@ serve(async (req: Request) => {
     let withdrawal: any = existingWth;
     if (!lockErr && lockedRows && lockedRows.length > 0) {
       withdrawal = lockedRows[0];
-    } else if (existingWth.status === 'PROCESSING') {
-      withdrawal = existingWth;
     } else {
       // Re-fetch in case of concurrent lock race
       const { data: rechecked } = await adminClient
@@ -358,7 +491,47 @@ serve(async (req: Request) => {
     } catch (networkErr: any) {
       clearTimeout(timeoutId);
 
-      // FINANCIAL SAFETY RULE: Network / Timeout MUST retain PROCESSING. NEVER auto-refund!
+      const isConnectError =
+        networkErr.message?.includes('Connect') ||
+        networkErr.message?.includes('fatal alert') ||
+        networkErr.message?.includes('InternalError') ||
+        networkErr.message?.includes('ECONNREFUSED') ||
+        networkErr.message?.includes('ENOTFOUND') ||
+        networkErr.message?.includes('ConnectionRefused');
+
+      if (isConnectError) {
+        // Zero HTTP bytes were transmitted to the provider. Provider NEVER accepted the payout.
+        // Rule: Set PROCESSING only when provider confirmed acceptance.
+        // Therefore, safely finalize as FAILED and refund creator escrow immediately.
+        await adminClient.rpc('admin_update_withdrawal_rpc', {
+          p_withdrawal_id: withdrawal.id,
+          p_new_status: 'FAILED',
+          p_payout_reference_id: deterministicOrderId,
+          p_rejection_reason: `Connection to payment provider failed before dispatch: ${networkErr.message}`,
+        });
+
+        await adminClient.from('payout_transactions').insert({
+          withdrawal_id: withdrawal.id,
+          provider: 'PAYNIT',
+          provider_event_id: `conn_fail_${Date.now()}`,
+          provider_reference_id: deterministicOrderId,
+          status: 'CONNECT_FAILED',
+          raw_payload: { message: networkErr.message, order_id: deterministicOrderId, payload: paynitPayload },
+        });
+
+        return new Response(
+          JSON.stringify({
+            success: false,
+            status: 'FAILED',
+            order_id: deterministicOrderId,
+            amount: payoutAmount,
+            error: `Connection to payment provider failed before dispatch (${networkErr.message}). Escrow has been safely refunded.`,
+          }),
+          { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // FINANCIAL SAFETY RULE: Response read timeout / ambiguous in-flight MUST retain PROCESSING!
       await adminClient.from('payout_transactions').insert({
         withdrawal_id: withdrawal.id,
         provider: 'PAYNIT',

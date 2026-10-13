@@ -387,6 +387,39 @@ export const lifafaService = {
 
       // Condition: withdrawal is PROCESSING (queued with PayNit or awaiting webhook)
       if (wth.status === 'PROCESSING') {
+        // Attempt active server-side reconciliation via consumer-paynit-payout
+        try {
+          const token = await getValidAuthToken();
+          const headers: Record<string, string> = {};
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+
+          const reconcileRes = await supabase.functions.invoke('consumer-paynit-payout', {
+            headers,
+            body: { action: 'reconcile', withdrawal_id: withdrawalId },
+          });
+
+          if (reconcileRes.data && reconcileRes.data.reconciled) {
+            if (reconcileRes.data.status === 'SUCCESS') {
+              return {
+                verified: true,
+                status: 'SUCCESS',
+                payout_reference_id: reconcileRes.data.reference_id,
+                order_id: reconcileRes.data.order_id,
+              };
+            }
+            if (reconcileRes.data.status === 'FAILED') {
+              return {
+                verified: false,
+                status: 'FAILED',
+                order_id: reconcileRes.data.order_id,
+                error: reconcileRes.data.error || 'Payment could not be completed by provider.',
+              };
+            }
+          }
+        } catch {
+          // Fall through to database state on network glitch
+        }
+
         return {
           verified: true,
           status: 'PROCESSING',

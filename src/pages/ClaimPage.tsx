@@ -606,15 +606,52 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                   </div>
                 )}
 
-                {onNavigateHome && (
+                <div className="space-y-2 pt-1">
                   <button
                     type="button"
-                    onClick={onNavigateHome}
-                    className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl text-xs shadow-md transition-all cursor-pointer"
+                    onClick={async () => {
+                      if (!lifafa || !userId) return;
+                      try {
+                        const existingClaim = await lifafaService.getUserClaimForLifafa(lifafa.id, userId);
+                        if (existingClaim?.withdrawal_id) {
+                          const verified = await lifafaService.verifyClaimBankPayout(
+                            existingClaim.withdrawal_id,
+                            userId,
+                            existingClaim.amount
+                          );
+                          if (verified.status === 'SUCCESS') {
+                            setClaimResult((prev) =>
+                              prev ? { ...prev, withdrawalStatus: 'SUCCESS', payoutDispatched: true } : null
+                            );
+                            setStage('success');
+                          } else if (verified.status === 'FAILED') {
+                            setClaimResult((prev) =>
+                              prev
+                                ? { ...prev, withdrawalStatus: 'FAILED', payoutDispatched: false, payoutError: verified.error }
+                                : null
+                            );
+                          }
+                        }
+                      } catch (err: any) {
+                        console.error('Status check error:', err);
+                      }
+                    }}
+                    className="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-2xl text-xs shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
                   >
-                    Done / Back to Home
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Check Payout Status Now</span>
                   </button>
-                )}
+
+                  {onNavigateHome && (
+                    <button
+                      type="button"
+                      onClick={onNavigateHome}
+                      className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs transition-all cursor-pointer"
+                    >
+                      Done / Back to Home
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="bg-white rounded-3xl p-6 shadow-xl border border-rose-100 text-center space-y-5 animate-in zoom-in-95 duration-300">
