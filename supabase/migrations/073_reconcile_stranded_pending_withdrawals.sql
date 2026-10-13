@@ -15,7 +15,7 @@
 -- CONTEXT & ROOT CAUSE:
 -- On 2026-10-13, withdrawals requested through consumer-paynit-payout action
 -- 'request_and_dispatch' executed request_withdrawal_rpc(), which debited the
--- user's wallet balance and created a row in public.withdrawals with status 'PENDING'.
+-- user's wallet available_balance and created a row in public.withdrawals with status 'PENDING'.
 -- Immediately following the RPC commit, a PostgREST GET query attempted to fetch
 -- the record. Due to read-replica replication lag / transient PostgREST lookup lag,
 -- data was returned as null, prompting the function to return:
@@ -25,36 +25,36 @@
 -- while the user's wallet had already been debited.
 -- ==============================================================================
 
--- STEP 1: READ-ONLY AUDIT QUERY (SAFE TO RUN IN DB QUERY CONSOLE)
+-- ==============================================================================
+-- STEP 1: READ-ONLY AUDIT QUERY (SAFE TO RUN IN SUPABASE SQL EDITOR)
 -- Run this query first to inspect all stranded PENDING withdrawals:
-/*
+-- ==============================================================================
+
 SELECT 
     w.id AS withdrawal_id,
     w.user_id,
-    u.email,
-    w.amount,
-    w.fee,
-    (w.amount + COALESCE(w.fee, 0)) AS total_debited,
-    w.payment_method,
+    p.email,
+    p.full_name,
+    w.amount AS total_debited,
+    w.net_amount AS upi_amount,
+    w.fee_amount AS platform_fee,
     w.upi_id,
     w.status,
     w.created_at,
-    w.payout_batch_id,
-    pt.provider_reference,
-    pt.status AS provider_tx_status
+    pt.provider_reference_id
 FROM public.withdrawals w
-LEFT JOIN auth.users u ON u.id = w.user_id
+LEFT JOIN public.profiles p ON p.id = w.user_id
 LEFT JOIN public.payout_transactions pt ON pt.withdrawal_id = w.id
 WHERE w.status = 'PENDING'
-  AND (w.payout_batch_id IS NULL OR w.payout_batch_id LIKE 'BATCH-INIT%')
   AND pt.id IS NULL
 ORDER BY w.created_at DESC;
-*/
 
+-- ==============================================================================
 -- STEP 2: RECONCILIATION FUNCTION (NOT EXECUTED)
--- This function allows an authorized administrator to either:
---   a) Refund the debited amount + fee back to the user's wallet and mark status = 'REJECTED' / 'FAILED'
---   b) Cancel cleanly if no gateway transaction took place
+-- Allows an administrator to atomically refund undispatched withdrawals back
+-- to the user wallet and record the compensating WITHDRAWAL_REVERSAL transaction.
+-- ==============================================================================
+
 CREATE OR REPLACE FUNCTION public.admin_reconcile_stranded_withdrawal(
     p_withdrawal_id UUID,
     p_action TEXT, -- 'REFUND' or 'CANCEL'
@@ -68,8 +68,8 @@ AS $$
 DECLARE
     v_withdrawal RECORD;
     v_wallet RECORD;
-    v_total_refund NUMERIC(14, 2);
-    v_new_balance NUMERIC(14, 2);
+    v_total_refund NUMERIC(12, 2);
+    v_new_balance NUMERIC(12, 2);
     v_existing_provider_tx RECORD;
 BEGIN
     -- Verify caller is admin
@@ -95,21 +95,22 @@ BEGIN
         );
     END IF;
 
-    -- Safety check: Ensure no payout_transaction exists with a provider reference
+    -- Safety check: Ensure no payout_transaction exists with an active provider reference
     SELECT * INTO v_existing_provider_tx
     FROM public.payout_transactions
     WHERE withdrawal_id = p_withdrawal_id
-      AND provider_reference IS NOT NULL
+      AND provider_reference_id IS NOT NULL
       AND status NOT IN ('FAILED', 'REJECTED');
 
     IF FOUND THEN
         RETURN jsonb_build_object(
             'success', false,
-            'error', format('Provider payout already exists with ref: %s. Cannot refund without gateway verification.', v_existing_provider_tx.provider_reference)
+            'error', format('Provider payout already exists with ref: %s. Cannot refund without gateway verification.', v_existing_provider_tx.provider_reference_id)
         );
     END IF;
 
-    v_total_refund := v_withdrawal.amount + COALESCE(v_withdrawal.fee, 0);
+    -- In request_withdrawal_rpc, w.amount is the full debited amount (net_amount + fee_amount)
+    v_total_refund := v_withdrawal.amount;
 
     IF p_action = 'REFUND' THEN
         -- Lock and update wallet balance
@@ -122,50 +123,64 @@ BEGIN
             RETURN jsonb_build_object('success', false, 'error', 'Wallet not found for user');
         END IF;
 
-        v_new_balance := v_wallet.balance + v_total_refund;
+        v_new_balance := v_wallet.available_balance + v_total_refund;
 
+        -- 1. Restore available_balance and adjust total_withdrawn
         UPDATE public.wallets
         SET 
-            balance = v_new_balance,
-            updated_at = NOW()
+            available_balance = v_new_balance,
+            total_withdrawn = GREATEST(0.00, total_withdrawn - v_withdrawal.net_amount),
+            updated_at = TIMEZONE('utc'::text, NOW())
         WHERE user_id = v_withdrawal.user_id;
 
-        -- Record compensating ledger transaction
+        -- 2. Keep merchant_wallets synchronized
+        UPDATE public.merchant_wallets
+        SET 
+            available_balance = v_new_balance,
+            updated_at = TIMEZONE('utc'::text, NOW())
+        WHERE merchant_id IN (SELECT id FROM public.merchants WHERE user_id = v_withdrawal.user_id);
+
+        -- 3. Record compensating ledger transaction
         INSERT INTO public.wallet_transactions (
             wallet_id,
             user_id,
             amount,
             type,
             status,
-            description,
+            reference_type,
+            reference_id,
+            balance_before,
             balance_after,
+            metadata,
             created_at
         ) VALUES (
             v_wallet.id,
             v_withdrawal.user_id,
             v_total_refund,
-            'WITHDRAWAL_REFUND',
-            'COMPLETED',
-            format('Refund for undispatched withdrawal %s: %s', p_withdrawal_id, p_admin_reason),
+            'WITHDRAWAL_REVERSAL',
+            'SUCCESS',
+            'WITHDRAWAL',
+            v_withdrawal.id::text,
+            v_wallet.available_balance,
             v_new_balance,
-            NOW()
+            jsonb_build_object('reason', p_admin_reason, 'withdrawal_id', p_withdrawal_id),
+            TIMEZONE('utc'::text, NOW())
         );
 
-        -- Update withdrawal record
+        -- 4. Update withdrawal record to terminal REJECTED status
         UPDATE public.withdrawals
         SET 
             status = 'REJECTED',
             rejection_reason = p_admin_reason,
-            processed_at = NOW(),
-            updated_at = NOW()
+            processed_at = TIMEZONE('utc'::text, NOW()),
+            updated_at = TIMEZONE('utc'::text, NOW())
         WHERE id = p_withdrawal_id;
 
-        -- If a placeholder payout_transactions record exists, mark it failed
+        -- 5. Mark placeholder payout_transactions if present
         UPDATE public.payout_transactions
         SET 
             status = 'FAILED',
-            failure_reason = p_admin_reason,
-            updated_at = NOW()
+            raw_payload = raw_payload || jsonb_build_object('reconciled_failure', p_admin_reason)
         WHERE withdrawal_id = p_withdrawal_id;
 
         RETURN jsonb_build_object(
@@ -178,12 +193,12 @@ BEGIN
         );
 
     ELSIF p_action = 'CANCEL' THEN
-        -- Mark as cancelled without balance alteration (if balance was not deducted)
+        -- Mark as cancelled without balance alteration
         UPDATE public.withdrawals
         SET 
             status = 'CANCELLED',
             rejection_reason = p_admin_reason,
-            updated_at = NOW()
+            updated_at = TIMEZONE('utc'::text, NOW())
         WHERE id = p_withdrawal_id;
 
         RETURN jsonb_build_object(
@@ -197,8 +212,10 @@ BEGIN
 END;
 $$;
 
--- STEP 3: BATCH RECONCILIATION TEMPLATE (NOT EXECUTED)
--- Once confirmed with PayNit dashboard that the following 9 orders were never dispatched to gateway:
+-- ==============================================================================
+-- STEP 3: BATCH RECONCILIATION SCRIPT TEMPLATE (NOT EXECUTED)
+-- Once confirmed with PayNit dashboard that the following 9 orders were never
+-- dispatched to the gateway:
 --
 -- 1. 59c3bf91-539e-4e64-a069-0fa14c11b84f (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
 -- 2. df8f1b41-11fb-4299-8800-84382e70ec4a (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
