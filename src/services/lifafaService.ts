@@ -317,11 +317,18 @@ export const lifafaService = {
       }
 
       // If payout dispatch failed or was not confirmed:
+      let rawError = verifiedCheck.error || invokeErrorMessage || payoutRes?.error || 'Reward claimed, but direct UPI payout could not be initiated.';
+      if (rawError.includes('Domain validation failed') || rawError.includes('Origin header') || rawError.includes('whitelisted')) {
+        rawError = 'Payment gateway domain security verification check is processing. Your reward is preserved — please tap Try Again below.';
+      } else if (rawError.includes('Hostinger') || rawError.includes('WAF Challenge') || rawError.includes('Checking your browser')) {
+        rawError = 'Payment gateway network challenge encountered. Your claim is preserved and you can try again below.';
+      }
+
       return {
         ...data,
         payout_dispatched: false, // EXPLICITLY FALSE
         withdrawal_status: verifiedCheck.status || payoutRes?.status || 'FAILED',
-        payout_error: verifiedCheck.error || invokeErrorMessage || payoutRes?.error || 'Reward claimed, but direct UPI payout could not be initiated.',
+        payout_error: rawError,
         payout_order_id: verifiedCheck.order_id || payoutRes?.order_id,
       };
     }

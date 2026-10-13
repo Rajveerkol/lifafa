@@ -23,7 +23,15 @@ const corsHeaders = {
 };
 
 const PAYNIT_USER_AGENT =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36';
+  'CreateLifafa-Payout-Engine/1.0 (Supabase-Edge-Runtime; +https://createlifafa.xyz)';
+
+function getCanonicalPaynitOrigin(): string {
+  const envOrigin = Deno.env.get('PAYNIT_ORIGIN') || Deno.env.get('SITE_URL') || '';
+  if (envOrigin.trim()) {
+    return envOrigin.trim().replace(/\/+$/, '');
+  }
+  return 'https://createlifafa.xyz';
+}
 
 function calculateMerchantPayoutFee(amount: number): number {
   const num = Math.round(Number(amount) * 100) / 100;
@@ -72,6 +80,7 @@ serve(async (req: Request) => {
     const paynitApiKey = Deno.env.get('PAYNIT_API_KEY') || '';
     const paynitApiSecret = Deno.env.get('PAYNIT_API_SECRET') || '';
     const paynitBaseUrl = getCanonicalPaynitBaseUrl();
+    const paynitOrigin = getCanonicalPaynitOrigin();
 
     if (!supabaseUrl || !serviceRoleKey) {
       return new Response(
@@ -584,7 +593,8 @@ serve(async (req: Request) => {
           Authorization: paynitAuthHeader,
           'Content-Type': 'application/json',
           'User-Agent': PAYNIT_USER_AGENT,
-          Origin: 'https://createlifafa.xyz',
+          Origin: paynitOrigin,
+          Referer: `${paynitOrigin}/`,
           Accept: 'application/json',
         },
         body: JSON.stringify(paynitPayload),

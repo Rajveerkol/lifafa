@@ -61,6 +61,13 @@ function sanitizePayoutErrorMessage(msg?: string | null): string {
   ) {
     return 'Payment gateway network challenge encountered. Your claim is preserved and you can try again below.';
   }
+  if (
+    msg.includes('Domain validation failed') ||
+    msg.includes('Origin header') ||
+    msg.includes('domain is whitelisted')
+  ) {
+    return 'Payment gateway domain security verification check is processing. Your reward is preserved — please tap Try Again below.';
+  }
   return msg;
 }
 

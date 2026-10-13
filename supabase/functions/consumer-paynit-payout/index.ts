@@ -27,6 +27,14 @@ const corsHeaders = {
 const PAYNIT_USER_AGENT =
   'CreateLifafa-Payout-Engine/1.0 (Supabase-Edge-Runtime; +https://createlifafa.xyz)';
 
+function getCanonicalPaynitOrigin(): string {
+  const envOrigin = Deno.env.get('PAYNIT_ORIGIN') || Deno.env.get('SITE_URL') || '';
+  if (envOrigin.trim()) {
+    return envOrigin.trim().replace(/\/+$/, '');
+  }
+  return 'https://createlifafa.xyz';
+}
+
 function getCanonicalPaynitBaseUrl(): string {
   let rawUrl = (Deno.env.get('PAYNIT_BASE_URL') || 'https://api.paynit.in').trim();
   rawUrl = rawUrl
@@ -58,6 +66,7 @@ serve(async (req: Request) => {
     const paynitApiKey = Deno.env.get('PAYNIT_API_KEY') || '';
     const paynitApiSecret = Deno.env.get('PAYNIT_API_SECRET') || '';
     const paynitBaseUrl = getCanonicalPaynitBaseUrl();
+    const paynitOrigin = getCanonicalPaynitOrigin();
 
     if (!supabaseUrl || !serviceRoleKey) {
       return new Response(
@@ -370,6 +379,8 @@ serve(async (req: Request) => {
             Authorization: `Bearer ${paynitApiKey}:${paynitApiSecret}`,
             'Content-Type': 'application/json',
             'User-Agent': PAYNIT_USER_AGENT,
+            Origin: paynitOrigin,
+            Referer: `${paynitOrigin}/`,
             Accept: 'application/json',
           },
           body: JSON.stringify({ order_id: orderIdToCheck }),
@@ -535,6 +546,8 @@ serve(async (req: Request) => {
           Authorization: paynitAuthHeader,
           'Content-Type': 'application/json',
           'User-Agent': PAYNIT_USER_AGENT,
+          Origin: paynitOrigin,
+          Referer: `${paynitOrigin}/`,
           Accept: 'application/json',
         },
         body: JSON.stringify(paynitPayload),
@@ -736,6 +749,8 @@ serve(async (req: Request) => {
             Authorization: paynitAuthHeader,
             'Content-Type': 'application/json',
             'User-Agent': PAYNIT_USER_AGENT,
+            Origin: paynitOrigin,
+            Referer: `${paynitOrigin}/`,
             Accept: 'application/json',
           },
           body: JSON.stringify({ order_id: deterministicOrderId }),
@@ -853,6 +868,13 @@ serve(async (req: Request) => {
       // Funds definitely did NOT move. Invoke authoritative admin_update_withdrawal_rpc to refund:
       // - User available balance (if Consumer Wallet withdrawal)
       // - Creator reserved balance (if Lifafa claim withdrawal)
+      console.error('PayNit Provider Rejection:', {
+        statusCode,
+        rejectionReason,
+        orderId: deterministicOrderId,
+        paynitData,
+      });
+
       await adminClient.rpc('admin_update_withdrawal_rpc', {
         p_withdrawal_id: withdrawal.id,
         p_new_status: 'FAILED',
@@ -869,14 +891,30 @@ serve(async (req: Request) => {
         raw_payload: { status_code: statusCode, error: rejectionReason, raw: paynitData },
       });
 
+      let clientFacingError = rejectionReason;
+      if (
+        rejectionReason.includes('Domain validation failed') ||
+        rejectionReason.includes('Origin header')
+      ) {
+        clientFacingError =
+          'Payment gateway domain security verification check failed. Please ensure the domain configuration is verified in your provider settings or try again shortly.';
+      } else if (
+        rejectionReason.includes('Hostinger') ||
+        rejectionReason.includes('WAF Challenge') ||
+        rejectionReason.includes('Checking your browser')
+      ) {
+        clientFacingError =
+          'Payment gateway network challenge encountered. Your funds/reward remain safe. Please try again shortly.';
+      }
+
       return new Response(
         JSON.stringify({
           success: false,
           status: 'FAILED',
           order_id: deterministicOrderId,
           amount: payoutAmount,
-          error: rejectionReason,
-          message: 'Payout definitively rejected by PayNit. Funds have been safely refunded according to platform policy.',
+          error: clientFacingError,
+          message: 'Payout was rejected by payment provider. Funds have been safely refunded according to platform policy.',
         }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );

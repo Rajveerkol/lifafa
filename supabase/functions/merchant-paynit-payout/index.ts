@@ -25,6 +25,14 @@ const corsHeaders = {
 const PAYNIT_USER_AGENT =
   'CreateLifafa-Payout-Engine/1.0 (Supabase-Edge-Runtime; +https://createlifafa.xyz)';
 
+function getCanonicalPaynitOrigin(): string {
+  const envOrigin = Deno.env.get('PAYNIT_ORIGIN') || Deno.env.get('SITE_URL') || '';
+  if (envOrigin.trim()) {
+    return envOrigin.trim().replace(/\/+$/, '');
+  }
+  return 'https://createlifafa.xyz';
+}
+
 function calculateMerchantPayoutFee(amount: number): number {
   const num = Math.round(Number(amount) * 100) / 100;
   if (isNaN(num) || num <= 0) return 0;
@@ -628,6 +636,7 @@ async function handleMerchantCheckOrderStatus(
   if (!queryCompleted) {
     try {
       const paynitAuthHeader = `Bearer ${paynitApiKey}:${paynitApiSecret}`;
+      const paynitOrigin = getCanonicalPaynitOrigin();
       let statusUrl = `${paynitBaseUrl}/v1/status.php`;
       paynitRes = await fetch(statusUrl, {
         method: 'POST',
@@ -635,6 +644,8 @@ async function handleMerchantCheckOrderStatus(
           Authorization: paynitAuthHeader,
           'Content-Type': 'application/json',
           'User-Agent': PAYNIT_USER_AGENT,
+          Origin: paynitOrigin,
+          Referer: `${paynitOrigin}/`,
           Accept: 'application/json',
         },
         body: JSON.stringify({ order_id: paynitLookupId }),
@@ -649,6 +660,8 @@ async function handleMerchantCheckOrderStatus(
             Authorization: paynitAuthHeader,
             'Content-Type': 'application/json',
             'User-Agent': PAYNIT_USER_AGENT,
+            Origin: paynitOrigin,
+            Referer: `${paynitOrigin}/`,
             Accept: 'application/json',
           },
           body: JSON.stringify({ order_id: paynitLookupId }),
@@ -876,6 +889,8 @@ serve(async (req: Request) => {
     } catch {
       paynitBaseUrl = 'https://api.paynit.in';
     }
+
+    const paynitOrigin = getCanonicalPaynitOrigin();
 
     if (!supabaseUrl || !serviceRoleKey) {
       return new Response(
@@ -1471,6 +1486,8 @@ serve(async (req: Request) => {
           Authorization: paynitAuthHeader,
           'Content-Type': 'application/json',
           'User-Agent': PAYNIT_USER_AGENT,
+          Origin: paynitOrigin,
+          Referer: `${paynitOrigin}/`,
           Accept: 'application/json',
         },
         body: JSON.stringify(paynitPayload),

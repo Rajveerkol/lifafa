@@ -30,6 +30,26 @@ import type {
 import { formatCurrency } from '../../lib/utils';
 import { TaskCard as ModernTaskCard } from '../../components/lifafa/TaskCard';
 
+function sanitizePayoutErrorMessage(msg?: string | null): string {
+  if (!msg) return 'The UPI payout request could not be completed.';
+  if (
+    msg.includes('Hostinger') ||
+    msg.includes('CDN Challenge') ||
+    msg.includes('Checking your browser') ||
+    msg.includes('WAF Challenge')
+  ) {
+    return 'Payment gateway network challenge encountered. Your claim is preserved and you can try again below.';
+  }
+  if (
+    msg.includes('Domain validation failed') ||
+    msg.includes('Origin header') ||
+    msg.includes('domain is whitelisted')
+  ) {
+    return 'Payment gateway domain security verification check is processing. Your reward is preserved — please tap Try Again below.';
+  }
+  return msg;
+}
+
 export function createThemeComponents(config: ThemeVisualConfig) {
   // 1. Envelope: Approved 3D Hero Card
   const Envelope: React.FC<ThemeEnvelopeProps> = ({
@@ -560,7 +580,7 @@ export function createThemeComponents(config: ThemeVisualConfig) {
             The instant UPI transfer could not be completed by the payment provider.
           </p>
           <p className="text-xs text-slate-500 pt-0.5">
-            {payoutError || 'The UPI payout request could not be completed.'}
+            {sanitizePayoutErrorMessage(payoutError)}
           </p>
         </div>
 

@@ -29,6 +29,14 @@ const corsHeaders = {
 const PAYNIT_USER_AGENT =
   'CreateLifafa-Payout-Engine/1.0 (Supabase-Edge-Runtime; +https://createlifafa.xyz)';
 
+function getCanonicalPaynitOrigin(): string {
+  const envOrigin = Deno.env.get('PAYNIT_ORIGIN') || Deno.env.get('SITE_URL') || '';
+  if (envOrigin.trim()) {
+    return envOrigin.trim().replace(/\/+$/, '');
+  }
+  return 'https://createlifafa.xyz';
+}
+
 // Activation boundary for automated status-check wallet refunds (ISO 8601).
 // Payouts created BEFORE this timestamp are treated as HISTORICAL transactions
 // and will NEVER be refunded or modified by this automated check.
@@ -791,6 +799,7 @@ serve(async (req: Request) => {
     if (!queryCompleted) {
       try {
         const paynitAuthHeader = `Bearer ${paynitApiKey}:${paynitApiSecret}`;
+        const paynitOrigin = getCanonicalPaynitOrigin();
         let statusUrl = `${paynitBaseUrl}/v1/status.php`;
         paynitRes = await fetch(statusUrl, {
           method: 'POST',
@@ -798,6 +807,8 @@ serve(async (req: Request) => {
             Authorization: paynitAuthHeader,
             'Content-Type': 'application/json',
             'User-Agent': PAYNIT_USER_AGENT,
+            Origin: paynitOrigin,
+            Referer: `${paynitOrigin}/`,
             Accept: 'application/json',
           },
           body: JSON.stringify({ order_id: paynitLookupId }),
@@ -812,6 +823,8 @@ serve(async (req: Request) => {
               Authorization: paynitAuthHeader,
               'Content-Type': 'application/json',
               'User-Agent': PAYNIT_USER_AGENT,
+              Origin: paynitOrigin,
+              Referer: `${paynitOrigin}/`,
               Accept: 'application/json',
             },
             body: JSON.stringify({ order_id: paynitLookupId }),
