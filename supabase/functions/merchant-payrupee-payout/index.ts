@@ -41,6 +41,26 @@ async function hashSecret(secret: string): Promise<string> {
     .join('');
 }
 
+function getCanonicalPaynitBaseUrl(): string {
+  let rawUrl = (Deno.env.get('PAYNIT_BASE_URL') || 'https://api.paynit.in').trim();
+  rawUrl = rawUrl
+    .replace(/\/+$/, '')
+    .replace(/\/api\/v1\/?$/, '')
+    .replace(/\/v1\/?$/, '')
+    .replace(/\/api\/?$/, '')
+    .replace(/\/payout\.php\/?$/, '');
+
+  try {
+    const parsed = new URL(rawUrl);
+    if (parsed.hostname === 'paynit.in' || parsed.hostname === 'portal.paynit.in') {
+      parsed.hostname = 'api.paynit.in';
+    }
+    return parsed.origin;
+  } catch {
+    return 'https://api.paynit.in';
+  }
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -51,7 +71,7 @@ serve(async (req: Request) => {
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     const paynitApiKey = Deno.env.get('PAYNIT_API_KEY') || '';
     const paynitApiSecret = Deno.env.get('PAYNIT_API_SECRET') || '';
-    const paynitBaseUrl = (Deno.env.get('PAYNIT_BASE_URL') || 'https://api.paynit.in').replace(/\/$/, '');
+    const paynitBaseUrl = getCanonicalPaynitBaseUrl();
 
     if (!supabaseUrl || !serviceRoleKey) {
       return new Response(
@@ -736,6 +756,44 @@ serve(async (req: Request) => {
           method: method,
           error: rejectionReason,
           message: 'PayNit returned HTTP 5xx. Payout held in PROCESSING state awaiting reconciliation. Locked float is preserved.',
+        }),
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } else if (paynitData.is_waf_challenge === true) {
+      // PayNit CDN / WAF Challenge -> State is UNCERTAIN.
+      // CRITICAL: Hold in PROCESSING. NEVER auto-refund on edge CDN challenge!
+      const rejectionReason = 'PayNit gateway challenge encountered before dispatch';
+
+      await adminClient
+        .from('merchant_payouts')
+        .update({
+          status: 'PROCESSING',
+          payout_provider: 'PAYNIT',
+          rejection_reason: rejectionReason,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('provider_order_id', providerOrderId)
+        .eq('status', 'PENDING');
+
+      await adminClient.from('merchant_payout_events').insert({
+        provider_event_id: `pn_cdn_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        payout_id: payoutId,
+        event_type: 'paynit.cdn_challenge_uncertain',
+        raw_payload: { status: paynitRes.status, body: paynitData, provider_order_id: providerOrderId },
+      });
+
+      return new Response(
+        JSON.stringify({
+          success: false,
+          status: 'PROCESSING',
+          order_id: orderId,
+          provider_order_id: providerOrderId,
+          amount: amount,
+          fee: authoritativeFee,
+          total_debited: totalDebited,
+          method: method,
+          error: rejectionReason,
+          message: 'PayNit gateway challenge encountered. Payout held in PROCESSING state awaiting reconciliation. Locked float is preserved.',
         }),
         { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );

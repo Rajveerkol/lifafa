@@ -462,6 +462,15 @@ serve(async (req: Request) => {
     if (!paynitBaseUrl.startsWith('http')) {
       paynitBaseUrl = 'https://api.paynit.in';
     }
+    try {
+      const parsed = new URL(paynitBaseUrl);
+      if (parsed.hostname === 'paynit.in' || parsed.hostname === 'portal.paynit.in') {
+        parsed.hostname = 'api.paynit.in';
+      }
+      paynitBaseUrl = parsed.origin;
+    } catch {
+      paynitBaseUrl = 'https://api.paynit.in';
+    }
 
     if (!supabaseUrl || !serviceRoleKey) {
       return new Response(

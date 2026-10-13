@@ -27,6 +27,26 @@ const corsHeaders = {
 const PAYNIT_USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36';
 
+function getCanonicalPaynitBaseUrl(): string {
+  let rawUrl = (Deno.env.get('PAYNIT_BASE_URL') || 'https://api.paynit.in').trim();
+  rawUrl = rawUrl
+    .replace(/\/+$/, '')
+    .replace(/\/api\/v1\/?$/, '')
+    .replace(/\/v1\/?$/, '')
+    .replace(/\/api\/?$/, '')
+    .replace(/\/payout\.php\/?$/, '');
+
+  try {
+    const parsed = new URL(rawUrl);
+    if (parsed.hostname === 'paynit.in' || parsed.hostname === 'portal.paynit.in') {
+      parsed.hostname = 'api.paynit.in';
+    }
+    return parsed.origin;
+  } catch {
+    return 'https://api.paynit.in';
+  }
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -37,7 +57,7 @@ serve(async (req: Request) => {
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     const paynitApiKey = Deno.env.get('PAYNIT_API_KEY') || '';
     const paynitApiSecret = Deno.env.get('PAYNIT_API_SECRET') || '';
-    const paynitBaseUrl = (Deno.env.get('PAYNIT_BASE_URL') || 'https://api.paynit.in').replace(/\/$/, '');
+    const paynitBaseUrl = getCanonicalPaynitBaseUrl();
 
     if (!supabaseUrl || !serviceRoleKey) {
       return new Response(
@@ -479,6 +499,7 @@ serve(async (req: Request) => {
           const challengeTitle = titleMatch ? titleMatch[1].trim() : 'WAF Challenge';
           paynitData = {
             success: false,
+            is_waf_challenge: true,
             error: `Hostinger CDN Challenge (${paynitRes.status}): ${challengeTitle}`,
           };
         } else {
@@ -640,6 +661,138 @@ serve(async (req: Request) => {
           amount: payoutAmount,
           error: rejectionReason,
           message: 'PayNit returned HTTP 5xx. Payout held in PROCESSING state awaiting reconciliation.',
+        }),
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } else if (paynitData.is_waf_challenge === true) {
+      // Hostinger CDN / WAF challenged the request at the edge.
+      // PayNit's core payout application did not reject this payout; the request was intercepted at the CDN layer.
+      // MANDATORY SAFETY INVARIANT: Do NOT classify a CDN HTML challenge as a definitive provider payout rejection
+      // unless authoritative transaction status from the provider confirms failure.
+      let statusData: any = null;
+      let statusConfirmedFailure = false;
+      let statusConfirmedSuccess = false;
+      let confirmedRef = deterministicOrderId;
+
+      try {
+        const statusController = new AbortController();
+        const statusTimeout = setTimeout(() => statusController.abort(), 6000);
+        const stRes = await fetch(`${paynitBaseUrl}/v1/status.php`, {
+          method: 'POST',
+          headers: {
+            Authorization: paynitAuthHeader,
+            'Content-Type': 'application/json',
+            'User-Agent': PAYNIT_USER_AGENT,
+            Origin: 'https://createlifafa.xyz',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({ order_id: deterministicOrderId }),
+          signal: statusController.signal,
+        });
+        clearTimeout(statusTimeout);
+        const stRaw = await stRes.text().catch(() => '');
+        try { statusData = JSON.parse(stRaw); } catch { statusData = null; }
+
+        if (statusData && typeof statusData === 'object') {
+          const stStatus = String(statusData?.status || statusData?.transaction?.status || '').toLowerCase();
+          if (stRes.ok && statusData.success === true && (stStatus === 'success' || stStatus === 'processed')) {
+            statusConfirmedSuccess = true;
+            confirmedRef = statusData.order_id || statusData.transaction?.order_id || deterministicOrderId;
+          } else if (
+            statusData.success === false &&
+            (String(statusData.message || statusData.error || '').toLowerCase().includes('not found') ||
+             String(statusData.message || statusData.error || '').toLowerCase().includes('invalid order_id'))
+          ) {
+            // Authoritative confirmation from PayNit database: Order definitely NEVER reached or existed in PayNit!
+            statusConfirmedFailure = true;
+          }
+        }
+      } catch (_stErr) {
+        // Status check timed out or unreachable
+      }
+
+      if (statusConfirmedSuccess) {
+        // Provider actually processed it! Finalize as SUCCESS
+        await adminClient.rpc('admin_update_withdrawal_rpc', {
+          p_withdrawal_id: withdrawal.id,
+          p_new_status: 'SUCCESS',
+          p_payout_reference_id: confirmedRef,
+        });
+
+        await adminClient.from('payout_transactions').insert({
+          withdrawal_id: withdrawal.id,
+          provider: 'PAYNIT',
+          provider_event_id: `pn_cdn_succ_${Date.now()}`,
+          provider_reference_id: confirmedRef,
+          status: 'SUCCESS',
+          raw_payload: statusData,
+        });
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            status: 'SUCCESS',
+            order_id: deterministicOrderId,
+            reference_id: confirmedRef,
+            amount: payoutAmount,
+            message: 'Payout accepted by provider and confirmed successful.',
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (statusConfirmedFailure) {
+        // Provider authoritatively confirmed the order does not exist in their ledger.
+        // It is 100% safe to finalize as FAILED and restore escrow.
+        const cleanFailReason = 'Payment provider gateway network challenge encountered before dispatch. Order not created.';
+        await adminClient.rpc('admin_update_withdrawal_rpc', {
+          p_withdrawal_id: withdrawal.id,
+          p_new_status: 'FAILED',
+          p_payout_reference_id: deterministicOrderId,
+          p_rejection_reason: cleanFailReason,
+        });
+
+        await adminClient.from('payout_transactions').insert({
+          withdrawal_id: withdrawal.id,
+          provider: 'PAYNIT',
+          provider_event_id: `pn_cdn_fail_${Date.now()}`,
+          provider_reference_id: deterministicOrderId,
+          status: 'PROVIDER_REJECTED',
+          raw_payload: { status_code: statusCode, error: rejectionReason, status_data: statusData },
+        });
+
+        return new Response(
+          JSON.stringify({
+            success: false,
+            status: 'FAILED',
+            order_id: deterministicOrderId,
+            amount: payoutAmount,
+            error: cleanFailReason,
+            message: 'Payment gateway challenge prevented dispatch. Payout was not initiated and funds have been safely restored. Please retry.',
+          }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // State is UNCERTAIN: Status check could not confirm outcome.
+      // FINANCIAL SAFETY RULE: Hold in PROCESSING. NEVER auto-refund!
+      await adminClient.from('payout_transactions').insert({
+        withdrawal_id: withdrawal.id,
+        provider: 'PAYNIT',
+        provider_event_id: `pn_cdn_unc_${Date.now()}`,
+        provider_reference_id: deterministicOrderId,
+        status: 'CDN_CHALLENGE_UNCERTAIN',
+        raw_payload: { status_code: statusCode, error: rejectionReason, raw: paynitData },
+      });
+
+      return new Response(
+        JSON.stringify({
+          success: false,
+          status: 'PROCESSING',
+          order_id: deterministicOrderId,
+          amount: payoutAmount,
+          error: 'Payment provider gateway verification in progress.',
+          message: 'Payment provider gateway check in progress. Payout held in PROCESSING state awaiting reconciliation.',
         }),
         { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );

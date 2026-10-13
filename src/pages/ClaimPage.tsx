@@ -51,6 +51,19 @@ interface ClaimPageProps {
 
 type ClaimStage = 'opening' | 'tasks' | 'upi' | 'success';
 
+function sanitizePayoutErrorMessage(msg?: string | null): string {
+  if (!msg) return 'The UPI payout request could not be completed.';
+  if (
+    msg.includes('Hostinger') ||
+    msg.includes('CDN Challenge') ||
+    msg.includes('Checking your browser') ||
+    msg.includes('WAF Challenge')
+  ) {
+    return 'Payment gateway network challenge encountered. Your claim is preserved and you can try again below.';
+  }
+  return msg;
+}
+
 export const ClaimPage: React.FC<ClaimPageProps> = ({
   code,
   onNavigateHome,
@@ -671,7 +684,7 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                     The instant UPI transfer could not be initiated by the payment provider.
                   </p>
                   <p className="text-xs text-slate-500 pt-0.5">
-                    {claimResult.payoutError || 'The UPI payout request could not be completed.'}
+                    {sanitizePayoutErrorMessage(claimResult.payoutError)}
                   </p>
                 </div>
 
