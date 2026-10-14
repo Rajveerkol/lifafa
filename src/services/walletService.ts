@@ -145,18 +145,103 @@ export const walletService = {
     }
 
     if (error) {
-      if (data?.status === 'PROCESSING') {
-        return data;
+      let errorBody: any = null;
+      try {
+        const resp: Response | undefined = error?.context instanceof Response ? error.context : undefined;
+        if (resp) {
+          const cloned = typeof resp.clone === 'function' ? resp.clone() : resp;
+          const text = await cloned.text();
+          if (text) {
+            errorBody = JSON.parse(text);
+          }
+        }
+      } catch {}
+
+      const effectiveData = data || errorBody;
+      if (effectiveData?.status === 'PROCESSING') {
+        return effectiveData;
       }
-      const errMsg = await extractFunctionError(error, data);
+      const errMsg = await extractFunctionError(error, effectiveData);
       throw new Error(errMsg);
     }
 
-    if (data?.error) {
+    if (data?.error && data?.status !== 'PROCESSING') {
       throw new Error(data.error);
     }
 
     return data;
+  },
+
+  // Check withdrawal status and reconcile with payment gateway if PROCESSING
+  async checkWithdrawalStatus(withdrawalId: string): Promise<{
+    status: string;
+    order_id?: string;
+    reference_id?: string;
+    error?: string;
+    reconciled?: boolean;
+    withdrawal?: Withdrawal;
+  }> {
+    if (!isSupabaseConfigured || !supabase || !withdrawalId) {
+      return { status: 'UNKNOWN', error: 'Database not configured or missing withdrawalId' };
+    }
+
+    try {
+      // 1. Authoritative check on database record
+      const { data: wth, error: wthErr } = await supabase
+        .from('withdrawals')
+        .select('*')
+        .eq('id', withdrawalId)
+        .maybeSingle();
+
+      if (wthErr || !wth) {
+        return { status: 'NOT_FOUND', error: wthErr?.message || 'Withdrawal record not found' };
+      }
+
+      // If already terminal, return immediately
+      if (['SUCCESS', 'FAILED', 'REJECTED', 'CANCELLED'].includes(wth.status)) {
+        return {
+          status: wth.status,
+          order_id: wth.provider_order_id,
+          reference_id: wth.payout_reference_id,
+          error: wth.rejection_reason,
+          withdrawal: wth as Withdrawal,
+        };
+      }
+
+      // 2. If status is PROCESSING or PENDING, trigger edge reconciliation check
+      const token = await getValidAuthToken();
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const { data: edgeData, error: edgeErr } = await supabase.functions.invoke('consumer-paynit-payout', {
+        headers,
+        body: {
+          action: 'check_status',
+          withdrawal_id: withdrawalId,
+        },
+      });
+
+      if (!edgeErr && edgeData) {
+        return {
+          status: edgeData.status || wth.status,
+          order_id: edgeData.order_id || wth.provider_order_id,
+          reference_id: edgeData.reference_id || wth.payout_reference_id,
+          error: edgeData.error || wth.rejection_reason,
+          reconciled: Boolean(edgeData.reconciled),
+          withdrawal: wth as Withdrawal,
+        };
+      }
+
+      return {
+        status: wth.status,
+        order_id: wth.provider_order_id,
+        reference_id: wth.payout_reference_id,
+        withdrawal: wth as Withdrawal,
+      };
+    } catch (err: any) {
+      console.warn('Error in checkWithdrawalStatus:', err);
+      return { status: 'PROCESSING', error: err.message };
+    }
   },
 
   // Fetch server-authoritative withdrawable balance breakdown

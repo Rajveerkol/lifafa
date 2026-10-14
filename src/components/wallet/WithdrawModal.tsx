@@ -15,6 +15,8 @@ import {
   Clock,
   ArrowRight,
   Zap,
+  RefreshCw,
+  Loader2,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { walletService } from '../../services/walletService';
@@ -32,8 +34,10 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
   const [amount, setAmount] = useState('');
 
   const [loading, setLoading] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successData, setSuccessData] = useState<any | null>(null);
+  const [activeProcessingWth, setActiveProcessingWth] = useState<any | null>(null);
   const activeIdempotencyKeyRef = useRef<string | null>(null);
 
   const [withdrawableData, setWithdrawableData] = useState<{
@@ -50,8 +54,98 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
     activeIdempotencyKeyRef.current = null;
     setErrorMsg(null);
     setLoading(false);
+    setCheckingStatus(false);
+    setActiveProcessingWth(null);
     onClose();
   };
+
+  const handleCheckStatus = async (targetId?: string) => {
+    const idToCheck = targetId || successData?.withdrawal_id || successData?.id || activeProcessingWth?.id;
+    if (!idToCheck) return;
+
+    try {
+      setCheckingStatus(true);
+      const res = await walletService.checkWithdrawalStatus(idToCheck);
+      if (res && res.status) {
+        if (res.status === 'SUCCESS') {
+          setSuccessData((prev: any) => ({
+            ...(prev || {}),
+            status: 'SUCCESS',
+            amount: prev?.amount || res.withdrawal?.amount,
+            net_amount: prev?.net_amount || res.withdrawal?.net_amount,
+            fee_amount: prev?.fee_amount || res.withdrawal?.fee_amount,
+            upi_id: prev?.upi_id || res.withdrawal?.upi_id,
+            reference_id: res.reference_id || prev?.reference_id,
+            order_id: res.order_id || prev?.order_id,
+          }));
+          setActiveProcessingWth(null);
+          await refreshWallet();
+        } else if (res.status === 'FAILED' || res.status === 'REJECTED') {
+          setSuccessData((prev: any) => ({
+            ...(prev || {}),
+            status: 'FAILED',
+            amount: prev?.amount || res.withdrawal?.amount,
+            net_amount: prev?.net_amount || res.withdrawal?.net_amount,
+            fee_amount: prev?.fee_amount || res.withdrawal?.fee_amount,
+            upi_id: prev?.upi_id || res.withdrawal?.upi_id,
+            error_message: res.error || 'Payment gateway could not complete transfer. Funds have been safely refunded to your wallet.',
+          }));
+          setActiveProcessingWth(null);
+          await refreshWallet();
+        }
+      }
+    } catch (e) {
+      console.warn('Status check failed:', e);
+    } finally {
+      setCheckingStatus(false);
+    }
+  };
+
+  // Automated bounded polling while a withdrawal is in PROCESSING state
+  useEffect(() => {
+    if (!isOpen || !successData || successData.status !== 'PROCESSING') {
+      return;
+    }
+
+    const idToCheck = successData.withdrawal_id || successData.id;
+    if (!idToCheck) return;
+
+    let attempts = 0;
+    const maxAttempts = 8;
+    const interval = setInterval(async () => {
+      attempts++;
+      if (attempts > maxAttempts) {
+        clearInterval(interval);
+        return;
+      }
+
+      try {
+        const res = await walletService.checkWithdrawalStatus(idToCheck);
+        if (res.status === 'SUCCESS') {
+          setSuccessData((prev: any) => ({
+            ...(prev || {}),
+            status: 'SUCCESS',
+            reference_id: res.reference_id || prev?.reference_id,
+            order_id: res.order_id || prev?.order_id,
+          }));
+          await refreshWallet();
+          clearInterval(interval);
+        } else if (res.status === 'FAILED' || res.status === 'REJECTED') {
+          setSuccessData((prev: any) => ({
+            ...(prev || {}),
+            status: 'FAILED',
+            error_message: res.error || 'Payment gateway could not complete transfer. Funds have been safely refunded to your wallet.',
+          }));
+          await refreshWallet();
+          clearInterval(interval);
+        }
+      } catch (e) {
+        console.warn('Auto status poll error:', e);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [isOpen, successData?.status, successData?.withdrawal_id, successData?.id]);
 
   useEffect(() => {
     if (isOpen) {
@@ -67,11 +161,27 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
         .catch((e) => {
           console.error('Failed to fetch withdrawable balance', e);
         });
+
+      // Check if user has an active in-flight processing withdrawal from the last 15 minutes
+      if (user?.id) {
+        walletService.getWithdrawals(user.id).then((wths) => {
+          if (!isMounted || !wths || wths.length === 0) return;
+          const recentProcessing = wths.find((w) => {
+            if (w.status !== 'PROCESSING') return false;
+            const ageMs = Date.now() - new Date(w.created_at).getTime();
+            return ageMs < 15 * 60 * 1000;
+          });
+          if (recentProcessing && !successData) {
+            setActiveProcessingWth(recentProcessing);
+          }
+        }).catch(() => {});
+      }
+
       return () => {
         isMounted = false;
       };
     }
-  }, [isOpen, wallet?.available_balance]);
+  }, [isOpen, wallet?.available_balance, user?.id]);
 
   if (!isOpen) return null;
 
@@ -145,6 +255,24 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
     } catch (err: any) {
       // Keep activeIdempotencyKeyRef intact for retry so server deduplicates if it reached backend
       let msg = err.message || 'Failed to process withdrawal request.';
+      if (
+        msg.includes('Payment provider gateway verification in progress') ||
+        msg.includes('verification in progress') ||
+        msg.includes('held in PROCESSING')
+      ) {
+        activeIdempotencyKeyRef.current = null;
+        setSuccessData({
+          status: 'PROCESSING',
+          amount: numAmount,
+          net_amount: numAmount,
+          fee_amount: currentFee,
+          upi_id: cleanUpi,
+          message: 'Withdrawal request submitted. Payment provider gateway verification in progress.',
+        });
+        await refreshWallet();
+        return;
+      }
+
       if (msg.includes('Withdrawal record not found')) {
         msg = 'Your withdrawal request was submitted and is processing. Please check your transaction history shortly.';
       }
@@ -197,6 +325,31 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
           </div>
         </div>
 
+        {/* Active In-Flight Withdrawal Banner */}
+        {activeProcessingWth && !successData && (
+          <div className="mx-6 mt-4 p-3.5 bg-blue-50 border border-blue-200 rounded-2xl flex items-center justify-between gap-3 text-xs text-blue-900 shadow-xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Clock className="w-5 h-5 text-blue-600 shrink-0 animate-pulse" />
+              <div className="min-w-0">
+                <span className="font-bold block truncate">Withdrawal Currently In-Flight</span>
+                <p className="text-[11px] text-blue-700 leading-snug">
+                  ₹{Number(activeProcessingWth.net_amount || activeProcessingWth.amount).toFixed(2)} to {activeProcessingWth.upi_id}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setSuccessData(activeProcessingWth);
+                handleCheckStatus(activeProcessingWth.id);
+              }}
+              className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shrink-0 cursor-pointer transition-colors shadow-xs"
+            >
+              Check Status
+            </button>
+          </div>
+        )}
+
         {/* Restricted Funds Notice Banner */}
         {withdrawableData.blocked_balance > 0 && !successData && (
           <div className="mx-6 mt-4 p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-2.5 text-xs text-amber-900">
@@ -224,14 +377,19 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
 
             <div>
               <div
-                className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-black uppercase mb-1.5 ${
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase mb-1.5 ${
                   successData.status === 'SUCCESS'
-                    ? 'bg-emerald-100 text-emerald-800'
+                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                     : successData.status === 'FAILED'
-                    ? 'bg-red-100 text-red-800'
-                    : 'bg-amber-100 text-amber-800'
+                    ? 'bg-red-100 text-red-800 border border-red-200'
+                    : 'bg-amber-100 text-amber-800 border border-amber-200'
                 }`}
               >
+                {successData.status === 'SUCCESS' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
+                {successData.status === 'FAILED' && <AlertCircle className="w-3.5 h-3.5 text-red-600" />}
+                {(!successData.status || successData.status === 'PROCESSING') && (
+                  <Clock className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
+                )}
                 <span>Status: {successData.status || 'PROCESSING'}</span>
               </div>
 
@@ -244,10 +402,10 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
               </h4>
               <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
                 {successData.status === 'SUCCESS'
-                  ? `Your transfer of ${formatCurrency(numAmount)} has been credited.`
+                  ? `Your transfer of ${formatCurrency(Number(successData.net_amount || successData.amount || numAmount))} has been credited.`
                   : successData.status === 'FAILED'
                   ? (successData.error_message || 'The payout could not be processed. Your wallet funds were not deducted.')
-                  : `Your transfer of ${formatCurrency(numAmount)} has been submitted to the banking network via PayNit UPI. Amount will be credited to your account within minutes.`}
+                  : `Your transfer of ${formatCurrency(Number(successData.net_amount || successData.amount || numAmount))} has been submitted to the banking network via PayNit UPI. Amount will be credited to your account within minutes.`}
               </p>
             </div>
 
@@ -259,28 +417,68 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
               </div>
               <div className="flex justify-between text-slate-600">
                 <span>Beneficiary UPI ID:</span>
-                <span className="font-mono font-bold text-slate-900">{upiId.trim().toLowerCase()}</span>
+                <span className="font-mono font-bold text-slate-900">
+                  {String(successData.upi_id || upiId).trim().toLowerCase()}
+                </span>
               </div>
+              {(successData.order_id || successData.reference_id) && (
+                <div className="flex justify-between text-slate-600 text-[11px] pt-1 border-t border-slate-200">
+                  <span>Reference ID:</span>
+                  <span className="font-mono font-bold text-slate-900">
+                    {successData.reference_id || successData.order_id}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between text-slate-600 pt-1.5 border-t border-slate-200">
                 <span>Net Transfer Amount:</span>
-                <span className="font-bold text-emerald-700 text-sm">{formatCurrency(numAmount)}</span>
+                <span className="font-bold text-emerald-700 text-sm">
+                  {formatCurrency(Number(successData.net_amount || successData.amount || numAmount))}
+                </span>
               </div>
               <div className="flex justify-between text-slate-500 text-[11px]">
                 <span>Platform Fee:</span>
-                <span>{formatCurrency(currentFee)}</span>
+                <span>{formatCurrency(Number(successData.fee_amount || currentFee))}</span>
               </div>
               <div className="flex justify-between text-slate-900 font-bold text-xs pt-1 border-t border-slate-200">
                 <span>Total Deducted:</span>
-                <span className="text-blue-600">{formatCurrency(totalDeduction)}</span>
+                <span className="text-blue-600">
+                  {formatCurrency(Number(successData.amount || totalDeduction))}
+                </span>
               </div>
             </div>
 
-            <button
-              onClick={handleClose}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-2xl shadow-md text-xs cursor-pointer transition-colors"
-            >
-              Done
-            </button>
+            {/* Actions for Status */}
+            {(!successData.status || successData.status === 'PROCESSING') ? (
+              <div className="space-y-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => handleCheckStatus()}
+                  disabled={checkingStatus}
+                  className="w-full bg-amber-500 hover:bg-amber-600 active:scale-98 disabled:opacity-75 text-slate-950 font-bold py-3.5 rounded-2xl shadow-md text-xs cursor-pointer transition-all flex items-center justify-center gap-2"
+                >
+                  <RefreshCw className={`w-4 h-4 ${checkingStatus ? 'animate-spin' : ''}`} />
+                  <span>{checkingStatus ? 'Checking Gateway Status...' : 'Check Payout Status Now'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-2xl text-xs cursor-pointer transition-colors"
+                >
+                  Close &amp; Check Transaction History
+                </button>
+                <p className="text-[11px] text-slate-400">
+                  Transfers typically settle within 1–5 minutes. You can safely close this window while the network verifies.
+                </p>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleClose}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-2xl shadow-md text-xs cursor-pointer transition-colors"
+              >
+                {successData.status === 'FAILED' ? 'Close & Try Again' : 'Done'}
+              </button>
+            )}
           </div>
         ) : (
           /* WITHDRAWAL FORM (UPI ONLY) */

@@ -41,12 +41,13 @@ SELECT
     w.upi_id,
     w.status,
     w.created_at,
+    pt.status AS payout_tx_status,
     pt.provider_reference_id
 FROM public.withdrawals w
 LEFT JOIN public.profiles p ON p.id = w.user_id
 LEFT JOIN public.payout_transactions pt ON pt.withdrawal_id = w.id
-WHERE w.status = 'PENDING'
-  AND pt.id IS NULL
+WHERE w.status IN ('PENDING', 'PROCESSING')
+  AND (pt.id IS NULL OR pt.status IN ('CDN_CHALLENGE_UNCERTAIN', 'CONNECT_FAILED', 'NETWORK_TIMEOUT'))
 ORDER BY w.created_at DESC;
 
 -- ==============================================================================
@@ -87,11 +88,11 @@ BEGIN
         RETURN jsonb_build_object('success', false, 'error', 'Withdrawal record not found');
     END IF;
 
-    -- Guard: Only allow reconciling PENDING withdrawals
-    IF v_withdrawal.status != 'PENDING' THEN
+    -- Guard: Only allow reconciling PENDING or undispatched PROCESSING withdrawals
+    IF v_withdrawal.status NOT IN ('PENDING', 'PROCESSING') THEN
         RETURN jsonb_build_object(
             'success', false,
-            'error', format('Withdrawal is not in PENDING status (current: %s)', v_withdrawal.status)
+            'error', format('Withdrawal is not in PENDING or PROCESSING status (current: %s)', v_withdrawal.status)
         );
     END IF;
 
@@ -214,18 +215,19 @@ $$;
 
 -- ==============================================================================
 -- STEP 3: BATCH RECONCILIATION SCRIPT TEMPLATE (NOT EXECUTED)
--- Once confirmed with PayNit dashboard that the following 9 orders were never
--- dispatched to the gateway:
+-- Once confirmed with PayNit dashboard that the following 10 orders were never
+-- successfully dispatched to or processed by the gateway:
 --
--- 1. 59c3bf91-539e-4e64-a069-0fa14c11b84f (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
--- 2. df8f1b41-11fb-4299-8800-84382e70ec4a (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
--- 3. d209c7c1-dfa0-4a87-9bc8-5d207ec2d829 (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
--- 4. eb160a35-c335-4ae0-a29d-ee2f15fdf8b1 (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
--- 5. 31d13d7a-425b-4394-bb9e-bf0a2c040d7c (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
--- 6. 30295795-0f6f-40ff-9f4a-ea843be6858e (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
--- 7. 7b5b3f4a-0a79-43c3-b4cf-d61fb3a1213f (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
--- 8. 8472e8d5-1815-4ba5-a6e5-49ce8fb8bf53 (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
--- 9. f16b4b52-e87f-47cf-b499-47007be49033 (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
+-- 1.  59c3bf91-539e-4e64-a069-0fa14c11b84f (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
+-- 2.  df8f1b41-11fb-4299-8800-84382e70ec4a (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
+-- 3.  d209c7c1-dfa0-4a87-9bc8-5d207ec2d829 (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
+-- 4.  eb160a35-c335-4ae0-a29d-ee2f15fdf8b1 (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
+-- 5.  31d13d7a-425b-4394-bb9e-bf0a2c040d7c (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
+-- 6.  30295795-0f6f-40ff-9f4a-ea843be6858e (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
+-- 7.  7b5b3f4a-0a79-43c3-b4cf-d61fb3a1213f (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
+-- 8.  8472e8d5-1815-4ba5-a6e5-49ce8fb8bf53 (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
+-- 9.  f16b4b52-e87f-47cf-b499-47007be49033 (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50)
+-- 10. 8aa0bc43-bb9f-4f2e-a9d3-6b9bb46100c2 (User: 860f19e0-3b75-4b42-91db-dc7a3cf29d9a, Net: 10.00, Fee: 2.50, Status: PROCESSING, PayoutTx: CDN_CHALLENGE_UNCERTAIN)
 --
 -- The administrator can execute:
 /*
@@ -241,11 +243,12 @@ DECLARE
         '30295795-0f6f-40ff-9f4a-ea843be6858e'::uuid,
         '7b5b3f4a-0a79-43c3-b4cf-d61fb3a1213f'::uuid,
         '8472e8d5-1815-4ba5-a6e5-49ce8fb8bf53'::uuid,
-        'f16b4b52-e87f-47cf-b499-47007be49033'::uuid
+        'f16b4b52-e87f-47cf-b499-47007be49033'::uuid,
+        '8aa0bc43-bb9f-4f2e-a9d3-6b9bb46100c2'::uuid
     ];
 BEGIN
     FOREACH r IN ARRAY w_ids LOOP
-        PERFORM public.admin_reconcile_stranded_withdrawal(r, 'REFUND', 'Stranded pending withdrawal due to 2026-10-13 edge lookup lag incident');
+        PERFORM public.admin_reconcile_stranded_withdrawal(r, 'REFUND', 'Stranded withdrawal due to edge CDN challenge / verification incident');
     END LOOP;
 END;
 $$;
