@@ -49,6 +49,54 @@ async function hashSecret(secret: string): Promise<string> {
     .join('');
 }
 
+function extractClientIp(req: Request): string {
+  const rawIp = (
+    req.headers.get('cf-connecting-ip') ||
+    req.headers.get('x-real-ip') ||
+    req.headers.get('x-forwarded-for')?.split(',')[0] ||
+    '127.0.0.1'
+  ).trim();
+
+  let cleanIp = rawIp.replace(/^::ffff:/i, '');
+  if (/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}:[0-9]+$/.test(cleanIp)) {
+    cleanIp = cleanIp.split(':')[0];
+  }
+  return cleanIp;
+}
+
+function isIpWhitelisted(whitelist: any[] | null, clientIp: string): boolean {
+  if (!whitelist || whitelist.length === 0) return true;
+  const normalizedClient = clientIp.trim().toLowerCase();
+
+  return whitelist.some((entry: any) => {
+    let entryIp = String(entry.ip_address || '').trim().toLowerCase();
+    entryIp = entryIp.replace(/\/32$/, '').replace(/\/128$/, '');
+
+    if (entryIp === normalizedClient) return true;
+
+    if (entryIp.includes('/')) {
+      const [subnet, maskStr] = entryIp.split('/');
+      const mask = parseInt(maskStr, 10);
+      if (!isNaN(mask) && mask >= 8 && mask <= 32) {
+        const ipToLong = (ipStr: string) =>
+          ipStr.split('.').reduce((acc, oct) => ((acc << 8) + parseInt(oct, 10)) >>> 0, 0);
+        if (
+          /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/.test(subnet) &&
+          /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/.test(normalizedClient)
+        ) {
+          const subnetLong = ipToLong(subnet);
+          const clientLong = ipToLong(normalizedClient);
+          const bitmask = mask === 0 ? 0 : (~0 << (32 - mask)) >>> 0;
+          if ((subnetLong & bitmask) === (clientLong & bitmask)) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  });
+}
+
 function getCanonicalPaynitBaseUrl(): string {
   let rawUrl = (Deno.env.get('PAYNIT_BASE_URL') || 'https://api.paynit.in').trim();
   rawUrl = rawUrl
@@ -104,11 +152,7 @@ serve(async (req: Request) => {
     const clientSecretHeader = req.headers.get('X-Client-Secret') || req.headers.get('x-client-secret');
     const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
 
-    const clientIp = (
-      req.headers.get('x-forwarded-for')?.split(',')[0] ||
-      req.headers.get('cf-connecting-ip') ||
-      '127.0.0.1'
-    ).trim();
+    const clientIp = extractClientIp(req);
 
     if (clientIdHeader && clientSecretHeader) {
       // API Key Authentication Path
@@ -152,10 +196,13 @@ serve(async (req: Request) => {
         .eq('merchant_id', merchantId);
 
       if (whitelist && whitelist.length > 0) {
-        const allowed = whitelist.some((entry: any) => String(entry.ip_address).trim() === clientIp);
+        const allowed = isIpWhitelisted(whitelist, clientIp);
         if (!allowed) {
           return new Response(
-            JSON.stringify({ error: `Forbidden: Client IP ${clientIp} is not authorized for this merchant` }),
+            JSON.stringify({
+              error: `Forbidden: Client IP ${clientIp} is not authorized for this merchant. Please whitelist ${clientIp} in your Gateway settings.`,
+              client_ip: clientIp,
+            }),
             { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }

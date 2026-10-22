@@ -69,30 +69,35 @@ export const MerchantIpWhitelistManager: React.FC<MerchantIpWhitelistManagerProp
       )}
 
       {/* Add IP Form */}
-      <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-2">
-        <input
-          type="text"
-          required
-          placeholder="e.g. 192.168.1.1 or 35.180.20.10"
-          value={ipAddress}
-          onChange={(e) => setIpAddress(e.target.value)}
-          className="flex-1 px-3 py-1.5 rounded-md border border-slate-300 text-xs font-mono focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden"
-        />
-        <input
-          type="text"
-          placeholder="Server label (optional)"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="sm:w-48 px-3 py-1.5 rounded-md border border-slate-300 text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden"
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="inline-flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium px-4 py-1.5 rounded-md shadow-xs transition-colors cursor-pointer disabled:opacity-50"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>Add IP</span>
-        </button>
+      <form onSubmit={handleAdd} className="space-y-2">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            type="text"
+            required
+            placeholder="e.g. 203.0.113.195 or 2409:4081:... (Public IP)"
+            value={ipAddress}
+            onChange={(e) => setIpAddress(e.target.value)}
+            className="flex-1 px-3 py-1.5 rounded-md border border-slate-300 text-xs font-mono focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden"
+          />
+          <input
+            type="text"
+            placeholder="Server label (optional)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="sm:w-48 px-3 py-1.5 rounded-md border border-slate-300 text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden"
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="inline-flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium px-4 py-1.5 rounded-md shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add IP</span>
+          </button>
+        </div>
+        <p className="text-[11px] text-slate-500">
+          Provide your production server's public outbound IP (e.g. run <code className="bg-slate-100 px-1 py-0.5 rounded text-[10px]">curl ifconfig.me</code> on your server). Do not enter local/private IPs like 192.168.x.x. If your server connects over IPv6, add the IPv6 address.
+        </p>
       </form>
 
       {/* Whitelist items */}

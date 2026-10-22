@@ -169,7 +169,7 @@ export const MerchantApiDocumentation: React.FC = () => {
           <div className="bg-white rounded-b-lg rounded-t-none border border-slate-200 shadow-xs p-5 sm:p-6 space-y-6 -mt-6">
             <div>
               <span className="inline-flex items-center text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 uppercase tracking-wider mb-2">
-                POST /api/v1/payout/status
+                POST /functions/v1/check-order-status
               </span>
               <h3 className="text-base font-semibold text-slate-900">Check Payout Status &amp; Reconcile</h3>
               <p className="text-xs text-slate-500 mt-1 leading-relaxed">
@@ -179,34 +179,14 @@ export const MerchantApiDocumentation: React.FC = () => {
 
             {/* Endpoints Box */}
             <div className="space-y-3">
-              <h4 className="text-xs font-semibold text-slate-900">Endpoints</h4>
+              <h4 className="text-xs font-semibold text-slate-900">Gateway Status Endpoint</h4>
               
-              {/* Documented Public Endpoint */}
+              {/* Live Gateway Edge Function */}
               <div className="p-3.5 bg-slate-900 rounded-lg text-xs font-mono text-slate-200 border border-slate-800 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="px-1.5 py-0.5 rounded bg-blue-600/30 text-blue-300 font-bold text-[10px]">POST</span>
-                    <span className="text-slate-400 text-[11px]">Public Gateway Endpoint:</span>
-                  </div>
-                  <button
-                    onClick={() => handleCopy('https://createlifafa.xyz/api/v1/payout/status', 'ep_pub_status')}
-                    className="flex items-center gap-1 text-[11px] text-slate-300 hover:text-white cursor-pointer"
-                  >
-                    {copiedKey === 'ep_pub_status' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                    <span>{copiedKey === 'ep_pub_status' ? 'Copied' : 'Copy'}</span>
-                  </button>
-                </div>
-                <div className="text-emerald-400 font-semibold break-all text-[12px]">
-                  https://createlifafa.xyz/api/v1/payout/status
-                </div>
-              </div>
-
-              {/* Direct Gateway Edge Function */}
-              <div className="p-3.5 bg-slate-900 rounded-lg text-xs font-mono text-slate-200 border border-slate-800 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="px-1.5 py-0.5 rounded bg-indigo-600/30 text-indigo-300 font-bold text-[10px]">POST</span>
-                    <span className="text-slate-400 text-[11px]">Direct Gateway Edge Function:</span>
+                    <span className="px-1.5 py-0.5 rounded bg-emerald-600/30 text-emerald-300 font-bold text-[10px]">POST</span>
+                    <span className="text-slate-400 text-[11px]">Authoritative Status Check Endpoint:</span>
                   </div>
                   <button
                     onClick={() => handleCopy('https://pxqyeonymwlpiklfyjbb.supabase.co/functions/v1/check-order-status', 'ep_edge_status')}
@@ -216,7 +196,7 @@ export const MerchantApiDocumentation: React.FC = () => {
                     <span>{copiedKey === 'ep_edge_status' ? 'Copied' : 'Copy'}</span>
                   </button>
                 </div>
-                <div className="text-indigo-300 font-semibold break-all text-[12px]">
+                <div className="text-emerald-400 font-semibold break-all text-[12px]">
                   https://pxqyeonymwlpiklfyjbb.supabase.co/functions/v1/check-order-status
                 </div>
               </div>
