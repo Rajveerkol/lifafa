@@ -56,6 +56,7 @@ import { formatCurrency, formatDate } from '../lib/utils';
 import { MerchantOnboardingCard } from '../components/merchant/MerchantOnboardingCard';
 import { AuthModal } from '../components/auth/AuthModal';
 import { MerchantTopUpModal } from '../components/merchant/MerchantTopUpModal';
+import { DepositAdminAssistanceCard } from '../components/common/DepositAdminAssistanceCard';
 import { MerchantNewPayoutModal } from '../components/merchant/MerchantNewPayoutModal';
 import { MerchantApiKeysManager } from '../components/merchant/MerchantApiKeysManager';
 import { MerchantIpWhitelistManager } from '../components/merchant/MerchantIpWhitelistManager';
@@ -1222,6 +1223,9 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
           {/* ======================================================== */}
           {activeSection === 'add-money' && (
             <div className="space-y-6 max-w-4xl mx-auto">
+              {/* Temporary Deposit Assistance Notice */}
+              <DepositAdminAssistanceCard variant="merchant" />
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Left Column: Amount & Live Fee Breakdown */}
                 <div className="bg-white rounded-lg border border-slate-200 shadow-xs p-5 space-y-4">

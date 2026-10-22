@@ -26,6 +26,7 @@ import {
 import { calculateDepositFee } from '../../lib/feeCalculations';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import type { DepositRequest } from '../../types/database';
+import { DepositAdminAssistanceCard } from '../common/DepositAdminAssistanceCard';
 
 interface AddMoneyModalProps {
   isOpen: boolean;
@@ -272,6 +273,9 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
               {/* STEP 1: Select Amount & Pay */}
               {step === 'amount_and_pay' && (
                 <div className="space-y-4">
+                  {/* Temporary Deposit Assistance Notice */}
+                  <DepositAdminAssistanceCard variant="wallet" className="mb-2" />
+
                   {/* Current Balance Overview */}
                   <div className="flex items-center justify-between p-3.5 bg-blue-50/60 rounded-2xl border border-blue-100 text-xs">
                     <span className="text-slate-600 font-medium">Current Available Wallet Balance:</span>

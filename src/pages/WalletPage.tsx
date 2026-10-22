@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { HeroWalletCard } from '../components/wallet/HeroWalletCard';
 import { WithdrawalHistory } from '../components/wallet/WithdrawalHistory';
+import { DepositAdminAssistanceCard } from '../components/common/DepositAdminAssistanceCard';
 import { useAuth } from '../context/AuthContext';
 import { walletService } from '../services/walletService';
 import type { WalletTransaction, Withdrawal, TransactionType } from '../types/database';
@@ -86,6 +87,8 @@ export const WalletPage: React.FC<WalletPageProps> = ({ onOpenWithdraw, onOpenAd
 
   return (
     <div className="space-y-6 pb-20 md:pb-10 max-w-4xl mx-auto">
+      {/* Temporary Deposit Assistance Notice */}
+      <DepositAdminAssistanceCard variant="wallet" />
       {/* 1. Hero Wallet Card */}
       <HeroWalletCard
         onAddMoneyClick={onOpenAddMoney}

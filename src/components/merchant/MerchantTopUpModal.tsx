@@ -8,6 +8,7 @@ import {
   MERCHANT_UPI_SETTINGS_EVENT,
 } from '../../services/merchantGatewayService';
 import { formatCurrency } from '../../lib/utils';
+import { DepositAdminAssistanceCard } from '../common/DepositAdminAssistanceCard';
 
 interface MerchantTopUpModalProps {
   isOpen: boolean;
@@ -142,6 +143,8 @@ export const MerchantTopUpModal: React.FC<MerchantTopUpModalProps> = ({
         </div>
 
         <div className="p-6 max-h-[80vh] overflow-y-auto space-y-4">
+          {/* Temporary Deposit Assistance Notice */}
+          <DepositAdminAssistanceCard variant="merchant" />
           {errorMsg && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-xs text-red-700 font-medium">
               <AlertCircle className="w-4 h-4 shrink-0" />
