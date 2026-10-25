@@ -699,26 +699,40 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
                     <Clock className="w-3.5 h-3.5 text-amber-600" />
-                    <span>UPI Payout Processing</span>
+                    <span>Payout Pending Admin Review</span>
                   </span>
                   <h3 className="text-xl font-black text-slate-900 tracking-tight pt-1">
-                    Reward Claimed — UPI Payout Processing
+                    Reward Claimed — Payout In Review
                   </h3>
-                  <p className="text-xs text-amber-700 font-semibold pt-1">
-                    Your reward of {formatCurrency(claimResult.amount)} is being transferred to {upiId || 'your UPI ID'}.
-                  </p>
-                  <p className="text-xs text-slate-500 pt-0.5">
-                    Payment provider is processing the instant UPI transfer. Payouts typically complete within 1–5 minutes.
+                  <p className="text-xs text-slate-600 pt-1 leading-relaxed">
+                    Your reward of <strong className="text-slate-900 font-bold">{formatCurrency(claimResult.amount)}</strong> has been reserved! Our admin team will verify and transfer the funds to your UPI ID (<span className="font-mono font-bold text-blue-700">{upiId || 'your UPI ID'}</span>) shortly.
                   </p>
                 </div>
 
-                {claimResult.referenceId && (
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center font-mono text-[11px] text-slate-600">
-                    Reference ID: <span className="font-bold text-slate-900">{claimResult.referenceId}</span>
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-left space-y-2 text-xs">
+                  {claimResult.referenceId && (
+                    <div className="flex justify-between items-center text-slate-600">
+                      <span>Request ID:</span>
+                      <span className="font-mono font-bold text-slate-900 select-all">{claimResult.referenceId}</span>
+                    </div>
+                  )}
+                  {upiId && (
+                    <div className="flex justify-between items-center text-slate-600">
+                      <span>Destination UPI:</span>
+                      <span className="font-mono font-bold text-blue-700 select-all">{upiId}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center text-slate-600">
+                    <span>Reward Amount:</span>
+                    <span className="font-bold text-emerald-700">{formatCurrency(claimResult.amount)}</span>
                   </div>
-                )}
+                  <div className="flex justify-between items-center text-slate-600 pt-1 border-t border-slate-200">
+                    <span>Status:</span>
+                    <span className="font-bold text-amber-700">Pending Admin Verification</span>
+                  </div>
+                </div>
 
                 <div className="space-y-2 pt-1">
                   <button
@@ -800,15 +814,12 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                 <div className="space-y-1">
                   <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
                     <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
-                    <span>UPI Payout Failed</span>
+                    <span>UPI Payout Not Approved</span>
                   </span>
                   <h3 className="text-xl font-black text-slate-900 tracking-tight pt-1">
-                    UPI Payout Could Not Be Dispatched
+                    Payout Request Rejected
                   </h3>
                   <p className="text-xs text-rose-600 font-semibold pt-1">
-                    The instant UPI transfer could not be initiated by the payment provider.
-                  </p>
-                  <p className="text-xs text-slate-500 pt-0.5">
                     {sanitizePayoutErrorMessage(claimResult.payoutError)}
                   </p>
                 </div>
@@ -816,25 +827,11 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-left space-y-1 text-xs text-slate-600">
                   <span className="font-bold text-slate-800">What should you do?</span>
                   <p className="leading-relaxed">
-                    Please ensure your UPI ID is active and able to receive payments, then try claiming again or contact support.
+                    Please ensure your UPI ID is active, valid, and able to receive payments, or contact platform support for assistance.
                   </p>
                 </div>
 
                 <div className="space-y-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setClaimResult(null);
-                      setAlreadyClaimed(null);
-                      setErrorMsg(null);
-                      setStage('upi');
-                    }}
-                    className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl text-xs shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    <span>Try Again / Re-enter UPI ID</span>
-                  </button>
-
                   {onNavigateHome && (
                     <button
                       type="button"

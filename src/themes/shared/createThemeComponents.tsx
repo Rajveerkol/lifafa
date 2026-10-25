@@ -490,7 +490,8 @@ export function createThemeComponents(config: ThemeVisualConfig) {
     payoutReferenceId,
   }) => {
     const isDirectBank = payoutMode === 'UPI_BANK';
-    const isBankSuccess = isDirectBank && payoutDispatched === true && withdrawalStatus === 'SUCCESS';
+    const isBankSuccess = isDirectBank && withdrawalStatus === 'SUCCESS';
+    const isBankPending = isDirectBank && (withdrawalStatus === 'PENDING' || withdrawalStatus === 'PROCESSING' || !withdrawalStatus);
     const isWalletSuccess = !isDirectBank;
     const isFullySuccessful = isBankSuccess || isWalletSuccess;
 
@@ -508,7 +509,7 @@ export function createThemeComponents(config: ThemeVisualConfig) {
           <div className="space-y-1">
             <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/80">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>{isDirectBank ? 'Payment Completed' : 'Reward Claimed Successfully!'}</span>
+              <span>{isDirectBank ? 'Payment Transferred!' : 'Reward Claimed Successfully!'}</span>
             </span>
             <h3 className="text-2xl font-black text-slate-900 tracking-tight pt-1">
               Congratulations!
@@ -525,12 +526,12 @@ export function createThemeComponents(config: ThemeVisualConfig) {
             </span>
             <p className="text-xs font-semibold mt-1 text-emerald-600">
               {isDirectBank
-                ? 'Dispatched directly to Bank Account!'
+                ? 'Transferred directly to your UPI ID!'
                 : 'Credited instantly to your Createlifafa Wallet!'}
             </p>
             {payoutReferenceId && (
               <p className="text-[10px] text-slate-400 font-mono mt-1">
-                Ref: {payoutReferenceId}
+                Ref / UTR: {payoutReferenceId}
               </p>
             )}
           </div>
@@ -561,7 +562,77 @@ export function createThemeComponents(config: ThemeVisualConfig) {
       );
     }
 
-    // PAYOUT FAILURE / UNCONFIRMED STATE: Reward claimed/allocated, but UPI payout dispatch failed
+    // PENDING MANUAL PROCESSING STATE: Reward claimed & registered in PostgreSQL, awaiting admin transfer
+    if (isBankPending) {
+      return (
+        <div className="bg-white rounded-3xl p-6 shadow-xl border border-amber-100 text-center space-y-5 animate-in zoom-in-95 duration-300">
+          <div className="w-16 h-16 rounded-3xl bg-amber-50 border border-amber-200 text-amber-600 mx-auto flex items-center justify-center shadow-xs">
+            <Clock className="w-8 h-8 text-amber-600 animate-pulse" />
+          </div>
+
+          <div className="space-y-1">
+            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
+              <Clock className="w-3.5 h-3.5 text-amber-600" />
+              <span>Payout Pending Review</span>
+            </span>
+            <h3 className="text-xl font-black text-slate-900 tracking-tight pt-1">
+              Reward Claimed — Payout In Review
+            </h3>
+            <p className="text-xs text-slate-600 pt-1 leading-relaxed">
+              Your reward of <strong className="text-slate-900 font-bold">{formatCurrency(amount)}</strong> has been reserved! Our admin team will verify the claim and transfer the funds to your UPI ID shortly.
+            </p>
+          </div>
+
+          {/* Amount & Request Details */}
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-left space-y-2 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+                Reward Amount
+              </span>
+              <span className="text-lg font-black text-slate-900">
+                {formatCurrency(amount)}
+              </span>
+            </div>
+            {payoutReferenceId && (
+              <div className="flex items-center justify-between text-slate-600 font-mono text-[11px] pt-1 border-t border-slate-200">
+                <span>Request ID:</span>
+                <span className="font-bold text-slate-900 select-all">{payoutReferenceId}</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between text-slate-600 text-[11px]">
+              <span>Status:</span>
+              <span className="font-bold text-amber-700">Pending Admin Verification</span>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="space-y-2 pt-1">
+            {onOpenShare && (
+              <button
+                type="button"
+                onClick={() => onOpenShare(lifafa)}
+                className={`w-full py-3.5 ${config.ctaGradient} text-white font-bold rounded-2xl text-xs shadow-md ${config.ctaShadow} flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer`}
+              >
+                <Share2 className="w-4 h-4" />
+                <span>Share This Lifafa With Friends</span>
+              </button>
+            )}
+
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full py-2.5 text-slate-500 hover:text-slate-800 text-xs font-bold transition-colors cursor-pointer"
+              >
+                Done / Back to Home
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // PAYOUT REJECTED STATE: Admin rejected payout request with reason
     return (
       <div className="bg-white rounded-3xl p-6 shadow-xl border border-rose-100 text-center space-y-5 animate-in zoom-in-95 duration-300">
         <div className="w-16 h-16 rounded-3xl bg-rose-50 border border-rose-200 text-rose-500 mx-auto flex items-center justify-center shadow-xs">
@@ -571,16 +642,13 @@ export function createThemeComponents(config: ThemeVisualConfig) {
         <div className="space-y-1">
           <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
             <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
-            <span>UPI Payout Failed</span>
+            <span>UPI Payout Rejected</span>
           </span>
           <h3 className="text-xl font-black text-slate-900 tracking-tight pt-1">
-            UPI Payout Could Not Be Dispatched
+            Payout Request Not Approved
           </h3>
           <p className="text-xs text-rose-600 font-semibold pt-1">
-            The instant UPI transfer could not be completed by the payment provider.
-          </p>
-          <p className="text-xs text-slate-500 pt-0.5">
-            {sanitizePayoutErrorMessage(payoutError)}
+            {payoutError || 'The payout request could not be approved by platform administration.'}
           </p>
         </div>
 
@@ -595,7 +663,7 @@ export function createThemeComponents(config: ThemeVisualConfig) {
             </span>
           </div>
           <p className="text-xs text-slate-600 leading-relaxed">
-            Please verify that your UPI ID is active and can receive incoming transfers, or reach out to platform support.
+            Please ensure your UPI ID is valid, active, and able to receive transfers, or reach out to platform support.
           </p>
         </div>
 

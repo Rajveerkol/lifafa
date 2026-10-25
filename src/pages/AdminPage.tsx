@@ -443,9 +443,11 @@ export const AdminPage: React.FC = () => {
     }
   };
 
-  const handleWithdrawalStatusUpdate = async (wId: string, status: any, reason?: string) => {
+  const handleWithdrawalStatusUpdate = async (wId: string, status: any, refOrReason?: string) => {
     try {
-      await adminService.updateWithdrawalStatus(wId, status, `ADMIN_${Date.now()}`, reason);
+      const payoutRef = status === 'SUCCESS' ? (refOrReason || `MANUAL_${Date.now()}`) : undefined;
+      const rejectionReason = status === 'FAILED' ? (refOrReason || 'Administrative cancellation') : undefined;
+      await adminService.updateWithdrawalStatus(wId, status, payoutRef, rejectionReason);
       await loadData();
     } catch (err: any) {
       alert(err.message || 'Status update failed');
@@ -1475,6 +1477,18 @@ export const AdminPage: React.FC = () => {
 
                     {w.status === 'PENDING' && (
                       <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => {
+                            const ref = prompt('Enter Bank/UPI Reference (UTR) for this manual payout (optional):');
+                            if (ref !== null) {
+                              handleWithdrawalStatusUpdate(w.id, 'SUCCESS', ref.trim() || undefined);
+                            }
+                          }}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1.5 rounded-xl text-[11px]"
+                          title="Mark withdrawal as paid manually"
+                        >
+                          Mark Paid
+                        </button>
                         <button
                           onClick={() => handleDispatchPendingPayout(w.id)}
                           className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-2.5 py-1.5 rounded-xl text-[11px]"

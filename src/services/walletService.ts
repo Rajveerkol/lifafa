@@ -48,8 +48,7 @@ export const walletService = {
     return (data || []) as WalletTransaction[];
   },
 
-  // Request withdrawal via server-side orchestrator Edge Function (UPI via PayNit)
-  // Dedicated endpoint: consumer-paynit-payout
+  // Request manual wallet withdrawal via PostgreSQL RPC (status: PENDING)
   async requestWithdrawal(params: RequestWithdrawalParams, idempotencyKey?: string) {
     if (!isSupabaseConfigured || !supabase) {
       throw new Error('Supabase database is not configured.');
@@ -65,114 +64,31 @@ export const walletService = {
       throw new Error('UPI ID is required for withdrawal.');
     }
 
-    // 1. Proactively obtain fresh valid access token with auto-refresh
-    let token = await getValidAuthToken();
-    if (!token) {
-      try {
-        const { data: refreshData } = await supabase.auth.refreshSession();
-        token = refreshData?.session?.access_token || null;
-      } catch (authErr) {
-        console.warn('Session refresh attempt failed:', authErr);
-      }
+    const { data: rpcRes, error: rpcErr } = await supabase.rpc('request_withdrawal_rpc', {
+      p_amount: params.amount,
+      p_account_holder_name: params.accountHolderName?.trim() || null,
+      p_bank_account_number: null,
+      p_ifsc_code: null,
+      p_upi_id: cleanUpi,
+      p_idempotency_key: idempotencyKey || null,
+    });
+
+    if (rpcErr) {
+      throw new Error(rpcErr.message || 'Failed to submit withdrawal request.');
     }
 
-    if (!token) {
-      throw new Error('Your session expired. Please sign in again.');
-    }
-
-    // Standard allowed headers:
-    // Do NOT send custom non-standard headers like 'x-idempotency-key' here because Edge Function CORS
-    // restricts non-standard headers in browser preflight. The idempotencyKey is transmitted
-    // authoritatively inside the request body payload.
-    const headers: Record<string, string> = {
-      Authorization: `Bearer ${token}`,
-    };
-
-    const payload = {
-      action: 'request_and_dispatch',
+    return {
+      success: true,
+      withdrawal_id: rpcRes?.withdrawal_id,
       amount: params.amount,
-      payoutMethod: 'UPI',
-      upiId: cleanUpi,
-      accountHolderName: params.accountHolderName?.trim() || null,
-      idempotencyKey: idempotencyKey || null,
+      net_amount: params.amount,
+      upi_id: cleanUpi,
+      status: 'PENDING',
+      message: 'Withdrawal request submitted successfully and is awaiting manual administrator verification.',
     };
-
-    let data: any = null;
-    let error: any = null;
-
-    try {
-      const invokeResult = await supabase.functions.invoke('consumer-paynit-payout', {
-        headers,
-        body: payload,
-      });
-      data = invokeResult.data;
-      error = invokeResult.error;
-    } catch (invokeErr: any) {
-      error = invokeErr;
-    }
-
-    // Fallback: If FunctionsFetchError occurred (network/transport quirk), attempt standard direct fetch
-    if (error && (error.name === 'FunctionsFetchError' || error.message?.includes('Failed to send a request'))) {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-      if (supabaseUrl && typeof window !== 'undefined' && typeof window.fetch === 'function') {
-        try {
-          const directResp = await window.fetch(
-            `${supabaseUrl}/functions/v1/consumer-paynit-payout`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                apikey: supabaseAnonKey || '',
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify(payload),
-            }
-          );
-
-          const directData = await directResp.json().catch(() => null);
-          if (directResp.ok) {
-            data = directData;
-            error = null;
-          } else {
-            data = directData;
-            error = new Error(directData?.error || `Service returned HTTP ${directResp.status}`);
-          }
-        } catch (directErr: any) {
-          console.warn('Direct fetch fallback also failed:', directErr);
-        }
-      }
-    }
-
-    if (error) {
-      let errorBody: any = null;
-      try {
-        const resp: Response | undefined = error?.context instanceof Response ? error.context : undefined;
-        if (resp) {
-          const cloned = typeof resp.clone === 'function' ? resp.clone() : resp;
-          const text = await cloned.text();
-          if (text) {
-            errorBody = JSON.parse(text);
-          }
-        }
-      } catch {}
-
-      const effectiveData = data || errorBody;
-      if (effectiveData?.status === 'PROCESSING') {
-        return effectiveData;
-      }
-      const errMsg = await extractFunctionError(error, effectiveData);
-      throw new Error(errMsg);
-    }
-
-    if (data?.error && data?.status !== 'PROCESSING') {
-      throw new Error(data.error);
-    }
-
-    return data;
   },
 
-  // Check withdrawal status and reconcile with payment gateway if PROCESSING
+  // Check withdrawal status authoritatively from PostgreSQL database
   async checkWithdrawalStatus(withdrawalId: string): Promise<{
     status: string;
     order_id?: string;
@@ -186,7 +102,7 @@ export const walletService = {
     }
 
     try {
-      // 1. Authoritative check on database record
+      // Authoritative check on database record
       const { data: wth, error: wthErr } = await supabase
         .from('withdrawals')
         .select('*')
@@ -197,45 +113,11 @@ export const walletService = {
         return { status: 'NOT_FOUND', error: wthErr?.message || 'Withdrawal record not found' };
       }
 
-      // If already terminal, return immediately
-      if (['SUCCESS', 'FAILED', 'REJECTED', 'CANCELLED'].includes(wth.status)) {
-        return {
-          status: wth.status,
-          order_id: wth.provider_order_id,
-          reference_id: wth.payout_reference_id,
-          error: wth.rejection_reason,
-          withdrawal: wth as Withdrawal,
-        };
-      }
-
-      // 2. If status is PROCESSING or PENDING, trigger edge reconciliation check
-      const token = await getValidAuthToken();
-      const headers: Record<string, string> = {};
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
-      const { data: edgeData, error: edgeErr } = await supabase.functions.invoke('consumer-paynit-payout', {
-        headers,
-        body: {
-          action: 'check_status',
-          withdrawal_id: withdrawalId,
-        },
-      });
-
-      if (!edgeErr && edgeData) {
-        return {
-          status: edgeData.status || wth.status,
-          order_id: edgeData.order_id || wth.provider_order_id,
-          reference_id: edgeData.reference_id || wth.payout_reference_id,
-          error: edgeData.error || wth.rejection_reason,
-          reconciled: Boolean(edgeData.reconciled),
-          withdrawal: wth as Withdrawal,
-        };
-      }
-
       return {
-        status: wth.status,
-        order_id: wth.provider_order_id,
-        reference_id: wth.payout_reference_id,
+        status: wth.status || 'PENDING',
+        order_id: wth.provider_order_id || wth.id,
+        reference_id: wth.payout_reference_id || wth.id,
+        error: wth.rejection_reason || undefined,
         withdrawal: wth as Withdrawal,
       };
     } catch (err: any) {

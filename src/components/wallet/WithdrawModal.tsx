@@ -387,25 +387,25 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
               >
                 {successData.status === 'SUCCESS' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
                 {successData.status === 'FAILED' && <AlertCircle className="w-3.5 h-3.5 text-red-600" />}
-                {(!successData.status || successData.status === 'PROCESSING') && (
+                {(!successData.status || successData.status === 'PROCESSING' || successData.status === 'PENDING') && (
                   <Clock className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
                 )}
-                <span>Status: {successData.status || 'PROCESSING'}</span>
+                <span>Status: {successData.status === 'PENDING' ? 'PENDING REVIEW' : successData.status || 'PROCESSING'}</span>
               </div>
 
               <h4 className="text-lg font-black text-slate-900">
                 {successData.status === 'SUCCESS'
-                  ? 'Withdrawal Dispatched Successfully!'
+                  ? 'Withdrawal Paid Successfully!'
                   : successData.status === 'FAILED'
                   ? 'Withdrawal Failed'
-                  : 'Payout In Progress (UPI)'}
+                  : 'Withdrawal Request Submitted'}
               </h4>
               <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
                 {successData.status === 'SUCCESS'
-                  ? `Your transfer of ${formatCurrency(Number(successData.net_amount || successData.amount || numAmount))} has been credited.`
+                  ? `Your transfer of ${formatCurrency(Number(successData.net_amount || successData.amount || numAmount))} has been sent to your UPI ID.`
                   : successData.status === 'FAILED'
                   ? (successData.error_message || 'The payout could not be processed. Your wallet funds were not deducted.')
-                  : `Your transfer of ${formatCurrency(Number(successData.net_amount || successData.amount || numAmount))} has been submitted to the banking network via PayNit UPI. Amount will be credited to your account within minutes.`}
+                  : `Your withdrawal request of ${formatCurrency(Number(successData.net_amount || successData.amount || numAmount))} has been submitted. Our admin team will verify and transfer the funds to your UPI ID shortly.`}
               </p>
             </div>
 
@@ -542,7 +542,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
                 />
               </div>
               <p className="text-[10px] text-slate-400 mt-1">
-                Funds will be deposited directly to your UPI linked bank account via PayNit.
+                Funds will be transferred directly to your UPI ID following administrator verification.
               </p>
             </div>
 
