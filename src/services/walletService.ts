@@ -336,18 +336,26 @@ export const walletService = {
   },
 
   // Submit manual UPI deposit request with authoritative server validation
-  async submitDepositRequest(amount: number, utrNumber: string) {
+  async submitDepositRequest(amount: number, utrNumber: string, paymentMethod: string = 'UPI') {
     if (!isSupabaseConfigured || !supabase) {
       throw new Error('Supabase database is not configured.');
     }
 
+    const cleanAmount = Math.round(Number(amount) * 100) / 100;
+    const cleanUtr = utrNumber.trim().toUpperCase();
+
     const { data, error } = await supabase.rpc('submit_deposit_request_rpc', {
-      p_amount: amount,
-      p_utr_number: utrNumber.trim(),
+      p_amount: cleanAmount,
+      p_utr_number: cleanUtr,
+      p_payment_method: paymentMethod,
     });
 
     if (error) {
       throw new Error(error.message || 'Failed to submit deposit request.');
+    }
+
+    if (data && data.success === false) {
+      throw new Error(data.error || 'Failed to submit deposit request.');
     }
 
     return data;
