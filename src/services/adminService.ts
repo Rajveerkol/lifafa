@@ -437,32 +437,76 @@ export const adminService = {
   },
 
   // Fetch deposit requests for admin review
+  // Fetch deposit requests for admin review with robust RPC/table fallback and hydration
   async getDepositRequests(statusFilter?: string): Promise<DepositRequest[]> {
     if (!isSupabaseConfigured || !supabase) return [];
 
+    // 1. Try canonical server RPC first (avoids PostgREST FK join ambiguities)
+    try {
+      const { data: rpcData, error: rpcError } = await supabase.rpc('admin_get_deposit_requests_rpc', {
+        p_status: statusFilter && statusFilter !== 'ALL' ? statusFilter : 'ALL',
+      });
+      if (!rpcError && rpcData && rpcData.success && Array.isArray(rpcData.records)) {
+        return rpcData.records as DepositRequest[];
+      }
+    } catch {
+      // Fall through to direct table query
+    }
+
+    // 2. Direct table query with profile relation
     let query = supabase
       .from('deposit_requests')
-      .select('*, profile:profiles!deposit_requests_user_id_fkey(id, full_name, email, avatar_url)')
+      .select('*, profile:profiles!user_id(id, full_name, email, avatar_url)')
       .order('created_at', { ascending: false });
 
     if (statusFilter && statusFilter !== 'ALL') {
       query = query.eq('status', statusFilter);
     }
 
-    const { data, error } = await query;
+    let { data, error } = await query;
 
+    // 3. Fallback: If PostgREST relationship naming failed, query table directly and hydrate profiles
     if (error) {
-      // Fallback without foreign key join if relation cache is cold
-      const { data: fallbackData, error: fbError } = await supabase
+      console.warn('Direct relationship query on deposit_requests failed, activating fallback:', error.message);
+      let fallbackQuery = supabase
         .from('deposit_requests')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (fbError) {
-        console.error('Error fetching deposit requests:', fbError);
-        return [];
+      if (statusFilter && statusFilter !== 'ALL') {
+        fallbackQuery = fallbackQuery.eq('status', statusFilter);
       }
-      return (fallbackData || []) as DepositRequest[];
+
+      const { data: fbData, error: fbError } = await fallbackQuery;
+
+      if (fbError) {
+        console.error('Error fetching deposit requests fallback:', fbError);
+        throw new Error(fbError.message || 'Failed to fetch deposit requests from database.');
+      }
+
+      if (fbData && fbData.length > 0) {
+        // Hydrate profiles for user_ids
+        const userIds = Array.from(new Set(fbData.map((d: any) => d.user_id).filter(Boolean)));
+        const profileMap = new Map<string, any>();
+
+        if (userIds.length > 0) {
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('id, full_name, email, avatar_url')
+            .in('id', userIds);
+
+          if (profilesData) {
+            profilesData.forEach((p: any) => profileMap.set(p.id, p));
+          }
+        }
+
+        data = fbData.map((d: any) => ({
+          ...d,
+          profile: profileMap.get(d.user_id) || undefined,
+        }));
+      } else {
+        data = [];
+      }
     }
 
     return (data || []) as DepositRequest[];

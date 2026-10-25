@@ -311,9 +311,19 @@ export interface FraudFlag {
   user_profile?: Profile;
 }
 
-export type DepositRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type DepositRequestStatus =
+  | 'PENDING'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'VERIFYING'
+  | 'PROCESSING'
+  | 'FAILED'
+  | 'EXPIRED';
 
 export interface DepositRequest {
+  deposit_fee?: number;
+  total_payable?: number;
+  gateway_provider?: string;
   id: string;
   user_id: string;
   amount: number;

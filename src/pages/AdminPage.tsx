@@ -48,6 +48,8 @@ import {
 import { AdminMerchantPanel } from '../components/admin/AdminMerchantPanel';
 import { MerchantUpiSettingsCard } from '../components/admin/MerchantUpiSettingsCard';
 import { TermsComplianceAdminPanel } from '../components/admin/TermsComplianceAdminPanel';
+import { merchantGatewayService } from '../services/merchantGatewayService';
+import type { MerchantDeposit } from '../types/merchant';
 import type {
   Profile,
   Lifafa,
@@ -117,9 +119,14 @@ export const AdminPage: React.FC = () => {
 
   // Deposit Requests state
   const [depositsList, setDepositsList] = useState<DepositRequest[]>([]);
-  const [depositStatusFilter, setDepositStatusFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('ALL');
+  const [merchantDepositsList, setMerchantDepositsList] = useState<MerchantDeposit[]>([]);
+  const [depositLoadError, setDepositLoadError] = useState<string | null>(null);
+  const [depositQueueTab, setDepositQueueTab] = useState<'ALL' | 'CUSTOMER' | 'MERCHANT'>('ALL');
+  const [depositSearchQuery, setDepositSearchQuery] = useState('');
+  const [depositStatusFilter, setDepositStatusFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'FAILED'>('ALL');
   const [reviewingDepositId, setReviewingDepositId] = useState<string | null>(null);
   const [rejectModalDeposit, setRejectModalDeposit] = useState<DepositRequest | null>(null);
+  const [rejectModalMerchantDeposit, setRejectModalMerchantDeposit] = useState<MerchantDeposit | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [rejectingLoading, setRejectingLoading] = useState(false);
 
@@ -142,10 +149,29 @@ export const AdminPage: React.FC = () => {
   // Lifafa Public Visibility toggle loading state
   const [lifafaVisibilityLoadingId, setLifafaVisibilityLoadingId] = useState<string | null>(null);
 
+  const loadDepositsOnly = async () => {
+    try {
+      setDepositLoadError(null);
+      const [deps, mDeps] = await Promise.all([
+        adminService.getDepositRequests(),
+        merchantGatewayService.getAllMerchantDeposits().catch((err) => {
+          console.warn('Merchant deposits fetch fallback:', err);
+          return [] as MerchantDeposit[];
+        }),
+      ]);
+      setDepositsList(deps);
+      setMerchantDepositsList(mDeps);
+    } catch (err: any) {
+      console.error('Error refreshing deposit requests:', err);
+      setDepositLoadError(err.message || 'Failed to fetch deposit requests from database.');
+    }
+  };
+
   const loadData = async () => {
     setLoading(true);
+    setDepositLoadError(null);
     try {
-      const [m, u, l, w, f, a, tx, deps, pSettings] = await Promise.all([
+      const [m, u, l, w, f, a, tx, pSettings] = await Promise.all([
         adminService.getDashboardMetrics(),
         adminService.getUsers(),
         adminService.getAllLifafas(),
@@ -153,7 +179,6 @@ export const AdminPage: React.FC = () => {
         adminService.getFraudFlags(),
         adminService.getAuditLogs(),
         adminService.getAllTransactions(),
-        adminService.getDepositRequests(),
         adminService.getPaymentSettings(),
       ]);
       setMetrics(m);
@@ -163,10 +188,12 @@ export const AdminPage: React.FC = () => {
       setFraudFlags(f);
       setAuditLogs(a);
       setTransactionsList(tx);
-      setDepositsList(deps);
       if (pSettings) {
         setPaymentSettings(pSettings);
       }
+
+      // Safely load customer & merchant deposits with explicit error reporting
+      await loadDepositsOnly();
     } catch (e) {
       console.error('Error loading admin data', e);
     } finally {
@@ -181,7 +208,7 @@ export const AdminPage: React.FC = () => {
     try {
       setReviewingDepositId(dep.id);
       await adminService.reviewDepositRequest(dep.id, 'APPROVE');
-      await loadData();
+      await loadDepositsOnly();
     } catch (err: any) {
       alert(err.message || 'Failed to approve deposit');
     } finally {
@@ -197,9 +224,40 @@ export const AdminPage: React.FC = () => {
       await adminService.reviewDepositRequest(rejectModalDeposit.id, 'REJECT', rejectReason);
       setRejectModalDeposit(null);
       setRejectReason('');
-      await loadData();
+      await loadDepositsOnly();
     } catch (err: any) {
       alert(err.message || 'Failed to reject deposit');
+    } finally {
+      setRejectingLoading(false);
+    }
+  };
+
+  const handleApproveMerchantDeposit = async (mDep: MerchantDeposit) => {
+    if (!window.confirm(`Confirm APPROVE merchant float top-up of ₹${mDep.net_credited} (UTR: ${mDep.utr_number})? This will credit ₹${mDep.net_credited} to the merchant's active float balance.`)) {
+      return;
+    }
+    try {
+      setReviewingDepositId(mDep.id);
+      await merchantGatewayService.approveMerchantDeposit(mDep.id);
+      await loadDepositsOnly();
+    } catch (err: any) {
+      alert(err.message || 'Failed to approve merchant deposit');
+    } finally {
+      setReviewingDepositId(null);
+    }
+  };
+
+  const handleRejectMerchantDepositSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!rejectModalMerchantDeposit) return;
+    try {
+      setRejectingLoading(true);
+      await merchantGatewayService.rejectMerchantDeposit(rejectModalMerchantDeposit.id, rejectReason);
+      setRejectModalMerchantDeposit(null);
+      setRejectReason('');
+      await loadDepositsOnly();
+    } catch (err: any) {
+      alert(err.message || 'Failed to reject merchant deposit');
     } finally {
       setRejectingLoading(false);
     }
@@ -1024,11 +1082,94 @@ export const AdminPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Status Filters & Counter */}
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 bg-white p-1 rounded-2xl border border-slate-100 shadow-2xs">
-              {(['ALL', 'PENDING', 'APPROVED', 'REJECTED'] as const).map((st) => {
-                const count = st === 'ALL' ? depositsList.length : depositsList.filter((d) => d.status === st).length;
+          {/* Error Banner when Query Fails */}
+          {depositLoadError && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center justify-between text-xs text-red-700 animate-in fade-in">
+              <div className="flex items-center gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+                <div>
+                  <p className="font-bold">Failed to load deposit requests from database</p>
+                  <p className="text-[11px] text-red-600 mt-0.5">{depositLoadError}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={loadDepositsOnly}
+                className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-800 font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Retry</span>
+              </button>
+            </div>
+          )}
+
+          {/* Queue Selector Tabs: Customer Wallet vs Merchant Float */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-100 shadow-2xs">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
+                Queue:
+              </span>
+              {(
+                [
+                  { id: 'ALL', label: 'All Deposits', count: depositsList.length + merchantDepositsList.length },
+                  { id: 'CUSTOMER', label: 'Customer Wallet', count: depositsList.length },
+                  { id: 'MERCHANT', label: 'Merchant Float', count: merchantDepositsList.length },
+                ] as const
+              ).map((q) => (
+                <button
+                  key={q.id}
+                  type="button"
+                  onClick={() => setDepositQueueTab(q.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    depositQueueTab === q.id
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  }`}
+                >
+                  <span>{q.label}</span>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                      depositQueueTab === q.id
+                        ? 'bg-white/20 text-white'
+                        : 'bg-slate-100 text-slate-600'
+                    }`}
+                  >
+                    {q.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={loadDepositsOnly}
+              className="self-end sm:self-auto px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+              title="Refresh deposit records"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
+              <span>Refresh</span>
+            </button>
+          </div>
+
+          {/* Status Filters & Search Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-1.5 bg-white p-1 rounded-2xl border border-slate-100 shadow-2xs flex-wrap">
+              {(['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'FAILED'] as const).map((st) => {
+                const customerMatching = depositsList.filter((d) => d.status === st).length;
+                const merchantMatching = merchantDepositsList.filter((d) => d.status === st).length;
+                const count =
+                  st === 'ALL'
+                    ? depositQueueTab === 'CUSTOMER'
+                      ? depositsList.length
+                      : depositQueueTab === 'MERCHANT'
+                      ? merchantDepositsList.length
+                      : depositsList.length + merchantDepositsList.length
+                    : depositQueueTab === 'CUSTOMER'
+                    ? customerMatching
+                    : depositQueueTab === 'MERCHANT'
+                    ? merchantMatching
+                    : customerMatching + merchantMatching;
+
                 return (
                   <button
                     key={st}
@@ -1057,102 +1198,224 @@ export const AdminPage: React.FC = () => {
               })}
             </div>
 
-            <span className="text-xs text-slate-500 font-medium">
-              Showing {depositsList.filter((d) => depositStatusFilter === 'ALL' || d.status === depositStatusFilter).length} requests
-            </span>
+            {/* Search Box */}
+            <div className="relative min-w-[220px]">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={depositSearchQuery}
+                onChange={(e) => setDepositSearchQuery(e.target.value)}
+                placeholder="Search UTR, account, ID..."
+                className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl outline-none focus:border-blue-500"
+              />
+            </div>
           </div>
 
-          {/* Deposit Requests Table */}
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-2xs overflow-hidden divide-y divide-slate-100">
-            {depositsList.filter((d) => depositStatusFilter === 'ALL' || d.status === depositStatusFilter).length === 0 ? (
-              <div className="py-16 text-center text-xs text-slate-400">
-                No deposit requests matching the filter.
-              </div>
-            ) : (
-              depositsList
-                .filter((d) => depositStatusFilter === 'ALL' || d.status === depositStatusFilter)
-                .map((dep) => (
-                  <div key={dep.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-900 text-sm font-mono">
-                          {formatCurrency(dep.amount)}
-                        </span>
-                        <span
-                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
-                            dep.status === 'APPROVED'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : dep.status === 'REJECTED'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-amber-100 text-amber-800'
-                          }`}
-                        >
-                          {dep.status}
-                        </span>
-                      </div>
+          {/* Unified Deposit Requests Table */}
+          {(() => {
+            // Build Unified Deposit List
+            const customerItems = depositsList.map((d) => ({
+              id: d.id,
+              queueType: 'CUSTOMER' as const,
+              accountLabel: d.profile?.full_name || d.profile?.email || `User ${d.user_id.substring(0, 8)}`,
+              accountSub: d.profile?.email,
+              amount: Number(d.amount),
+              deposit_fee: Number(d.deposit_fee || (d.amount >= 1000 ? Math.round(d.amount * 0.02 * 100) / 100 : 100)),
+              total_payable: Number(d.total_payable || (d.amount + (d.amount >= 1000 ? Math.round(d.amount * 0.02 * 100) / 100 : 100))),
+              utr_number: d.utr_number,
+              upi_id: d.upi_id,
+              status: d.status,
+              created_at: d.created_at,
+              processed_at: d.processed_at,
+              admin_notes: d.admin_notes,
+              rawCustomer: d,
+            }));
 
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
-                        <span>
-                          User: <strong className="text-slate-900">{dep.profile?.full_name || dep.profile?.email || dep.user_id.substring(0, 8)}</strong>
-                        </span>
-                        <span>•</span>
-                        <span className="font-mono">
-                          UTR: <strong className="text-blue-700 select-all">{dep.utr_number}</strong>
-                        </span>
-                        <span>•</span>
-                        <span>
-                          Destination UPI: <code className="bg-slate-100 px-1.5 py-0.5 rounded text-[11px] font-mono">{dep.upi_id}</code>
-                        </span>
-                      </div>
+            const merchantItems = merchantDepositsList.map((m) => ({
+              id: m.id,
+              queueType: 'MERCHANT' as const,
+              accountLabel: `Merchant Float (${m.merchant_id.substring(0, 8)})`,
+              accountSub: `Merchant ID: ${m.merchant_id}`,
+              amount: Number(m.net_credited || m.gross_amount),
+              deposit_fee: Number(m.deposit_fee || (m.gross_amount - (m.net_credited || m.gross_amount))),
+              total_payable: Number(m.gross_amount),
+              utr_number: m.utr_number,
+              upi_id: paymentSettings.upiId || 'createlifafa@upi',
+              status: m.status,
+              created_at: m.created_at,
+              processed_at: m.reviewed_at,
+              admin_notes: m.admin_notes,
+              rawMerchant: m,
+            }));
 
-                      <div className="text-[10px] text-slate-400">
-                        Submitted: {formatDate(dep.created_at)}
-                        {dep.admin_notes && (
-                          <span className="ml-2 text-slate-600 font-medium">
-                            (Notes: {dep.admin_notes})
-                          </span>
-                        )}
-                      </div>
-                    </div>
+            let displayed: typeof customerItems | typeof merchantItems | any[] = [];
+            if (depositQueueTab === 'CUSTOMER') {
+              displayed = customerItems;
+            } else if (depositQueueTab === 'MERCHANT') {
+              displayed = merchantItems;
+            } else {
+              displayed = [...customerItems, ...merchantItems].sort(
+                (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+              );
+            }
 
-                    {/* Actions */}
-                    {dep.status === 'PENDING' ? (
-                      <div className="flex items-center gap-2 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => handleApproveDeposit(dep)}
-                          disabled={reviewingDepositId === dep.id}
-                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
-                        >
-                          {reviewingDepositId === dep.id ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          ) : (
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                          )}
-                          <span>Approve & Credit</span>
-                        </button>
+            // Apply Status Filter
+            if (depositStatusFilter !== 'ALL') {
+              displayed = displayed.filter((item) => item.status === depositStatusFilter);
+            }
 
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setRejectModalDeposit(dep);
-                            setRejectReason('');
-                          }}
-                          disabled={reviewingDepositId === dep.id}
-                          className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition-all cursor-pointer"
-                        >
-                          <span>Reject</span>
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="text-right text-xs text-slate-400 font-mono shrink-0">
-                        Processed: {dep.processed_at ? formatDate(dep.processed_at) : 'Done'}
-                      </div>
-                    )}
+            // Apply Search Query
+            if (depositSearchQuery.trim()) {
+              const q = depositSearchQuery.trim().toLowerCase();
+              displayed = displayed.filter(
+                (item) =>
+                  item.utr_number.toLowerCase().includes(q) ||
+                  item.accountLabel.toLowerCase().includes(q) ||
+                  (item.accountSub && item.accountSub.toLowerCase().includes(q)) ||
+                  item.id.toLowerCase().includes(q)
+              );
+            }
+
+            return (
+              <div className="bg-white rounded-3xl border border-slate-100 shadow-2xs overflow-hidden divide-y divide-slate-100">
+                <div className="p-3 bg-slate-50/50 flex items-center justify-between text-xs text-slate-500 font-medium">
+                  <span>Showing {displayed.length} deposit requests</span>
+                  <span className="text-[11px] text-slate-400">
+                    {depositQueueTab === 'ALL'
+                      ? 'All Queues'
+                      : depositQueueTab === 'CUSTOMER'
+                      ? 'Customer Wallet Queue'
+                      : 'Merchant Float Queue'}
+                  </span>
+                </div>
+
+                {displayed.length === 0 ? (
+                  <div className="py-16 text-center text-xs text-slate-400 space-y-1">
+                    <p className="font-medium">No deposit requests matching the filter.</p>
+                    <p className="text-[11px] text-slate-400">
+                      Check your queue or status filters, or use the refresh button above.
+                    </p>
                   </div>
-                ))
-            )}
-          </div>
+                ) : (
+                  displayed.map((item) => (
+                    <div
+                      key={item.id}
+                      className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/40 transition-colors"
+                    >
+                      <div className="space-y-1.5 flex-1 min-w-0">
+                        {/* Header: Amounts & Badges */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-slate-900 text-sm font-mono">
+                            {formatCurrency(item.amount)}
+                          </span>
+                          <span className="text-[11px] text-slate-400 font-mono">
+                            (Fee: +{formatCurrency(item.deposit_fee)} | Total: {formatCurrency(item.total_payable)})
+                          </span>
+
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                              item.queueType === 'CUSTOMER'
+                                ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                : 'bg-purple-50 text-purple-700 border border-purple-200'
+                            }`}
+                          >
+                            {item.queueType === 'CUSTOMER' ? 'Customer Wallet' : 'Merchant Float'}
+                          </span>
+
+                          <span
+                            className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                              item.status === 'APPROVED'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : item.status === 'REJECTED'
+                                ? 'bg-red-100 text-red-800'
+                                : item.status === 'FAILED'
+                                ? 'bg-rose-100 text-rose-800'
+                                : 'bg-amber-100 text-amber-800'
+                            }`}
+                          >
+                            {item.status}
+                          </span>
+                        </div>
+
+                        {/* Account Details & UTR */}
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
+                          <span>
+                            Account: <strong className="text-slate-900">{item.accountLabel}</strong>
+                          </span>
+                          <span>•</span>
+                          <span className="font-mono">
+                            UTR: <strong className="text-blue-700 select-all">{item.utr_number}</strong>
+                          </span>
+                          <span>•</span>
+                          <span className="font-mono text-[11px] text-slate-400 select-all">
+                            ID: {item.id.substring(0, 8)}
+                          </span>
+                          <span>•</span>
+                          <span>
+                            UPI: <code className="bg-slate-100 px-1.5 py-0.5 rounded text-[11px] font-mono">{item.upi_id}</code>
+                          </span>
+                        </div>
+
+                        <div className="text-[10px] text-slate-400">
+                          Submitted: {formatDate(item.created_at)}
+                          {item.admin_notes && (
+                            <span className="ml-2 text-slate-600 font-medium">
+                              (Notes: {item.admin_notes})
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      {item.status === 'PENDING' ? (
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (item.queueType === 'CUSTOMER') {
+                                handleApproveDeposit(item.rawCustomer);
+                              } else {
+                                handleApproveMerchantDeposit(item.rawMerchant);
+                              }
+                            }}
+                            disabled={reviewingDepositId === item.id}
+                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                          >
+                            {reviewingDepositId === item.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                            )}
+                            <span>Approve &amp; Credit</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRejectReason('');
+                              if (item.queueType === 'CUSTOMER') {
+                                setRejectModalDeposit(item.rawCustomer);
+                              } else {
+                                setRejectModalMerchantDeposit(item.rawMerchant);
+                              }
+                            }}
+                            disabled={reviewingDepositId === item.id}
+                            className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition-all cursor-pointer"
+                          >
+                            <span>Reject</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="text-right text-xs text-slate-400 font-mono shrink-0">
+                          Processed: {item.processed_at ? formatDate(item.processed_at) : 'Done'}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            );
+          })()}
         </div>
       ) : section === 'users' || section === 'wallets' ? (
         /* 2 & 3. Users & Wallets Management */
@@ -1935,6 +2198,50 @@ export const AdminPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleRejectDepositSubmit}
+                disabled={rejectingLoading}
+                className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs cursor-pointer"
+              >
+                {rejectingLoading ? 'Rejecting...' : 'Confirm Reject'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reject Merchant Float Deposit Modal */}
+      {rejectModalMerchantDeposit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-100 space-y-4">
+            <h4 className="text-base font-bold text-slate-900">
+              Reject Merchant Float Deposit
+            </h4>
+            <p className="text-xs text-slate-600">
+              Are you sure you want to reject this float deposit of <strong>₹{rejectModalMerchantDeposit.net_credited || rejectModalMerchantDeposit.gross_amount}</strong> with UTR <strong className="font-mono">{rejectModalMerchantDeposit.utr_number}</strong>? No merchant float balance will be added.
+            </p>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Rejection Reason (Shown to merchant)
+              </label>
+              <input
+                type="text"
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="e.g. UTR not verified in bank statement"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+              />
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setRejectModalMerchantDeposit(null)}
+                disabled={rejectingLoading}
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleRejectMerchantDepositSubmit}
                 disabled={rejectingLoading}
                 className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs cursor-pointer"
               >

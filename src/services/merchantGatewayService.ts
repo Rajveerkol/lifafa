@@ -306,15 +306,25 @@ export const merchantGatewayService = {
     merchantId: string;
     grossAmount: number;
     utrNumber: string;
-  }): Promise<{ success: boolean; message?: string }> {
+  }): Promise<{
+    success: boolean;
+    deposit_id?: string;
+    status?: string;
+    amount?: number;
+    total_payable?: number;
+    utr_number?: string;
+    message?: string;
+  }> {
     if (!isSupabaseConfigured || !supabase) {
       throw new Error('Supabase is not configured.');
     }
 
+    const cleanUtr = params.utrNumber.trim().toUpperCase();
+
     const { data, error } = await supabase.rpc('merchant_submit_deposit_rpc', {
       p_merchant_id: params.merchantId,
       p_gross_amount: params.grossAmount,
-      p_utr_number: params.utrNumber.trim().toUpperCase(),
+      p_utr_number: cleanUtr,
     });
 
     if (error) {
@@ -325,7 +335,15 @@ export const merchantGatewayService = {
       throw new Error(data.error || data.message || 'Failed to submit deposit request');
     }
 
-    return { success: true };
+    return {
+      success: true,
+      deposit_id: data?.deposit_id,
+      status: data?.status || 'PENDING',
+      amount: data?.deposit_amount ?? params.grossAmount,
+      total_payable: data?.total_payable,
+      utr_number: data?.utr_number || cleanUtr,
+      message: data?.message,
+    };
   },
 
   // Proactively validate and obtain fresh access token for authenticated merchant session

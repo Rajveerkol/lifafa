@@ -357,13 +357,14 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
 
     try {
       setSubmittingDeposit(true);
-      await merchantGatewayService.submitDeposit({
+      const depRes = await merchantGatewayService.submitDeposit({
         merchantId: merchant.id,
         grossAmount: walletCredit,
         utrNumber: cleanUtr,
       });
 
-      setDepositSuccessMsg(`Float top-up request for ₹${walletCredit.toLocaleString('en-IN')} (Total Paid: ₹${payableAmount.toLocaleString('en-IN')}) submitted! Status: PENDING admin verification.`);
+      const refIdStr = depRes.deposit_id ? ` (ID: ${depRes.deposit_id.substring(0, 8)})` : '';
+      setDepositSuccessMsg(`Float top-up request${refIdStr} for ₹${walletCredit.toLocaleString('en-IN')} (Total Paid: ₹${payableAmount.toLocaleString('en-IN')}) submitted! Status: PENDING admin verification.`);
       setDepositUtr('');
       await loadMerchantData();
       if (refreshWallet) {
