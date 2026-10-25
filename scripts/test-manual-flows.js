@@ -91,12 +91,18 @@ assert(mig077Content.includes('public.wallets is NEVER touched or dropped'), 'Mi
 
 // 7. Flow Simulation
 console.log('\n--- 7. Mathematical & Ledger Simulation ---');
-// Deposit calculation test:
-const depositAmount = 500;
-const depositFee = Math.round(depositAmount * 0.02 * 100) / 100;
-const totalPayable = depositAmount + depositFee;
-assert(depositFee === 10, '2% deposit fee correctly calculated (₹10.00 for ₹500.00)');
-assert(totalPayable === 510, 'Total payable is ₹510.00');
+// Deposit calculation test (Updated fee slabs):
+const depositAmount1 = 500;
+const depositFee1 = depositAmount1 < 1000 ? 100 : Math.round(depositAmount1 * 0.02 * 100) / 100;
+const totalPayable1 = depositAmount1 + depositFee1;
+assert(depositFee1 === 100, 'Flat ₹100 deposit fee correctly calculated for ₹500.00');
+assert(totalPayable1 === 600, 'Total payable is ₹600.00');
+
+const depositAmount2 = 1000;
+const depositFee2 = Math.round(depositAmount2 * 0.02 * 100) / 100;
+const totalPayable2 = depositAmount2 + depositFee2;
+assert(depositFee2 === 20, '2% deposit fee correctly calculated (₹20.00 for ₹1,000.00)');
+assert(totalPayable2 === 1020, 'Total payable is ₹1,020.00');
 
 // Withdrawal calculation test:
 const withdrawalAmount = 200;

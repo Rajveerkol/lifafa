@@ -50,30 +50,38 @@ export function calculateWithdrawalFee(amount: number): FeeSlabResult {
 }
 
 /**
- * 2% Deposit Fee Calculation:
- * - Formula:
- *   Deposit Fee = Deposit Amount × 2%
- *   Total Payable = Deposit Amount + 2% Fee
- *   Wallet Credit = Deposit Amount
+ * Authoritative Deposit Fee Slabs:
+ * - Deposit amount ₹100 to ₹999.99: Flat ₹100 fee.
+ * - Deposit amount ₹1,000 and above: 2% of deposit amount.
+ * - Minimum deposit amount: ₹100.
  *
- * Examples:
- * ₹1,000 deposit:
- *   Fee = ₹20
- *   User pays = ₹1,020
- *   Wallet receives = ₹1,000
- *
- * ₹5,000 deposit:
- *   Fee = ₹100
- *   User pays = ₹5,100
- *   Wallet receives = ₹5,000
+ * Exact examples:
+ * ₹100    -> Fee ₹100 -> User pays ₹200 (Wallet gets ₹100)
+ * ₹200    -> Fee ₹100 -> User pays ₹300 (Wallet gets ₹200)
+ * ₹500    -> Fee ₹100 -> User pays ₹600 (Wallet gets ₹500)
+ * ₹999    -> Fee ₹100 -> User pays ₹1,099 (Wallet gets ₹999)
+ * ₹1,000  -> Fee ₹20  -> User pays ₹1,020 (Wallet gets ₹1,000)
+ * ₹2,000  -> Fee ₹40  -> User pays ₹2,040 (Wallet gets ₹2,000)
+ * ₹5,000  -> Fee ₹100 -> User pays ₹5,100 (Wallet gets ₹5,000)
  */
 export function calculateDepositFee(depositAmount: number): DepositFeeResult {
   const cleanAmount = Math.round(Number(depositAmount) * 100) / 100;
-  if (isNaN(cleanAmount) || cleanAmount <= 0) {
-    return { depositAmount: 0, fee: 0, totalPayable: 0, walletCredit: 0 };
+  if (isNaN(cleanAmount) || cleanAmount < 100) {
+    return {
+      depositAmount: isNaN(cleanAmount) ? 0 : cleanAmount,
+      fee: 0,
+      totalPayable: isNaN(cleanAmount) ? 0 : cleanAmount,
+      walletCredit: isNaN(cleanAmount) ? 0 : cleanAmount,
+    };
   }
 
-  const fee = Math.round(cleanAmount * 0.02 * 100) / 100;
+  let fee = 0;
+  if (cleanAmount < 1000) {
+    fee = 100.00;
+  } else {
+    fee = Math.round(cleanAmount * 0.02 * 100) / 100;
+  }
+
   const totalPayable = Math.round((cleanAmount + fee) * 100) / 100;
   const walletCredit = cleanAmount;
 
