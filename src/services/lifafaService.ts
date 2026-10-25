@@ -246,9 +246,8 @@ export const lifafaService = {
       throw new Error(friendlyMsg);
     }
 
-    // Direct external payout flow: Manual UPI Bank Payout
+    // Direct external payout flow: Automatic UPI Bank Payout via deployed consumer-paynit-payout
     // The claim and withdrawal request have already been atomically created in PostgreSQL by claim_lifafa_rpc.
-    // The request is queued as PENDING for administrator review and manual payout dispatch.
     if (data?.payout_mode === 'UPI_BANK') {
       if (!data?.withdrawal_id) {
         return {
@@ -259,11 +258,70 @@ export const lifafaService = {
         };
       }
 
+      // 1. Obtain fresh access token (optional for guest)
+      const token = await getValidAuthToken();
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      // 2. Invoke deployed Consumer PayNit Edge Function dispatch
+      let payoutRes: any = null;
+      let invokeErrorMessage: string | null = null;
+      try {
+        const invokeResult = await supabase.functions.invoke('consumer-paynit-payout', {
+          headers,
+          body: {
+            withdrawal_id: data.withdrawal_id,
+            guest_claim_token: guestClaimToken || data?.guest_claim_token || undefined,
+          },
+        });
+        payoutRes = invokeResult.data;
+        if (invokeResult.error) {
+          invokeErrorMessage = await extractFunctionError(invokeResult.error, invokeResult.data);
+          console.error('Consumer PayNit invoke error:', invokeErrorMessage);
+        }
+      } catch (invokeErr: any) {
+        invokeErrorMessage = invokeErr?.message || 'Network exception dispatching external payout';
+        console.error('Consumer PayNit invoke exception:', invokeErr);
+      }
+
+      // 3. Authoritatively verify the payout state from the database
+      const currentUserId = (await supabase.auth.getUser())?.data?.user?.id;
+      const verifiedCheck = await lifafaService.verifyClaimBankPayout(
+        data.withdrawal_id,
+        currentUserId || '',
+        data.amount,
+        guestClaimToken || data?.guest_claim_token
+      );
+
+      if (verifiedCheck.verified && verifiedCheck.status === 'SUCCESS') {
+        return {
+          ...data,
+          payout_dispatched: true,
+          withdrawal_status: 'SUCCESS',
+          payout_reference_id: verifiedCheck.payout_reference_id || payoutRes?.reference_id,
+          payout_order_id: verifiedCheck.order_id || payoutRes?.order_id,
+        };
+      }
+
+      if (verifiedCheck.verified && verifiedCheck.status === 'PROCESSING') {
+        return {
+          ...data,
+          payout_dispatched: true,
+          withdrawal_status: 'PROCESSING',
+          payout_reference_id: verifiedCheck.payout_reference_id || payoutRes?.reference_id,
+          payout_order_id: verifiedCheck.order_id || payoutRes?.order_id,
+        };
+      }
+
+      // If status is still PENDING or in-flight with PayNit, present reassuring pending/processing state
       return {
         ...data,
-        payout_dispatched: false, // Explicitly false: awaiting manual admin transfer
-        withdrawal_status: data.withdrawal_status || 'PENDING',
-        payout_reference_id: data.withdrawal_id,
+        payout_dispatched: Boolean(payoutRes?.success),
+        withdrawal_status: verifiedCheck.status || payoutRes?.status || 'PENDING',
+        payout_reference_id: verifiedCheck.payout_reference_id || data.withdrawal_id,
+        payout_order_id: verifiedCheck.order_id || payoutRes?.order_id,
       };
     }
 
@@ -320,6 +378,48 @@ export const lifafaService = {
         return {
           verified: true,
           status: 'SUCCESS',
+          payout_reference_id: wth.payout_reference_id || wth.provider_order_id || wth.id,
+          order_id: wth.provider_order_id,
+        };
+      }
+
+      // Condition: withdrawal is PROCESSING (queued with PayNit or awaiting webhook)
+      if (wth.status === 'PROCESSING') {
+        try {
+          const token = await getValidAuthToken();
+          const headers: Record<string, string> = {};
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+
+          const reconcileRes = await supabase.functions.invoke('consumer-paynit-payout', {
+            headers,
+            body: { action: 'reconcile', withdrawal_id: withdrawalId, guest_claim_token: guestClaimToken },
+          });
+
+          if (reconcileRes.data && reconcileRes.data.reconciled) {
+            if (reconcileRes.data.status === 'SUCCESS') {
+              return {
+                verified: true,
+                status: 'SUCCESS',
+                payout_reference_id: reconcileRes.data.reference_id,
+                order_id: reconcileRes.data.order_id,
+              };
+            }
+            if (reconcileRes.data.status === 'FAILED') {
+              return {
+                verified: false,
+                status: 'FAILED',
+                order_id: reconcileRes.data.order_id,
+                error: reconcileRes.data.error || 'Payment could not be completed by provider.',
+              };
+            }
+          }
+        } catch {
+          // Fall through to database state on network glitch
+        }
+
+        return {
+          verified: true,
+          status: 'PROCESSING',
           payout_reference_id: wth.payout_reference_id || wth.provider_order_id || wth.id,
           order_id: wth.provider_order_id,
         };

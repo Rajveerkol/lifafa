@@ -101,9 +101,9 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
     }
   };
 
-  // Automated bounded polling while a withdrawal is in PROCESSING state
+  // Automated bounded polling while a withdrawal is in PROCESSING or PENDING state
   useEffect(() => {
-    if (!isOpen || !successData || successData.status !== 'PROCESSING') {
+    if (!isOpen || !successData || (successData.status !== 'PROCESSING' && successData.status !== 'PENDING')) {
       return;
     }
 
@@ -390,7 +390,9 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
                 {(!successData.status || successData.status === 'PROCESSING' || successData.status === 'PENDING') && (
                   <Clock className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
                 )}
-                <span>Status: {successData.status === 'PENDING' ? 'PENDING REVIEW' : successData.status || 'PROCESSING'}</span>
+                <span>
+                  Status: {successData.status === 'SUCCESS' ? 'PAID' : successData.status === 'PROCESSING' ? 'PROCESSING' : 'PENDING'}
+                </span>
               </div>
 
               <h4 className="text-lg font-black text-slate-900">
@@ -398,6 +400,8 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
                   ? 'Withdrawal Paid Successfully!'
                   : successData.status === 'FAILED'
                   ? 'Withdrawal Failed'
+                  : successData.status === 'PROCESSING'
+                  ? 'Payout In Progress (UPI)'
                   : 'Withdrawal Request Submitted'}
               </h4>
               <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
@@ -405,6 +409,8 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
                   ? `Your transfer of ${formatCurrency(Number(successData.net_amount || successData.amount || numAmount))} has been sent to your UPI ID.`
                   : successData.status === 'FAILED'
                   ? (successData.error_message || 'The payout could not be processed. Your wallet funds were not deducted.')
+                  : successData.status === 'PROCESSING'
+                  ? `Your transfer of ${formatCurrency(Number(successData.net_amount || successData.amount || numAmount))} is being processed by the banking network via PayNit. Amount will be credited to your account shortly.`
                   : `Your withdrawal request of ${formatCurrency(Number(successData.net_amount || successData.amount || numAmount))} has been submitted. Our admin team will verify and transfer the funds to your UPI ID shortly.`}
               </p>
             </div>

@@ -701,13 +701,13 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                 <div className="space-y-1">
                   <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
                     <Clock className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Payout Pending Admin Review</span>
+                    <span>{claimResult.withdrawalStatus === 'PROCESSING' ? 'Payout In Progress (UPI)' : 'Payout Pending Review'}</span>
                   </span>
                   <h3 className="text-xl font-black text-slate-900 tracking-tight pt-1">
-                    Reward Claimed — Payout In Review
+                    {claimResult.withdrawalStatus === 'PROCESSING' ? 'Reward Claimed — UPI Transfer In Progress' : 'Reward Claimed — Payout In Review'}
                   </h3>
                   <p className="text-xs text-slate-600 pt-1 leading-relaxed">
-                    Your reward of <strong className="text-slate-900 font-bold">{formatCurrency(claimResult.amount)}</strong> has been reserved! Our admin team will verify and transfer the funds to your UPI ID (<span className="font-mono font-bold text-blue-700">{upiId || 'your UPI ID'}</span>) shortly.
+                    Your reward of <strong className="text-slate-900 font-bold">{formatCurrency(claimResult.amount)}</strong> has been reserved! {claimResult.withdrawalStatus === 'PROCESSING' ? 'Our payout engine is transferring the funds to your UPI ID via PayNit.' : 'Our admin team will verify and transfer the funds to your UPI ID shortly.'}
                   </p>
                 </div>
 
@@ -730,7 +730,9 @@ export const ClaimPage: React.FC<ClaimPageProps> = ({
                   </div>
                   <div className="flex justify-between items-center text-slate-600 pt-1 border-t border-slate-200">
                     <span>Status:</span>
-                    <span className="font-bold text-amber-700">Pending Admin Verification</span>
+                    <span className="font-bold text-amber-700">
+                      {claimResult.withdrawalStatus === 'PROCESSING' ? 'Processing Transfer' : 'Pending Verification'}
+                    </span>
                   </div>
                 </div>
 

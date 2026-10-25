@@ -48,7 +48,7 @@ export const walletService = {
     return (data || []) as WalletTransaction[];
   },
 
-  // Request manual wallet withdrawal via PostgreSQL RPC (status: PENDING)
+  // Request automatic wallet withdrawal via deployed consumer-paynit-payout Edge Function
   async requestWithdrawal(params: RequestWithdrawalParams, idempotencyKey?: string) {
     if (!isSupabaseConfigured || !supabase) {
       throw new Error('Supabase database is not configured.');
@@ -64,31 +64,89 @@ export const walletService = {
       throw new Error('UPI ID is required for withdrawal.');
     }
 
-    const { data: rpcRes, error: rpcErr } = await supabase.rpc('request_withdrawal_rpc', {
-      p_amount: params.amount,
-      p_account_holder_name: params.accountHolderName?.trim() || null,
-      p_bank_account_number: null,
-      p_ifsc_code: null,
-      p_upi_id: cleanUpi,
-      p_idempotency_key: idempotencyKey || null,
-    });
-
-    if (rpcErr) {
-      throw new Error(rpcErr.message || 'Failed to submit withdrawal request.');
+    // 1. Proactively obtain valid access token with auto-refresh
+    let token = await getValidAuthToken();
+    if (!token) {
+      try {
+        const { data: refreshData } = await supabase.auth.refreshSession();
+        token = refreshData?.session?.access_token || null;
+      } catch (authErr) {
+        console.warn('Session refresh attempt failed:', authErr);
+      }
     }
 
-    return {
-      success: true,
-      withdrawal_id: rpcRes?.withdrawal_id,
-      amount: params.amount,
-      net_amount: params.amount,
-      upi_id: cleanUpi,
-      status: 'PENDING',
-      message: 'Withdrawal request submitted successfully and is awaiting manual administrator verification.',
+    if (!token) {
+      throw new Error('Your session expired. Please sign in again.');
+    }
+
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
     };
+
+    const payload = {
+      action: 'request_and_dispatch',
+      amount: params.amount,
+      payoutMethod: 'UPI',
+      upiId: cleanUpi,
+      accountHolderName: params.accountHolderName?.trim() || null,
+      idempotencyKey: idempotencyKey || null,
+    };
+
+    let data: any = null;
+    let error: any = null;
+
+    try {
+      const invokeResult = await supabase.functions.invoke('consumer-paynit-payout', {
+        headers,
+        body: payload,
+      });
+      data = invokeResult.data;
+      error = invokeResult.error;
+    } catch (invokeErr: any) {
+      error = invokeErr;
+    }
+
+    // If an error occurred during Edge Function dispatch:
+    if (error) {
+      // Safety check: verify if the withdrawal was already recorded in the database
+      if (idempotencyKey) {
+        const { data: createdWth } = await supabase
+          .from('withdrawals')
+          .select('id, status, provider_order_id, payout_reference_id, net_amount, fee_amount, amount')
+          .eq('idempotency_key', idempotencyKey)
+          .maybeSingle();
+
+        if (createdWth) {
+          return {
+            success: true,
+            withdrawal_id: createdWth.id,
+            status: createdWth.status || 'PROCESSING',
+            order_id: createdWth.provider_order_id,
+            reference_id: createdWth.payout_reference_id,
+            amount: params.amount,
+            net_amount: params.amount,
+            upi_id: cleanUpi,
+            message: 'Withdrawal created and currently queued for payout dispatch.',
+          };
+        }
+      }
+
+      const effectiveData = data;
+      if (effectiveData?.status === 'PROCESSING') {
+        return effectiveData;
+      }
+      const errMsg = await extractFunctionError(error, effectiveData);
+      throw new Error(errMsg);
+    }
+
+    if (data?.error && data?.status !== 'PROCESSING') {
+      throw new Error(data.error);
+    }
+
+    return data;
   },
 
-  // Check withdrawal status authoritatively from PostgreSQL database
+  // Check withdrawal status authoritatively and trigger edge reconciliation if PROCESSING/PENDING
   async checkWithdrawalStatus(withdrawalId: string): Promise<{
     status: string;
     order_id?: string;
@@ -102,7 +160,7 @@ export const walletService = {
     }
 
     try {
-      // Authoritative check on database record
+      // 1. Authoritative check on database record
       const { data: wth, error: wthErr } = await supabase
         .from('withdrawals')
         .select('*')
@@ -111,6 +169,45 @@ export const walletService = {
 
       if (wthErr || !wth) {
         return { status: 'NOT_FOUND', error: wthErr?.message || 'Withdrawal record not found' };
+      }
+
+      // If already in terminal state (SUCCESS / FAILED / REVERSED / CANCELLED), return immediately
+      if (['SUCCESS', 'FAILED', 'REVERSED', 'CANCELLED'].includes(wth.status)) {
+        return {
+          status: wth.status,
+          order_id: wth.provider_order_id,
+          reference_id: wth.payout_reference_id,
+          error: wth.rejection_reason,
+          withdrawal: wth as Withdrawal,
+        };
+      }
+
+      // 2. If status is PROCESSING or PENDING, trigger edge reconciliation check via deployed consumer-paynit-payout
+      const token = await getValidAuthToken();
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      try {
+        const { data: edgeData, error: edgeErr } = await supabase.functions.invoke('consumer-paynit-payout', {
+          headers,
+          body: {
+            action: 'check_status',
+            withdrawal_id: withdrawalId,
+          },
+        });
+
+        if (!edgeErr && edgeData) {
+          return {
+            status: edgeData.status || wth.status,
+            order_id: edgeData.order_id || wth.provider_order_id,
+            reference_id: edgeData.reference_id || wth.payout_reference_id,
+            error: edgeData.error || wth.rejection_reason,
+            reconciled: Boolean(edgeData.reconciled),
+            withdrawal: wth as Withdrawal,
+          };
+        }
+      } catch (pollErr) {
+        console.warn('Edge check_status invoke failed:', pollErr);
       }
 
       return {
