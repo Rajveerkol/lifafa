@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Shield,
+  ShieldCheck,
   Users,
   Wallet,
   Gift,
@@ -46,6 +47,7 @@ import {
 } from '../services/walletService';
 import { AdminMerchantPanel } from '../components/admin/AdminMerchantPanel';
 import { MerchantUpiSettingsCard } from '../components/admin/MerchantUpiSettingsCard';
+import { TermsComplianceAdminPanel } from '../components/admin/TermsComplianceAdminPanel';
 import type {
   Profile,
   Lifafa,
@@ -60,6 +62,7 @@ import { supabase } from '../lib/supabase';
 
 type AdminSection =
   | 'merchant-gateway'
+  | 'terms-compliance'
   | 'dashboard'
   | 'deposits'
   | 'users'
@@ -534,6 +537,7 @@ export const AdminPage: React.FC = () => {
           { id: 'transactions', label: 'Ledger Transactions', icon: Clock, category: 'FINANCE' },
           // Users & Operations
           { id: 'dashboard', label: 'Dashboard', icon: Shield, category: 'COMMUNITY' },
+          { id: 'terms-compliance', label: 'Terms & Compliance', icon: ShieldCheck, category: 'SYSTEM' },
           { id: 'users', label: 'Users', icon: Users, category: 'COMMUNITY' },
           { id: 'lifafas', label: 'Lifafas', icon: Gift, category: 'COMMUNITY' },
           { id: 'settings', label: 'Payment Settings', icon: Settings, category: 'COMMUNITY' },
@@ -618,6 +622,8 @@ export const AdminPage: React.FC = () => {
         </div>
       ) : section === 'merchant-gateway' ? (
         <AdminMerchantPanel />
+      ) : section === 'terms-compliance' ? (
+        <TermsComplianceAdminPanel />
       ) : section === 'dashboard' ? (
         /* 1. Dashboard Metrics Grid */
         <div className="space-y-4">

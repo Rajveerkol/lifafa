@@ -53,7 +53,7 @@ export const merchantGatewayService = {
     return calculateWithdrawalFee(amount);
   },
 
-  // Deposit Fee Calculation: Unified 2% deposit fee (Total Payable = Deposit + 2%, Wallet Credit = Deposit)
+  // Deposit Fee Calculation: Authoritative fee slabs (Flat ₹100 for <₹1000, 2% for >=₹1000)
   calculateDepositFee(depositAmount: number): {
     depositAmount: number;
     fee: number;
@@ -317,8 +317,12 @@ export const merchantGatewayService = {
       p_utr_number: params.utrNumber.trim().toUpperCase(),
     });
 
-    if (error || !data?.success) {
-      throw new Error(error?.message || 'Failed to submit deposit request');
+    if (error) {
+      throw new Error(error.message || 'Failed to submit deposit request');
+    }
+
+    if (data && data.success === false) {
+      throw new Error(data.error || data.message || 'Failed to submit deposit request');
     }
 
     return { success: true };

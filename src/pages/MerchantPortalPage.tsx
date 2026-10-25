@@ -62,6 +62,8 @@ import { MerchantApiKeysManager } from '../components/merchant/MerchantApiKeysMa
 import { MerchantIpWhitelistManager } from '../components/merchant/MerchantIpWhitelistManager';
 import { MerchantOrderStatusChecker } from '../components/merchant/MerchantOrderStatusChecker';
 import { MerchantApiDocumentation } from '../components/merchant/MerchantApiDocumentation';
+import { FundsSafetyNoticeModal } from '../components/compliance/FundsSafetyNoticeModal';
+import { termsComplianceService } from '../services/termsComplianceService';
 
 export type MerchantNavSection =
   | 'dashboard'
@@ -194,6 +196,10 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
   const [depositErrorMsg, setDepositErrorMsg] = useState<string | null>(null);
   const [copiedUpi, setCopiedUpi] = useState<boolean>(false);
 
+  // Mandatory Funds Safety Terms Acceptance State
+  const [termsAccepted, setTermsAccepted] = useState<boolean>(true);
+  const [termsNoticeOpen, setTermsNoticeOpen] = useState<boolean>(false);
+
   // Manual Make Payout Form State
   const [payoutMethod, setPayoutMethod] = useState<'UPI' | 'IMPS'>('UPI');
   const [payoutOrderId, setPayoutOrderId] = useState<string>(`ord_${Date.now().toString().slice(-6)}`);
@@ -286,6 +292,18 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
     };
   }, [loadMerchantData, loadUpiSettings]);
 
+  // Check mandatory funds safety terms acceptance for active merchant
+  useEffect(() => {
+    if (user?.id) {
+      termsComplianceService.getUserTermsStatus(user.id).then((res) => {
+        setTermsAccepted(res.has_accepted);
+        if (!res.has_accepted) {
+          setTermsNoticeOpen(true);
+        }
+      }).catch(() => {});
+    }
+  }, [user?.id]);
+
   const handleManualRefresh = () => {
     setRefreshing(true);
     loadMerchantData();
@@ -327,6 +345,12 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
       return;
     }
 
+    if (!termsAccepted) {
+      setTermsNoticeOpen(true);
+      setDepositErrorMsg('Acceptance of Funds Safety & Responsibility Notice is mandatory before submitting float deposits.');
+      return;
+    }
+
     const depCalc = merchantGatewayService.calculateDepositFee(grossNum);
     const payableAmount = depCalc.totalPayable;
     const walletCredit = depCalc.walletCredit;
@@ -335,11 +359,11 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
       setSubmittingDeposit(true);
       await merchantGatewayService.submitDeposit({
         merchantId: merchant.id,
-        grossAmount: payableAmount,
+        grossAmount: walletCredit,
         utrNumber: cleanUtr,
       });
 
-      setDepositSuccessMsg(`Float top-up of ₹${walletCredit} (Total Paid: ₹${payableAmount} incl. 2% fee) submitted! Status: PENDING admin verification.`);
+      setDepositSuccessMsg(`Float top-up request for ₹${walletCredit.toLocaleString('en-IN')} (Total Paid: ₹${payableAmount.toLocaleString('en-IN')}) submitted! Status: PENDING admin verification.`);
       setDepositUtr('');
       await loadMerchantData();
       if (refreshWallet) {
@@ -579,7 +603,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
   // Section Title & Subtitle Map
   const sectionMeta: Record<MerchantNavSection, { title: string; subtitle: string }> = {
     dashboard: { title: 'Dashboard', subtitle: 'Real-time overview of merchant float and disbursement activity' },
-    'add-money': { title: 'Add Float via UPI', subtitle: 'Deposit funds to payout balance with instant 2% fee calculation' },
+    'add-money': { title: 'Add Float via UPI', subtitle: 'Deposit funds to payout balance with instant fee calculation' },
     'make-payout': { title: 'Make Payout', subtitle: 'Disburse funds directly to beneficiary accounts via PayNit instant UPI rails' },
     payouts: { title: 'Payout History', subtitle: 'Searchable audit log of all bank transfers and disbursement statuses' },
     wallet: { title: 'Float Wallet & Ledger', subtitle: 'Double-entry balance audit ledger and float movement records' },
@@ -1232,7 +1256,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                   <div className="pb-3 border-b border-slate-200">
                     <h3 className="text-sm font-semibold text-slate-900">Step 1: Select Amount &amp; Scan UPI</h3>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      Platform fee is exactly 2.0% deducted at clearing.
+                      Deposit fee: Flat ₹100 for amounts under ₹1,000; 2% for amounts ₹1,000 and above.
                     </p>
                   </div>
 
@@ -1253,7 +1277,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
 
                     {/* Quick amount chips */}
                     <div className="flex flex-wrap gap-1.5 mt-2">
-                      {[1000, 5000, 10000, 25000, 50000].map((amt) => (
+                      {[100, 500, 1000, 5000, 10000, 25000].map((amt) => (
                         <button
                           key={amt}
                           type="button"
@@ -1277,7 +1301,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                       <span className="font-mono font-medium text-slate-900">{formatCurrency(numDepositAmt)}</span>
                     </div>
                     <div className="flex justify-between text-slate-600">
-                      <span>Deposit Fee (2.0%):</span>
+                      <span>Deposit Fee {numDepositAmt >= 1000 ? '(2.0%)' : numDepositAmt >= 100 ? '(Flat ₹100)' : ''}:</span>
                       <span className="font-mono font-medium text-amber-700">+{formatCurrency(liveDepositFee)}</span>
                     </div>
                     <div className="pt-2 border-t border-slate-200 flex justify-between font-semibold text-slate-900">
@@ -2186,7 +2210,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500">Deposit Top-Up Fee:</span>
-                      <strong className="font-mono text-slate-800">2.0%</strong>
+                      <strong className="font-mono text-slate-800">Flat ₹100 (&lt;₹1,000) / 2.0% (≥₹1,000)</strong>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500">Payout Fee (₹1–₹499.99):</span>
@@ -2508,7 +2532,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                     <strong className="font-mono text-slate-900">{formatCurrency(selectedDepositDetail.gross_amount)}</strong>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Platform Fee (2.0%):</span>
+                    <span className="text-slate-500">Deposit Fee:</span>
                     <strong className="font-mono text-amber-700">-{formatCurrency(selectedDepositDetail.deposit_fee)}</strong>
                   </div>
                   <div className="flex justify-between pt-1 border-t border-slate-200">
@@ -2560,6 +2584,25 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
           setPayoutSuccessMsg('Payment Completed');
           setTimeout(() => setPayoutSuccessMsg(null), 7000);
         }}
+      />
+
+      {/* Mandatory Funds Safety Notice Modal */}
+      <FundsSafetyNoticeModal
+        isOpen={termsNoticeOpen}
+        userEmail={user?.email || undefined}
+        userType="MERCHANT"
+        initialMobile={merchant?.mobile_number || ''}
+        forceMandatory={false}
+        onAccepted={() => {
+          setTermsAccepted(true);
+          setTermsNoticeOpen(false);
+        }}
+        onRejected={() => {
+          setTermsAccepted(false);
+          setTermsNoticeOpen(false);
+          setDepositErrorMsg('Notice rejected. Float top-up and live payouts remain restricted.');
+        }}
+        onClose={() => setTermsNoticeOpen(false)}
       />
     </div>
   );

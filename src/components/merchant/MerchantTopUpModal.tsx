@@ -106,7 +106,7 @@ export const MerchantTopUpModal: React.FC<MerchantTopUpModalProps> = ({
       setLoading(true);
       await merchantGatewayService.submitDeposit({
         merchantId,
-        grossAmount: totalPayable,
+        grossAmount: walletCredit,
         utrNumber: cleanUtr,
       });
       onSuccess();
@@ -131,7 +131,7 @@ export const MerchantTopUpModal: React.FC<MerchantTopUpModalProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-slate-900">Add Float via UPI</h3>
-              <p className="text-[11px] text-slate-500">2% standard gateway processing fee</p>
+              <p className="text-[11px] text-slate-500">Flat ₹100 (&lt;₹1,000) or 2% (≥₹1,000) processing fee</p>
             </div>
           </div>
           <button
@@ -177,7 +177,7 @@ export const MerchantTopUpModal: React.FC<MerchantTopUpModalProps> = ({
                 <span className="font-semibold text-slate-900">{formatCurrency(numAmount)}</span>
               </div>
               <div className="flex justify-between text-slate-600">
-                <span>Deposit Fee (2%):</span>
+                <span>Deposit Fee {numAmount >= 1000 ? '(2%)' : numAmount >= 100 ? '(Flat ₹100)' : ''}:</span>
                 <span className="font-semibold text-amber-700">+{formatCurrency(fee)}</span>
               </div>
               <div className="pt-1.5 border-t border-slate-200 flex justify-between font-bold text-slate-900">

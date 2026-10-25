@@ -33,6 +33,8 @@ import { calculateDepositFee } from '../../lib/feeCalculations';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import type { DepositRequest } from '../../types/database';
 import { DepositAdminAssistanceCard } from '../common/DepositAdminAssistanceCard';
+import { FundsSafetyNoticeModal } from '../compliance/FundsSafetyNoticeModal';
+import { termsComplianceService } from '../../services/termsComplianceService';
 
 interface AddMoneyModalProps {
   isOpen: boolean;
@@ -88,8 +90,21 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
   const [history, setHistory] = useState<DepositRequest[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
+  // Mandatory Funds Safety Terms Acceptance state
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsNoticeOpen, setTermsNoticeOpen] = useState(false);
+
   // Quick amount choices matching specification
   const quickAmounts = [100, 200, 500, 1000, 2000, 5000];
+
+  // Check mandatory Funds Safety Terms acceptance status on open
+  useEffect(() => {
+    if (isOpen && user?.id) {
+      termsComplianceService.getUserTermsStatus(user.id).then((res) => {
+        setTermsAccepted(res.has_accepted);
+      }).catch(() => {});
+    }
+  }, [isOpen, user?.id]);
 
   // Load platform payment settings
   useEffect(() => {
@@ -187,6 +202,10 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
   const handleContinueToPayment = () => {
     if (!isAmountValid) {
       setErrorMsg('Please select or enter an amount of at least ₹100.00');
+      return;
+    }
+    if (!termsAccepted) {
+      setTermsNoticeOpen(true);
       return;
     }
     setErrorMsg(null);
@@ -915,6 +934,26 @@ export const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
 
         </div>
       </div>
+
+      {/* Mandatory Funds Safety Notice Modal */}
+      <FundsSafetyNoticeModal
+        isOpen={termsNoticeOpen}
+        userEmail={user?.email || undefined}
+        userType="CUSTOMER"
+        initialMobile={user?.phone_number || ''}
+        forceMandatory={false}
+        onAccepted={() => {
+          setTermsAccepted(true);
+          setTermsNoticeOpen(false);
+          setStep('pay');
+        }}
+        onRejected={() => {
+          setTermsAccepted(false);
+          setTermsNoticeOpen(false);
+          setErrorMsg('Acceptance of Funds Safety terms is mandatory before continuing to payment.');
+        }}
+        onClose={() => setTermsNoticeOpen(false)}
+      />
     </div>
   );
 };

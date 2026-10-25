@@ -316,7 +316,7 @@ export const AdminMerchantPanel: React.FC = () => {
           <div className="bg-white/5 border border-white/10 rounded-2xl p-3">
             <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Float Deposited</span>
             <span className="text-lg font-black text-emerald-400 mt-0.5 block">{formatCurrency(totalFloatDeposited)}</span>
-            <span className="text-[10px] text-slate-400">2% Fees: {formatCurrency(totalDepositFees)}</span>
+            <span className="text-[10px] text-slate-400">Deposit Fees: {formatCurrency(totalDepositFees)}</span>
           </div>
 
           <div className="bg-white/5 border border-white/10 rounded-2xl p-3">
@@ -458,7 +458,7 @@ export const AdminMerchantPanel: React.FC = () => {
                           Net: {formatCurrency(d.net_credited)}
                         </div>
                         <div className="text-[11px] text-slate-400">
-                          Gross: {formatCurrency(d.gross_amount)} | Fee (2%): {formatCurrency(d.deposit_fee)}
+                          Gross: {formatCurrency(d.gross_amount)} | Fee: {formatCurrency(d.deposit_fee)}
                         </div>
                       </div>
 
@@ -907,7 +907,7 @@ export const AdminMerchantPanel: React.FC = () => {
             <div className="bg-slate-50 p-3 rounded-2xl text-xs space-y-1">
               <div>UTR: <strong className="font-mono">{approvingDeposit.utr_number}</strong></div>
               <div>Gross Amount: <strong>{formatCurrency(approvingDeposit.gross_amount)}</strong></div>
-              <div>Deposit Fee (2%): <strong className="text-amber-600">-{formatCurrency(approvingDeposit.deposit_fee)}</strong></div>
+              <div>Deposit Fee: <strong className="text-amber-600">-{formatCurrency(approvingDeposit.deposit_fee)}</strong></div>
               <div>Net Float to Credit: <strong className="text-emerald-600">{formatCurrency(approvingDeposit.net_credited)}</strong></div>
             </div>
 
