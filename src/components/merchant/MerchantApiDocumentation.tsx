@@ -390,7 +390,7 @@ export const MerchantApiDocumentation: React.FC = () => {
   "message": "Payment Failed"
 }`}
                   </pre>
-                  <p className="text-[11px] text-red-800">Bank rejected transaction. Locked principal + ₹2.50 fee are automatically reversed to merchant wallet.</p>
+                  <p className="text-[11px] text-red-800">Bank rejected transaction. Locked principal + ₹3.00 fee are automatically reversed to merchant wallet.</p>
                 </div>
 
                 {/* ERROR STATES */}
@@ -502,8 +502,8 @@ export const MerchantApiDocumentation: React.FC = () => {
                     <tr>
                       <td className="p-2.5 font-semibold text-blue-700">UPI (VPA)</td>
                       <td className="p-2.5 font-mono">₹1.00 &ndash; ₹1,000.00</td>
-                      <td className="p-2.5 font-mono font-semibold text-amber-700">₹2.50</td>
-                      <td className="p-2.5 font-mono">Principal + ₹2.50</td>
+                      <td className="p-2.5 font-mono font-semibold text-amber-700">₹3.00</td>
+                      <td className="p-2.5 font-mono">Principal + ₹3.00</td>
                     </tr>
                   </tbody>
                 </table>
@@ -646,7 +646,7 @@ export const MerchantApiDocumentation: React.FC = () => {
                   <span>Pessimistic Float Reservation</span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  When a payout is dispatched, the required funds (principal + ₹2.50 fee) are immediately moved from Available to Locked Float. If banking rails confirm failure, funds are restored automatically.
+                  When a payout is dispatched, the required funds (principal + ₹3.00 fee) are immediately moved from Available to Locked Float. If banking rails confirm failure, funds are restored automatically.
                 </p>
               </div>
 

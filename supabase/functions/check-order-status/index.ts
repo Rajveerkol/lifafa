@@ -44,7 +44,7 @@ const STATUS_REFUND_ACTIVATION_BOUNDARY = '2026-10-07T10:45:00.000Z';
 function calculateMerchantPayoutFee(amount: number): number {
   const num = Math.round(Number(amount) * 100) / 100;
   if (isNaN(num) || num <= 0) return 0;
-  if (num < 500) return 2.50;
+  if (num < 500) return 3.00;
   if (num < 1000) return 5.00;
   return 10.00;
 }

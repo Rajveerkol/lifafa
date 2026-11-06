@@ -312,7 +312,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose })
 
               <h3 className="text-xl font-black">Withdraw Funds</h3>
               <p className="text-xs text-blue-100/90 leading-relaxed">
-                Instant automated UPI transfers. Tiered platform fee from ₹2.50.
+                Instant automated UPI transfers. Tiered platform fee from ₹3.00.
               </p>
 
               <div className="pt-2 flex items-center justify-between text-xs border-t border-white/15">

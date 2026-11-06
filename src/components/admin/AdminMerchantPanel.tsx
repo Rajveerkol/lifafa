@@ -769,7 +769,7 @@ export const AdminMerchantPanel: React.FC = () => {
 
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
               <span className="text-[10px] font-bold text-slate-400 uppercase">Payout Fee (UPI Rail)</span>
-              <div className="text-2xl font-black text-slate-900 mt-1">₹2.50</div>
+              <div className="text-2xl font-black text-slate-900 mt-1">₹3.00</div>
               <p className="text-[11px] text-slate-500 mt-1">
                 Flat fee for all PayNit UPI disbursements up to ₹1,000.00.
               </p>

@@ -17,13 +17,13 @@ export interface DepositFeeResult {
 
 /**
  * Authoritative Payout & Withdrawal Fee Slabs:
- * - ₹1 to ₹499.99          -> Fixed Charge = ₹2.50
+ * - ₹1 to ₹499.99          -> Fixed Charge = ₹3.00
  * - ₹500 to ₹999.99        -> Fixed Charge = ₹5.00
  * - ₹1,000 to ₹2,000       -> Fixed Charge = ₹10.00
  *
  * Exact boundaries:
- * ₹1        -> ₹2.50  (Total: ₹3.50)
- * ₹499.99   -> ₹2.50  (Total: ₹502.49)
+ * ₹1        -> ₹3.00  (Total: ₹4.00)
+ * ₹499.99   -> ₹3.00  (Total: ₹502.99)
  * ₹500      -> ₹5.00  (Total: ₹505.00)
  * ₹999.99   -> ₹5.00  (Total: ₹1,004.99)
  * ₹1,000    -> ₹10.00 (Total: ₹1,010.00)
@@ -33,12 +33,12 @@ export interface DepositFeeResult {
 export function calculateWithdrawalFee(amount: number): FeeSlabResult {
   const num = Math.round(Number(amount) * 100) / 100;
   if (isNaN(num) || num <= 0) {
-    return { fee: 2.50, totalDeducted: 0 };
+    return { fee: 3.00, totalDeducted: 0 };
   }
 
-  let fee = 2.50;
+  let fee = 3.00;
   if (num < 500) {
-    fee = 2.50;
+    fee = 3.00;
   } else if (num < 1000) {
     fee = 5.00;
   } else {

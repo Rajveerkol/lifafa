@@ -3,7 +3,7 @@
 // 1. Authenticates via API Key (X-Client-Id + X-Client-Secret) OR Supabase Bearer JWT.
 // 2. Checks client IP against merchant_ip_whitelist.
 // 3. Enforces Payout Method: UPI ONLY (rejects IMPS / bank account attempts).
-// 4. Invokes merchant_initiate_payout_rpc for atomic float deduction & authoritative ₹2.50 fee.
+// 4. Invokes merchant_initiate_payout_rpc for atomic float deduction & authoritative ₹3.00 fee.
 // 5. Dispatches server-side HTTP POST to PayNit API (https://api.paynit.in/api/v1/payout.php).
 // 6. PayNit Authentication: Bearer PAYNIT_API_KEY:PAYNIT_API_SECRET (Server-side ONLY).
 // 7. Handles Real PayNit Response:
@@ -36,7 +36,7 @@ function getCanonicalPaynitOrigin(): string {
 function calculateMerchantPayoutFee(amount: number): number {
   const num = Math.round(Number(amount) * 100) / 100;
   if (isNaN(num) || num <= 0) return 0;
-  if (num < 500) return 2.50;
+  if (num < 500) return 3.00;
   if (num < 1000) return 5.00;
   return 10.00;
 }
@@ -348,7 +348,7 @@ serve(async (req: Request) => {
     const method: 'UPI' = 'UPI';
     const accountHolderName = String(body.account_holder_name || recipient.name || 'UPI Beneficiary').trim();
 
-    // 3. Execute Atomic Payout Initiation RPC (Pessimistic float deduction + authoritative ₹2.50 fee)
+    // 3. Execute Atomic Payout Initiation RPC (Pessimistic float deduction + authoritative ₹3.00 fee)
     let initRes: any = null;
     let initErr: any = null;
 

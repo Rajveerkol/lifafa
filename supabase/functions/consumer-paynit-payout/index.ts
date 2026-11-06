@@ -251,8 +251,8 @@ serve(async (req: Request) => {
       existingWth = {
         id: withdrawal_id,
         user_id: user?.id || null,
-        amount: Number(dispatchedRpcRes.total_deducted ?? (Number(body.amount) + 2.5)),
-        fee_amount: Number(dispatchedRpcRes.fee ?? 2.5),
+        amount: Number(dispatchedRpcRes.total_deducted ?? (Number(body.amount) + 3.0)),
+        fee_amount: Number(dispatchedRpcRes.fee ?? 3.0),
         net_amount: Number(dispatchedRpcRes.amount ?? body.amount),
         account_holder_name: body.accountHolderName ? String(body.accountHolderName).trim() : (user?.full_name || 'Beneficiary'),
         ifsc_code: null,

@@ -128,3 +128,116 @@ export interface MerchantPayoutEvent {
   created_at: string;
 }
 
+// ==============================================================================
+// UNIFIED TRANSACTION & ANALYTICS TYPES
+// ==============================================================================
+
+export type UnifiedTransactionType = 'DEPOSIT' | 'WITHDRAWAL';
+
+export type UnifiedTransactionStatus =
+  | 'SUCCESS'
+  | 'PENDING'
+  | 'PROCESSING'
+  | 'FAILED'
+  | 'REJECTED';
+
+export interface MerchantUnifiedTransaction {
+  id: string;
+  merchant_id: string;
+  type: UnifiedTransactionType;
+  reference_id: string; // order_id for payouts, utr_number for deposits
+  provider_order_id?: string | null;
+  provider_reference_id?: string | null; // UTR / RRN from bank
+  amount: number; // gross deposit amount or payout requested amount
+  fee: number; // deposit fee or payout fee
+  net_amount: number; // net float credited (deposit) or total float deducted (payout)
+  status: UnifiedTransactionStatus;
+  payment_method: string;
+  recipient_or_sender?: string | null;
+  created_at: string;
+  reviewed_or_processed_at?: string | null;
+  notes_or_reason?: string | null;
+  raw_data?: Record<string, any>;
+}
+
+export interface MerchantDailyVolumePoint {
+  date: string; // YYYY-MM-DD
+  label: string; // e.g. "06 Nov"
+  deposit_volume: number;
+  withdrawal_volume: number;
+  successful_count: number;
+  failed_count: number;
+  total_count: number;
+}
+
+export interface MerchantFinancialAnalytics {
+  // Financial Overview Cards
+  total_deposited_amount: number; // lifetime successful deposits net credited to float
+  total_deposited_gross: number; // lifetime gross deposit amount paid
+  total_deposited_count: number;
+  total_withdrawn_amount: number; // lifetime successful payouts net principal
+  total_withdrawn_gross: number; // lifetime total deducted (principal + fee)
+  total_withdrawn_count: number;
+
+  today_deposits_amount: number;
+  today_deposits_count: number;
+  today_withdrawals_amount: number;
+  today_withdrawals_count: number;
+  today_transactions_count: number;
+
+  yesterday_deposits_amount: number;
+  yesterday_deposits_count: number;
+  yesterday_withdrawals_amount: number;
+  yesterday_withdrawals_count: number;
+  yesterday_transactions_count: number;
+
+  last_7_days_deposits_amount: number;
+  last_7_days_withdrawals_amount: number;
+  last_7_days_transactions_count: number;
+
+  last_30_days_deposits_amount: number;
+  last_30_days_withdrawals_amount: number;
+  last_30_days_transactions_count: number;
+
+  total_transactions_count: number;
+  available_float_balance: number;
+  locked_payout_balance: number;
+
+  // Pending Transactions (Displayed Separately)
+  pending_deposits_count: number;
+  pending_deposits_amount: number;
+  pending_withdrawals_count: number;
+  pending_withdrawals_amount: number;
+
+  // Status breakdown
+  successful_count: number;
+  pending_count: number;
+  failed_count: number;
+  rejected_count: number;
+
+  // Daily volume trends for visual charts
+  daily_chart: MerchantDailyVolumePoint[];
+}
+
+export interface MerchantTransactionsQueryParams {
+  merchantId: string;
+  page: number; // 1-indexed
+  pageSize?: number; // Exactly 100
+  type?: 'ALL' | 'DEPOSIT' | 'WITHDRAWAL';
+  status?: 'ALL' | 'SUCCESS' | 'PENDING' | 'FAILED' | 'REJECTED';
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+  minAmount?: number;
+  maxAmount?: number;
+}
+
+export interface MerchantTransactionsResponse {
+  transactions: MerchantUnifiedTransaction[];
+  total_count: number;
+  page: number;
+  pageSize: number;
+  total_pages: number;
+}
+
+

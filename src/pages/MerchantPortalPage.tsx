@@ -34,6 +34,7 @@ import {
   ArrowUpRight,
   ArrowDownLeft,
   Smartphone,
+  Layers,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../context/AuthContext';
@@ -51,6 +52,7 @@ import type {
   MerchantLedgerEntry,
   MerchantApiKey,
   MerchantIpWhitelist,
+  MerchantFinancialAnalytics,
 } from '../types/merchant';
 import { formatCurrency, formatDate } from '../lib/utils';
 import { MerchantOnboardingCard } from '../components/merchant/MerchantOnboardingCard';
@@ -64,9 +66,13 @@ import { MerchantOrderStatusChecker } from '../components/merchant/MerchantOrder
 import { MerchantApiDocumentation } from '../components/merchant/MerchantApiDocumentation';
 import { FundsSafetyNoticeModal } from '../components/compliance/FundsSafetyNoticeModal';
 import { termsComplianceService } from '../services/termsComplianceService';
+import { MerchantFinancialOverviewCards } from '../components/merchant/MerchantFinancialOverviewCards';
+import { MerchantAnalyticsSection } from '../components/merchant/MerchantAnalyticsSection';
+import { MerchantTransactionsTable } from '../components/merchant/MerchantTransactionsTable';
 
 export type MerchantNavSection =
   | 'dashboard'
+  | 'transactions'
   | 'add-money'
   | 'make-payout'
   | 'payouts'
@@ -166,6 +172,9 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
   const [ledger, setLedger] = useState<MerchantLedgerEntry[]>([]);
   const [apiKeys, setApiKeys] = useState<MerchantApiKey[]>([]);
   const [whitelist, setWhitelist] = useState<MerchantIpWhitelist[]>([]);
+  const [analytics, setAnalytics] = useState<MerchantFinancialAnalytics | null>(null);
+  const [txTableType, setTxTableType] = useState<'ALL' | 'DEPOSIT' | 'WITHDRAWAL'>('ALL');
+  const [txTableStatus, setTxTableStatus] = useState<string>('ALL');
 
   const [activeSection, setActiveSection] = useState<MerchantNavSection>('dashboard');
   const [loading, setLoading] = useState<boolean>(true);
@@ -246,13 +255,14 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
       const activeMerchant = contextMerchant || merchant;
       if (activeMerchant) {
         setMerchant(activeMerchant);
-        const [wRes, pRes, dRes, lRes, kRes, ipRes] = await Promise.allSettled([
+        const [wRes, pRes, dRes, lRes, kRes, ipRes, aRes] = await Promise.allSettled([
           merchantGatewayService.getMerchantWallet(activeMerchant.id),
           merchantGatewayService.getMerchantPayouts(activeMerchant.id),
           merchantGatewayService.getMerchantDeposits(activeMerchant.id),
           merchantGatewayService.getMerchantLedger(activeMerchant.id),
           merchantGatewayService.getMerchantApiKeys(activeMerchant.id),
           merchantGatewayService.getMerchantIpWhitelist(activeMerchant.id),
+          merchantGatewayService.getMerchantFinancialAnalytics(activeMerchant.id),
         ]);
 
         if (wRes.status === 'fulfilled') setWallet(wRes.value);
@@ -261,6 +271,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
         if (lRes.status === 'fulfilled') setLedger(lRes.value);
         if (kRes.status === 'fulfilled') setApiKeys(kRes.value);
         if (ipRes.status === 'fulfilled') setWhitelist(ipRes.value);
+        if (aRes.status === 'fulfilled') setAnalytics(aRes.value);
 
         if (refreshWallet) {
           refreshWallet().catch(() => {});
@@ -585,15 +596,16 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
     exportToCsv(`merchant_ledger_${Date.now()}.csv`, headers, rows);
   };
 
-  // 12 Standard Merchant Navigation Items
+  // 13 Standard Merchant Navigation Items
   const navItems: { id: MerchantNavSection; label: string; icon: any; count?: number }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: Building2 },
+    { id: 'transactions', label: 'All Transactions', icon: Layers, count: analytics?.total_transactions_count },
+    { id: 'reports', label: 'Financial Analytics', icon: TrendingUp },
     { id: 'add-money', label: 'Add Money', icon: ArrowDownToLine },
     { id: 'make-payout', label: 'Make Payout', icon: Send },
     { id: 'payouts', label: 'Payout History', icon: Clock, count: payouts.length },
     { id: 'wallet', label: 'Wallet', icon: Wallet },
     { id: 'deposits', label: 'Deposit History', icon: FileText, count: deposits.length },
-    { id: 'reports', label: 'Reports', icon: TrendingUp },
     { id: 'api-settings', label: 'API Settings', icon: Key },
     { id: 'api-docs', label: 'API Documentation', icon: FileText },
     { id: 'notifications', label: 'Notifications', icon: Bell, count: 2 },
@@ -604,12 +616,13 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
   // Section Title & Subtitle Map
   const sectionMeta: Record<MerchantNavSection, { title: string; subtitle: string }> = {
     dashboard: { title: 'Dashboard', subtitle: 'Real-time overview of merchant float and disbursement activity' },
+    transactions: { title: 'Complete Transaction History', subtitle: 'Authoritative server-side paginated ledger (100 per page) with advanced multi-filters' },
+    reports: { title: 'Financial Analytics & Volume Trends', subtitle: 'Authoritative financial performance, success rates, and volume comparisons' },
     'add-money': { title: 'Add Float via UPI', subtitle: 'Deposit funds to payout balance with instant fee calculation' },
     'make-payout': { title: 'Make Payout', subtitle: 'Disburse funds directly to beneficiary accounts via PayNit instant UPI rails' },
     payouts: { title: 'Payout History', subtitle: 'Searchable audit log of all bank transfers and disbursement statuses' },
     wallet: { title: 'Float Wallet & Ledger', subtitle: 'Double-entry balance audit ledger and float movement records' },
     deposits: { title: 'Deposit History', subtitle: 'Record of manual UPI float deposits and administrative clearing' },
-    reports: { title: 'Financial Reports', subtitle: 'Volume analytics, disbursement success rates, and fee summaries' },
     'api-settings': { title: 'API Settings & Security', subtitle: 'Manage developer credentials and authorized server IP whitelists' },
     'api-docs': { title: 'API Documentation', subtitle: 'Technical integration specifications, cURL examples, and webhook events' },
     notifications: { title: 'Gateway Notifications', subtitle: 'Operational alerts regarding float thresholds and transaction events' },
@@ -797,14 +810,14 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
           <div className="px-3 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
             Operations
           </div>
-          {navItems.slice(0, 7).map((item) => (
+          {navItems.slice(0, 8).map((item) => (
             <NavButton key={item.id} item={item} />
           ))}
 
           <div className="pt-3 px-3 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
             Developers &amp; System
           </div>
-          {navItems.slice(7).map((item) => (
+          {navItems.slice(8).map((item) => (
             <NavButton key={item.id} item={item} />
           ))}
         </nav>
@@ -994,98 +1007,49 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
           {/* ======================================================== */}
           {activeSection === 'dashboard' && (
             <div className="space-y-6">
-              {/* Balance & Float Financial Block */}
-              <div className="bg-white rounded-lg border border-slate-200 shadow-xs p-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-                  <div>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Available Float Balance</span>
-                    <div className="text-2xl sm:text-3xl font-bold font-mono text-slate-900 mt-0.5">
-                      {formatCurrency(wallet?.available_balance ?? 0)}
-                    </div>
-                    <span className="text-xs text-slate-500 mt-1 block">
-                      Disbursements are instantly debited from this balance with zero delay.
-                    </span>
-                  </div>
+              {/* Comprehensive Financial Overview (Authoritative Float, Today's Slabs, Separate Pending) */}
+              <MerchantFinancialOverviewCards
+                analytics={analytics}
+                wallet={wallet}
+                onTopUpClick={() => setActiveSection('add-money')}
+                onPayoutClick={() => setActiveSection('make-payout')}
+                onViewTransactionsClick={(type, status) => {
+                  setTxTableType(type || 'ALL');
+                  setTxTableStatus(status || 'ALL');
+                  setActiveSection('transactions');
+                }}
+              />
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setActiveSection('add-money')}
-                      className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-4 py-2 rounded-md shadow-xs transition-colors cursor-pointer"
-                    >
-                      <ArrowDownToLine className="w-3.5 h-3.5" />
-                      <span>Top-Up Float</span>
-                    </button>
-                    <button
-                      onClick={() => setActiveSection('make-payout')}
-                      className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-4 py-2 rounded-md shadow-xs transition-colors cursor-pointer"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                      <span>Disburse Payout</span>
-                    </button>
-                  </div>
+              {/* Complete 100-Record Paginated History & Analytics Quick Banner */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 bg-white rounded-xl border border-blue-200/80 shadow-xs bg-gradient-to-r from-white via-white to-blue-50/30">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-blue-600" />
+                    <span>Complete 100-Record Paginated Transaction History</span>
+                  </h4>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Search, filter, and inspect authoritative deposits and payouts with exact timestamps and bank reference numbers.
+                  </p>
                 </div>
-
-                {/* Sub-balances grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
-                  <div>
-                    <span className="text-[11px] font-medium text-slate-500 uppercase">In-Transit (Locked)</span>
-                    <div className="text-base font-semibold font-mono text-amber-600 mt-0.5">
-                      {formatCurrency(wallet?.locked_payout_balance ?? 0)}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-[11px] font-medium text-slate-500 uppercase">Total Deposited</span>
-                    <div className="text-base font-semibold font-mono text-slate-800 mt-0.5">
-                      {formatCurrency(wallet?.total_deposited ?? 0)}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-[11px] font-medium text-slate-500 uppercase">Total Paid Out</span>
-                    <div className="text-base font-semibold font-mono text-slate-800 mt-0.5">
-                      {formatCurrency(wallet?.total_paid_out ?? 0)}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-[11px] font-medium text-slate-500 uppercase">Total Fees Paid</span>
-                    <div className="text-base font-semibold font-mono text-slate-800 mt-0.5">
-                      {formatCurrency(wallet?.total_fees_paid ?? 0)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 4-Stat Metric Row (Derived strictly from REAL data) */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-xs">
-                  <span className="text-[11px] font-medium text-slate-500 uppercase">Today's Payout Volume</span>
-                  <div className="text-lg font-bold font-mono text-slate-900 mt-1">
-                    {formatCurrency(metrics.todayVolume)}
-                  </div>
-                  <span className="text-[11px] text-slate-400 mt-0.5 block">{metrics.todayCount} transfers today</span>
-                </div>
-
-                <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-xs">
-                  <span className="text-[11px] font-medium text-slate-500 uppercase">Today's Payout Count</span>
-                  <div className="text-lg font-bold font-mono text-slate-900 mt-1">
-                    {metrics.todayCount}
-                  </div>
-                  <span className="text-[11px] text-slate-400 mt-0.5 block">Dispatches</span>
-                </div>
-
-                <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-xs">
-                  <span className="text-[11px] font-medium text-slate-500 uppercase">Monthly Volume</span>
-                  <div className="text-lg font-bold font-mono text-slate-900 mt-1">
-                    {formatCurrency(metrics.monthlyVolume)}
-                  </div>
-                  <span className="text-[11px] text-slate-400 mt-0.5 block">Current calendar month</span>
-                </div>
-
-                <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-xs">
-                  <span className="text-[11px] font-medium text-slate-500 uppercase">Success Rate</span>
-                  <div className="text-lg font-bold font-mono text-emerald-600 mt-1">
-                    {metrics.successRate}
-                  </div>
-                  <span className="text-[11px] text-slate-400 mt-0.5 block">{metrics.successCount} of {payouts.length} successful</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => setActiveSection('reports')}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                  >
+                    <TrendingUp className="w-3.5 h-3.5 text-blue-600" />
+                    <span>View Analytics</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setTxTableType('ALL');
+                      setTxTableStatus('ALL');
+                      setActiveSection('transactions');
+                    }}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer"
+                  >
+                    <Layers className="w-3.5 h-3.5" />
+                    <span>Open History (100/Page) &rarr;</span>
+                  </button>
                 </div>
               </div>
 
@@ -1240,6 +1204,20 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* SECTION 1.5: TRANSACTIONS (PAGINATED 100 PER PAGE)       */}
+          {/* ======================================================== */}
+          {activeSection === 'transactions' && (
+            <div className="space-y-4">
+              <MerchantTransactionsTable
+                merchantId={merchant.id}
+                initialType={txTableType}
+                initialStatus={txTableStatus}
+                onRefreshAnalytics={loadMerchantData}
+              />
             </div>
           )}
 
@@ -1950,94 +1928,18 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
           )}
 
           {/* ======================================================== */}
-          {/* SECTION 7: REPORTS                                       */}
+          {/* SECTION 7: REPORTS & TRANSACTION ANALYTICS               */}
           {/* ======================================================== */}
           {activeSection === 'reports' && (
             <div className="space-y-6">
-              <div className="bg-white rounded-lg border border-slate-200 shadow-xs p-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-                  <div>
-                    <h3 className="text-sm font-semibold text-slate-900">Volume Analytics &amp; Expenditure</h3>
-                    <p className="text-xs text-slate-500 mt-0.5">Authoritative financial summary calculated from real ledger data</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleExportPayouts}
-                      className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-medium px-3 py-1.5 rounded-md transition-colors cursor-pointer"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Payouts CSV</span>
-                    </button>
-                    <button
-                      onClick={handleExportDeposits}
-                      className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-medium px-3 py-1.5 rounded-md transition-colors cursor-pointer"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Deposits CSV</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 text-xs">
-                  <div className="p-3 bg-slate-50 rounded-md border border-slate-200">
-                    <span className="text-[11px] text-slate-500 font-medium uppercase">Gross Disbursed</span>
-                    <div className="text-lg font-bold font-mono text-slate-900 mt-1">
-                      {formatCurrency(wallet?.total_paid_out ?? 0)}
-                    </div>
-                  </div>
-                  <div className="p-3 bg-slate-50 rounded-md border border-slate-200">
-                    <span className="text-[11px] text-slate-500 font-medium uppercase">Gross Float Added</span>
-                    <div className="text-lg font-bold font-mono text-slate-900 mt-1">
-                      {formatCurrency(wallet?.total_deposited ?? 0)}
-                    </div>
-                  </div>
-                  <div className="p-3 bg-slate-50 rounded-md border border-slate-200">
-                    <span className="text-[11px] text-slate-500 font-medium uppercase">Total Fees Paid</span>
-                    <div className="text-lg font-bold font-mono text-amber-700 mt-1">
-                      {formatCurrency(wallet?.total_fees_paid ?? 0)}
-                    </div>
-                  </div>
-                  <div className="p-3 bg-slate-50 rounded-md border border-slate-200">
-                    <span className="text-[11px] text-slate-500 font-medium uppercase">Success Rate</span>
-                    <div className="text-lg font-bold font-mono text-emerald-600 mt-1">
-                      {metrics.successRate}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Status Breakdown Table */}
-              <div className="bg-white rounded-lg border border-slate-200 shadow-xs p-5">
-                <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-3">
-                  Payout Status Breakdown
-                </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-                  <div className="p-3 bg-emerald-50/50 rounded-md border border-emerald-100">
-                    <span className="text-emerald-700 font-medium">Payment Completed</span>
-                    <div className="text-base font-bold font-mono text-emerald-900 mt-0.5">
-                      {payouts.filter((p) => p.status === 'SUCCESS').length}
-                    </div>
-                  </div>
-                  <div className="p-3 bg-blue-50/50 rounded-md border border-blue-100">
-                    <span className="text-blue-700 font-medium">Processing</span>
-                    <div className="text-base font-bold font-mono text-blue-900 mt-0.5">
-                      {payouts.filter((p) => p.status === 'PROCESSING').length}
-                    </div>
-                  </div>
-                  <div className="p-3 bg-amber-50/50 rounded-md border border-amber-100">
-                    <span className="text-amber-700 font-medium">Pending</span>
-                    <div className="text-base font-bold font-mono text-amber-900 mt-0.5">
-                      {payouts.filter((p) => p.status === 'PENDING').length}
-                    </div>
-                  </div>
-                  <div className="p-3 bg-red-50/50 rounded-md border border-red-100">
-                    <span className="text-red-700 font-medium">Failed / Reversed</span>
-                    <div className="text-base font-bold font-mono text-red-900 mt-0.5">
-                      {payouts.filter((p) => p.status === 'FAILED' || p.status === 'REVERSED').length}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <MerchantAnalyticsSection
+                analytics={analytics}
+                onViewTransactions={(type, status) => {
+                  setTxTableType(type || 'ALL');
+                  setTxTableStatus(status || 'ALL');
+                  setActiveSection('transactions');
+                }}
+              />
             </div>
           )}
 

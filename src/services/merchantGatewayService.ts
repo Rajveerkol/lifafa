@@ -8,7 +8,149 @@ import type {
   MerchantLedgerEntry,
   MerchantApiKey,
   MerchantIpWhitelist,
+  MerchantUnifiedTransaction,
+  MerchantFinancialAnalytics,
+  MerchantTransactionsQueryParams,
+  MerchantTransactionsResponse,
+  MerchantDailyVolumePoint,
 } from '../types/merchant';
+
+// ==============================================================================
+// TIMEZONE CALCULATION UTILITIES (INDIA STANDARD TIME: UTC+05:30)
+// ==============================================================================
+
+/**
+ * Returns exact start and end UTC timestamps corresponding to a specific day in IST (UTC+05:30).
+ * daysAgo = 0: Today in IST
+ * daysAgo = 1: Yesterday in IST
+ */
+export function getIstDayBoundaries(daysAgo: number = 0, timezoneOffsetMinutes: number = 330): {
+  startUtc: Date;
+  endUtc: Date;
+  dateStr: string;
+} {
+  const offsetMs = timezoneOffsetMinutes * 60 * 1000;
+  const nowUtc = Date.now();
+  const nowIst = new Date(nowUtc + offsetMs);
+
+  const targetIst = new Date(nowIst);
+  targetIst.setUTCDate(targetIst.getUTCDate() - daysAgo);
+
+  const year = targetIst.getUTCFullYear();
+  const month = targetIst.getUTCMonth();
+  const date = targetIst.getUTCDate();
+
+  const startUtc = new Date(Date.UTC(year, month, date, 0, 0, 0, 0) - offsetMs);
+  const endUtc = new Date(Date.UTC(year, month, date, 23, 59, 59, 999) - offsetMs);
+
+  const monthStr = String(month + 1).padStart(2, '0');
+  const dateStr = String(date).padStart(2, '0');
+  const isoDateStr = `${year}-${monthStr}-${dateStr}`;
+
+  return { startUtc, endUtc, dateStr: isoDateStr };
+}
+
+/**
+ * Deterministically generates mock transactions for demo merchant mode (>250 records).
+ * Enables offline and review testing across Page 1 (100), Page 2 (100), Page 3 (65+).
+ */
+function generateDemoTransactions(merchantId: string): MerchantUnifiedTransaction[] {
+  const transactions: MerchantUnifiedTransaction[] = [];
+  const baseTime = Date.now();
+
+  // 135 Deposits
+  for (let i = 1; i <= 135; i++) {
+    const hoursAgo = i * 4 + (i % 3);
+    const createdAt = new Date(baseTime - hoursAgo * 3600 * 1000).toISOString();
+    const grossAmount = 500 + ((i * 350) % 15000);
+    const depositFee = grossAmount < 1000 ? 100 : Math.round(grossAmount * 0.02 * 100) / 100;
+    const netCredited = grossAmount;
+
+    let status: 'SUCCESS' | 'PENDING' | 'REJECTED' = 'SUCCESS';
+    if (i <= 8) status = 'PENDING';
+    else if (i === 12 || i === 25 || i === 48) status = 'REJECTED';
+
+    const utr = `UTR${String(982000000000 + i * 137).padStart(12, '0')}`;
+    const id = `demo-dep-${String(i).padStart(4, '0')}`;
+
+    transactions.push({
+      id,
+      merchant_id: merchantId,
+      type: 'DEPOSIT',
+      reference_id: utr,
+      provider_order_id: `DEP-REF-${1000 + i}`,
+      provider_reference_id: utr,
+      amount: grossAmount,
+      fee: depositFee,
+      net_amount: netCredited,
+      status,
+      payment_method: 'UPI',
+      recipient_or_sender: 'Float Top-Up (PayNit / UPI)',
+      created_at: createdAt,
+      reviewed_or_processed_at: status !== 'PENDING' ? createdAt : null,
+      notes_or_reason: status === 'REJECTED' ? 'UTR verification failed with bank' : (status === 'SUCCESS' ? 'Admin approved float credit' : 'Pending bank verification'),
+      raw_data: {
+        gross_amount: grossAmount,
+        deposit_fee: depositFee,
+        net_credited: netCredited,
+        utr_number: utr,
+      },
+    });
+  }
+
+  // 130 Withdrawals / Payouts
+  for (let i = 1; i <= 130; i++) {
+    const hoursAgo = i * 4.2 + (i % 5);
+    const createdAt = new Date(baseTime - hoursAgo * 3600 * 1000).toISOString();
+    const amount = 50 + ((i * 125) % 4500);
+    const fee = amount < 500 ? 3.00 : (amount < 1000 ? 5.00 : 10.00);
+    const totalDeducted = Math.round((amount + fee) * 100) / 100;
+
+    let status: 'SUCCESS' | 'PENDING' | 'FAILED' | 'REJECTED' = 'SUCCESS';
+    if (i <= 6) status = 'PENDING';
+    else if (i === 15 || i === 33) status = 'FAILED';
+    else if (i === 22 || i === 50) status = 'REJECTED';
+
+    const orderId = `ORD-2026-${String(2000 + i)}`;
+    const providerOrderId = `PO-${String(88000000 + i)}`;
+    const providerRef = status === 'SUCCESS' ? `RRN${900000000000 + i * 29}` : null;
+    const id = `demo-wth-${String(i).padStart(4, '0')}`;
+
+    transactions.push({
+      id,
+      merchant_id: merchantId,
+      type: 'WITHDRAWAL',
+      reference_id: orderId,
+      provider_order_id: providerOrderId,
+      provider_reference_id: providerRef,
+      amount,
+      fee,
+      net_amount: totalDeducted,
+      status,
+      payment_method: 'UPI',
+      recipient_or_sender: `vendor${i}@okhdfcbank`,
+      created_at: createdAt,
+      reviewed_or_processed_at: status !== 'PENDING' ? createdAt : null,
+      notes_or_reason: status === 'FAILED' ? 'Bank server timeout (Safe refunded)' : (status === 'REJECTED' ? 'Beneficiary VPA invalid' : 'Dispatched via PayNit UPI'),
+      raw_data: {
+        order_id: orderId,
+        provider_order_id: providerOrderId,
+        amount,
+        fee_amount: fee,
+        total_deducted: totalDeducted,
+      },
+    });
+  }
+
+  // Stable sorting by creation time descending, tie-break by ID
+  transactions.sort((a, b) => {
+    const diff = new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    if (diff !== 0) return diff;
+    return b.id.localeCompare(a.id);
+  });
+
+  return transactions;
+}
 
 export interface MerchantUpiSettings {
   payeeName: string;
@@ -1248,5 +1390,718 @@ export const merchantGatewayService = {
     }
 
     return cleanSettings;
+  },
+
+  // ============================================================================
+  // AUTHORITATIVE FINANCIAL ANALYTICS (IST TIMEZONE RESPECTED)
+  // ============================================================================
+  async getMerchantFinancialAnalytics(
+    merchantId: string,
+    timezoneOffsetMinutes: number = 330
+  ): Promise<MerchantFinancialAnalytics> {
+    // 1. Demo Mode Redundancy (> 250 records)
+    if (merchantId === 'dev-demo-merchant-001') {
+      const allTxs = generateDemoTransactions(merchantId);
+      const todayBounds = getIstDayBoundaries(0, timezoneOffsetMinutes);
+      const yesterdayBounds = getIstDayBoundaries(1, timezoneOffsetMinutes);
+      const weekAgoMs = Date.now() - 7 * 24 * 3600 * 1000;
+      const monthAgoMs = Date.now() - 30 * 24 * 3600 * 1000;
+
+      let totalDepAmt = 0;
+      let totalDepGross = 0;
+      let totalDepCount = 0;
+      let totalWthAmt = 0;
+      let totalWthGross = 0;
+      let totalWthCount = 0;
+
+      let todayDepAmt = 0;
+      let todayDepCount = 0;
+      let todayWthAmt = 0;
+      let todayWthCount = 0;
+      let todayTxCount = 0;
+
+      let yestDepAmt = 0;
+      let yestDepCount = 0;
+      let yestWthAmt = 0;
+      let yestWthCount = 0;
+      let yestTxCount = 0;
+
+      let weekDepAmt = 0;
+      let weekWthAmt = 0;
+      let weekTxCount = 0;
+
+      let monthDepAmt = 0;
+      let monthWthAmt = 0;
+      let monthTxCount = 0;
+
+      let pendingDepCount = 0;
+      let pendingDepAmt = 0;
+      let pendingWthCount = 0;
+      let pendingWthAmt = 0;
+
+      let successCount = 0;
+      let pendingCount = 0;
+      let failedCount = 0;
+      let rejectedCount = 0;
+
+      allTxs.forEach((tx) => {
+        const txTime = new Date(tx.created_at).getTime();
+
+        if (tx.status === 'SUCCESS') successCount++;
+        else if (tx.status === 'PENDING' || tx.status === 'PROCESSING') pendingCount++;
+        else if (tx.status === 'FAILED') failedCount++;
+        else if (tx.status === 'REJECTED') rejectedCount++;
+
+        if (tx.type === 'DEPOSIT') {
+          if (tx.status === 'SUCCESS') {
+            totalDepAmt += tx.net_amount;
+            totalDepGross += tx.amount;
+            totalDepCount++;
+          } else if (tx.status === 'PENDING') {
+            pendingDepCount++;
+            pendingDepAmt += tx.amount;
+          }
+        } else {
+          if (tx.status === 'SUCCESS') {
+            totalWthAmt += tx.amount;
+            totalWthGross += tx.net_amount;
+            totalWthCount++;
+          } else if (tx.status === 'PENDING' || tx.status === 'PROCESSING') {
+            pendingWthCount++;
+            pendingWthAmt += tx.amount;
+          }
+        }
+
+        // Today Check (IST)
+        if (txTime >= todayBounds.startUtc.getTime() && txTime <= todayBounds.endUtc.getTime()) {
+          todayTxCount++;
+          if (tx.type === 'DEPOSIT' && tx.status === 'SUCCESS') {
+            todayDepAmt += tx.net_amount;
+            todayDepCount++;
+          } else if (tx.type === 'WITHDRAWAL' && tx.status === 'SUCCESS') {
+            todayWthAmt += tx.amount;
+            todayWthCount++;
+          }
+        }
+
+        // Yesterday Check (IST)
+        if (txTime >= yesterdayBounds.startUtc.getTime() && txTime <= yesterdayBounds.endUtc.getTime()) {
+          yestTxCount++;
+          if (tx.type === 'DEPOSIT' && tx.status === 'SUCCESS') {
+            yestDepAmt += tx.net_amount;
+            yestDepCount++;
+          } else if (tx.type === 'WITHDRAWAL' && tx.status === 'SUCCESS') {
+            yestWthAmt += tx.amount;
+            yestWthCount++;
+          }
+        }
+
+        // Last 7 Days
+        if (txTime >= weekAgoMs) {
+          weekTxCount++;
+          if (tx.type === 'DEPOSIT' && tx.status === 'SUCCESS') weekDepAmt += tx.net_amount;
+          else if (tx.type === 'WITHDRAWAL' && tx.status === 'SUCCESS') weekWthAmt += tx.amount;
+        }
+
+        // Last 30 Days
+        if (txTime >= monthAgoMs) {
+          monthTxCount++;
+          if (tx.type === 'DEPOSIT' && tx.status === 'SUCCESS') monthDepAmt += tx.net_amount;
+          else if (tx.type === 'WITHDRAWAL' && tx.status === 'SUCCESS') monthWthAmt += tx.amount;
+        }
+      });
+
+      // Generate 14-day daily chart series
+      const dailyChart: MerchantDailyVolumePoint[] = [];
+      for (let d = 13; d >= 0; d--) {
+        const dayBound = getIstDayBoundaries(d, timezoneOffsetMinutes);
+        const dayTxs = allTxs.filter((t) => {
+          const tTime = new Date(t.created_at).getTime();
+          return tTime >= dayBound.startUtc.getTime() && tTime <= dayBound.endUtc.getTime();
+        });
+
+        const depVol = dayTxs
+          .filter((t) => t.type === 'DEPOSIT' && t.status === 'SUCCESS')
+          .reduce((sum, t) => sum + t.net_amount, 0);
+
+        const wthVol = dayTxs
+          .filter((t) => t.type === 'WITHDRAWAL' && t.status === 'SUCCESS')
+          .reduce((sum, t) => sum + t.amount, 0);
+
+        const succ = dayTxs.filter((t) => t.status === 'SUCCESS').length;
+        const fail = dayTxs.filter((t) => t.status === 'FAILED' || t.status === 'REJECTED').length;
+
+        // Label: "06 Nov"
+        const dateParts = dayBound.dateStr.split('-');
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const label = `${dateParts[2]} ${monthNames[parseInt(dateParts[1], 10) - 1]}`;
+
+        dailyChart.push({
+          date: dayBound.dateStr,
+          label,
+          deposit_volume: depVol,
+          withdrawal_volume: wthVol,
+          successful_count: succ,
+          failed_count: fail,
+          total_count: dayTxs.length,
+        });
+      }
+
+      return {
+        total_deposited_amount: totalDepAmt,
+        total_deposited_gross: totalDepGross,
+        total_deposited_count: totalDepCount,
+        total_withdrawn_amount: totalWthAmt,
+        total_withdrawn_gross: totalWthGross,
+        total_withdrawn_count: totalWthCount,
+
+        today_deposits_amount: todayDepAmt,
+        today_deposits_count: todayDepCount,
+        today_withdrawals_amount: todayWthAmt,
+        today_withdrawals_count: todayWthCount,
+        today_transactions_count: todayTxCount,
+
+        yesterday_deposits_amount: yestDepAmt,
+        yesterday_deposits_count: yestDepCount,
+        yesterday_withdrawals_amount: yestWthAmt,
+        yesterday_withdrawals_count: yestWthCount,
+        yesterday_transactions_count: yestTxCount,
+
+        last_7_days_deposits_amount: weekDepAmt,
+        last_7_days_withdrawals_amount: weekWthAmt,
+        last_7_days_transactions_count: weekTxCount,
+
+        last_30_days_deposits_amount: monthDepAmt,
+        last_30_days_withdrawals_amount: monthWthAmt,
+        last_30_days_transactions_count: monthTxCount,
+
+        total_transactions_count: allTxs.length,
+        available_float_balance: 48500.0,
+        locked_payout_balance: 1500.0,
+
+        pending_deposits_count: pendingDepCount,
+        pending_deposits_amount: pendingDepAmt,
+        pending_withdrawals_count: pendingWthCount,
+        pending_withdrawals_amount: pendingWthAmt,
+
+        successful_count: successCount,
+        pending_count: pendingCount,
+        failed_count: failedCount,
+        rejected_count: rejectedCount,
+
+        daily_chart: dailyChart,
+      };
+    }
+
+    // 2. Production RPC Attempt
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data: rpcData, error: rpcErr } = await supabase.rpc(
+          'get_merchant_financial_analytics_rpc',
+          {
+            p_merchant_id: merchantId,
+            p_timezone_offset_minutes: timezoneOffsetMinutes,
+          }
+        );
+
+        if (!rpcErr && rpcData && typeof rpcData === 'object' && rpcData.total_transactions_count !== undefined) {
+          return rpcData as MerchantFinancialAnalytics;
+        }
+      } catch (rpcEx) {
+        console.warn('RPC get_merchant_financial_analytics_rpc fallback to direct query:', rpcEx);
+      }
+    }
+
+    // 3. Authoritative Direct Database Fallback Aggregation
+    const wallet = await this.getMerchantWallet(merchantId);
+    const availableBalance = wallet?.available_balance ?? 0;
+    const lockedBalance = wallet?.locked_payout_balance ?? 0;
+
+    let deposits: MerchantDeposit[] = [];
+    let payouts: MerchantPayout[] = [];
+
+    if (isSupabaseConfigured && supabase) {
+      const [depRes, payRes] = await Promise.all([
+        supabase
+          .from('merchant_deposits')
+          .select('id, gross_amount, deposit_fee, net_credited, status, created_at')
+          .eq('merchant_id', merchantId),
+        supabase
+          .from('merchant_payouts')
+          .select('id, amount, fee_amount, total_deducted, status, created_at')
+          .eq('merchant_id', merchantId),
+      ]);
+
+      if (depRes.data) deposits = depRes.data as MerchantDeposit[];
+      if (payRes.data) payouts = payRes.data as MerchantPayout[];
+    }
+
+    const todayBounds = getIstDayBoundaries(0, timezoneOffsetMinutes);
+    const yesterdayBounds = getIstDayBoundaries(1, timezoneOffsetMinutes);
+    const weekAgoMs = Date.now() - 7 * 24 * 3600 * 1000;
+    const monthAgoMs = Date.now() - 30 * 24 * 3600 * 1000;
+
+    let totalDepAmt = 0;
+    let totalDepGross = 0;
+    let totalDepCount = 0;
+    let totalWthAmt = 0;
+    let totalWthGross = 0;
+    let totalWthCount = 0;
+
+    let todayDepAmt = 0;
+    let todayDepCount = 0;
+    let todayWthAmt = 0;
+    let todayWthCount = 0;
+    let todayTxCount = 0;
+
+    let yestDepAmt = 0;
+    let yestDepCount = 0;
+    let yestWthAmt = 0;
+    let yestWthCount = 0;
+    let yestTxCount = 0;
+
+    let weekDepAmt = 0;
+    let weekWthAmt = 0;
+    let weekTxCount = 0;
+
+    let monthDepAmt = 0;
+    let monthWthAmt = 0;
+    let monthTxCount = 0;
+
+    let pendingDepCount = 0;
+    let pendingDepAmt = 0;
+    let pendingWthCount = 0;
+    let pendingWthAmt = 0;
+
+    let successCount = 0;
+    let pendingCount = 0;
+    let failedCount = 0;
+    let rejectedCount = 0;
+
+    // Process Deposits
+    deposits.forEach((d) => {
+      const tTime = new Date(d.created_at).getTime();
+      const gross = Number(d.gross_amount || 0);
+      const net = Number(d.net_credited || 0);
+
+      if (d.status === 'APPROVED') {
+        successCount++;
+        totalDepAmt += net;
+        totalDepGross += gross;
+        totalDepCount++;
+      } else if (d.status === 'PENDING') {
+        pendingCount++;
+        pendingDepCount++;
+        pendingDepAmt += gross;
+      } else if (d.status === 'REJECTED') {
+        rejectedCount++;
+      }
+
+      if (tTime >= todayBounds.startUtc.getTime() && tTime <= todayBounds.endUtc.getTime()) {
+        todayTxCount++;
+        if (d.status === 'APPROVED') {
+          todayDepAmt += net;
+          todayDepCount++;
+        }
+      }
+
+      if (tTime >= yesterdayBounds.startUtc.getTime() && tTime <= yesterdayBounds.endUtc.getTime()) {
+        yestTxCount++;
+        if (d.status === 'APPROVED') {
+          yestDepAmt += net;
+          yestDepCount++;
+        }
+      }
+
+      if (tTime >= weekAgoMs) {
+        weekTxCount++;
+        if (d.status === 'APPROVED') weekDepAmt += net;
+      }
+
+      if (tTime >= monthAgoMs) {
+        monthTxCount++;
+        if (d.status === 'APPROVED') monthDepAmt += net;
+      }
+    });
+
+    // Process Payouts
+    payouts.forEach((p) => {
+      const tTime = new Date(p.created_at).getTime();
+      const amt = Number(p.amount || 0);
+      const totalDed = Number(p.total_deducted || amt);
+
+      if (p.status === 'SUCCESS') {
+        successCount++;
+        totalWthAmt += amt;
+        totalWthGross += totalDed;
+        totalWthCount++;
+      } else if (p.status === 'PENDING' || p.status === 'PROCESSING') {
+        pendingCount++;
+        pendingWthCount++;
+        pendingWthAmt += amt;
+      } else if (p.status === 'FAILED') {
+        failedCount++;
+      } else if (p.status === 'REVERSED') {
+        rejectedCount++;
+      }
+
+      if (tTime >= todayBounds.startUtc.getTime() && tTime <= todayBounds.endUtc.getTime()) {
+        todayTxCount++;
+        if (p.status === 'SUCCESS') {
+          todayWthAmt += amt;
+          todayWthCount++;
+        }
+      }
+
+      if (tTime >= yesterdayBounds.startUtc.getTime() && tTime <= yesterdayBounds.endUtc.getTime()) {
+        yestTxCount++;
+        if (p.status === 'SUCCESS') {
+          yestWthAmt += amt;
+          yestWthCount++;
+        }
+      }
+
+      if (tTime >= weekAgoMs) {
+        weekTxCount++;
+        if (p.status === 'SUCCESS') weekWthAmt += amt;
+      }
+
+      if (tTime >= monthAgoMs) {
+        monthTxCount++;
+        if (p.status === 'SUCCESS') monthWthAmt += amt;
+      }
+    });
+
+    // Generate 14-day daily chart series
+    const dailyChart: MerchantDailyVolumePoint[] = [];
+    for (let d = 13; d >= 0; d--) {
+      const dayBound = getIstDayBoundaries(d, timezoneOffsetMinutes);
+
+      const dayDeps = deposits.filter((dep) => {
+        const tTime = new Date(dep.created_at).getTime();
+        return tTime >= dayBound.startUtc.getTime() && tTime <= dayBound.endUtc.getTime();
+      });
+
+      const dayPays = payouts.filter((pay) => {
+        const tTime = new Date(pay.created_at).getTime();
+        return tTime >= dayBound.startUtc.getTime() && tTime <= dayBound.endUtc.getTime();
+      });
+
+      const depVol = dayDeps
+        .filter((dep) => dep.status === 'APPROVED')
+        .reduce((sum, dep) => sum + Number(dep.net_credited || 0), 0);
+
+      const wthVol = dayPays
+        .filter((pay) => pay.status === 'SUCCESS')
+        .reduce((sum, pay) => sum + Number(pay.amount || 0), 0);
+
+      const succ =
+        dayDeps.filter((dep) => dep.status === 'APPROVED').length +
+        dayPays.filter((pay) => pay.status === 'SUCCESS').length;
+
+      const fail =
+        dayDeps.filter((dep) => dep.status === 'REJECTED').length +
+        dayPays.filter((pay) => pay.status === 'FAILED' || pay.status === 'REVERSED').length;
+
+      const dateParts = dayBound.dateStr.split('-');
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const label = `${dateParts[2]} ${monthNames[parseInt(dateParts[1], 10) - 1]}`;
+
+      dailyChart.push({
+        date: dayBound.dateStr,
+        label,
+        deposit_volume: depVol,
+        withdrawal_volume: wthVol,
+        successful_count: succ,
+        failed_count: fail,
+        total_count: dayDeps.length + dayPays.length,
+      });
+    }
+
+    return {
+      total_deposited_amount: totalDepAmt,
+      total_deposited_gross: totalDepGross,
+      total_deposited_count: totalDepCount,
+      total_withdrawn_amount: totalWthAmt,
+      total_withdrawn_gross: totalWthGross,
+      total_withdrawn_count: totalWthCount,
+
+      today_deposits_amount: todayDepAmt,
+      today_deposits_count: todayDepCount,
+      today_withdrawals_amount: todayWthAmt,
+      today_withdrawals_count: todayWthCount,
+      today_transactions_count: todayTxCount,
+
+      yesterday_deposits_amount: yestDepAmt,
+      yesterday_deposits_count: yestDepCount,
+      yesterday_withdrawals_amount: yestWthAmt,
+      yesterday_withdrawals_count: yestWthCount,
+      yesterday_transactions_count: yestTxCount,
+
+      last_7_days_deposits_amount: weekDepAmt,
+      last_7_days_withdrawals_amount: weekWthAmt,
+      last_7_days_transactions_count: weekTxCount,
+
+      last_30_days_deposits_amount: monthDepAmt,
+      last_30_days_withdrawals_amount: monthWthAmt,
+      last_30_days_transactions_count: monthTxCount,
+
+      total_transactions_count: deposits.length + payouts.length,
+      available_float_balance: availableBalance,
+      locked_payout_balance: lockedBalance,
+
+      pending_deposits_count: pendingDepCount,
+      pending_deposits_amount: pendingDepAmt,
+      pending_withdrawals_count: pendingWthCount,
+      pending_withdrawals_amount: pendingWthAmt,
+
+      successful_count: successCount,
+      pending_count: pendingCount,
+      failed_count: failedCount,
+      rejected_count: rejectedCount,
+
+      daily_chart: dailyChart,
+    };
+  },
+
+  // ============================================================================
+  // COMPLETE UNIFIED TRANSACTION HISTORY — 100 RECORDS PER PAGE
+  // ============================================================================
+  async getMerchantUnifiedTransactions(
+    params: MerchantTransactionsQueryParams
+  ): Promise<MerchantTransactionsResponse> {
+    const page = Math.max(1, params.page || 1);
+    const pageSize = 100; // Strict authoritative 100 records per page requirement
+
+    // 1. Demo Mode Redundancy (> 250 records for pagination testing)
+    if (params.merchantId === 'dev-demo-merchant-001') {
+      let txs = generateDemoTransactions(params.merchantId);
+
+      // Type filter
+      if (params.type && params.type !== 'ALL') {
+        txs = txs.filter((t) => t.type === params.type);
+      }
+
+      // Status filter
+      if (params.status && params.status !== 'ALL') {
+        if (params.status === 'SUCCESS') {
+          txs = txs.filter((t) => t.status === 'SUCCESS');
+        } else if (params.status === 'PENDING') {
+          txs = txs.filter((t) => t.status === 'PENDING' || t.status === 'PROCESSING');
+        } else if (params.status === 'FAILED') {
+          txs = txs.filter((t) => t.status === 'FAILED');
+        } else if (params.status === 'REJECTED') {
+          txs = txs.filter((t) => t.status === 'REJECTED');
+        }
+      }
+
+      // Search filter (ID, UTR, Order ID, Beneficiary)
+      if (params.search && params.search.trim()) {
+        const q = params.search.trim().toLowerCase();
+        txs = txs.filter(
+          (t) =>
+            t.reference_id.toLowerCase().includes(q) ||
+            (t.provider_order_id && t.provider_order_id.toLowerCase().includes(q)) ||
+            (t.provider_reference_id && t.provider_reference_id.toLowerCase().includes(q)) ||
+            (t.recipient_or_sender && t.recipient_or_sender.toLowerCase().includes(q)) ||
+            t.id.toLowerCase().includes(q)
+        );
+      }
+
+      // Date range filter
+      if (params.startDate) {
+        const startMs = new Date(params.startDate).getTime();
+        txs = txs.filter((t) => new Date(t.created_at).getTime() >= startMs);
+      }
+      if (params.endDate) {
+        const endMs = new Date(params.endDate).getTime();
+        txs = txs.filter((t) => new Date(t.created_at).getTime() <= endMs);
+      }
+
+      // Amount range filter
+      if (params.minAmount != null && !isNaN(params.minAmount)) {
+        txs = txs.filter((t) => t.amount >= params.minAmount!);
+      }
+      if (params.maxAmount != null && !isNaN(params.maxAmount)) {
+        txs = txs.filter((t) => t.amount <= params.maxAmount!);
+      }
+
+      const totalCount = txs.length;
+      const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+      const from = (page - 1) * pageSize;
+      const paginated = txs.slice(from, from + pageSize);
+
+      return {
+        transactions: paginated,
+        total_count: totalCount,
+        page,
+        pageSize,
+        total_pages: totalPages,
+      };
+    }
+
+    // 2. Production RPC Attempt
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data: rpcData, error: rpcErr } = await supabase.rpc(
+          'get_merchant_unified_transactions_rpc',
+          {
+            p_merchant_id: params.merchantId,
+            p_page: page,
+            p_page_size: pageSize,
+            p_type: params.type || 'ALL',
+            p_status: params.status || 'ALL',
+            p_search: params.search?.trim() || null,
+            p_start_date: params.startDate || null,
+            p_end_date: params.endDate || null,
+            p_min_amount: params.minAmount ?? null,
+            p_max_amount: params.maxAmount ?? null,
+          }
+        );
+
+        if (!rpcErr && rpcData && typeof rpcData === 'object' && Array.isArray(rpcData.transactions)) {
+          return {
+            transactions: rpcData.transactions as MerchantUnifiedTransaction[],
+            total_count: Number(rpcData.total_count || 0),
+            page: Number(rpcData.page || page),
+            pageSize: Number(rpcData.page_size || pageSize),
+            total_pages: Number(rpcData.total_pages || 1),
+          };
+        }
+      } catch (rpcEx) {
+        console.warn('RPC get_merchant_unified_transactions_rpc fallback to direct query:', rpcEx);
+      }
+    }
+
+    // 3. Authoritative Direct Database Fallback Query
+    let unifiedList: MerchantUnifiedTransaction[] = [];
+
+    if (isSupabaseConfigured && supabase) {
+      const fetchDeposits = params.type !== 'WITHDRAWAL';
+      const fetchPayouts = params.type !== 'DEPOSIT';
+
+      if (fetchDeposits) {
+        let q = supabase
+          .from('merchant_deposits')
+          .select('*')
+          .eq('merchant_id', params.merchantId);
+
+        if (params.startDate) q = q.gte('created_at', params.startDate);
+        if (params.endDate) q = q.lte('created_at', params.endDate);
+        if (params.minAmount != null) q = q.gte('gross_amount', params.minAmount);
+        if (params.maxAmount != null) q = q.lte('gross_amount', params.maxAmount);
+
+        const { data: depData } = await q;
+        if (depData) {
+          const mapped: MerchantUnifiedTransaction[] = depData.map((d: any) => ({
+            id: d.id,
+            merchant_id: d.merchant_id,
+            type: 'DEPOSIT',
+            reference_id: d.utr_number,
+            provider_order_id: d.id.substring(0, 8).toUpperCase(),
+            provider_reference_id: d.utr_number,
+            amount: Number(d.gross_amount),
+            fee: Number(d.deposit_fee),
+            net_amount: Number(d.net_credited),
+            status: d.status === 'APPROVED' ? 'SUCCESS' : (d.status === 'PENDING' ? 'PENDING' : 'REJECTED'),
+            payment_method: 'UPI',
+            recipient_or_sender: 'Float Top-Up (PayNit / UPI)',
+            created_at: d.created_at,
+            reviewed_or_processed_at: d.reviewed_at,
+            notes_or_reason: d.admin_notes,
+            raw_data: d,
+          }));
+          unifiedList.push(...mapped);
+        }
+      }
+
+      if (fetchPayouts) {
+        let q = supabase
+          .from('merchant_payouts')
+          .select('*')
+          .eq('merchant_id', params.merchantId);
+
+        if (params.startDate) q = q.gte('created_at', params.startDate);
+        if (params.endDate) q = q.lte('created_at', params.endDate);
+        if (params.minAmount != null) q = q.gte('amount', params.minAmount);
+        if (params.maxAmount != null) q = q.lte('amount', params.maxAmount);
+
+        const { data: payData } = await q;
+        if (payData) {
+          const mapped: MerchantUnifiedTransaction[] = payData.map((p: any) => {
+            let s: 'SUCCESS' | 'PENDING' | 'FAILED' | 'REJECTED' = 'SUCCESS';
+            if (p.status === 'PENDING' || p.status === 'PROCESSING') s = 'PENDING';
+            else if (p.status === 'FAILED') s = 'FAILED';
+            else if (p.status === 'REVERSED') s = 'REJECTED';
+
+            return {
+              id: p.id,
+              merchant_id: p.merchant_id,
+              type: 'WITHDRAWAL',
+              reference_id: p.order_id,
+              provider_order_id: p.provider_order_id,
+              provider_reference_id: p.provider_reference_id || p.provider_order_id,
+              amount: Number(p.amount),
+              fee: Number(p.fee_amount),
+              net_amount: Number(p.total_deducted),
+              status: s,
+              payment_method: p.payout_method || 'UPI',
+              recipient_or_sender: p.account_holder_name || p.upi_id || 'Beneficiary',
+              created_at: p.created_at,
+              reviewed_or_processed_at: p.processed_at,
+              notes_or_reason: p.rejection_reason,
+              raw_data: p,
+            };
+          });
+          unifiedList.push(...mapped);
+        }
+      }
+    }
+
+    // Apply in-memory status filter if needed
+    if (params.status && params.status !== 'ALL') {
+      if (params.status === 'SUCCESS') {
+        unifiedList = unifiedList.filter((t) => t.status === 'SUCCESS');
+      } else if (params.status === 'PENDING') {
+        unifiedList = unifiedList.filter((t) => t.status === 'PENDING' || t.status === 'PROCESSING');
+      } else if (params.status === 'FAILED') {
+        unifiedList = unifiedList.filter((t) => t.status === 'FAILED');
+      } else if (params.status === 'REJECTED') {
+        unifiedList = unifiedList.filter((t) => t.status === 'REJECTED');
+      }
+    }
+
+    // Apply search filter (ID, UTR, Order ID, Beneficiary)
+    if (params.search && params.search.trim()) {
+      const q = params.search.trim().toLowerCase();
+      unifiedList = unifiedList.filter(
+        (t) =>
+          t.reference_id.toLowerCase().includes(q) ||
+          (t.provider_order_id && t.provider_order_id.toLowerCase().includes(q)) ||
+          (t.provider_reference_id && t.provider_reference_id.toLowerCase().includes(q)) ||
+          (t.recipient_or_sender && t.recipient_or_sender.toLowerCase().includes(q)) ||
+          t.id.toLowerCase().includes(q)
+      );
+    }
+
+    // Deterministic sort: created_at DESC, id DESC tie-breaker
+    unifiedList.sort((a, b) => {
+      const diff = new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      if (diff !== 0) return diff;
+      return b.id.localeCompare(a.id);
+    });
+
+    const totalCount = unifiedList.length;
+    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+    const from = (page - 1) * pageSize;
+    const paginated = unifiedList.slice(from, from + pageSize);
+
+    return {
+      transactions: paginated,
+      total_count: totalCount,
+      page,
+      pageSize,
+      total_pages: totalPages,
+    };
   },
 };
