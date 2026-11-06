@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Search,
   Filter,
@@ -65,6 +65,7 @@ export const MerchantTransactionsTable: React.FC<MerchantTransactionsTableProps>
   });
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const activeRequestIdRef = useRef<number>(0);
 
   // Sync initial props if changed from outside
   useEffect(() => {
@@ -74,6 +75,7 @@ export const MerchantTransactionsTable: React.FC<MerchantTransactionsTableProps>
 
   // Fetch paginated transactions from server/service
   const loadTransactions = async (pageToLoad: number = currentPage) => {
+    const requestId = ++activeRequestIdRef.current;
     setLoading(true);
     try {
       // Calculate date filter strings
@@ -123,12 +125,20 @@ export const MerchantTransactionsTable: React.FC<MerchantTransactionsTableProps>
       };
 
       const res = await merchantGatewayService.getMerchantUnifiedTransactions(params);
-      setData(res);
-      setCurrentPage(res.page);
+      
+      // Prevent stale requests from overwriting newer page queries
+      if (requestId === activeRequestIdRef.current) {
+        setData(res);
+        setCurrentPage(res.page);
+      }
     } catch (err) {
-      console.error('Failed to load merchant transactions:', err);
+      if (requestId === activeRequestIdRef.current) {
+        console.error('Failed to load merchant transactions:', err);
+      }
     } finally {
-      setLoading(false);
+      if (requestId === activeRequestIdRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -630,12 +640,17 @@ export const MerchantTransactionsTable: React.FC<MerchantTransactionsTableProps>
 
         {/* 3. Pagination Controls (Authoritative 100 Records Per Page) */}
         <div className="p-4 border-t border-slate-200 bg-slate-50/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
-          {/* Record summary */}
-          <div className="font-medium text-slate-600">
-            Showing <strong className="text-slate-900 font-mono">{displayFrom.toLocaleString('en-IN')}</strong> &ndash;{' '}
-            <strong className="text-slate-900 font-mono">{displayTo.toLocaleString('en-IN')}</strong> of{' '}
-            <strong className="text-slate-900 font-mono">{data.total_count.toLocaleString('en-IN')}</strong> transactions
-            <span className="text-slate-400 text-[11px] ml-2 font-mono">(100 per page)</span>
+          {/* Record summary & Page Indicator */}
+          <div className="flex items-center gap-3">
+            <div className="font-medium text-slate-600">
+              Showing <strong className="text-slate-900 font-mono">{displayFrom.toLocaleString('en-IN')}</strong> &ndash;{' '}
+              <strong className="text-slate-900 font-mono">{displayTo.toLocaleString('en-IN')}</strong> of{' '}
+              <strong className="text-slate-900 font-mono">{data.total_count.toLocaleString('en-IN')}</strong> transactions
+              <span className="text-slate-400 text-[11px] ml-2 font-mono">(100 per page)</span>
+            </div>
+            <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-white border border-slate-200 text-slate-600">
+              Page {currentPage} of {data.total_pages}
+            </span>
           </div>
 
           {/* Numbered Page Buttons & Navigation */}

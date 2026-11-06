@@ -462,43 +462,45 @@ BEGIN
             AND (p_min_amount IS NULL OR amount >= p_min_amount)
             AND (p_max_amount IS NULL OR amount <= p_max_amount)
     )
-    SELECT
-        COUNT(*),
-        COALESCE(
-            jsonb_agg(
-                jsonb_build_object(
-                    'id', id,
-                    'merchant_id', merchant_id,
-                    'type', type,
-                    'reference_id', reference_id,
-                    'provider_order_id', provider_order_id,
-                    'provider_reference_id', provider_reference_id,
-                    'amount', amount,
-                    'fee', fee,
-                    'net_amount', net_amount,
-                    'status', status,
-                    'payment_method', payment_method,
-                    'recipient_or_sender', recipient_or_sender,
-                    'created_at', created_at,
-                    'reviewed_or_processed_at', reviewed_or_processed_at,
-                    'notes_or_reason', notes_or_reason,
-                    'raw_data', raw_data
-                )
-                ORDER BY created_at DESC, id DESC
-            ),
-            '[]'::jsonb
-        )
-    INTO v_total_count, v_transactions
+    -- 1. Authoritative Total Matching Record Count (Evaluated across the entire filtered feed)
+    SELECT COUNT(*) INTO v_total_count FROM filtered_feed;
+
+    -- 2. Accurate Total Pages Calculation
+    v_total_pages := GREATEST(1, CEIL(v_total_count::numeric / v_page_size));
+
+    -- 3. Fetch Exactly One Page Slice (Strictly v_page_size rows with stable tie-breaker ordering)
+    SELECT COALESCE(
+        jsonb_agg(
+            jsonb_build_object(
+                'id', id,
+                'merchant_id', merchant_id,
+                'type', type,
+                'reference_id', reference_id,
+                'provider_order_id', provider_order_id,
+                'provider_reference_id', provider_reference_id,
+                'amount', amount,
+                'fee', fee,
+                'net_amount', net_amount,
+                'status', status,
+                'payment_method', payment_method,
+                'recipient_or_sender', recipient_or_sender,
+                'created_at', created_at,
+                'reviewed_or_processed_at', reviewed_or_processed_at,
+                'notes_or_reason', notes_or_reason,
+                'raw_data', raw_data
+            )
+            ORDER BY created_at DESC, id DESC
+        ),
+        '[]'::jsonb
+    )
+    INTO v_transactions
     FROM (
         SELECT *
         FROM filtered_feed
         ORDER BY created_at DESC, id DESC
         LIMIT v_page_size
         OFFSET v_offset
-    ) sub;
-
-    -- Accurate total pages
-    v_total_pages := GREATEST(1, CEIL(v_total_count::numeric / v_page_size));
+    ) page_slice;
 
     RETURN jsonb_build_object(
         'transactions', v_transactions,

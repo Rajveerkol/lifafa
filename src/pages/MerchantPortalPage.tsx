@@ -603,9 +603,9 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
     { id: 'reports', label: 'Financial Analytics', icon: TrendingUp },
     { id: 'add-money', label: 'Add Money', icon: ArrowDownToLine },
     { id: 'make-payout', label: 'Make Payout', icon: Send },
-    { id: 'payouts', label: 'Payout History', icon: Clock, count: payouts.length },
+    { id: 'payouts', label: 'Payout History', icon: Clock, count: analytics?.total_withdrawn_count ?? payouts.length },
     { id: 'wallet', label: 'Wallet', icon: Wallet },
-    { id: 'deposits', label: 'Deposit History', icon: FileText, count: deposits.length },
+    { id: 'deposits', label: 'Deposit History', icon: FileText, count: analytics?.total_deposited_count ?? deposits.length },
     { id: 'api-settings', label: 'API Settings', icon: Key },
     { id: 'api-docs', label: 'API Documentation', icon: FileText },
     { id: 'notifications', label: 'Notifications', icon: Bell, count: 2 },
@@ -1088,7 +1088,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                     onClick={() => setActiveSection('payouts')}
                     className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors inline-flex items-center gap-1 cursor-pointer"
                   >
-                    <span>View All Payouts ({payouts.length})</span>
+                    <span>View All Payouts ({analytics?.total_withdrawn_count ?? payouts.length})</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -1153,7 +1153,7 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                     onClick={() => setActiveSection('deposits')}
                     className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors inline-flex items-center gap-1 cursor-pointer"
                   >
-                    <span>View All Deposits ({deposits.length})</span>
+                    <span>View All Deposits ({analytics?.total_deposited_count ?? deposits.length})</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -1569,160 +1569,12 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
                 onStatusChecked={loadMerchantData}
               />
 
-              {/* Filter & Search Bar */}
-              <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                {/* Status tabs */}
-                <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
-                  {(['ALL', 'SUCCESS', 'PROCESSING', 'PENDING', 'FAILED'] as const).map((filter) => (
-                    <button
-                      key={filter}
-                      onClick={() => setPayoutStatusFilter(filter)}
-                      className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer whitespace-nowrap ${
-                        payoutStatusFilter === filter
-                          ? 'bg-blue-50 text-blue-700 border border-blue-200 font-semibold'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                      }`}
-                    >
-                      {filter === 'SUCCESS' ? 'Payment Completed' : filter}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {/* Date range dropdown */}
-                  <select
-                    value={payoutDateFilter}
-                    onChange={(e) => setPayoutDateFilter(e.target.value as any)}
-                    className="px-2.5 py-1.5 bg-white border border-slate-300 rounded-md text-xs font-medium text-slate-700 focus:outline-hidden"
-                  >
-                    <option value="ALL">All Time</option>
-                    <option value="TODAY">Today</option>
-                    <option value="WEEK">Last 7 Days</option>
-                    <option value="MONTH">This Month</option>
-                  </select>
-
-                  {/* Search box */}
-                  <div className="relative w-full sm:w-60">
-                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      placeholder="Search order / beneficiary..."
-                      value={payoutSearch}
-                      onChange={(e) => setPayoutSearch(e.target.value)}
-                      className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-md text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden"
-                    />
-                  </div>
-
-                  {/* CSV Export */}
-                  <button
-                    onClick={handleExportPayouts}
-                    className="p-1.5 text-slate-600 hover:text-slate-900 border border-slate-300 rounded-md hover:bg-slate-50 transition-colors cursor-pointer shrink-0"
-                    title="Export Payouts as CSV"
-                  >
-                    <Download className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Transactions Table */}
-              <div className="bg-white rounded-lg border border-slate-200 shadow-xs overflow-hidden">
-                {filteredPayouts.length === 0 ? (
-                  <div className="py-12 text-center text-xs text-slate-400">
-                    No payouts found matching your search or filters.
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse text-xs">
-                      <thead>
-                        <tr className="bg-slate-50/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
-                          <th className="px-4 py-2.5">Transfer ID</th>
-                          <th className="px-4 py-2.5">Method</th>
-                          <th className="px-4 py-2.5">Beneficiary / VPA</th>
-                          <th className="px-4 py-2.5">Destination</th>
-                          <th className="px-4 py-2.5">Amount</th>
-                          <th className="px-4 py-2.5">Fee</th>
-                          <th className="px-4 py-2.5">Total Deducted</th>
-                          <th className="px-4 py-2.5">Status</th>
-                          <th className="px-4 py-2.5">Provider UTR</th>
-                          <th className="px-4 py-2.5">Date &amp; Time</th>
-                          <th className="px-4 py-2.5 text-right">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 text-slate-700">
-                        {filteredPayouts.map((p) => (
-                          <tr
-                            key={p.id}
-                            onClick={() => setSelectedPayoutDetail(p)}
-                            className="hover:bg-slate-50/70 transition-colors cursor-pointer"
-                          >
-                            <td className="px-4 py-2.5 font-mono text-slate-900 font-medium">{p.order_id}</td>
-                            <td className="px-4 py-2.5">
-                              <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                (p.payout_method === 'UPI' || p.upi_id)
-                                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                                  : 'bg-slate-100 text-slate-700 border border-slate-200'
-                              }`}>
-                                {(p.payout_method === 'UPI' || p.upi_id) ? 'UPI' : 'IMPS'}
-                              </span>
-                            </td>
-                            <td className="px-4 py-2.5 font-medium text-slate-900">
-                              {p.account_holder_name || p.upi_id || '—'}
-                            </td>
-                            <td className="px-4 py-2.5 font-mono text-slate-500">
-                              {(p.payout_method === 'UPI' || p.upi_id) ? (
-                                <span className="text-blue-700 font-semibold">{p.upi_id || '—'}</span>
-                              ) : (
-                                <span>{p.bank_account_number_masked || '••••'} {p.ifsc_code ? `• ${p.ifsc_code}` : ''}</span>
-                              )}
-                            </td>
-                            <td className="px-4 py-2.5 font-mono font-semibold text-slate-900">
-                              {formatCurrency(p.amount)}
-                            </td>
-                            <td className="px-4 py-2.5 font-mono text-amber-700">
-                              {formatCurrency(p.fee_amount)}
-                            </td>
-                            <td className="px-4 py-2.5 font-mono font-medium text-slate-800">
-                              {formatCurrency(p.total_deducted)}
-                            </td>
-                            <td className="px-4 py-2.5">
-                              <StatusBadge status={p.status} />
-                            </td>
-                            <td className="px-4 py-2.5 font-mono text-[11px] text-slate-500">
-                              {p.provider_reference_id || '—'}
-                            </td>
-                            <td className="px-4 py-2.5 font-mono text-[11px] text-slate-500">
-                              {formatDate(p.created_at)}
-                            </td>
-                            <td className="px-4 py-2.5 text-right whitespace-nowrap space-x-2">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedPayoutDetail(p);
-                                }}
-                                className="text-slate-600 hover:text-slate-900 font-medium text-[11px] cursor-pointer"
-                              >
-                                View
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setCheckerOrderId(p.order_id);
-                                  window.scrollTo({ top: 100, behavior: 'smooth' });
-                                }}
-                                className="text-blue-600 hover:text-blue-800 font-semibold text-[11px] cursor-pointer inline-flex items-center gap-1 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded border border-blue-100 transition-colors"
-                                title="Check real-time provider status"
-                              >
-                                <Search className="w-2.5 h-2.5" />
-                                <span>Check Status</span>
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
+              {/* Authoritative Server-Side Paginated Table (Strictly 100 per page) */}
+              <MerchantTransactionsTable
+                merchantId={merchant.id}
+                initialType="WITHDRAWAL"
+                onRefreshAnalytics={loadMerchantData}
+              />
             </div>
           )}
 
@@ -1829,101 +1681,12 @@ export const MerchantPortalPage: React.FC<MerchantPortalPageProps> = ({ onNaviga
           {/* ======================================================== */}
           {activeSection === 'deposits' && (
             <div className="space-y-4">
-              <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-1">
-                  {(['ALL', 'APPROVED', 'PENDING', 'REJECTED'] as const).map((filter) => (
-                    <button
-                      key={filter}
-                      onClick={() => setDepositStatusFilter(filter)}
-                      className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${
-                        depositStatusFilter === filter
-                          ? 'bg-blue-50 text-blue-700 border border-blue-200 font-semibold'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                      }`}
-                    >
-                      {filter}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <div className="relative w-full sm:w-60">
-                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      placeholder="Search UTR number..."
-                      value={depositSearch}
-                      onChange={(e) => setDepositSearch(e.target.value)}
-                      className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-md text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden"
-                    />
-                  </div>
-
-                  <button
-                    onClick={handleExportDeposits}
-                    className="p-1.5 text-slate-600 hover:text-slate-900 border border-slate-300 rounded-md hover:bg-slate-50 transition-colors cursor-pointer shrink-0"
-                    title="Export Deposits as CSV"
-                  >
-                    <Download className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg border border-slate-200 shadow-xs overflow-hidden">
-                {filteredDeposits.length === 0 ? (
-                  <div className="py-12 text-center text-xs text-slate-400">
-                    No float deposits recorded matching your filter.
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse text-xs">
-                      <thead>
-                        <tr className="bg-slate-50/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
-                          <th className="px-4 py-2.5">UTR Reference</th>
-                          <th className="px-4 py-2.5">Gross Amount</th>
-                          <th className="px-4 py-2.5">Fee (2%)</th>
-                          <th className="px-4 py-2.5">Net Float Credited</th>
-                          <th className="px-4 py-2.5">Status</th>
-                          <th className="px-4 py-2.5">Submitted At</th>
-                          <th className="px-4 py-2.5">Reviewed At</th>
-                          <th className="px-4 py-2.5 text-right">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 text-slate-700">
-                        {filteredDeposits.map((d) => (
-                          <tr
-                            key={d.id}
-                            onClick={() => setSelectedDepositDetail(d)}
-                            className="hover:bg-slate-50/70 transition-colors cursor-pointer"
-                          >
-                            <td className="px-4 py-2.5 font-mono text-slate-900 font-semibold">{d.utr_number}</td>
-                            <td className="px-4 py-2.5 font-mono text-slate-700">{formatCurrency(d.gross_amount)}</td>
-                            <td className="px-4 py-2.5 font-mono text-amber-700">-{formatCurrency(d.deposit_fee)}</td>
-                            <td className="px-4 py-2.5 font-mono font-semibold text-emerald-700">
-                              +{formatCurrency(d.net_credited)}
-                            </td>
-                            <td className="px-4 py-2.5">
-                              <StatusBadge status={d.status} />
-                            </td>
-                            <td className="px-4 py-2.5 font-mono text-[11px] text-slate-500">{formatDate(d.created_at)}</td>
-                            <td className="px-4 py-2.5 font-mono text-[11px] text-slate-500">{d.reviewed_at ? formatDate(d.reviewed_at) : '—'}</td>
-                            <td className="px-4 py-2.5 text-right">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedDepositDetail(d);
-                                }}
-                                className="text-blue-600 hover:text-blue-800 font-medium text-[11px] cursor-pointer"
-                              >
-                                View
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
+              {/* Authoritative Server-Side Paginated Table (Strictly 100 per page) */}
+              <MerchantTransactionsTable
+                merchantId={merchant.id}
+                initialType="DEPOSIT"
+                onRefreshAnalytics={loadMerchantData}
+              />
             </div>
           )}
 

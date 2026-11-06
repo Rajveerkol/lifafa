@@ -54,13 +54,30 @@ export function getIstDayBoundaries(daysAgo: number = 0, timezoneOffsetMinutes: 
  * Deterministically generates mock transactions for demo merchant mode (>250 records).
  * Enables offline and review testing across Page 1 (100), Page 2 (100), Page 3 (65+).
  */
-function generateDemoTransactions(merchantId: string): MerchantUnifiedTransaction[] {
+function generateDemoTransactions(merchantId: string, targetCount?: number): MerchantUnifiedTransaction[] {
   const transactions: MerchantUnifiedTransaction[] = [];
   const baseTime = Date.now();
 
-  // 135 Deposits
-  for (let i = 1; i <= 135; i++) {
-    const hoursAgo = i * 4 + (i % 3);
+  let count = targetCount;
+  if (count === undefined) {
+    if (merchantId === 'demo-merchant-0') count = 0;
+    else if (merchantId === 'demo-merchant-75') count = 75;
+    else if (merchantId === 'demo-merchant-350') count = 350;
+    else if (merchantId === 'demo-merchant-2106') count = 2106;
+    else if (merchantId === 'demo-merchant-10500') count = 10500;
+    else if (merchantId === 'dev-demo-merchant-001') count = 2106;
+    else count = 265;
+  }
+
+  if (count === 0) return [];
+
+  // Generate deposits and payouts with realistic distribution
+  const numDeposits = Math.max(0, Math.min(106, Math.floor(count * 0.1)));
+  const numPayouts = count - numDeposits;
+
+  // Deposits
+  for (let i = 1; i <= numDeposits; i++) {
+    const hoursAgo = (i * 3.5) + (i % 5) * 0.5;
     const createdAt = new Date(baseTime - hoursAgo * 3600 * 1000).toISOString();
     const grossAmount = 500 + ((i * 350) % 15000);
     const depositFee = grossAmount < 1000 ? 100 : Math.round(grossAmount * 0.02 * 100) / 100;
@@ -71,7 +88,7 @@ function generateDemoTransactions(merchantId: string): MerchantUnifiedTransactio
     else if (i === 12 || i === 25 || i === 48) status = 'REJECTED';
 
     const utr = `UTR${String(982000000000 + i * 137).padStart(12, '0')}`;
-    const id = `demo-dep-${String(i).padStart(4, '0')}`;
+    const id = `demo-dep-${String(i).padStart(6, '0')}`;
 
     transactions.push({
       id,
@@ -98,9 +115,9 @@ function generateDemoTransactions(merchantId: string): MerchantUnifiedTransactio
     });
   }
 
-  // 130 Withdrawals / Payouts
-  for (let i = 1; i <= 130; i++) {
-    const hoursAgo = i * 4.2 + (i % 5);
+  // Withdrawals / Payouts
+  for (let i = 1; i <= numPayouts; i++) {
+    const hoursAgo = (i * 0.8) + (i % 7) * 0.1;
     const createdAt = new Date(baseTime - hoursAgo * 3600 * 1000).toISOString();
     const amount = 50 + ((i * 125) % 4500);
     const fee = amount < 500 ? 3.00 : (amount < 1000 ? 5.00 : 10.00);
@@ -108,13 +125,13 @@ function generateDemoTransactions(merchantId: string): MerchantUnifiedTransactio
 
     let status: 'SUCCESS' | 'PENDING' | 'FAILED' | 'REJECTED' = 'SUCCESS';
     if (i <= 6) status = 'PENDING';
-    else if (i === 15 || i === 33) status = 'FAILED';
-    else if (i === 22 || i === 50) status = 'REJECTED';
+    else if (i % 47 === 0) status = 'FAILED';
+    else if (i % 53 === 0) status = 'REJECTED';
 
-    const orderId = `ORD-2026-${String(2000 + i)}`;
+    const orderId = `ORD-2026-${String(20000 + i)}`;
     const providerOrderId = `PO-${String(88000000 + i)}`;
-    const providerRef = status === 'SUCCESS' ? `RRN${900000000000 + i * 29}` : null;
-    const id = `demo-wth-${String(i).padStart(4, '0')}`;
+    const providerRef = status === 'SUCCESS' ? `RRN${900000000000 + (i % 100000) * 29}` : null;
+    const id = `demo-wth-${String(i).padStart(6, '0')}`;
 
     transactions.push({
       id,
@@ -1872,10 +1889,19 @@ export const merchantGatewayService = {
   ): Promise<MerchantTransactionsResponse> {
     const page = Math.max(1, params.page || 1);
     const pageSize = 100; // Strict authoritative 100 records per page requirement
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1; // e.g. 0-99 (page 1), 100-199 (page 2), 2100-2199 (page 22)
 
-    // 1. Demo Mode Redundancy (> 250 records for pagination testing)
-    if (params.merchantId === 'dev-demo-merchant-001') {
-      let txs = generateDemoTransactions(params.merchantId);
+    // 1. Deterministic Multi-Count Demo Generator for Testing & Verification
+    if (params.merchantId.startsWith('dev-demo-') || params.merchantId.startsWith('demo-merchant-')) {
+      let targetCount = 2106;
+      if (params.merchantId === 'demo-merchant-0') targetCount = 0;
+      else if (params.merchantId === 'demo-merchant-75') targetCount = 75;
+      else if (params.merchantId === 'demo-merchant-350') targetCount = 350;
+      else if (params.merchantId === 'demo-merchant-2106' || params.merchantId === 'dev-demo-merchant-001') targetCount = 2106;
+      else if (params.merchantId === 'demo-merchant-10500') targetCount = 10500;
+
+      let txs = generateDemoTransactions(params.merchantId, targetCount);
 
       // Type filter
       if (params.type && params.type !== 'ALL') {
@@ -1928,7 +1954,6 @@ export const merchantGatewayService = {
 
       const totalCount = txs.length;
       const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-      const from = (page - 1) * pageSize;
       const paginated = txs.slice(from, from + pageSize);
 
       return {
@@ -1940,7 +1965,7 @@ export const merchantGatewayService = {
       };
     }
 
-    // 2. Production RPC Attempt
+    // 2. Production RPC Attempt (Server-side PL/pgSQL Function with Composite Indexes)
     if (isSupabaseConfigured && supabase) {
       try {
         const { data: rpcData, error: rpcErr } = await supabase.rpc(
@@ -1969,139 +1994,290 @@ export const merchantGatewayService = {
           };
         }
       } catch (rpcEx) {
-        console.warn('RPC get_merchant_unified_transactions_rpc fallback to direct query:', rpcEx);
+        console.warn('RPC get_merchant_unified_transactions_rpc fallback to direct PostgREST query:', rpcEx);
       }
     }
 
-    // 3. Authoritative Direct Database Fallback Query
-    let unifiedList: MerchantUnifiedTransaction[] = [];
-
+    // 3. Authoritative Direct PostgREST Fallback (Exact Server-Side Count & Strictly 100 Rows/Page)
     if (isSupabaseConfigured && supabase) {
-      const fetchDeposits = params.type !== 'WITHDRAWAL';
-      const fetchPayouts = params.type !== 'DEPOSIT';
+      try {
+        // CASE A: User requested ONLY WITHDRAWALS (Payouts)
+        if (params.type === 'WITHDRAWAL') {
+          let q = supabase
+            .from('merchant_payouts')
+            .select('*', { count: 'exact' })
+            .eq('merchant_id', params.merchantId);
 
-      if (fetchDeposits) {
-        let q = supabase
-          .from('merchant_deposits')
-          .select('*')
-          .eq('merchant_id', params.merchantId);
+          if (params.status && params.status !== 'ALL') {
+            if (params.status === 'SUCCESS') q = q.eq('status', 'SUCCESS');
+            else if (params.status === 'PENDING') q = q.in('status', ['PENDING', 'PROCESSING']);
+            else if (params.status === 'FAILED') q = q.eq('status', 'FAILED');
+            else if (params.status === 'REJECTED') q = q.eq('status', 'REVERSED');
+          }
+          if (params.startDate) q = q.gte('created_at', params.startDate);
+          if (params.endDate) q = q.lte('created_at', params.endDate);
+          if (params.minAmount != null) q = q.gte('amount', params.minAmount);
+          if (params.maxAmount != null) q = q.lte('amount', params.maxAmount);
+          if (params.search && params.search.trim()) {
+            const s = params.search.trim();
+            q = q.or(`order_id.ilike.%${s}%,provider_order_id.ilike.%${s}%,provider_reference_id.ilike.%${s}%,account_holder_name.ilike.%${s}%,upi_id.ilike.%${s}%`);
+          }
 
-        if (params.startDate) q = q.gte('created_at', params.startDate);
-        if (params.endDate) q = q.lte('created_at', params.endDate);
-        if (params.minAmount != null) q = q.gte('gross_amount', params.minAmount);
-        if (params.maxAmount != null) q = q.lte('gross_amount', params.maxAmount);
+          q = q
+            .order('created_at', { ascending: false })
+            .order('id', { ascending: false })
+            .range(from, to);
 
-        const { data: depData } = await q;
-        if (depData) {
-          const mapped: MerchantUnifiedTransaction[] = depData.map((d: any) => ({
-            id: d.id,
-            merchant_id: d.merchant_id,
-            type: 'DEPOSIT',
-            reference_id: d.utr_number,
-            provider_order_id: d.id.substring(0, 8).toUpperCase(),
-            provider_reference_id: d.utr_number,
-            amount: Number(d.gross_amount),
-            fee: Number(d.deposit_fee),
-            net_amount: Number(d.net_credited),
-            status: d.status === 'APPROVED' ? 'SUCCESS' : (d.status === 'PENDING' ? 'PENDING' : 'REJECTED'),
-            payment_method: 'UPI',
-            recipient_or_sender: 'Float Top-Up (PayNit / UPI)',
-            created_at: d.created_at,
-            reviewed_or_processed_at: d.reviewed_at,
-            notes_or_reason: d.admin_notes,
-            raw_data: d,
-          }));
-          unifiedList.push(...mapped);
-        }
-      }
+          const { data, count, error } = await q;
+          if (!error && data) {
+            const mapped: MerchantUnifiedTransaction[] = data.map((p: any) => {
+              let s: 'SUCCESS' | 'PENDING' | 'FAILED' | 'REJECTED' = 'SUCCESS';
+              if (p.status === 'PENDING' || p.status === 'PROCESSING') s = 'PENDING';
+              else if (p.status === 'FAILED') s = 'FAILED';
+              else if (p.status === 'REVERSED') s = 'REJECTED';
 
-      if (fetchPayouts) {
-        let q = supabase
-          .from('merchant_payouts')
-          .select('*')
-          .eq('merchant_id', params.merchantId);
+              return {
+                id: p.id,
+                merchant_id: p.merchant_id,
+                type: 'WITHDRAWAL',
+                reference_id: p.order_id,
+                provider_order_id: p.provider_order_id,
+                provider_reference_id: p.provider_reference_id || p.provider_order_id,
+                amount: Number(p.amount),
+                fee: Number(p.fee_amount),
+                net_amount: Number(p.total_deducted),
+                status: s,
+                payment_method: p.payout_method || 'UPI',
+                recipient_or_sender: p.account_holder_name || p.upi_id || 'Beneficiary',
+                created_at: p.created_at,
+                reviewed_or_processed_at: p.processed_at,
+                notes_or_reason: p.rejection_reason,
+                raw_data: p,
+              };
+            });
 
-        if (params.startDate) q = q.gte('created_at', params.startDate);
-        if (params.endDate) q = q.lte('created_at', params.endDate);
-        if (params.minAmount != null) q = q.gte('amount', params.minAmount);
-        if (params.maxAmount != null) q = q.lte('amount', params.maxAmount);
-
-        const { data: payData } = await q;
-        if (payData) {
-          const mapped: MerchantUnifiedTransaction[] = payData.map((p: any) => {
-            let s: 'SUCCESS' | 'PENDING' | 'FAILED' | 'REJECTED' = 'SUCCESS';
-            if (p.status === 'PENDING' || p.status === 'PROCESSING') s = 'PENDING';
-            else if (p.status === 'FAILED') s = 'FAILED';
-            else if (p.status === 'REVERSED') s = 'REJECTED';
+            const totalCount = count ?? mapped.length;
+            const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
             return {
-              id: p.id,
-              merchant_id: p.merchant_id,
-              type: 'WITHDRAWAL',
-              reference_id: p.order_id,
-              provider_order_id: p.provider_order_id,
-              provider_reference_id: p.provider_reference_id || p.provider_order_id,
-              amount: Number(p.amount),
-              fee: Number(p.fee_amount),
-              net_amount: Number(p.total_deducted),
-              status: s,
-              payment_method: p.payout_method || 'UPI',
-              recipient_or_sender: p.account_holder_name || p.upi_id || 'Beneficiary',
-              created_at: p.created_at,
-              reviewed_or_processed_at: p.processed_at,
-              notes_or_reason: p.rejection_reason,
-              raw_data: p,
+              transactions: mapped,
+              total_count: totalCount,
+              page,
+              pageSize,
+              total_pages: totalPages,
             };
-          });
-          unifiedList.push(...mapped);
+          }
         }
+
+        // CASE B: User requested ONLY DEPOSITS
+        if (params.type === 'DEPOSIT') {
+          let q = supabase
+            .from('merchant_deposits')
+            .select('*', { count: 'exact' })
+            .eq('merchant_id', params.merchantId);
+
+          if (params.status && params.status !== 'ALL') {
+            if (params.status === 'SUCCESS') q = q.eq('status', 'APPROVED');
+            else if (params.status === 'PENDING') q = q.eq('status', 'PENDING');
+            else if (params.status === 'REJECTED') q = q.eq('status', 'REJECTED');
+          }
+          if (params.startDate) q = q.gte('created_at', params.startDate);
+          if (params.endDate) q = q.lte('created_at', params.endDate);
+          if (params.minAmount != null) q = q.gte('gross_amount', params.minAmount);
+          if (params.maxAmount != null) q = q.lte('gross_amount', params.maxAmount);
+          if (params.search && params.search.trim()) {
+            const s = params.search.trim();
+            q = q.or(`utr_number.ilike.%${s}%,admin_notes.ilike.%${s}%`);
+          }
+
+          q = q
+            .order('created_at', { ascending: false })
+            .order('id', { ascending: false })
+            .range(from, to);
+
+          const { data, count, error } = await q;
+          if (!error && data) {
+            const mapped: MerchantUnifiedTransaction[] = data.map((d: any) => ({
+              id: d.id,
+              merchant_id: d.merchant_id,
+              type: 'DEPOSIT',
+              reference_id: d.utr_number,
+              provider_order_id: d.id.substring(0, 8).toUpperCase(),
+              provider_reference_id: d.utr_number,
+              amount: Number(d.gross_amount),
+              fee: Number(d.deposit_fee),
+              net_amount: Number(d.net_credited),
+              status: d.status === 'APPROVED' ? 'SUCCESS' : (d.status === 'PENDING' ? 'PENDING' : 'REJECTED'),
+              payment_method: 'UPI',
+              recipient_or_sender: 'Float Top-Up (PayNit / UPI)',
+              created_at: d.created_at,
+              reviewed_or_processed_at: d.reviewed_at,
+              notes_or_reason: d.admin_notes,
+              raw_data: d,
+            }));
+
+            const totalCount = count ?? mapped.length;
+            const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+            return {
+              transactions: mapped,
+              total_count: totalCount,
+              page,
+              pageSize,
+              total_pages: totalPages,
+            };
+          }
+        }
+
+        // CASE C: User requested 'ALL' (Unified Deposits + Withdrawals)
+        // Step 1: Accurate server-side count using lightweight HEAD queries
+        let depQ = supabase.from('merchant_deposits').select('id', { count: 'exact', head: true }).eq('merchant_id', params.merchantId);
+        let payQ = supabase.from('merchant_payouts').select('id', { count: 'exact', head: true }).eq('merchant_id', params.merchantId);
+
+        if (params.startDate) {
+          depQ = depQ.gte('created_at', params.startDate);
+          payQ = payQ.gte('created_at', params.startDate);
+        }
+        if (params.endDate) {
+          depQ = depQ.lte('created_at', params.endDate);
+          payQ = payQ.lte('created_at', params.endDate);
+        }
+        if (params.minAmount != null) {
+          depQ = depQ.gte('gross_amount', params.minAmount);
+          payQ = payQ.gte('amount', params.minAmount);
+        }
+        if (params.maxAmount != null) {
+          depQ = depQ.lte('gross_amount', params.maxAmount);
+          payQ = payQ.lte('amount', params.maxAmount);
+        }
+        if (params.status && params.status !== 'ALL') {
+          if (params.status === 'SUCCESS') {
+            depQ = depQ.eq('status', 'APPROVED');
+            payQ = payQ.eq('status', 'SUCCESS');
+          } else if (params.status === 'PENDING') {
+            depQ = depQ.eq('status', 'PENDING');
+            payQ = payQ.in('status', ['PENDING', 'PROCESSING']);
+          } else if (params.status === 'FAILED') {
+            depQ = depQ.eq('id', '00000000-0000-0000-0000-000000000000');
+            payQ = payQ.eq('status', 'FAILED');
+          } else if (params.status === 'REJECTED') {
+            depQ = depQ.eq('status', 'REJECTED');
+            payQ = payQ.eq('status', 'REVERSED');
+          }
+        }
+        if (params.search && params.search.trim()) {
+          const s = params.search.trim();
+          depQ = depQ.or(`utr_number.ilike.%${s}%,admin_notes.ilike.%${s}%`);
+          payQ = payQ.or(`order_id.ilike.%${s}%,provider_order_id.ilike.%${s}%,provider_reference_id.ilike.%${s}%,account_holder_name.ilike.%${s}%,upi_id.ilike.%${s}%`);
+        }
+
+        const [depCountRes, payCountRes] = await Promise.all([depQ, payQ]);
+        const depCount = depCountRes.count ?? 0;
+        const payCount = payCountRes.count ?? 0;
+        const totalCount = depCount + payCount;
+        const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+        // Step 2: Fetch the exact 100 rows for the requested page window
+        if (depCount === 0) {
+          return this.getMerchantUnifiedTransactions({ ...params, type: 'WITHDRAWAL' });
+        }
+        if (payCount === 0) {
+          return this.getMerchantUnifiedTransactions({ ...params, type: 'DEPOSIT' });
+        }
+
+        // Both deposits and payouts exist: fetch windowed slices, merge, and strictly sort
+        const fetchDepWindow = depCount > 0 ? from < depCount : false;
+        const depFetchLimit = Math.min(pageSize, Math.max(0, depCount - from));
+        const payFetchLimit = pageSize;
+        const payOffset = Math.max(0, from - depCount);
+
+        const [depSlice, paySlice] = await Promise.all([
+          fetchDepWindow
+            ? supabase.from('merchant_deposits').select('*').eq('merchant_id', params.merchantId).order('created_at', { ascending: false }).order('id', { ascending: false }).range(from, from + depFetchLimit - 1)
+            : Promise.resolve({ data: [] }),
+          supabase.from('merchant_payouts').select('*').eq('merchant_id', params.merchantId).order('created_at', { ascending: false }).order('id', { ascending: false }).range(payOffset, payOffset + payFetchLimit - 1),
+        ]);
+
+        const combined: MerchantUnifiedTransaction[] = [];
+        if (depSlice.data) {
+          combined.push(
+            ...depSlice.data.map((d: any) => ({
+              id: d.id,
+              merchant_id: d.merchant_id,
+              type: 'DEPOSIT' as const,
+              reference_id: d.utr_number,
+              provider_order_id: d.id.substring(0, 8).toUpperCase(),
+              provider_reference_id: d.utr_number,
+              amount: Number(d.gross_amount),
+              fee: Number(d.deposit_fee),
+              net_amount: Number(d.net_credited),
+              status: d.status === 'APPROVED' ? ('SUCCESS' as const) : (d.status === 'PENDING' ? ('PENDING' as const) : ('REJECTED' as const)),
+              payment_method: 'UPI',
+              recipient_or_sender: 'Float Top-Up (PayNit / UPI)',
+              created_at: d.created_at,
+              reviewed_or_processed_at: d.reviewed_at,
+              notes_or_reason: d.admin_notes,
+              raw_data: d,
+            }))
+          );
+        }
+        if (paySlice.data) {
+          combined.push(
+            ...paySlice.data.map((p: any) => {
+              let s: 'SUCCESS' | 'PENDING' | 'FAILED' | 'REJECTED' = 'SUCCESS';
+              if (p.status === 'PENDING' || p.status === 'PROCESSING') s = 'PENDING';
+              else if (p.status === 'FAILED') s = 'FAILED';
+              else if (p.status === 'REVERSED') s = 'REJECTED';
+
+              return {
+                id: p.id,
+                merchant_id: p.merchant_id,
+                type: 'WITHDRAWAL' as const,
+                reference_id: p.order_id,
+                provider_order_id: p.provider_order_id,
+                provider_reference_id: p.provider_reference_id || p.provider_order_id,
+                amount: Number(p.amount),
+                fee: Number(p.fee_amount),
+                net_amount: Number(p.total_deducted),
+                status: s,
+                payment_method: p.payout_method || 'UPI',
+                recipient_or_sender: p.account_holder_name || p.upi_id || 'Beneficiary',
+                created_at: p.created_at,
+                reviewed_or_processed_at: p.processed_at,
+                notes_or_reason: p.rejection_reason,
+                raw_data: p,
+              };
+            })
+          );
+        }
+
+        // Deterministic sort: created_at DESC, id DESC
+        combined.sort((a, b) => {
+          const diff = new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          if (diff !== 0) return diff;
+          return b.id.localeCompare(a.id);
+        });
+
+        const paginated = combined.slice(0, pageSize);
+
+        return {
+          transactions: paginated,
+          total_count: totalCount,
+          page,
+          pageSize,
+          total_pages: totalPages,
+        };
+      } catch (directErr) {
+        console.error('Direct PostgREST paginated query failed:', directErr);
       }
     }
-
-    // Apply in-memory status filter if needed
-    if (params.status && params.status !== 'ALL') {
-      if (params.status === 'SUCCESS') {
-        unifiedList = unifiedList.filter((t) => t.status === 'SUCCESS');
-      } else if (params.status === 'PENDING') {
-        unifiedList = unifiedList.filter((t) => t.status === 'PENDING' || t.status === 'PROCESSING');
-      } else if (params.status === 'FAILED') {
-        unifiedList = unifiedList.filter((t) => t.status === 'FAILED');
-      } else if (params.status === 'REJECTED') {
-        unifiedList = unifiedList.filter((t) => t.status === 'REJECTED');
-      }
-    }
-
-    // Apply search filter (ID, UTR, Order ID, Beneficiary)
-    if (params.search && params.search.trim()) {
-      const q = params.search.trim().toLowerCase();
-      unifiedList = unifiedList.filter(
-        (t) =>
-          t.reference_id.toLowerCase().includes(q) ||
-          (t.provider_order_id && t.provider_order_id.toLowerCase().includes(q)) ||
-          (t.provider_reference_id && t.provider_reference_id.toLowerCase().includes(q)) ||
-          (t.recipient_or_sender && t.recipient_or_sender.toLowerCase().includes(q)) ||
-          t.id.toLowerCase().includes(q)
-      );
-    }
-
-    // Deterministic sort: created_at DESC, id DESC tie-breaker
-    unifiedList.sort((a, b) => {
-      const diff = new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      if (diff !== 0) return diff;
-      return b.id.localeCompare(a.id);
-    });
-
-    const totalCount = unifiedList.length;
-    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-    const from = (page - 1) * pageSize;
-    const paginated = unifiedList.slice(from, from + pageSize);
 
     return {
-      transactions: paginated,
-      total_count: totalCount,
-      page,
-      pageSize,
-      total_pages: totalPages,
+      transactions: [],
+      total_count: 0,
+      page: 1,
+      pageSize: 100,
+      total_pages: 1,
     };
   },
 };
