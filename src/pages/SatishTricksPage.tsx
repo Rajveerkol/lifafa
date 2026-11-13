@@ -1,22 +1,51 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Gift, Sparkles, RefreshCw, Copy, Check, ExternalLink } from 'lucide-react';
 
+const DEFAULT_CODE = 'K8UT7P7XP';
+const ALPHANUMERIC_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
 /**
- * Generates an exclusive 9-digit numeric demo code.
- * Invariant: Never starts with zero (first digit 1-9, remaining 8 digits 0-9).
+ * Generates an unbiased random character from A-Z and 0-9 using crypto.getRandomValues().
  */
-function generateRandom9DigitCode(): string {
-  const firstDigit = Math.floor(Math.random() * 9) + 1; // 1 to 9
-  let restDigits = '';
-  for (let i = 0; i < 8; i++) {
-    restDigits += Math.floor(Math.random() * 10); // 0 to 9
+function getRandomAlphanumericChar(): string {
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+    const buf = new Uint8Array(1);
+    while (true) {
+      window.crypto.getRandomValues(buf);
+      // 36 * 7 = 252; values < 252 eliminate modulo bias for 36 possible outcomes
+      if (buf[0] < 252) {
+        return ALPHANUMERIC_CHARS[buf[0] % 36];
+      }
+    }
   }
-  return `${firstDigit}${restDigits}`;
+  return ALPHANUMERIC_CHARS[Math.floor(Math.random() * 36)];
+}
+
+/**
+ * Generates an exclusive 9-character uppercase alphanumeric demo code.
+ * Requirements:
+ * - Exactly 9 characters.
+ * - Uppercase English letters A-Z and digits 0-9.
+ * - Naturally mixed: guarantees at least one letter and at least one digit.
+ * - No lowercase, spaces, or symbols.
+ * - Avoids numeric-only and letter-only codes.
+ */
+function generateRandomAlphanumericCode(): string {
+  while (true) {
+    let result = '';
+    for (let i = 0; i < 9; i++) {
+      result += getRandomAlphanumericChar();
+    }
+    // Avoid numeric-only or letter-only codes
+    if (/[A-Z]/.test(result) && /[0-9]/.test(result)) {
+      return result;
+    }
+  }
 }
 
 export function SatishTricksPage() {
-  // Requirement 4: On open, a random 9-digit code must already be visible
-  const [code, setCode] = useState<string>(() => generateRandom9DigitCode());
+  // Requirement 1: On open or refresh, display exact default code K8UT7P7XP immediately
+  const [code, setCode] = useState<string>(DEFAULT_CODE);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -30,7 +59,7 @@ export function SatishTricksPage() {
     return () => clearTimeout(timer);
   }, [toastMessage]);
 
-  // Requirement 5: Generate New Code with animation and anti-spam lock
+  // Requirement 2 & 3: Generate New Code with animation and anti-spam lock
   const handleGenerateCode = useCallback(() => {
     if (isGenerating) return; // Prevent duplicate clicks during animation
 
@@ -39,7 +68,7 @@ export function SatishTricksPage() {
 
     // Halfway through flip animation, update the displayed code
     setTimeout(() => {
-      const nextCode = generateRandom9DigitCode();
+      const nextCode = generateRandomAlphanumericCode();
       setCode(nextCode);
       setToastMessage('New demo code generated!');
     }, 220);
@@ -189,7 +218,7 @@ export function SatishTricksPage() {
 
             {/* Card Subtitle */}
             <p className="text-xs sm:text-sm text-purple-200/70 font-medium mb-6">
-              Generate your exclusive 9-digit demo code
+              Generate your exclusive 9-character demo code
             </p>
 
             {/* CODE CONTAINER (White / Yellow Gradient with 3D Flip) */}
@@ -208,14 +237,14 @@ export function SatishTricksPage() {
               >
                 {/* Tech Corner Accent Marks */}
                 <div className="absolute top-1.5 left-2 text-[10px] text-yellow-400/40 font-mono tracking-wider">
-                  DEMO // 9-DIGIT
+                  DEMO // 9-CHAR
                 </div>
                 <div className="absolute top-1.5 right-2 text-[10px] text-emerald-400/70 font-mono flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
                   VALID
                 </div>
 
-                {/* THE 9-DIGIT CODE */}
+                {/* THE 9-CHARACTER CODE */}
                 <div className="py-2 flex items-center justify-center">
                   <span
                     className="font-mono font-black text-3xl sm:text-4xl tracking-[0.18em] sm:tracking-[0.24em] bg-gradient-to-r from-white via-yellow-200 to-amber-300 bg-clip-text text-transparent drop-shadow-[0_2px_14px_rgba(250,204,21,0.6)] select-all cursor-pointer"
@@ -237,7 +266,7 @@ export function SatishTricksPage() {
                 type="button"
                 onClick={handleGenerateCode}
                 disabled={isGenerating}
-                aria-label="Generate new 9-digit code"
+                aria-label="Generate new 9-character code"
                 className="group relative w-full py-4 px-6 rounded-2xl font-black text-slate-950 text-sm sm:text-base tracking-wider uppercase bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-400 hover:from-yellow-200 hover:via-yellow-300 hover:to-amber-300 active:scale-[0.98] transition-all duration-200 shadow-[0_0_25px_rgba(250,204,21,0.45)] hover:shadow-[0_0_35px_rgba(250,204,21,0.7)] flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed select-none overflow-hidden"
               >
                 {/* Light shimmer swipe across button */}
