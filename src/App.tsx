@@ -14,6 +14,7 @@ import { HelpSupportPage } from './pages/HelpSupportPage';
 import { TermsPage } from './pages/TermsPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { ClaimPage } from './pages/ClaimPage';
+import { SatishTricksPage } from './pages/SatishTricksPage';
 
 import { ProfileOnboardingModal } from './components/auth/ProfileOnboardingModal';
 import { AuthModal } from './components/auth/AuthModal';
@@ -38,6 +39,11 @@ export function App() {
       return code || null;
     }
     return null;
+  };
+
+  const isSatishTricksRoute = () => {
+    const raw = typeof window !== 'undefined' ? window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase() : '';
+    return raw === 'satish-tricks';
   };
 
   const getInitialTab = () => {
@@ -68,6 +74,7 @@ export function App() {
 
   const [currentTab, setCurrentTab] = useState<string>(getInitialTab);
   const [claimRouteCode, setClaimRouteCode] = useState<string | null>(parseClaimCodeFromPath);
+  const [isSatishTricks, setIsSatishTricks] = useState<boolean>(isSatishTricksRoute);
   const [isCreatingLifafa, setIsCreatingLifafa] = useState(false);
 
 
@@ -109,11 +116,17 @@ export function App() {
       const routeCode = parseClaimCodeFromPath();
       if (routeCode) {
         setClaimRouteCode(routeCode);
+        setIsSatishTricks(false);
         return;
       }
       setClaimRouteCode(null);
 
       const raw = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+      if (raw === 'satish-tricks') {
+        setIsSatishTricks(true);
+        return;
+      }
+      setIsSatishTricks(false);
       if (raw === 'login' || raw === 'signin') {
         setAuthModalOpen(true);
         setCurrentTab('home');
@@ -164,6 +177,7 @@ export function App() {
     setSelectedClaimLifafa(null);
     setSelectedShareLifafa(null);
     clearClaimQueryParam();
+    setIsSatishTricks(tab === 'satish-tricks');
 
     if (tab === 'lifafa' && extra?.action === 'create') {
       setIsCreatingLifafa(true);
@@ -206,6 +220,11 @@ export function App() {
       }
     });
   };
+
+  // Dedicated Standalone Satish Tricks Promo Page (suppresses consumer Header, BottomNav, and container constraints)
+  if (isSatishTricks) {
+    return <SatishTricksPage />;
+  }
 
   // Dedicated Standalone Claim Page View (suppresses Header, BottomNav, and surrounding Home UI)
   if (claimRouteCode) {
