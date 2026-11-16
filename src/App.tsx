@@ -15,6 +15,7 @@ import { TermsPage } from './pages/TermsPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { ClaimPage } from './pages/ClaimPage';
 import { SatishTricksPage } from './pages/SatishTricksPage';
+import { YonoAppPage } from './pages/YonoAppPage';
 
 import { ProfileOnboardingModal } from './components/auth/ProfileOnboardingModal';
 import { AuthModal } from './components/auth/AuthModal';
@@ -46,6 +47,11 @@ export function App() {
     return raw === 'satish-tricks';
   };
 
+  const isYonoAppRoute = () => {
+    const raw = typeof window !== 'undefined' ? window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase() : '';
+    return raw === 'yono-app';
+  };
+
   const getInitialTab = () => {
     const raw = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
     if (raw === 'games') {
@@ -75,6 +81,7 @@ export function App() {
   const [currentTab, setCurrentTab] = useState<string>(getInitialTab);
   const [claimRouteCode, setClaimRouteCode] = useState<string | null>(parseClaimCodeFromPath);
   const [isSatishTricks, setIsSatishTricks] = useState<boolean>(isSatishTricksRoute);
+  const [isYonoApp, setIsYonoApp] = useState<boolean>(isYonoAppRoute);
   const [isCreatingLifafa, setIsCreatingLifafa] = useState(false);
 
 
@@ -117,6 +124,7 @@ export function App() {
       if (routeCode) {
         setClaimRouteCode(routeCode);
         setIsSatishTricks(false);
+        setIsYonoApp(false);
         return;
       }
       setClaimRouteCode(null);
@@ -124,9 +132,16 @@ export function App() {
       const raw = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
       if (raw === 'satish-tricks') {
         setIsSatishTricks(true);
+        setIsYonoApp(false);
+        return;
+      }
+      if (raw === 'yono-app') {
+        setIsYonoApp(true);
+        setIsSatishTricks(false);
         return;
       }
       setIsSatishTricks(false);
+      setIsYonoApp(false);
       if (raw === 'login' || raw === 'signin') {
         setAuthModalOpen(true);
         setCurrentTab('home');
@@ -178,6 +193,7 @@ export function App() {
     setSelectedShareLifafa(null);
     clearClaimQueryParam();
     setIsSatishTricks(tab === 'satish-tricks');
+    setIsYonoApp(tab === 'yono-app');
 
     if (tab === 'lifafa' && extra?.action === 'create') {
       setIsCreatingLifafa(true);
@@ -224,6 +240,11 @@ export function App() {
   // Dedicated Standalone Satish Tricks Promo Page (suppresses consumer Header, BottomNav, and container constraints)
   if (isSatishTricks) {
     return <SatishTricksPage />;
+  }
+
+  // Dedicated Standalone Yono App VIP Demo Portal (suppresses consumer Header, BottomNav, and container constraints)
+  if (isYonoApp) {
+    return <YonoAppPage />;
   }
 
   // Dedicated Standalone Claim Page View (suppresses Header, BottomNav, and surrounding Home UI)
