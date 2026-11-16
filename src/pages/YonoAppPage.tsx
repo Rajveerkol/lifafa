@@ -168,11 +168,11 @@ export function YonoAppPage() {
               {/* 6E CLUB Logo (Uploaded Asset) */}
               <div className="relative mb-4 group">
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-emerald-400 rounded-2xl blur-md opacity-40 group-hover:opacity-70 transition-opacity" />
-                <div className="relative w-20 h-20 sm:w-22 sm:h-22 rounded-2xl overflow-hidden border-2 border-amber-500/50 shadow-[0_0_20px_rgba(245,158,11,0.3)] bg-emerald-950">
+                <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-amber-500/50 shadow-[0_0_20px_rgba(245,158,11,0.3)] bg-emerald-950">
                   <img
                     src="/images/6e-club-logo.jpg"
                     alt="6E CLUB Official Logo"
-                    className="w-full h-full object-cover select-none"
+                    className="w-full h-full object-cover select-none block"
                   />
                 </div>
               </div>
@@ -276,18 +276,24 @@ export function YonoAppPage() {
           <div className="yono-border-glow relative rounded-3xl p-[1.5px] bg-gradient-to-b from-amber-500/50 via-amber-600/30 to-orange-500/40 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.8)]">
             <div className="relative rounded-3xl bg-[#0d121f]/95 backdrop-blur-2xl p-8 sm:p-10 border border-white/10 flex flex-col items-center text-center">
               
-              {/* Pulsing 6E CLUB Logo with Circular Progress */}
-              <div className="relative mb-6">
-                {/* Glowing Outer Spinning Ring */}
-                <div className="absolute -inset-3 rounded-full border-2 border-amber-400/40 border-t-amber-300 border-r-transparent yono-spin-slow" />
-                
-                {/* 6E CLUB Logo */}
-                <div className="relative w-22 h-22 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-amber-500/60 shadow-[0_0_30px_rgba(245,158,11,0.5)] animate-pulse">
-                  <img
-                    src="/images/6e-club-logo.jpg"
-                    alt="6E CLUB Loading"
-                    className="w-full h-full object-cover select-none"
-                  />
+              {/* Pulsing 6E CLUB Logo with Symmetrical Circular Progress Spinner */}
+              <div className="relative mb-6 flex items-center justify-center">
+                {/* Fixed-size circular spinner frame with ample clearance */}
+                <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center">
+                  {/* Outer spinning gradient ring */}
+                  <div className="absolute inset-0 rounded-full border-2 border-amber-500/20 border-t-amber-400 border-r-amber-400/70 yono-spin-slow pointer-events-none shadow-[0_0_15px_rgba(245,158,11,0.25)]" />
+                  
+                  {/* Subtle pulsing amber glow behind logo */}
+                  <div className="absolute inset-3 rounded-full bg-amber-500/10 blur-md animate-pulse pointer-events-none" />
+
+                  {/* 6E CLUB Logo: Explicit fixed dimensions, rounded-2xl, beautifully centered with zero overlay */}
+                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-amber-500/60 shadow-[0_0_20px_rgba(245,158,11,0.4)] bg-emerald-950 shrink-0">
+                    <img
+                      src="/images/6e-club-logo.jpg"
+                      alt="6E CLUB Loading"
+                      className="w-full h-full object-cover select-none block"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -332,7 +338,7 @@ export function YonoAppPage() {
               {/* Animated Green Circle Checkmark */}
               <div className="relative mb-2">
                 <div className="absolute inset-0 bg-emerald-400 rounded-full blur-md opacity-40 animate-pulse" />
-                <div className="relative w-13 h-13 sm:w-15 sm:h-15 rounded-full bg-emerald-950/80 border-2 border-emerald-400/70 flex items-center justify-center text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.5)]">
+                <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-950/80 border-2 border-emerald-400/70 flex items-center justify-center text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.5)]">
                   <CheckCircle2 className="w-8 h-8 sm:w-9 sm:h-9 text-emerald-400" />
                 </div>
               </div>
