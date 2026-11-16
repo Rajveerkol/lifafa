@@ -1,272 +1,6 @@
 import React, { useState, useEffect, useCallback, useId } from 'react';
 import { CheckCircle2, ArrowLeft, AlertTriangle, ShieldCheck, Sparkles, Server } from 'lucide-react';
 
-interface GameTile {
-  id: string;
-  title: string;
-  subtitle: string;
-  provider: string;
-  themeGradient: string;
-  borderColor: string;
-  glowColor: string;
-  accentColor: string;
-  badge?: string;
-  iconType: 'buffalo' | 'diamonds' | 'gems' | 'bandito' | 'alibaba' | 'garuda1000' | 'garuda500' | 'niubi' | 'ape';
-}
-
-const GAME_TILES: GameTile[] = [
-  {
-    id: 'charge-buffalo',
-    title: 'CHARGE BUFFALO',
-    subtitle: 'WILD PRAIRIE',
-    provider: 'JILI',
-    themeGradient: 'from-amber-950 via-yellow-900 to-amber-950',
-    borderColor: 'border-amber-500/50',
-    glowColor: 'rgba(245, 158, 11, 0.35)',
-    accentColor: '#f59e0b',
-    iconType: 'buffalo',
-  },
-  {
-    id: 'double-diamonds',
-    title: 'DOUBLE DIAMONDS',
-    subtitle: 'IRIDESCENT MULTIPLIER',
-    provider: 'JILI',
-    themeGradient: 'from-sky-950 via-indigo-900 to-purple-950',
-    borderColor: 'border-sky-400/50',
-    glowColor: 'rgba(56, 189, 248, 0.35)',
-    accentColor: '#38bdf8',
-    badge: 'HOT',
-    iconType: 'diamonds',
-  },
-  {
-    id: 'fortune-gems',
-    title: 'FORTUNE GEMS',
-    subtitle: 'ANCIENT IDOL',
-    provider: 'JILI',
-    themeGradient: 'from-amber-950 via-amber-800 to-emerald-950',
-    borderColor: 'border-yellow-400/50',
-    glowColor: 'rgba(250, 204, 21, 0.4)',
-    accentColor: '#facc15',
-    iconType: 'gems',
-  },
-  {
-    id: 'wild-bandito',
-    title: 'WILD BANDITO',
-    subtitle: 'FIESTA BONANZA',
-    provider: 'PG SOFT',
-    themeGradient: 'from-purple-950 via-rose-950 to-indigo-950',
-    borderColor: 'border-rose-400/50',
-    glowColor: 'rgba(251, 113, 133, 0.35)',
-    accentColor: '#fb7185',
-    iconType: 'bandito',
-  },
-  {
-    id: 'ali-baba',
-    title: 'ALI BABA',
-    subtitle: 'TREASURE OF CAVE',
-    provider: 'JILI',
-    themeGradient: 'from-violet-950 via-purple-900 to-slate-950',
-    borderColor: 'border-purple-400/50',
-    glowColor: 'rgba(192, 132, 252, 0.35)',
-    accentColor: '#c084fc',
-    iconType: 'alibaba',
-  },
-  {
-    id: 'fortune-garuda-1000',
-    title: 'GARUDA 1000',
-    subtitle: '1000X MYTHIC WINGS',
-    provider: 'JILI',
-    themeGradient: 'from-amber-950 via-yellow-800 to-amber-900',
-    borderColor: 'border-amber-400/60',
-    glowColor: 'rgba(251, 191, 36, 0.45)',
-    accentColor: '#fbbf24',
-    badge: '1000X',
-    iconType: 'garuda1000',
-  },
-  {
-    id: 'fortune-garuda-500',
-    title: 'GARUDA 500',
-    subtitle: '500X CELESTIAL',
-    provider: 'JILI',
-    themeGradient: 'from-yellow-950 via-amber-900 to-orange-950',
-    borderColor: 'border-yellow-500/50',
-    glowColor: 'rgba(234, 179, 8, 0.35)',
-    accentColor: '#eab308',
-    badge: '500X',
-    iconType: 'garuda500',
-  },
-  {
-    id: 'super-niubi',
-    title: 'SUPER NIUBI',
-    subtitle: 'DELUXE CYBER BULL',
-    provider: 'JILI',
-    themeGradient: 'from-indigo-950 via-fuchsia-950 to-purple-950',
-    borderColor: 'border-fuchsia-400/50',
-    glowColor: 'rgba(232, 121, 249, 0.35)',
-    accentColor: '#e879f9',
-    iconType: 'niubi',
-  },
-  {
-    id: 'wild-ape',
-    title: 'WILD APE #3258',
-    subtitle: 'CYBER VIP CLUB',
-    provider: 'JILI',
-    themeGradient: 'from-purple-950 via-indigo-950 to-slate-950',
-    borderColor: 'border-violet-400/50',
-    glowColor: 'rgba(167, 139, 250, 0.35)',
-    accentColor: '#a78bfa',
-    badge: 'VIP',
-    iconType: 'ape',
-  },
-];
-
-/**
- * Custom SVG Game Artwork renderer for high fidelity on all screens.
- */
-function GameArtwork({ type, accent }: { type: GameTile['iconType']; accent: string }) {
-  switch (type) {
-    case 'buffalo':
-      return (
-        <svg viewBox="0 0 100 100" className="w-14 h-14 sm:w-16 sm:h-16 drop-shadow-[0_4px_12px_rgba(245,158,11,0.5)]">
-          <circle cx="50" cy="50" r="42" fill="#2b1402" stroke="#f59e0b" strokeWidth="2.5" />
-          {/* Horns */}
-          <path d="M 22 45 C 10 25 30 15 42 35 C 32 30 24 35 22 45 Z" fill="#fbbf24" />
-          <path d="M 78 45 C 90 25 70 15 58 35 C 68 30 76 35 78 45 Z" fill="#fbbf24" />
-          {/* Buffalo Face */}
-          <path d="M 32 40 L 68 40 L 62 70 L 50 78 L 38 70 Z" fill="#78350f" />
-          <ellipse cx="50" cy="48" rx="14" ry="12" fill="#92400e" />
-          {/* Glowing Eyes */}
-          <circle cx="43" cy="46" r="3" fill="#fef08a" />
-          <circle cx="57" cy="46" r="3" fill="#fef08a" />
-          {/* Nose Ring */}
-          <circle cx="50" cy="65" r="7" fill="none" stroke="#fbbf24" strokeWidth="2.5" />
-        </svg>
-      );
-    case 'diamonds':
-      return (
-        <svg viewBox="0 0 100 100" className="w-14 h-14 sm:w-16 sm:h-16 drop-shadow-[0_4px_14px_rgba(56,189,248,0.6)]">
-          <polygon points="50,15 85,38 72,82 28,82 15,38" fill="url(#diam-grad)" stroke="#38bdf8" strokeWidth="2" />
-          <polygon points="50,15 68,38 50,82 32,38" fill="#bae6fd" opacity="0.6" />
-          <polygon points="15,38 50,38 32,82" fill="#7dd3fc" opacity="0.7" />
-          <polygon points="85,38 50,38 68,82" fill="#0284c7" opacity="0.7" />
-          <defs>
-            <linearGradient id="diam-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#e0f2fe" />
-              <stop offset="50%" stopColor="#38bdf8" />
-              <stop offset="100%" stopColor="#0369a1" />
-            </linearGradient>
-          </defs>
-        </svg>
-      );
-    case 'gems':
-      return (
-        <svg viewBox="0 0 100 100" className="w-14 h-14 sm:w-16 sm:h-16 drop-shadow-[0_4px_14px_rgba(250,204,21,0.6)]">
-          {/* Aztec Golden Mask */}
-          <rect x="22" y="24" width="56" height="56" rx="12" fill="#78350f" stroke="#facc15" strokeWidth="2.5" />
-          <polygon points="50,14 62,24 38,24" fill="#facc15" />
-          <rect x="30" y="36" width="12" height="10" rx="3" fill="#10b981" stroke="#facc15" strokeWidth="1.5" />
-          <rect x="58" y="36" width="12" height="10" rx="3" fill="#10b981" stroke="#facc15" strokeWidth="1.5" />
-          {/* Center Ruby Gem */}
-          <polygon points="50,48 58,56 50,64 42,56" fill="#ef4444" stroke="#fef08a" strokeWidth="1.5" />
-          {/* Golden Teeth */}
-          <rect x="38" y="68" width="6" height="6" fill="#facc15" />
-          <rect x="46" y="68" width="8" height="6" fill="#facc15" />
-          <rect x="56" y="68" width="6" height="6" fill="#facc15" />
-        </svg>
-      );
-    case 'bandito':
-      return (
-        <svg viewBox="0 0 100 100" className="w-14 h-14 sm:w-16 sm:h-16 drop-shadow-[0_4px_14px_rgba(251,113,133,0.5)]">
-          {/* Sombrero */}
-          <ellipse cx="50" cy="38" rx="44" ry="14" fill="#fbbf24" stroke="#d97706" strokeWidth="2" />
-          <path d="M 34 38 C 34 20 66 20 66 38 Z" fill="#b45309" stroke="#fbbf24" strokeWidth="2" />
-          {/* Skull Face */}
-          <circle cx="50" cy="56" r="18" fill="#f1f5f9" />
-          <ellipse cx="43" cy="54" rx="4" ry="5" fill="#0f172a" />
-          <ellipse cx="57" cy="54" rx="4" ry="5" fill="#0f172a" />
-          <polygon points="50,60 47,66 53,66" fill="#0f172a" />
-          {/* Mustache */}
-          <path d="M 38 68 C 45 64 50 67 50 67 C 50 67 55 64 62 68 C 66 70 60 74 50 71 C 40 74 34 70 38 68 Z" fill="#020617" />
-        </svg>
-      );
-    case 'alibaba':
-      return (
-        <svg viewBox="0 0 100 100" className="w-14 h-14 sm:w-16 sm:h-16 drop-shadow-[0_4px_14px_rgba(192,132,252,0.5)]">
-          {/* Sultan Turban */}
-          <ellipse cx="50" cy="42" rx="28" ry="20" fill="#f8fafc" stroke="#c084fc" strokeWidth="2" />
-          <circle cx="50" cy="30" r="6" fill="#a855f7" stroke="#fbbf24" strokeWidth="1.5" />
-          <path d="M 50 24 C 54 14 58 12 60 8" stroke="#fbbf24" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-          {/* Face */}
-          <ellipse cx="50" cy="58" rx="16" ry="18" fill="#fcd34d" />
-          {/* Eyes & Beard */}
-          <circle cx="44" cy="54" r="2.5" fill="#1e1b4b" />
-          <circle cx="56" cy="54" r="2.5" fill="#1e1b4b" />
-          <path d="M 40 64 C 45 74 55 74 60 64 C 55 78 45 78 40 64 Z" fill="#1e1b4b" />
-        </svg>
-      );
-    case 'garuda1000':
-      return (
-        <svg viewBox="0 0 100 100" className="w-14 h-14 sm:w-16 sm:h-16 drop-shadow-[0_4px_14px_rgba(251,191,36,0.6)]">
-          {/* Sunburst Halo */}
-          <circle cx="50" cy="50" r="38" fill="none" stroke="#f59e0b" strokeWidth="2" strokeDasharray="4 3" />
-          {/* Golden Eagle Wings */}
-          <path d="M 16 50 C 14 30 36 26 46 42 C 34 38 24 44 16 50 Z" fill="#fbbf24" />
-          <path d="M 84 50 C 86 30 64 26 54 42 C 66 38 76 44 84 50 Z" fill="#fbbf24" />
-          {/* Garuda Crown & Head */}
-          <polygon points="50,16 56,30 44,30" fill="#facc15" stroke="#d97706" strokeWidth="1.5" />
-          <circle cx="50" cy="42" r="14" fill="#fbbf24" stroke="#d97706" strokeWidth="1.5" />
-          <polygon points="50,44 58,52 42,52" fill="#ea580c" />
-          {/* 1000X Banner */}
-          <rect x="26" y="66" width="48" height="16" rx="5" fill="#991b1b" stroke="#facc15" strokeWidth="1.5" />
-          <text x="50" y="78" textAnchor="middle" fill="#fef08a" fontSize="10" fontWeight="900" fontFamily="sans-serif">1000X</text>
-        </svg>
-      );
-    case 'garuda500':
-      return (
-        <svg viewBox="0 0 100 100" className="w-14 h-14 sm:w-16 sm:h-16 drop-shadow-[0_4px_14px_rgba(234,179,8,0.5)]">
-          <circle cx="50" cy="50" r="38" fill="none" stroke="#eab308" strokeWidth="2" strokeDasharray="3 3" />
-          {/* Wings */}
-          <path d="M 18 52 C 16 34 36 30 46 44 C 36 42 26 46 18 52 Z" fill="#fde047" />
-          <path d="M 82 52 C 84 34 64 30 54 44 C 64 42 74 46 82 52 Z" fill="#fde047" />
-          {/* Bird Mask */}
-          <circle cx="50" cy="42" r="14" fill="#facc15" stroke="#ca8a04" strokeWidth="1.5" />
-          <polygon points="50,44 56,52 44,52" fill="#c2410c" />
-          {/* 500 Banner */}
-          <rect x="28" y="66" width="44" height="16" rx="5" fill="#b45309" stroke="#fef08a" strokeWidth="1.5" />
-          <text x="50" y="78" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="900" fontFamily="sans-serif">500</text>
-        </svg>
-      );
-    case 'niubi':
-      return (
-        <svg viewBox="0 0 100 100" className="w-14 h-14 sm:w-16 sm:h-16 drop-shadow-[0_4px_14px_rgba(232,121,249,0.5)]">
-          {/* Cyber Bull Emblem */}
-          <polygon points="50,18 84,40 70,82 30,82 16,40" fill="#3b0764" stroke="#e879f9" strokeWidth="2" />
-          {/* Neon Magenta Horns */}
-          <path d="M 30 42 C 20 20 40 14 48 30 C 40 26 32 32 30 42 Z" fill="#f43f5e" />
-          <path d="M 70 42 C 80 20 60 14 52 30 C 60 26 68 32 70 42 Z" fill="#f43f5e" />
-          <circle cx="42" cy="50" r="3.5" fill="#38bdf8" />
-          <circle cx="58" cy="50" r="3.5" fill="#38bdf8" />
-          <polygon points="50,56 56,66 44,66" fill="#fbbf24" />
-        </svg>
-      );
-    case 'ape':
-      return (
-        <svg viewBox="0 0 100 100" className="w-14 h-14 sm:w-16 sm:h-16 drop-shadow-[0_4px_14px_rgba(167,139,250,0.5)]">
-          {/* Ape Head */}
-          <circle cx="50" cy="50" r="30" fill="#4c1d95" stroke="#a78bfa" strokeWidth="2" />
-          {/* Ears */}
-          <circle cx="20" cy="50" r="10" fill="#581c87" stroke="#a78bfa" strokeWidth="1.5" />
-          <circle cx="80" cy="50" r="10" fill="#581c87" stroke="#a78bfa" strokeWidth="1.5" />
-          {/* Cyberpunk Visor */}
-          <rect x="32" y="40" width="36" height="12" rx="4" fill="#06b6d4" stroke="#f43f5e" strokeWidth="1.5" />
-          {/* Ape Muzzle */}
-          <ellipse cx="50" cy="62" rx="14" ry="10" fill="#6d28d9" />
-          <line x1="42" y1="64" x2="58" y2="64" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      );
-  }
-}
-
 export function YonoAppPage() {
   const [screen, setScreen] = useState<'INPUT' | 'LOADING' | 'PREVIEW'>('INPUT');
   const [uid, setUid] = useState<string>('');
@@ -603,61 +337,30 @@ export function YonoAppPage() {
                 </div>
               </div>
 
-              {/* Heading: PREVIEW READY */}
-              <h2 className="text-xl sm:text-2xl font-black text-white tracking-wider uppercase mb-1.5">
-                PREVIEW READY
+              {/* Heading: HACK ACTIVE SUCCESSFUL */}
+              <h2 className="text-xl sm:text-2xl font-black text-emerald-400 tracking-wider uppercase mb-1.5 drop-shadow-[0_2px_10px_rgba(16,185,129,0.4)]">
+                HACK ACTIVE SUCCESSFUL
               </h2>
 
-              {/* Status Row: "Loaded" badge + "Entered UID: [uid]" */}
-              <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
-                <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-ping" />
-                  Loaded
-                </span>
-                
-                <span className="inline-flex items-center gap-1.5 px-3.5 py-0.5 rounded-full bg-[#080d1a] border border-amber-500/40 text-amber-300 font-mono text-xs font-bold shadow-[0_0_10px_rgba(245,158,11,0.2)]">
-                  Entered UID: <span className="text-white font-extrabold">{uid}</span>
+              {/* Status Row: Connected UID: [uid] */}
+              <div className="flex flex-wrap items-center justify-center gap-2 mb-3">
+                <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/50 text-emerald-400 font-mono text-xs font-bold shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400 shadow-[0_0_6px_#34d399]" />
+                  </span>
+                  <span>Connected UID: <strong className="text-white font-extrabold">{uid}</strong></span>
                 </span>
               </div>
 
-              {/* 3x3 GAME PREVIEW GRID (Matches Reference Screenshot 3) */}
-              <div className="w-full grid grid-cols-3 gap-2 sm:gap-2.5 p-2 sm:p-3 rounded-2xl bg-black/60 border border-amber-500/25 mb-4 shadow-[inset_0_2px_8px_rgba(0,0,0,0.8)]">
-                {GAME_TILES.map((tile) => (
-                  <div
-                    key={tile.id}
-                    className={`group relative rounded-xl overflow-hidden border ${tile.borderColor} bg-gradient-to-b ${tile.themeGradient} p-2 flex flex-col items-center justify-between transition-all duration-200 transform hover:scale-[1.04] active:scale-[0.98] cursor-pointer shadow-md`}
-                    style={{
-                      boxShadow: `0 4px 14px ${tile.glowColor}`,
-                    }}
-                  >
-                    {/* Top Provider / Multiplier Badge */}
-                    <div className="w-full flex justify-between items-center text-[9px] font-black tracking-wider uppercase mb-1">
-                      <span className="px-1.5 py-0.2 rounded bg-black/50 text-amber-300 border border-amber-500/30">
-                        {tile.provider}
-                      </span>
-                      {tile.badge && (
-                        <span className="px-1.5 py-0.2 rounded bg-rose-600/90 text-white font-bold text-[8px]">
-                          {tile.badge}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Center Artwork Illustration */}
-                    <div className="my-1.5 transform group-hover:scale-110 transition-transform duration-200">
-                      <GameArtwork type={tile.iconType} accent={tile.accentColor} />
-                    </div>
-
-                    {/* Bottom Title Ribbon */}
-                    <div className="w-full py-1 px-1 rounded-md bg-black/85 border border-white/10 text-center min-h-[32px] sm:min-h-[36px] flex flex-col justify-center">
-                      <div className="text-[9px] sm:text-[10.5px] font-black text-amber-300 tracking-tight leading-tight uppercase">
-                        {tile.title}
-                      </div>
-                      <div className="text-[7.5px] sm:text-[8px] text-slate-400 font-semibold leading-none mt-0.5 truncate">
-                        {tile.subtitle}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              {/* 3x3 GAME PREVIEW GRID (Official Reference Image) */}
+              <div className="w-full my-2 rounded-2xl overflow-hidden border border-amber-500/30 shadow-[0_4px_25px_rgba(245,158,11,0.25)] bg-black/60 p-1">
+                <img
+                  src="/images/yono-games-grid.jpg"
+                  alt="YONO APP VIP Game Grid"
+                  className="w-full h-auto object-cover rounded-xl select-none block"
+                  loading="eager"
+                />
               </div>
 
               {/* Disclaimer Notice */}
